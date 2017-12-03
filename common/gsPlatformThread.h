@@ -20,7 +20,9 @@ extern "C" {
 	typedef HANDLE GSISemaphoreID;
 	typedef HANDLE GSIThreadID;
 	typedef DWORD (WINAPI *GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE DWORD WINAPI
+#define GS_THREAD_RETURN return (DWORD)0
+#define GS_THREAD_RETURN_NEGATIVE return (DWORD)-1
 #elif defined(_PS2)
 	typedef int GSIThreadID;
 	typedef int GSISemaphoreID;
@@ -33,7 +35,9 @@ extern "C" {
 		gsi_u32 mPad; // make 16bytes
 	} GSICriticalSection;
 	typedef void (*GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE void
+#define GS_THREAD_RETURN return
+#define GS_THREAD_RETURN_NEGATIVE return
 #elif defined(_NITRO)
 	typedef OSMutex GSICriticalSection;
 	typedef struct
@@ -48,7 +52,9 @@ extern "C" {
 		void * mStack;
 	} GSIThreadID;
 	typedef void (*GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE void
+#define GS_THREAD_RETURN return
+#define GS_THREAD_RETURN_NEGATIVE return
 #elif defined(_REVOLUTION)
 	typedef OSMutex GSICriticalSection;
 	typedef OSSemaphore GSISemaphoreID;
@@ -58,7 +64,9 @@ extern "C" {
 		void * mStack;
 	} GSIThreadID;
 	typedef void *(*GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE void *
+#define GS_THReAD_RETURN return 0
+#define GS_THReAD_RETURN_NEGATIVE return -1
 #elif defined(_PSP)
 	// Todo: Test PSP thread code, then remove this define
 	#define GSI_NO_THREADS
@@ -73,7 +81,9 @@ extern "C" {
 		gsi_u32 mPad; // make 16bytes
 	} GSICriticalSection;
 	typedef void (*GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE void
+#define GS_THREAD_RETURN return
+#define GS_THREAD_RETURN_NEGATIVE return
 #elif defined(_PS3)
 	// Todo: Test PS3 ppu thread code, then remove this define
 	#define GSI_NO_THREADS
@@ -88,8 +98,10 @@ extern "C" {
 		gsi_u32 mPad; // make 16bytes
 	} GSICriticalSection;
 	typedef void (*GSThreadFunc)(void *arg);
-
-#elif defined(_UNIX) //_LINUX || _MACOSX
+#define GS_THREAD_RETURN_TYPE void
+#define GS_THREAD_RETURN return
+#define GS_THREAD_RETURN_NEGATIVE return
+#elif defined(_UNIX) //_LINUX || _MACOSX || _IPHONE
 	typedef pthread_mutex_t GSICriticalSection;
 	typedef struct
 	{
@@ -103,7 +115,9 @@ extern "C" {
 		pthread_attr_t attr;
 	} GSIThreadID;
 	typedef void (*GSThreadFunc)(void *arg);
-
+#define GS_THREAD_RETURN_TYPE void *
+#define GS_THREAD_RETURN return 0
+#define GS_THREAD_RETURN_NEGATIVE return -1
 #else
 	#define GSI_NO_THREADS
 #endif
