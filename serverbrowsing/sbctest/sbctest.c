@@ -47,6 +47,7 @@ static gsi_bool UpdateFinished = gsi_false; // used to track status of server br
 DEBUG OUTPUT
 ********/
 #ifdef GSI_COMMON_DEBUG
+#if !defined(_MACOSX) && !defined(_IPHONE)
 static void DebugCallback(GSIDebugCategory theCat, GSIDebugType theType,
 						  GSIDebugLevel theLevel, const char * theTokenStr,
 						  va_list theParamList)
@@ -58,6 +59,7 @@ static void DebugCallback(GSIDebugCategory theCat, GSIDebugType theType,
 
 	vprintf(theTokenStr, theParamList);
 }
+#endif
 #ifdef GSI_UNICODE
 static void AppDebug(const unsigned short* format, ...)
 {

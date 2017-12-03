@@ -12,7 +12,7 @@
 	#include "win32/gsUtilWin32.c"
 #elif defined(_LINUX)
 	#include "linux/gsUtilLinux.c"
-#elif defined(_MACOSX)
+#elif defined(_MACOSX) || defined (_IPHONE)
 	#include "macosx/gsUtilMacOSX.c"
 #elif defined(_NITRO)
 	#include "nitro/gsUtilNitro.c"
@@ -297,7 +297,7 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 
 #else	// if * not a supported platform OR * no threads allowed OR * no async lookup allowed
 		///////////////////////////////////////////////////////////////////////////////////
-		// if !(_WIN32 ||_PS2 || _LINUX || _MACOSX || _REVOLUTION) || GSI_NO_THREADS || GSI_NO_ASYNC_DNS
+		// if !(_WIN32 ||_PS2 || _LINUX || _MACOSX || _IPHONE || _REVOLUTION) || GSI_NO_THREADS || GSI_NO_ASYNC_DNS
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1889,6 +1889,36 @@ const char * GOAGetUniqueID_Internal(void);
 #if (!defined(_PS2) && !defined(_PS3) && !defined(_XBOX) && !defined(_PSP)) || defined(UNIQUEID)
 GetUniqueIDFunction GOAGetUniqueID = GOAGetUniqueID_Internal;
 #endif
+
+
+FILE * gsifopen(const char *filename, const char *mode)
+{
+	FILE* f = NULL;
+
+#if defined(_IPHONE)
+	char* filepath;
+	static char* documentsPathCString = NULL;
+	static size_t documentsPathCStringLen = 0;
+
+	if (documentsPathCString == NULL)
+	{
+		documentsPathCStringLen = GetPlatformPath(&documentsPathCString);
+	}
+
+	filepath = (char*)gsimalloc(documentsPathCStringLen + 1 + strlen(filename)+ 1);
+	sprintf(filepath, "%s/%s", documentsPathCString, filename);
+
+	f = (FILE*)fopen(filepath, mode);
+	gsifree(filepath);
+
+#elif !defined(NOFILE)
+	f = (FILE*)fopen(filename, mode);
+#endif
+
+	GSI_UNUSED(filename);
+	GSI_UNUSED(mode);
+	return f;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

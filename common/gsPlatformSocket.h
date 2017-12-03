@@ -588,7 +588,7 @@ int gsiShutdown(SOCKET s, int how);
 	#define EWOULDBLOCK sceNET_EWOULDBLOCK
 #endif
 
-#if defined(_MACOSX)
+#if defined(_MACOSX) || defined (_IPHONE)
 	#define accept(s,a,al) accept(s,a,(socklen_t*)(al))
 	#define bind(s,a,al) bind(s,a,(socklen_t)(al))
 	#define connect(s,a,al) connect(s,a,(socklen_t)(al))

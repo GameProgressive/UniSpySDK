@@ -105,6 +105,7 @@ gamedata_t gamedata;  // to store all the server/player/teamkeys
 DEBUG OUTPUT
 ********/
 #ifdef GSI_COMMON_DEBUG
+#if !defined(_MACOSX) && !defined(_IPHONE)
 	static void DebugCallback(GSIDebugCategory theCat, GSIDebugType theType,
 	                          GSIDebugLevel theLevel, const char * theTokenStr,
 	                          va_list theParamList)
@@ -116,6 +117,7 @@ DEBUG OUTPUT
 
 		vprintf(theTokenStr, theParamList);
 	}
+#endif
 
 	#ifdef GSI_UNICODE
 	static void AppDebug(const unsigned short* format, ...)

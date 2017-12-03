@@ -30,6 +30,9 @@
 	#include "psp/gsSocketPSP.c"
 #elif defined(_REVOLUTION)
 	#include "revolution/gsSocketRevolution.c"
+#elif defined(_IPHONE)
+	#import <net/if.h>
+	#import <ifaddrs.h>
 #else
 	#error "Missing or unsupported platform"
 #endif
@@ -564,6 +567,51 @@ HOSTENT * getlocalhost(void)
 #elif defined(_XBOX)
 	return NULL;
 
+
+#elif defined(_IPHONE)
+	static HOSTENT localhost;
+	static char * ipPtrs[2];
+	static unsigned int ips[5];
+	char hostname[256] = "";
+	struct ifaddrs *address, *addresses;
+	int error = getifaddrs(&addresses);
+	
+	if (error == 0) {
+		address = addresses;
+		while (address != NULL)
+		{
+			if ((address->ifa_addr->sa_family == AF_INET) &&
+				(strcmp(address->ifa_name, "lo0") != 0))
+			{
+				struct sockaddr_in* inet_address =
+				(struct sockaddr_in*)address->ifa_addr;
+				
+				// get the local host's name
+				gethostname(hostname, sizeof(hostname));
+				
+				localhost.h_name = hostname;
+				localhost.h_aliases = NULL;
+				localhost.h_addrtype = AF_INET;
+				localhost.h_length =
+				(gsi_u16)sizeof(IN_ADDR);
+				
+				memcpy(&ips[0],
+					   &inet_address->sin_addr.s_addr, sizeof(inet_address->sin_addr.s_addr));
+				ipPtrs[0] = (char *)&ips[0];
+				ipPtrs[1] = NULL;
+				localhost.h_addr_list = (gsi_i8
+										 **)ipPtrs;
+				
+				//ipPtrs[0] = inet_address->sin_addr.s_addr;
+				//ipPtrs[1] = NULL;
+				
+				break;
+			}
+			address = address->ifa_next;
+		}
+	}
+	freeifaddrs(addresses);
+       return &localhost;
 
 #else
 	char hostname[256] = "";

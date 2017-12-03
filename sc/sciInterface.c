@@ -16,7 +16,27 @@ char scServiceURL[SC_SERVICE_MAX_URL_LEN] = "";
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-
+gsi_u16 sciGetPlatformId(void)
+{
+	// Determine host platform.
+	#if defined(_X360)
+		return(SCPlatform_XBox360);
+	#elif defined(_WIN32)
+		return(SCPlatform_PC);
+	#elif defined(_LINUX)
+		return(SCPlatform_Unix);
+	#elif defined (_IPHONE)
+		return(SCPlatform_iPhone);
+	#elif defined(_PS3)
+		return(SCPlatform_PS3);
+	#elif defined(_PSP)
+		return(SCPlatform_PSP);
+    #elif defined(_REVOLUTION)
+		return(SCPlatform_Wii);
+	#elif defined(_NITRO)
+		return(SCPlatform_DS);
+	#endif	
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -314,7 +314,11 @@ void SBQueryEngineInit(SBQueryEngine *engine, int maxupdates, int queryversion, 
 		sndev_set_options(0, SN_DEV_SET_PING_RESET, &optval, sizeof(optval));
 	}
 	#else
-	engine->icmpsock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+		#if defined(_MACOSX) || defined(_IPHONE)	//SOCK_RAW fails under OS X; use SOCK_DGRAM instead
+			engine->icmpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
+		#else
+			engine->icmpsock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+		#endif
 	#endif
 #endif
 	FIFOClear(&engine->pendinglist);

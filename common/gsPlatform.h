@@ -35,7 +35,7 @@
 	#endif
 #endif
 
-#if defined(_LINUX) || defined(_MACOSX)
+#if defined(_LINUX) || defined(_MACOSX) || defined (_IPHONE)
 	#define _UNIX
 #endif
 
@@ -246,7 +246,7 @@
 
 
 //---------- Handle Endianess ----------------------
-#if defined(_PS3) || defined(_REVOLUTION) || defined(_X360) //defined(_MACOSX)
+#if defined(_PS3) || defined(_REVOLUTION) || defined(_X360) //defined(_MACOSX) || defined (_IPHONE)
 	#define GSI_BIG_ENDIAN
 #endif
 #ifndef GSI_BIG_ENDIAN
@@ -257,7 +257,7 @@
 
 #include <ctype.h>
 
-#if defined(_MACOSX)
+#if defined(_MACOSX) || defined (_IPHONE)
 	#undef _T
 #endif
 
@@ -267,7 +267,7 @@
 	#define NOFILE
 #endif
 
-#if defined(_PSP) || defined(_NITRO)
+#if defined(_PSP) || defined(_NITRO) || defined(_IPHONE)
 	#define GS_WIRELESS_DEVICE
 #endif
 
@@ -275,6 +275,10 @@
 	#define GSI_DOMAIN_NAME "gamespy.com"
 #endif
 
+//---------- Mac autorelease pool for working with CoreFoundation types ----------------------
+#if defined(_MACOSX) || defined(_IPHONE)
+	#include "macosx/macAutoreleasePool.h"
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

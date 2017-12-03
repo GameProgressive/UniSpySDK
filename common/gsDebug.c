@@ -76,7 +76,7 @@ static void gsiDebugCallback(GSIDebugCategory category, GSIDebugType type,
 		vsprintf(string, format, params); 			
 		OutputDebugStringA(string);
 
-	#elif defined(_LINUX) || defined(_MACOSX)
+	#elif defined(_LINUX) || defined(_MACOSX) || defined (_IPHONE)
 		//static char    string[256];
 		//vsprintf(string, format, params); 			
 		vprintf(format, params);
