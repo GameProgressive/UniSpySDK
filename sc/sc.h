@@ -99,6 +99,25 @@ typedef enum
 	SCGameStatusMax
 } SCGameStatus;
 
+	//////////////////////////////////////////////////////////////
+	// SCPlatform
+	// Summary
+	//		The platforms supported by the SDK.
+	typedef enum SCPlatform
+	{
+		SCPlatform_Unknown,
+		SCPlatform_PC,
+		SCPlatform_PS3,
+		SCPlatform_PSP,
+		SCPlatform_XBox360,
+		SCPlatform_DS,
+		SCPlatform_Wii,
+		SCPlatform_iPhone,
+		SCPlatform_Unix,
+
+		SCPlatformMax
+	} SCPlatform;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
