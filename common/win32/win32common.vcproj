@@ -202,10 +202,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gsSocketWin32.c"
-				>
-			</File>
-			<File
 				RelativePath="..\gsSSL.c"
 				>
 			</File>
@@ -214,15 +210,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gsThreadWin32.c"
-				>
-			</File>
-			<File
 				RelativePath="..\gsUdpEngine.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gsUtilWin32.c"
 				>
 			</File>
 			<File
