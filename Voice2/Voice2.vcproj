@@ -168,10 +168,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gvGSM.c"
-				>
-			</File>
-			<File
 				RelativePath=".\gvMain.c"
 				>
 			</File>
@@ -181,10 +177,6 @@
 			</File>
 			<File
 				RelativePath=".\gvSpeex.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvSpeexSpu.c"
 				>
 			</File>
 			<File
@@ -222,47 +214,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gvGSM.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvLogitechPS2Codecs.h"
-				>
-			</File>
-			<File
 				RelativePath=".\gvMain.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvOSXAudio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Audio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Eyetoy.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Headset.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Spu2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS3Audio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS3Headset.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPSPAudio.h"
 				>
 			</File>
 			<File
@@ -271,10 +223,6 @@
 			</File>
 			<File
 				RelativePath=".\gvSpeex.h"
-				>
-			</File>
-			<File
-				RelativePath=".\gvSpeexSpu.h"
 				>
 			</File>
 			<File
