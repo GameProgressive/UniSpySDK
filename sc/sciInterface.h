@@ -39,7 +39,7 @@ void     sciInterfaceDestroy(SCInterface*  theInterface);
 void     sciInterfaceSetSessionId(SCInterface* theInterface, const char * theSessionId);
 void     sciInterfaceSetConnectionId(SCInterface* theInterface, const char * theConnectionId);
 
-
+gsi_u16  sciGetPlatformId(void);
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef __cplusplus
