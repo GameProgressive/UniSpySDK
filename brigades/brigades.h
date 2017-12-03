@@ -14,6 +14,9 @@
 // This is the main header file for the GameSpy Brigades SDK.
 // All structures and SDK API functions are defined in this file.
 
+// Use new AuthService
+#define GSA_OPEN_AUTHSERVICE
+
 // Includes
 #include "../common/gsSoap.h"
 #include "../common/gsCrypt.h"
