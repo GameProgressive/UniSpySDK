@@ -170,43 +170,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gvLogitechPS2Codecs.c"
-				>
-			</File>
-			<File
 				RelativePath=".\gvMain.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvOSXAudio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Audio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Eyetoy.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Headset.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS2Spu2.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS3Audio.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPS3Headset.c"
-				>
-			</File>
-			<File
-				RelativePath=".\gvPSPAudio.c"
 				>
 			</File>
 			<File
