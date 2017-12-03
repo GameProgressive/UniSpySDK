@@ -73,6 +73,13 @@ typedef enum
 	GSIDebugCat_NatNeg,
 	GSIDebugCat_HTTP,
 	GSIDebugCat_CDKey,
+
+	// From GameSpy OpenSDK
+	GSIDebugCat_Direct2Game,
+    GSIDebugCat_Brigades,
+    GSIDebugCat_AuthService,
+    GSIDebugCat_Sake,
+	GSIDebugCat_Atlas,
 	// Add new ones here (update string table in gsiDebug.c!)
 
 

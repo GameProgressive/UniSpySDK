@@ -24,7 +24,7 @@ static struct GSIDebugInstance gGSIDebugInstance; // simple singleton "class"
 // Line prefixes, e.g. "[ cat][type][ lev] text"
 char* gGSIDebugCatStrings[GSIDebugCat_Count] =
 {
-	" APP", " GP ", "PEER", " QR2", "  SB", "  V2", "  AD", "  NN", "HTTP", "CDKY", " CMN"
+	" APP", " GP ", "PEER", " QR2", "  SB", "  V2", "  AD", "  NN", "HTTP", "CDKY", "D2G", "BRIG", "AUTH", "SAKE", " CMN", "ATLS"
 };
 char* gGSIDebugTypeStrings[GSIDebugType_Count] =
 {
