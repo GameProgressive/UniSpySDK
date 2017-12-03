@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\win32\win32common.vcproj", "{F51D094D-FBE1-4773-89F0-1321C5210CEC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ghttp", "ghttp\ghttp.vcproj", "{1338A207-2F4F-4FCA-9305-79A4609D7296}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{F51D094D-FBE1-4773-89F0-1321C5210CEC}.Debug|Win32.Build.0 = Debug|Win32
 		{F51D094D-FBE1-4773-89F0-1321C5210CEC}.Release|Win32.ActiveCfg = Release|Win32
 		{F51D094D-FBE1-4773-89F0-1321C5210CEC}.Release|Win32.Build.0 = Release|Win32
+		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Debug|Win32.Build.0 = Debug|Win32
+		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Release|Win32.ActiveCfg = Release|Win32
+		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
