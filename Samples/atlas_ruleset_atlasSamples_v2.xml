@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<Atlas>
+	<!--RULESET DEFINITION-->
+	<Ruleset xmlSchemaVersion="3" gameName="atlasSamples" version="2">
+
+		<!--CATEGORIES-->
+		<Category id="1" name="Player_Stats" description="General player-wide statistics" processOrder="1" />
+		<Category id="3" name="Game_Stats" description="General game-wide statistics" processOrder="3" />
+		<Category id="4" name="Vehicle_1" description="Stats associated with Vehicle 1" processOrder="4" />
+		<Category id="6" name="Track_1" description="Stats associated with Track 1" processOrder="8" />
+		<Category id="8" name="Vehicle_2" description="Stats associated with Vehicle 2" processOrder="7" />
+		<Category id="9" name="Track_2" description="Stats associated with Track 2" processOrder="9" />
+
+		<!--KEYS-->
+		<Key id="1" name="RACE_TIME_P" type="int64" desc="Player's race time" />
+		<Key id="2" name="USED_VEHICLE_1_P" type="byte" desc="Set to 1 if the player used Vehicle 1, otherwise 0" />
+		<Key id="3" name="USED_VEHICLE_2_P" type="byte" desc="Set to 1 if the player used Vehicle 2, otherwise 0" />
+		<Key id="5" name="USED_VEHICLE_1_G" type="byte" desc="The number of players that used Vehicle 1 in the race" />
+		<Key id="6" name="USED_VEHICLE_2_G" type="byte" desc="The number of players that used Vehicle 2 in the race" />
+		<Key id="7" name="USED_TRACK_1" type="byte" desc="Set to 1 if the race was on Track 1, otherwise 0; we can use this as a player key and game key since the value won't change" />
+		<Key id="8" name="USED_TRACK_2" type="byte" desc="Set to 1 if the race was on Track 2, otherwise 0; we can use this as a player key and game key since the value won't change" />
+		<Key id="9" name="PLAYER_NAME_P" type="string" desc="" />
+
+		<!--STATS-->
+		<Stat id="1" name="NUM_CAREER_RACES" type="int" desc="" categoryId="1" scope="Player" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="2" name="NUM_CAREER_WINS" type="int" desc="" categoryId="1" scope="Player" processOrder="2" isStored="True" defaultValue="0" />
+		<Stat id="3" name="NUM_CAREER_LOSSES" type="int" desc="" categoryId="1" scope="Player" processOrder="3" isStored="True" defaultValue="0" />
+		<Stat id="4" name="WIN_LOSS_RATIO" type="float" desc="(Wins / Losses)" categoryId="1" scope="Player" processOrder="6" isStored="True" defaultValue="" />
+		<Stat id="5" name="CURRENT_WIN_STREAK" type="int" desc="" categoryId="1" scope="Player" processOrder="4" isStored="True" defaultValue="" />
+		<Stat id="6" name="CURRENT_LOSS_STREAK" type="int" desc="" categoryId="1" scope="Player" processOrder="5" isStored="True" defaultValue="" />
+		<Stat id="7" name="LONGEST_WIN_STREAK" type="int" desc="" categoryId="1" scope="Player" processOrder="7" isStored="True" defaultValue="" />
+		<Stat id="8" name="LONGEST_LOSS_STREAK" type="int" desc="" categoryId="1" scope="Player" processOrder="8" isStored="True" defaultValue="" />
+		<Stat id="9" name="TOTAL_RACING_TIME" type="int64" desc="" categoryId="1" scope="Player" processOrder="10" isStored="True" defaultValue="0" />
+		<Stat id="10" name="BEST_RACE_TIME" type="int64" desc="" categoryId="1" scope="Player" processOrder="9" isStored="True" defaultValue="" />
+		<Stat id="12" name="TEMP_STAT_12" type="float" desc="" categoryId="1" scope="Player" processOrder="11" isStored="False" defaultValue="" />
+		<Stat id="14" name="TEMP_STAT_13" type="float" desc="" categoryId="1" scope="Player" processOrder="12" isStored="False" defaultValue="" />
+		<Stat id="28" name="NUM_TIMES_USED_PLAYER" type="int" desc="The number of times vehicle 1 was used for each player" categoryId="4" scope="Player" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="30" name="NUM_TIMES_USED" type="int" desc="The number of times vehicle 1 was used total for the game" categoryId="4" scope="Game" processOrder="2" isStored="True" defaultValue="0" />
+		<Stat id="40" name="NUM_TIMES_USED_PLAYER" type="int" desc="The number of times this track was raced for each player" categoryId="6" scope="Player" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="42" name="NUM_TIMES_USED" type="int" desc="The number of times this track was raced total for the game" categoryId="6" scope="Game" processOrder="2" isStored="True" defaultValue="0" />
+		<Stat id="52" name="TOTAL_NUM_RACES" type="int" desc="" categoryId="3" scope="Game" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="54" name="TEMP_STAT_54" type="int" desc="" categoryId="1" scope="Player" processOrder="13" isStored="False" defaultValue="" />
+		<Stat id="55" name="NUM_TIMES_USED_PLAYER" type="int" desc="The number of times vehicle 1 was used for each player" categoryId="8" scope="Player" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="56" name="NUM_TIMES_USED" type="int" desc="The number of times vehicle 1 was used total for the game" categoryId="8" scope="Game" processOrder="2" isStored="True" defaultValue="0" />
+		<Stat id="57" name="NUM_TIMES_USED_PLAYER" type="int" desc="The number of times this track was raced for each player" categoryId="9" scope="Player" processOrder="1" isStored="True" defaultValue="0" />
+		<Stat id="58" name="NUM_TIMES_USED" type="int" desc="The number of times this track was raced total for the game" categoryId="9" scope="Game" processOrder="2" isStored="True" defaultValue="0" />
+		<Stat id="59" name="PLAYER_NAME" type="string" desc="All Categories with Player stats should store the name - this way you don't have to convert from ownerid to player name when displaying leaderboards and stuff" categoryId="1" scope="Player" processOrder="14" isStored="True" defaultValue="" />
+		<Stat id="60" name="PLAYER_NAME" type="string" desc="All Categories with Player stats should store the name - this way you don't have to convert from ownerid to player name when displaying leaderboards and stuff" categoryId="4" scope="Player" processOrder="3" isStored="True" defaultValue="" />
+		<Stat id="61" name="PLAYER_NAME" type="string" desc="All Categories with Player stats should store the name - this way you don't have to convert from ownerid to player name when displaying leaderboards and stuff" categoryId="8" scope="Player" processOrder="3" isStored="True" defaultValue="" />
+		<Stat id="62" name="PLAYER_NAME" type="string" desc="All Categories with Player stats should store the name - this way you don't have to convert from ownerid to player name when displaying leaderboards and stuff" categoryId="6" scope="Player" processOrder="3" isStored="True" defaultValue="" />
+		<Stat id="63" name="PLAYER_NAME" type="string" desc="All Categories with Player stats should store the name - this way you don't have to convert from ownerid to player name when displaying leaderboards and stuff" categoryId="9" scope="Player" processOrder="3" isStored="True" defaultValue="" />
+
+		<!--RULES-->
+		<Rule id="1" name="Temp_Rule_1" operation="Increment" desc="" statId="1">
+			<InputStat statId="1" processOrder="1" />
+			<OutputStat statId="1" />
+		</Rule>
+		<Rule id="11" name="Temp_Rule_11" operation="Maximum" desc="" statId="7">
+			<InputStat statId="7" processOrder="1" />
+			<InputStat statId="5" processOrder="2" />
+			<OutputStat statId="7" />
+		</Rule>
+		<Rule id="45" name="Temp_Rule_27_Clone_45" operation="Add" desc="" statId="40">
+			<InputKey keyId="7" processOrder="2" />
+			<InputStat statId="40" processOrder="1" />
+			<OutputStat statId="40" />
+		</Rule>
+		<Rule id="47" name="Temp_Rule_27_Clone_28_Clone_29_Clone_47" operation="Increment" desc="" statId="42">
+			<InputKey keyId="7" processOrder="2" />
+			<InputStat statId="42" processOrder="1" />
+			<OutputStat statId="42" />
+		</Rule>
+		<Rule id="57" name="Temp_Rule_57" operation="Increment" desc="" statId="52">
+			<InputStat statId="52" processOrder="1" />
+			<OutputStat statId="52" />
+		</Rule>
+		<Rule id="58" name="Temp_Rule_58" operation="Minimum" desc="" statId="10">
+			<InputKey keyId="1" processOrder="0" />
+			<InputStat statId="10" processOrder="0" />
+			<OutputStat statId="10" />
+		</Rule>
+		<Rule id="59" name="Temp_Rule_59" operation="WinIncrement" desc="" statId="2">
+			<InputStat statId="2" processOrder="0" />
+			<OutputStat statId="2" />
+		</Rule>
+		<Rule id="60" name="Temp_Rule_60" operation="LossIncrement" desc="" statId="3">
+			<InputStat statId="3" processOrder="0" />
+			<OutputStat statId="3" />
+		</Rule>
+		<Rule id="61" name="Temp_Rule_61" operation="WinStreak" desc="" statId="5">
+			<InputStat statId="5" processOrder="0" />
+			<OutputStat statId="5" />
+		</Rule>
+		<Rule id="62" name="Temp_Rule_62" operation="LossStreak" desc="" statId="6">
+			<InputStat statId="6" processOrder="0" />
+			<OutputStat statId="6" />
+		</Rule>
+		<Rule id="63" name="Temp_Rule_63" operation="Divide" desc="" statId="4">
+			<InputStat statId="2" processOrder="0" />
+			<InputStat statId="3" processOrder="0" />
+			<OutputStat statId="4" />
+		</Rule>
+		<Rule id="64" name="Temp_Rule_64" operation="Maximum" desc="" statId="8">
+			<InputStat statId="8" processOrder="0" />
+			<InputStat statId="6" processOrder="0" />
+			<OutputStat statId="8" />
+		</Rule>
+		<Rule id="65" name="Temp_Rule_65" operation="Add" desc="" statId="9">
+			<InputKey keyId="1" processOrder="0" />
+			<InputStat statId="9" processOrder="0" />
+			<OutputStat statId="9" />
+		</Rule>
+		<Rule id="67" name="Temp_Rule_67" operation="Increment" desc="" statId="28">
+			<InputKey keyId="2" processOrder="0" />
+			<InputStat statId="28" processOrder="0" />
+			<OutputStat statId="28" />
+		</Rule>
+		<Rule id="68" name="Temp_Rule_68" operation="Add" desc="" statId="30">
+			<InputKey keyId="5" processOrder="0" />
+			<InputStat statId="30" processOrder="0" />
+			<OutputStat statId="30" />
+		</Rule>
+		<Rule id="69" name="Temp_Rule_67_Clone_69" operation="Increment" desc="" statId="55">
+			<InputKey keyId="3" processOrder="0" />
+			<InputStat statId="55" processOrder="0" />
+			<OutputStat statId="55" />
+		</Rule>
+		<Rule id="70" name="Temp_Rule_68_Clone_70" operation="Increment" desc="" statId="56">
+			<InputKey keyId="6" processOrder="0" />
+			<InputStat statId="56" processOrder="0" />
+			<OutputStat statId="56" />
+		</Rule>
+		<Rule id="71" name="Temp_Rule_27_Clone_45_Clone_71" operation="Add" desc="" statId="57">
+			<InputKey keyId="8" processOrder="2" />
+			<InputStat statId="57" processOrder="1" />
+			<OutputStat statId="57" />
+		</Rule>
+		<Rule id="72" name="Temp_Rule_27_Clone_28_Clone_29_Clone_47_Clone_72" operation="Increment" desc="" statId="58">
+			<InputKey keyId="8" processOrder="2" />
+			<InputStat statId="58" processOrder="1" />
+			<OutputStat statId="58" />
+		</Rule>
+		<Rule id="73" name="Temp_Rule_73" operation="Replace" desc="" statId="59">
+			<InputKey keyId="9" processOrder="0" />
+			<OutputStat statId="59" />
+		</Rule>
+		<Rule id="74" name="Temp_Rule_74" operation="Replace" desc="" statId="63">
+			<InputKey keyId="9" processOrder="0" />
+			<OutputStat statId="63" />
+		</Rule>
+		<Rule id="75" name="Temp_Rule_75" operation="Replace" desc="" statId="62">
+			<InputKey keyId="9" processOrder="0" />
+			<OutputStat statId="62" />
+		</Rule>
+		<Rule id="76" name="Temp_Rule_76" operation="Replace" desc="" statId="61">
+			<InputKey keyId="9" processOrder="0" />
+			<OutputStat statId="61" />
+		</Rule>
+		<Rule id="77" name="Temp_Rule_77" operation="Replace" desc="" statId="60">
+			<InputKey keyId="9" processOrder="0" />
+			<OutputStat statId="60" />
+		</Rule>
+
+		<!--QUERIES-->
+		<StatQuery queryType="NonRanked" categoryId="1" scope="Player" label="PROFILE_STATS_PLAYER" active="True" ownerApplication="Single" rankField="" rankDirection="" rankPositionNeighborInclusion="" />
+		<StatQuery queryType="Game" categoryId="3" scope="Game" label="METRICS_GLOBAL" active="True" ownerApplication="" rankField="" rankDirection="" rankPositionNeighborInclusion="" />
+		<StatQuery queryType="Ranked" categoryId="1" scope="Player" label="PLAYER_LB" active="True" ownerApplication="All" rankField="WIN_LOSS_RATIO" rankDirection="DESC" rankPositionNeighborInclusion="10" />
+		<StatQuery queryType="Ranked" categoryId="6" scope="Player" label="MOST_RACES_ON_TRACK1" active="True" ownerApplication="All" rankField="NUM_TIMES_USED_PLAYER" rankDirection="DESC" rankPositionNeighborInclusion="" />
+		<StatQuery queryType="Game" categoryId="8" scope="Game" label="VEHICLE_2_GLOBAL_METRICS" active="True" ownerApplication="" rankField="" rankDirection="" rankPositionNeighborInclusion="" />
+		<StatQuery queryType="Game" categoryId="4" scope="Game" label="VEHICLE_1_GLOBAL_METRICS" active="True" ownerApplication="" rankField="" rankDirection="" rankPositionNeighborInclusion="" />
+		<StatQuery queryType="Ranked" categoryId="9" scope="Player" label="MOST_RACES_ON_TRACK2" active="True" ownerApplication="All" rankField="NUM_TIMES_USED_PLAYER" rankDirection="DESC" rankPositionNeighborInclusion="" /></Ruleset>
+</Atlas>

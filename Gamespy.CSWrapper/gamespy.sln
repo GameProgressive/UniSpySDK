@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gamespySample", "gamespySample.csproj", "{8FC4EBBC-04DA-47DC-A82D-375AE405224E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Unicode Debug|x86 = Unicode Debug|x86
+		Unicode Release|x86 = Unicode Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8FC4EBBC-04DA-47DC-A82D-375AE405224E}.Unicode Debug|x86.ActiveCfg = Unicode Debug|x86
+		{8FC4EBBC-04DA-47DC-A82D-375AE405224E}.Unicode Debug|x86.Build.0 = Unicode Debug|x86
+		{8FC4EBBC-04DA-47DC-A82D-375AE405224E}.Unicode Release|x86.ActiveCfg = Unicode Release|x86
+		{8FC4EBBC-04DA-47DC-A82D-375AE405224E}.Unicode Release|x86.Build.0 = Unicode Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "brigadesTest", "brigadesTest\brigadesTest.vcproj", "{18E851E1-4664-45B6-8313-FF9693D1E9AB}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FE1DBDCD-5815-425A-A201-8D6478123A99}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		changelog.txt = changelog.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://tfs.ign.com:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = brigadesTest\\brigadesTest.vcproj
+		SccProjectName1 = brigadesTest
+		SccLocalPath1 = brigadesTest
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{18E851E1-4664-45B6-8313-FF9693D1E9AB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{18E851E1-4664-45B6-8313-FF9693D1E9AB}.Debug|Win32.Build.0 = Debug|Win32
+		{18E851E1-4664-45B6-8313-FF9693D1E9AB}.Release|Win32.ActiveCfg = Release|Win32
+		{18E851E1-4664-45B6-8313-FF9693D1E9AB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

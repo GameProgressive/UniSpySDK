@@ -1,0 +1,21 @@
+Changelog for: GameSpy Brigades SDK
+--------------------------------------------------------
+
+DATE        VERSION  BY   TYPE     DESCRIPTION
+----------  -------  ---  -------  ---------------------------------------------------------
+02-22-2011  1.00.00  JP   RELEASE  Reverted back to 1.00 for GameSpy Open Release
+02-01-2011  1.01.01  RV   FEATURE  Added Apigee header handling to Brigades
+03-02-2010  1.01.00  RV   RELEASE  Released to Developer Site
+11-09-2009  1.0.2    NAB  RELEASE  Fixes for memory issues and added UpdateNickNameAndEmail 
+10-19-2009  1.0.1    NAB  RELEASE  Prepare for release 1.0.1
+03-17-2009  0.01.06  SN   FEATURE  Update brigade member is now implemented
+03-11-2009  0.01.05  SN   FEATURE  DownloadLogo is now implemented
+03-10-2009  0.01.04  SN   FEATURE  SaveBrigade is now implemented
+02-26-2009  0.01.03  SN   FEATURE  Added functionality for uploading logos
+02-23-2009  0.01.02  SN   FIX      Refactored some code to add robustness
+                     SN   FEATURE  Moved from ascii to unicode
+                     SN   FIX      Fixed multiple error codes logic
+                     SN   FIX      Cleaned up and added debug logging
+02-17-2009  0.01.01  SN   FEATURE  Added support for testing against different backends
+                     SN   FIX      Medium cleanup with assertions and debug output
+02-17-2009  0.01.00  SN   CREATE   Alpha SDK implementation started
