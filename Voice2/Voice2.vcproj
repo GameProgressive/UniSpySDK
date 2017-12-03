@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\include&quot;;&quot;$(ProjectDir)libspeex\include&quot;;&quot;$(ProjectDir)libspeex\include\speex&quot;"
-				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;GSI_COMMON_DEBUG;HTTP_LOG;GHTTP_EXTENDEDERROR"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
