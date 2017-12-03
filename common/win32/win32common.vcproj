@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gsResultCodes.c"
+				>
+			</File>
+			<File
 				RelativePath="..\gsSHA1.c"
 				>
 			</File>
@@ -277,6 +281,10 @@
 			</File>
 			<File
 				RelativePath="..\gsRC4.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gsResultCodes.h"
 				>
 			</File>
 			<File
