@@ -5,8 +5,8 @@
 #include "../common/gsCommon.h"
 #include "../common/gsAvailable.h"
 
-#include "../darray.h"
-#include "../hashtable.h"
+#include "../common/darray.h"
+#include "../common/hashtable.h"
 
 #include "sb_serverbrowsing.h"
 #include "../qr2/qr2regkeys.h"

@@ -1,5 +1,5 @@
 #include "nninternal.h"
-#include "../darray.h"
+#include "../common/darray.h"
 #include "../common/gsAvailable.h"
 #include <stddef.h>
 #include <stdio.h>

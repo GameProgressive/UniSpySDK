@@ -5,7 +5,7 @@
 
 
 #include "gsLargeInt.h"
-#include "../md5.h"
+#include "md5.h"
 
 
 #if defined(__cplusplus)

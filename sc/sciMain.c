@@ -4,7 +4,7 @@
 #include "sciInterface.h"
 #include "sciReport.h"
 
-#include "../md5.h"
+#include "../common/md5.h"
 #include "../common/gsRC4.h"
 
 /* PUBLIC INTERFACE FUNCTIONS - SCINTERFACE.C CONTAINS PRIVATE INTERFACE */

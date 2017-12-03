@@ -5,13 +5,13 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#include "common/gsPlatform.c"
-#include "common/gsPlatformSocket.c"
-#include "common/gsPlatformThread.c"
-#include "common/gsPlatformUtil.c"
-#include "common/gsDebug.c"
-#include "common/gsAssert.c"
-#include "common/gsMemory.c"
+#include "gsPlatform.c"
+#include "gsPlatformSocket.c"
+#include "gsPlatformThread.c"
+#include "gsPlatformUtil.c"
+#include "gsDebug.c"
+#include "gsAssert.c"
+#include "gsMemory.c"
 
 
 ///////////////////////////////////////////////////////////////////////////////

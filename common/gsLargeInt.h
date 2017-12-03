@@ -6,7 +6,7 @@
 
 #include "gsCommon.h"
 #include "gsXML.h"
-#include "../md5.h"
+#include "md5.h"
 
 
 #if defined(__cplusplus)

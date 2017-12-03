@@ -17,9 +17,9 @@ devsupport@gamespy.com
 #include "chat.h"
 #include "chatSocket.h"
 #include "chatHandlers.h"
-#include "../hashtable.h"
-#include "../darray.h"
-#include "../md5.h"
+#include "../common/hashtable.h"
+#include "../common/darray.h"
+#include "../common/md5.h"
 
 /************
 ** DEFINES **

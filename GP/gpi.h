@@ -19,9 +19,9 @@ Please see the GameSpy Presence SDK documentation for more information
 #include "../common/gsCommon.h"
 #include "../common/gsAvailable.h"
 #include "../common/gsUdpEngine.h"
-#include "../hashtable.h"
-#include "../darray.h"
-#include "../md5.h"
+#include "../common/hashtable.h"
+#include "../common/darray.h"
+#include "../common/md5.h"
 #include "gp.h"
 
 // Extended message support

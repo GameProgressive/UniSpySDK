@@ -12,8 +12,8 @@ devsupport@gamespy.com
 #define _GT2_MAIN_H_
 
 #include "gt2.h"
-#include "../darray.h"
-#include "../hashtable.h"
+#include "../common/darray.h"
+#include "../common/hashtable.h"
 #include "gt2Auth.h"
 
 /*************************

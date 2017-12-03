@@ -3,7 +3,7 @@
 #include "AuthService.h"
 #include "../common/gsXML.h"
 #include "../common/gsAvailable.h"
-#include "../md5.h"
+#include "../common/md5.h"
 
 #pragma warning(disable: 4267)
 

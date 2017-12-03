@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "sciReport.h"
 #include "sciSerialize.h"
-#include "../md5.h"
+#include "../common/md5.h"
 
 #pragma warning(disable: 4267)
 

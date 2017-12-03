@@ -146,7 +146,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\darray.c"
+				RelativePath="..\darray.c"
 				>
 			</File>
 			<File
@@ -226,11 +226,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\hashtable.c"
+				RelativePath="..\hashtable.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\md5c.c"
+				RelativePath="..\md5c.c"
 				>
 			</File>
 			<File
@@ -244,7 +244,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\darray.h"
+				RelativePath="..\darray.h"
 				>
 			</File>
 			<File
@@ -328,15 +328,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\hashtable.h"
+				RelativePath="..\hashtable.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\md5.h"
+				RelativePath="..\md5.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\nonport.h"
+				RelativePath="..\nonport.h"
 				>
 			</File>
 		</Filter>

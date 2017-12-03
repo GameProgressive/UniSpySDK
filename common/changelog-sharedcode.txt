@@ -1,4 +1,4 @@
-Changelog for: GameSpy Common Code
+Changelog for: GameSpy Shared Code (nonport,darray,md5,hashtable)
 --------------------------------------------------------
 
 DATE        VERSION  BY   TYPE     DESCRIPTION

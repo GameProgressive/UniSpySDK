@@ -13,7 +13,7 @@ devsupport@gamespy.com
 
 #include "ghttp.h"
 #include "ghttpBuffer.h"
-#include "../darray.h"
+#include "../common/darray.h"
 
 #ifdef __cplusplus
 extern "C" {

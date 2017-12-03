@@ -15,8 +15,8 @@ devsupport@gamespy.com
 ** INCLUDES **
 *************/
 #include "peer.h"
-#include "../darray.h"
-#include "../hashtable.h"
+#include "../common/darray.h"
+#include "../common/hashtable.h"
 #include "../pinger/pinger.h"
 #include "../Chat/chatASCII.h"
 

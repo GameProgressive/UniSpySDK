@@ -3,8 +3,8 @@
 #ifndef __GSSSL_H__
 #define __GSSSL_H__
 
-#include "../darray.h"
-#include "../md5.h"
+#include "darray.h"
+#include "md5.h"
 #include "gsCrypt.h"
 #include "gsSHA1.h"
 #include "gsRC4.h"

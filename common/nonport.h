@@ -11,7 +11,7 @@ devsupport@gamespy.com
 #define _NONPORT_H_
 
 
-#include "common/gsCommon.h"
+#include "gsCommon.h"
 
 
 #endif

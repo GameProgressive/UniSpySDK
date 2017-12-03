@@ -26,7 +26,7 @@ devsupport@gamespy.com
 #include "peerHost.h"
 #include "peerAutoMatch.h"
 #include "peerQR.h"
-#include "../md5.h"
+#include "../common/md5.h"
 
 /************
 ** DEFINES **

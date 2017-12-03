@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Core task/callback manager
 #include "gsCommon.h"
-#include "../darray.h"
+#include "darray.h"
 
 #if defined(__cplusplus)
 extern "C"

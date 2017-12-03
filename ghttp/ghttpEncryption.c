@@ -684,7 +684,7 @@ GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection
 #include "../common/gsSSL.h"
 #include "../common/gsSHA1.h"
 #include "../common/gsRC4.h"
-#include "../md5.h"
+#include "../common/md5.h"
 
 
 // Processor for SSL state messages (transparent to application)

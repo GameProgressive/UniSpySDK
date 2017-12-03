@@ -13,7 +13,7 @@ INCLUDES
 ********/
 #include "../common/gsCommon.h"
 #include "gbucket.h"
-#include "../hashtable.h"
+#include "../common/hashtable.h"
 #include <ctype.h>
 
 #ifdef __cplusplus
