@@ -12,6 +12,7 @@
 // iPhone:           _IPHONE + _UNIX
 // Linux:            _LINUX + _UNIX
 // Nintendo DS:      _NITRO
+// Nintendo Wii:     _REVOLUTION
 // PSP:              _PSP
 // PS3:              _PS3
 
@@ -73,8 +74,14 @@
 
 	#if defined(GSI_WINSOCK2)
 		#include <winsock2.h>
+		#if defined(_MSC_VER)
+			#pragma comment(lib, "ws2_32.lib")
+		#endif
 	#else
 		#include <winsock.h>
+		#if defined(_MSC_VER)
+			#pragma comment(lib, "WSock32.lib")
+		#endif
 	#endif
 	
 	#if (_MSC_VER > 1300)
