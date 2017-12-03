@@ -9,6 +9,7 @@
 // Xbox:             _WIN32 + _XBOX
 // Xbox360:          _WIN32 + _XBOX + _X360
 // MacOSX:           _MACOSX + _UNIX
+// iPhone:           _IPHONE + _UNIX
 // Linux:            _LINUX + _UNIX
 // Nintendo DS:      _NITRO
 // PSP:              _PSP
@@ -197,7 +198,7 @@
 	#include <utility\utility_module.h>
 // PS3
 #elif defined(_PS3)
-#include <netex/errno.h>
+	#include <netex/errno.h>
 	#include <sys/process.h>
 	#include <sys/time.h>
 	#include <sys/types.h>	
@@ -214,6 +215,9 @@
 //	#include <netex/netset.h>
 	#include <limits.h>
 	#include <time.h>
+
+	#include <sysutil/sysutil_common.h>
+	#include <sysutil/sysutil_sysparam.h>
 
 // Nintendo Wii
 #elif defined(_REVOLUTION)
