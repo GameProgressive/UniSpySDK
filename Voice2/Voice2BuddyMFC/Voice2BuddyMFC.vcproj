@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="gptestc"
-	ProjectGUID="{BA43AA13-F6E4-42F6-A899-26679F258B10}"
-	RootNamespace="gptestc"
+	Name="Voice2BuddyMFC"
+	ProjectGUID="{72850C45-8D6D-437D-B02D-FAEFE720827F}"
+	RootNamespace="Voice2BuddyMFC"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -20,6 +20,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -44,6 +45,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="1"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -59,7 +61,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -89,6 +91,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -114,6 +117,7 @@
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="1"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -129,7 +133,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -163,12 +167,8 @@
 			RelativePathToProject=".\common\win32\win32common.vcproj"
 		/>
 		<ProjectReference
-			ReferencedProjectIdentifier="{73FD8394-2799-4875-9B77-2DB5F5243CD2}"
-			RelativePathToProject=".\GP\GP.vcproj"
-		/>
-		<ProjectReference
-			ReferencedProjectIdentifier="{E6C66FDF-1934-4A5F-A80E-01E0576ABFAC}"
-			RelativePathToProject=".\gt2\gt2.vcproj"
+			ReferencedProjectIdentifier="{1338A207-2F4F-4FCA-9305-79A4609D7296}"
+			RelativePathToProject=".\ghttp\ghttp.vcproj"
 		/>
 	</References>
 	<Files>
@@ -178,7 +178,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\gptestc.c"
+				RelativePath=".\LoginDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SetupDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StdAfx.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Voice2BuddyMFC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Voice2BuddyMFCDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\VoiceSessionDlg.cpp"
 				>
 			</File>
 		</Filter>
@@ -187,13 +207,49 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\LoginDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetupDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StdAfx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Voice2BuddyMFC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Voice2BuddyMFCDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VoiceSessionDlg.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\Voice2BuddyMFC.rc"
+				>
+			</File>
 		</Filter>
+		<File
+			RelativePath=".\ReadMe.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
