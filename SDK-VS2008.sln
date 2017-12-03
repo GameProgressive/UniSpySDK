@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\win32\win3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ghttp", "ghttp\ghttp.vcproj", "{1338A207-2F4F-4FCA-9305-79A4609D7296}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GP", "GP\GP.vcproj", "{73FD8394-2799-4875-9B77-2DB5F5243CD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Debug|Win32.Build.0 = Debug|Win32
 		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Release|Win32.ActiveCfg = Release|Win32
 		{1338A207-2F4F-4FCA-9305-79A4609D7296}.Release|Win32.Build.0 = Release|Win32
+		{73FD8394-2799-4875-9B77-2DB5F5243CD2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{73FD8394-2799-4875-9B77-2DB5F5243CD2}.Debug|Win32.Build.0 = Debug|Win32
+		{73FD8394-2799-4875-9B77-2DB5F5243CD2}.Release|Win32.ActiveCfg = Release|Win32
+		{73FD8394-2799-4875-9B77-2DB5F5243CD2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
