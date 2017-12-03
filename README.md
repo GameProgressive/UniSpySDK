@@ -1,11 +1,11 @@
-# RetroSpy Software Development Kit
+3# RetroSpy Software Development Kit
 RetroSpy is a project that aim to create a successfully working upgraded SDK and Server for GameSpy Services
 
 See [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for information about compiling and using the SDK
 
 The Upgraded SDK/Modification made are released under BSD3 License (See [LICENSE](https://github.com/GameProgressive/RetroSpySDK/blob/master/LICENSE) for more information)
 
-The Original SDK was released under BSD2 License reported here:
+The Original SDK license was released under BSD3 License reported here:
 
 Copyright (c) 2011, IGN Entertainment, Inc. ("IGN")
 All rights reserved.
