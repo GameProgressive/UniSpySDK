@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "authps3prodg", "authps3prodg.vcproj", "{28A39C63-00E9-4C9E-AA1A-D6C71A6F1F34}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://tfssql:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = authps3prodg.vcproj
+		SccLocalPath1 = .
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		PS3 Debug|Win32 = PS3 Debug|Win32
+		PS3 Release|Win32 = PS3 Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28A39C63-00E9-4C9E-AA1A-D6C71A6F1F34}.PS3 Debug|Win32.ActiveCfg = PS3 Debug|Win32
+		{28A39C63-00E9-4C9E-AA1A-D6C71A6F1F34}.PS3 Debug|Win32.Build.0 = PS3 Debug|Win32
+		{28A39C63-00E9-4C9E-AA1A-D6C71A6F1F34}.PS3 Release|Win32.ActiveCfg = PS3 Release|Win32
+		{28A39C63-00E9-4C9E-AA1A-D6C71A6F1F34}.PS3 Release|Win32.Build.0 = PS3 Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
