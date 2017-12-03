@@ -146,6 +146,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\darray.c"
+				>
+			</File>
+			<File
 				RelativePath="..\gsAssert.c"
 				>
 			</File>
@@ -222,6 +226,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\hashtable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\md5c.c"
+				>
+			</File>
+			<File
 				RelativePath=".\Win32Common.c"
 				>
 			</File>
@@ -231,6 +243,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\darray.h"
+				>
+			</File>
 			<File
 				RelativePath="..\gsAssert.h"
 				>
@@ -309,6 +325,18 @@
 			</File>
 			<File
 				RelativePath="..\gsXML.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\hashtable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\md5.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\nonport.h"
 				>
 			</File>
 		</Filter>
