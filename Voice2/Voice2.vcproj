@@ -140,6 +140,10 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{E972C52F-9E85-4D65-B19C-031E511E9DB4}"
+			RelativePathToProject=".\Voice2\libspeex\win32\VS2008\libspeex\libspeex.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
