@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;GSI_COMMON_DEBUG;HTTP_LOG;GHTTP_EXTENDEDERROR"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -114,6 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -132,6 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -167,8 +171,24 @@
 			RelativePathToProject=".\common\win32\win32common.vcproj"
 		/>
 		<ProjectReference
-			ReferencedProjectIdentifier="{1338A207-2F4F-4FCA-9305-79A4609D7296}"
-			RelativePathToProject=".\ghttp\ghttp.vcproj"
+			ReferencedProjectIdentifier="{D8B7C126-A241-46F6-88DB-8B0281C0B735}"
+			RelativePathToProject=".\Voice2\Voice2.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{73FD8394-2799-4875-9B77-2DB5F5243CD2}"
+			RelativePathToProject=".\GP\GP.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{E6C66FDF-1934-4A5F-A80E-01E0576ABFAC}"
+			RelativePathToProject=".\gt2\gt2.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{FE7DB30D-02B0-4E90-861A-30F76343E437}"
+			RelativePathToProject=".\natneg\natneg.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{E972C52F-9E85-4D65-B19C-031E511E9DB4}"
+			RelativePathToProject=".\Voice2\libspeex\win32\VS2008\libspeex\libspeex.vcproj"
 		/>
 	</References>
 	<Files>
