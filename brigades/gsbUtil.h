@@ -12,7 +12,12 @@
 
 #define GSB_HTTP             "https://"
 
-#define GSB_SERVICE_URL_BASE "" GSI_OPEN_DOMAIN_NAME "/Brigades/"
+#if defined(GSI_OPEN_DOMAIN_NAME)
+	#define GSB_SERVICE_URL_BASE "" GSI_OPEN_DOMAIN_NAME "/Brigades/"
+#else
+	#define GSB_SERVICE_URL_BASE "" GSI_DOMAIN_NAME "/Brigades/"	
+#endif
+
 #define GSB_SERVICE_CONTRACT "BrigadesService.svc"
 
 // Temporary!
