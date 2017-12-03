@@ -1,4 +1,4 @@
-3# RetroSpy Software Development Kit
+# RetroSpy Software Development Kit
 RetroSpy is a project that aim to create a successfully working upgraded SDK and Server for GameSpy Services
 
 See [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for information about compiling and using the SDK
