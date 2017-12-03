@@ -159,6 +159,14 @@
 				RelativePath=".\AuthService.h"
 				>
 			</File>
+			<File
+				RelativePath=".\AuthService2007.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AuthServiceOpen.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
