@@ -5,8 +5,9 @@ See [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for information 
 
 The Upgraded SDK/Modification made are released under BSD3 License (See [LICENSE](https://github.com/GameProgressive/RetroSpySDK/blob/master/LICENSE) for more information)
 
-The Origianl SDK license was released under BSD2 License reported here:
-`Copyright (c) 2011, IGN Entertainment, Inc. ("IGN")
+The Original SDK license was released under BSD2 License reported here:
+
+Copyright (c) 2011, IGN Entertainment, Inc. ("IGN")
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,4 +32,4 @@ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.`
+POSSIBILITY OF SUCH DAMAGE.
