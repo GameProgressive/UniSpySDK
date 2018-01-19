@@ -1245,7 +1245,7 @@ void CGptestDlg::OnInitialize()
 	gsSetDebugCallback(DebugCallback);
 
 	// Set some debug levels
-	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Debug);
+	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, /*GSIDebugLevel_Debug*/GSIDebugLevel_Hardcore);
 #endif
 
 	// check that the game's backend is available
