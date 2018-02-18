@@ -1634,7 +1634,7 @@ GPResult gpiProcessTransfer
 		/////////////////////////////////////////////////////////////////
 		if((now - transfer->lastSend) > GPI_PEER_TIMEOUT_TIME)
 		{
-			GPTransferCallbackArg * arg;
+			GPTransferCallbackArg * arg2;
 
 			// We couldn't connect.
 			///////////////////////
@@ -1642,13 +1642,13 @@ GPResult gpiProcessTransfer
 
 			// Call the callback.
 			/////////////////////
-			arg = (GPTransferCallbackArg *)gsimalloc(sizeof(GPTransferCallbackArg));
-			if(arg)
+			arg2 = (GPTransferCallbackArg *)gsimalloc(sizeof(GPTransferCallbackArg));
+			if(arg2)
 			{
-				memset(arg, 0, sizeof(GPTransferCallbackArg));
-				arg->transfer = transfer->localID;
-				arg->type = GP_TRANSFER_NO_CONNECTION;
-				gpiAddCallback(connection, iconnection->callbacks[GPI_TRANSFER_CALLBACK], arg, NULL, GPI_ADD_TRANSFER_CALLBACK);
+				memset(arg2, 0, sizeof(GPTransferCallbackArg));
+				arg2->transfer = transfer->localID;
+				arg2->type = GP_TRANSFER_NO_CONNECTION;
+				gpiAddCallback(connection, iconnection->callbacks[GPI_TRANSFER_CALLBACK], arg2, NULL, GPI_ADD_TRANSFER_CALLBACK);
 			}
 
 			return GP_NO_ERROR;
