@@ -22,7 +22,7 @@
     <ProjectGuid>{053EC363-5360-4CE4-B476-A5108293C5FA}</ProjectGuid>
     <RootNamespace>gptestc</RootNamespace>
     <ProjectName>gptestc</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'" Label="Configuration">

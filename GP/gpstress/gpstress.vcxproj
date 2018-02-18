@@ -14,7 +14,7 @@
     <ProjectGuid>{ADC08350-16C5-4822-A04A-1AD5133CF64D}</ProjectGuid>
     <RootNamespace>gpstress</RootNamespace>
     <ProjectName>gpstress</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
