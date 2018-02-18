@@ -12,6 +12,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CGptestDlg * dlg;
+FILE * theDebugFile = NULL;
 
 #define CHECK(result)  { if((result) != GP_NO_ERROR) { OutputDebugString(#result " failed\n");}}
 
@@ -36,7 +37,7 @@ void vsDebugOut(va_list args, const char * format, ...)
 	}
 	else
 		_vsnprintf(buffer, sizeof(buffer), format, args);
-
+	
 	OutputDebugString(buffer);
 #endif
 	GSI_UNUSED(args);
@@ -136,9 +137,11 @@ CGptestDlg::CGptestDlg(CWnd* pParent /*=NULL*/)
 	m_productid = 0;
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	
-	
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);	
+}
+
+CGptestDlg::~CGptestDlg()
+{
 }
 
 void CGptestDlg::DoDataExchange(CDataExchange* pDX)
@@ -1238,6 +1241,7 @@ void CGptestDlg::OnInitialize()
 		return;
 	}
 
+	fopen_s(&theDebugFile, "gpdebug.txt", "w");
 
 #ifdef GSI_COMMON_DEBUG
 	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
@@ -1246,6 +1250,7 @@ void CGptestDlg::OnInitialize()
 
 	// Set some debug levels
 	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, /*GSIDebugLevel_Debug*/GSIDebugLevel_Hardcore);
+	gsSetDebugFile(theDebugFile);
 #endif
 
 	// check that the game's backend is available
@@ -1286,6 +1291,10 @@ void CGptestDlg::OnDestroyGP()
 
 	gpDestroy(&m_connection);
 	m_connection = NULL;
+
+	if (theDebugFile)
+		fclose(theDebugFile);
+	theDebugFile = NULL;
 }
 
 void CGptestDlg::SetHost()

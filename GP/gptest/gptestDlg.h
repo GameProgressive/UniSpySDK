@@ -18,6 +18,7 @@ class CGptestDlg : public CDialog
 // Construction
 public:
 	CGptestDlg(CWnd* pParent = NULL);	// standard constructor
+	~CGptestDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CGptestDlg)
