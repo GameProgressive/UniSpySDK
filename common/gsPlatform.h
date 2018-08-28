@@ -36,7 +36,7 @@
 	#endif
 #endif
 
-#if defined(_LINUX) || defined(_MACOSX) || defined (_IPHONE)
+#if defined(__linux__) || defined(__APPLE__)
 	#define _UNIX
 #endif
 

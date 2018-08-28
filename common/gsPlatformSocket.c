@@ -15,7 +15,7 @@
 	#include "xbox/gsSocketXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsSocketWin32.c"
-#elif defined(_LINUX)
+#elif defined(__linux__)
 	//#include "linux/gsSocketLinux.c"
 #elif defined(_MACOSX)
 	//#include "macosx/gsSocketMacOSX.c"
