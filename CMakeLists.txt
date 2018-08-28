@@ -22,7 +22,8 @@ if(RETROSPY_SERVER_NAME)
 endif()
 
 add_subdirectory(common)
+add_subdirectory(Chat)
 
 add_library(retrospy dllmain.c)
-target_link_libraries(retrospy rscommon)
+target_link_libraries(retrospy rscommon rschat)
 
