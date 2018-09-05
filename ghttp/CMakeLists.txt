@@ -11,4 +11,3 @@ add_library(rshttp
     ghttpPost.c
     ghttpProcess.c
 )
-
