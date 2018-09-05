@@ -26,6 +26,7 @@ add_subdirectory(Chat)
 add_subdirectory(gcdkey)
 add_subdirectory(ghttp)
 add_subdirectory(GP)
+add_subdirectory(gstats)
 
 add_library(retrospy dllmain.c)
-target_link_libraries(retrospy SHARED rscommon rschat rscdkey rshttp rsgp)
+target_link_libraries(retrospy SHARED rscommon rschat rscdkey rshttp rsgp rsstats)
