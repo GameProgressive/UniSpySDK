@@ -24,6 +24,7 @@ endif()
 add_subdirectory(common)
 add_subdirectory(Chat)
 add_subdirectory(gcdkey)
+add_subdirectory(ghttp)
 
 add_library(retrospy dllmain.c)
-target_link_libraries(retrospy rscommon rschat rscdkey)
+target_link_libraries(retrospy rscommon rschat rscdkey rshttp)
