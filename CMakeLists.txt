@@ -32,6 +32,7 @@ add_subdirectory(natneg)
 add_subdirectory(Peer)
 add_subdirectory(pinger)
 add_subdirectory(pt)
+add_subdirectory(qr2)
 
 add_library(retrospy dllmain.c)
 
@@ -47,4 +48,5 @@ target_link_libraries(retrospy SHARED
     rspeer
     rspinger
     rspt
+    rsqr2
 )
