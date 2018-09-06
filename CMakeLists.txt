@@ -21,6 +21,7 @@ if(RETROSPY_SERVER_NAME)
     message(STATUS "RETROSPY server name is set to ${RETROSPY_SERVER_NAME}")
 endif()
 
+#add_subdirectory(brigades)
 add_subdirectory(common)
 add_subdirectory(Chat)
 add_subdirectory(gcdkey)
@@ -36,10 +37,13 @@ add_subdirectory(qr2)
 add_subdirectory(sake)
 add_subdirectory(sc)
 add_subdirectory(serverbrowsing)
+#add_subdirectory(Voice2)
+add_subdirectory(webservices)
 
 add_library(retrospy dllmain.c)
 
 target_link_libraries(retrospy SHARED
+    #rsbrigades
     rscommon
     rschat
     rscdkey
@@ -55,4 +59,6 @@ target_link_libraries(retrospy SHARED
     rssake
     rssc
     rsserverbrowsing
+    #rsvoice2
+    rswebservices
 )

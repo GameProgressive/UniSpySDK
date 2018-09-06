@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.0.0)
+
+add_library(rsvoice2
+    gvCodec.c
+    gvCustomDevice.c
+    gvDevice.c
+    gvFrame.c
+    gvMain.c
+    gvSource.c
+    gvSpeex.c
+    gvUtil.c
+    libspeex/libspeex/bits.c
+    libspeex/libspeex/cb_search.c
+    libspeex/libspeex/exc_10_16_table.c
+    libspeex/libspeex/exc_10_32_table.c
+    libspeex/libspeex/exc_20_32_table.c
+    libspeex/libspeex/exc_5_256_table.c
+    libspeex/libspeex/exc_5_64_table.c
+    libspeex/libspeex/exc_8_128_table.c
+    libspeex/libspeex/fftwrap.c
+    libspeex/libspeex/filters.c
+    libspeex/libspeex/gain_table.c
+    libspeex/libspeex/gain_table_lbr.c
+    libspeex/libspeex/hexc_10_32_table.c
+    libspeex/libspeex/hexc_table.c
+    libspeex/libspeex/high_lsp_tables.c
+    libspeex/libspeex/kiss_fft.c
+    libspeex/libspeex/kiss_fftr.c
+    libspeex/libspeex/lpc.c
+    libspeex/libspeex/lsp.c
+    libspeex/libspeex/lsp_tables_nb.c
+    libspeex/libspeex/ltp.c
+    libspeex/libspeex/modes.c
+    libspeex/libspeex/modes_wb.c
+    libspeex/libspeex/nb_celp.c
+    libspeex/libspeex/quant_lsp.c
+    libspeex/libspeex/sb_celp.c
+    libspeex/libspeex/smallft.c
+    libspeex/libspeex/speex.c
+    libspeex/libspeex/speex_callbacks.c
+    libspeex/libspeex/speex_header.c
+    libspeex/libspeex/stereo.c
+    libspeex/libspeex/vbr.c
+    libspeex/libspeex/vq.c
+    libspeex/libspeex/window.c
+)
