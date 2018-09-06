@@ -68,7 +68,8 @@ piConnection * connection;  // This is to fool Visual Assist.
 #define strzcpy(dest, src, len)   { strncpy(dest, src, (len)); (dest)[(len) - 1] = '\0'; }
 #define strzcat(dest, src, len)   { strncat(dest, src, (len) - strlen(dest)); (dest)[(len) - 1] = '\0'; }
 
-#if defined(_PS3)
+// int not suitable for 64bit platforms, so if not ANSI use void*
+#if defined(_PS3) || defined(__STDC_VERSION__) || defined(_MSC_VER)
 #define PEERCBType void*       // Note: ANSI function pointers should int rather than void*
 #else
 #define PEERCBType int         // Note: ANSI function pointers should int rather than void*
