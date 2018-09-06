@@ -28,6 +28,17 @@ add_subdirectory(ghttp)
 add_subdirectory(GP)
 add_subdirectory(gstats)
 add_subdirectory(gt2)
+add_subdirectory(natneg)
 
 add_library(retrospy dllmain.c)
-target_link_libraries(retrospy SHARED rscommon rschat rscdkey rshttp rsgp rsstats rsgt2)
+
+target_link_libraries(retrospy SHARED
+    rscommon
+    rschat
+    rscdkey
+    rshttp
+    rsgp
+    rsstats
+    rsgt2
+    rsnatneg
+)
