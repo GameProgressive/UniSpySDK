@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(retrospy VERSION 2.06 LANGUAGES C)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+
 # Set default build to be release if no other specified.
 if (NOT CMAKE_CONFIGURATION_TYPES AND 
     NOT CMAKE_NO_BUILD_TYPE AND
@@ -37,7 +39,7 @@ add_subdirectory(qr2)
 add_subdirectory(sake)
 add_subdirectory(sc)
 add_subdirectory(serverbrowsing)
-#add_subdirectory(Voice2)
+add_subdirectory(Voice2)
 add_subdirectory(webservices)
 
 add_library(retrospy dllmain.c)
@@ -59,6 +61,6 @@ target_link_libraries(retrospy SHARED
     rssake
     rssc
     rsserverbrowsing
-    #rsvoice2
+    rsvoice2
     rswebservices
 )

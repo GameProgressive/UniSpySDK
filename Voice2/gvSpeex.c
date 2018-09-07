@@ -1,5 +1,5 @@
 #include "gvSpeex.h"
-#include <speex.h>
+#include <speex/speex.h>
 #include "gvCodec.h"
 
 
