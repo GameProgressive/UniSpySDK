@@ -13421,7 +13421,6 @@ if test "${enable_binaries+set}" = set; then :
   enableval=$enable_binaries;
 fi
 
-if test "$enableval" != no; then
 
 
 
@@ -13542,6 +13541,8 @@ $as_echo "no" >&6; }
 		PKG_CONFIG=""
 	fi
 fi
+if test "x$enable_binaries" != "xno"; then :
+
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OGG" >&5
@@ -13601,7 +13602,9 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$OGG_PKG_ERRORS" >&5
 
-	 if false; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ogg not found, not building example programs" >&5
+$as_echo "$as_me: WARNING: Ogg not found, not building example programs" >&2;}
+      if false; then
   BUILD_BINARIES_TRUE=
   BUILD_BINARIES_FALSE='#'
 else
@@ -13612,7 +13615,9 @@ fi
 elif test $pkg_failed = untried; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	 if false; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ogg not found, not building example programs" >&5
+$as_echo "$as_me: WARNING: Ogg not found, not building example programs" >&2;}
+      if false; then
   BUILD_BINARIES_TRUE=
   BUILD_BINARIES_FALSE='#'
 else
@@ -14530,6 +14535,10 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
+if test -z "${BUILD_BINARIES_TRUE}" && test -z "${BUILD_BINARIES_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_BINARIES\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${BUILD_BINARIES_TRUE}" && test -z "${BUILD_BINARIES_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_BINARIES\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -16170,7 +16179,6 @@ $as_echo X"$file" |
     cat <<_LT_EOF >> "$cfgfile"
 #! $SHELL
 # Generated automatically by $as_me ($PACKAGE) $VERSION
-# Libtool was configured on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
