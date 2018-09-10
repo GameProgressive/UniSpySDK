@@ -352,3 +352,8 @@ ASALocalRun/
 
 # Netbeans IDE
 nbproject/
+
+# Tests specific
+gpdebug.txt
+login.txt
+gp.info
