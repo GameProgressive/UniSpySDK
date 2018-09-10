@@ -202,9 +202,9 @@ static void nr(gsi_bool success, NAT nat)
 }
 
 #ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
-	int test_main(int argc, char **argp);
+	int main(int argc, char **argp);
 #endif
-int test_main(int argc, char **argp)
+int main(int argc, char **argp)
 {
 	unsigned long lastsendtime = 0;
 	GSIACResult result;

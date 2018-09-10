@@ -434,7 +434,7 @@ void DoGameStuff(gsi_time totalTime)
 }
 
 
-int test_main(int argc, char **argp)
+int main(int argc, char **argp)
 {			
 	/* qr2_init parameters */
 	gsi_char  secret_key[9];         // your title's assigned secret key
@@ -445,7 +445,7 @@ int test_main(int argc, char **argp)
 	void * userData = NULL;          // optional data that will be passed to the callback functions
 
 	// for debug output on these platforms
-#if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO)
+#if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO) || defined(_WIN32)
 	#ifdef GSI_COMMON_DEBUG
 		// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
 		// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
