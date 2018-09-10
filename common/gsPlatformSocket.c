@@ -15,10 +15,14 @@
 	#include "xbox/gsSocketXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsSocketWin32.c"
-#elif defined(_LINUX)
+#elif defined(__linux__)
 	//#include "linux/gsSocketLinux.c"
-#elif defined(_MACOSX)
-	//#include "macosx/gsSocketMacOSX.c"
+#elif defined(__APPLE__) && defined(__MACH__)
+#if TARGET_IPHONE_SIMULATOR == 1 || TARGET_OS_IPHONE == 1
+	#import <net/if.h>
+	#import <ifaddrs.h>
+#endif
+    //#include "macosx/gsSocketMacOSX.c"
 #elif defined(_NITRO)
 	#include "nitro/gsSocketNitro.c"
 #elif defined(_PS2)
@@ -30,9 +34,6 @@
 	#include "psp/gsSocketPSP.c"
 #elif defined(_REVOLUTION)
 	#include "revolution/gsSocketRevolution.c"
-#elif defined(_IPHONE)
-	#import <net/if.h>
-	#import <ifaddrs.h>
 #else
 	#error "Missing or unsupported platform"
 #endif

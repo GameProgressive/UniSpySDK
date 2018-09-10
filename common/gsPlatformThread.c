@@ -11,9 +11,9 @@
 	//#include "xbox/gsThreadXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsThreadWin32.c"
-#elif defined(_MACOSX) || defined (_IPHONE)
+#elif defined(__APPLE__)
 	#include "macosx/gsThreadMacOSX.c"
-#elif defined (_LINUX)
+#elif defined (__linux__)
 	#include "linux/gsThreadLinux.c"
 #elif defined(_NITRO)
 	#include "nitro/gsThreadNitro.c"

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="testenc"
 	ProjectGUID="{961B8359-1393-4EF7-B8E0-67B6FE1C6DAE}"
-	RootNamespace="testenc"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -276,10 +275,6 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{E972C52F-9E85-4D65-B19C-031E511E9DB4}"
-			RelativePathToProject=".\Voice2\libspeex\win32\VS2008\libspeex\libspeex.vcproj"
-		/>
 	</References>
 	<Files>
 		<Filter

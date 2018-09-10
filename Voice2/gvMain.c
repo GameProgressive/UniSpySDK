@@ -19,7 +19,7 @@ http://gamespy.net
 		#include "gvDirectSound.h"
 	#elif defined(_PS2)
 		#include "gvPS2Audio.h"
-	#elif defined(_MACOSX)
+	#elif defined(__APPLE__)
 		#include "gvOSXAudio.h"
 	#elif defined(_PSP)
 		#include "gvPSPAudio.h"

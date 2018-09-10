@@ -10,9 +10,9 @@
 	//#include "xbox/gsUtilXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsUtilWin32.c"
-#elif defined(_LINUX)
+#elif defined(__linux__)
 	#include "linux/gsUtilLinux.c"
-#elif defined(_MACOSX) || defined (_IPHONE)
+#elif defined(__APPLE__)
 	#include "macosx/gsUtilMacOSX.c"
 #elif defined(_NITRO)
 	#include "nitro/gsUtilNitro.c"

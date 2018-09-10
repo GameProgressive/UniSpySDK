@@ -170,8 +170,8 @@ void  gsDebugAssert				(const char *szError,const char *szText, const char *szFi
 	void  _gsDebugAssert			(const char *string)
 	{
 
-		printf(string);
-		while(1);;
+		printf("%s", string);
+		while(1);
 
 	}
 
