@@ -134,7 +134,7 @@ find_package(Ogg)
 find_package(SpeexDsp)
 
 cmake_dependent_option(USE_SPEEXDSP "Enable SpeexDSP library" ON "SpeexDsp_FOUND" OFF)
-cmake_dependent_option(DISABLE_BINARIES "Do not build the encoder and decoder programs, only the library" OFF "Ogg_FOUND" OFF)
+cmake_dependent_option(DISABLE_BINARIES "Do not build the encoder and decoder programs, only the library" ON "NOT Ogg_FOUND" OFF)
 
 check_c_compiler_flag("-fvisibility=hidden" HAS_VISIBILITY)
 if(HAS_VISIBILITY)

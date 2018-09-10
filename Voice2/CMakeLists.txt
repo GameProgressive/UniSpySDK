@@ -25,7 +25,7 @@ add_library(rsvoice2
     ${DEFAULT_HARDWARE}
 )
 
-target_link_libraries(rsvoice2 ${SPEEX_LIBRARRIES})
+target_link_libraries(rsvoice2 ${SPEEX_LIBRARIES})
 target_include_directories(rsvoice2 PRIVATE $<BUILD_INTERFACE:${SPEEX_INCLUDE_DIRS}>)
 
 if(UNIX AND NOT APPLE)
