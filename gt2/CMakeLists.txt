@@ -12,3 +12,11 @@ add_library(rsgt2
     gt2Socket.c
     gt2Utility.c
 )
+
+target_link_libraries(rsgt2 rscommon)
+
+if(RS_BUILD_TESTS)
+    add_executable(gt2test gt2testc/gt2testc.c)
+    target_link_libraries(gt2test rsgt2)
+    target_compile_definitions(gt2test PRIVATE test_main=main)
+endif()

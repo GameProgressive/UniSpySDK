@@ -15,3 +15,11 @@ add_library(rspeer
     peerRooms.c
     peerSB.c
 )
+
+target_link_libraries(rspeer rscommon rsqr2 rschat rspinger rsserverbrowsing)
+
+if(RS_BUILD_TESTS)
+    add_executable(peertest peerc/peerc.c)
+    target_link_libraries(peertest rspeer)
+    target_compile_definitions(peertest PRIVATE test_main=main)
+endif()

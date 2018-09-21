@@ -11,3 +11,11 @@ add_library(rshttp
     ghttpPost.c
     ghttpProcess.c
 )
+
+target_link_libraries(rshttp rscommon)
+
+if(RS_BUILD_TESTS)
+    add_executable(httptest ghttpc/ghttpc.c)
+    target_link_libraries(httptest rshttp)
+    target_compile_definitions(httptest PRIVATE test_main=main)
+endif()
