@@ -19,10 +19,10 @@ add_library(rsgp
     gpiUtility.c
 )
 
-target_link_libraries(rsgp rscommon)
+target_link_libraries(rsgp rsgt2)
 
 if(RS_BUILD_TESTS)
     add_executable(gptest gptestc/gptestc.c)
-    target_link_libraries(gptest rsgp rsgt2)
+    target_link_libraries(gptest rsgp)
     target_compile_definitions(gptest PRIVATE test_main=main)
 endif()

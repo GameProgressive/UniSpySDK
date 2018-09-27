@@ -16,11 +16,17 @@ add_library(rscommon
     gsRC4.c
     gsResultCodes.c
     gsSHA1.c
-    gsSoap.c
     gsSSL.c
     gsStringUtil.c
-    gsUdpEngine.c
     gsXML.c
     hashtable.c
     md5c.c
 )
+
+find_package(Threads REQUIRED)
+if(THREADS_HAVE_PTHREAD_ARG)
+  target_compile_options(rscommon PUBLIC "-pthread")
+endif()
+if(CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries(rscommon "${CMAKE_THREAD_LIBS_INIT}")
+endif()

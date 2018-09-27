@@ -11,6 +11,7 @@ add_library(rsgt2
     gt2Message.c
     gt2Socket.c
     gt2Utility.c
+    ../common/gsUdpEngine.c
 )
 
 target_link_libraries(rsgt2 rscommon)

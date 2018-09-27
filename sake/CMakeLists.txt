@@ -6,6 +6,7 @@ add_library(rssake
     sakeRequestMisc.c
     sakeRequestModify.c
     sakeRequestRead.c
+    ../common/gsSoap.c
 )
 
 target_link_libraries(rssake rscommon rshttp)

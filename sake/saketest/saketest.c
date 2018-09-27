@@ -4,7 +4,7 @@
 #include "../../common/gsSoap.h"
 #include "../sake.h"
 #include "../../ghttp/ghttp.h"
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 
 #if defined(_NITRO)
 	#include "../../common/nitro/screen.h"
@@ -722,7 +722,7 @@ static void RunTests(SAKE sake)
 		static SAKEUpdateRecordInput input;
 		static SAKEField fields[16];
 		static char binaryData[] = "\x12\x34\x56\xAB\xCD";
-#if defined(_PS2) || defined(_MACOSX) || defined(_LINUX) || defined(_IPHONE)
+#if defined(_PS2) || defined(__APPLE__) || defined(__linux__)
 		static gsi_u16 unicodeString[] = {'u','n','i','c','o','d','e','\0'};
 #else
 		static gsi_u16 *unicodeString = L"unicode";

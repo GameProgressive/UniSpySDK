@@ -658,7 +658,7 @@ static void Think(void)
 	}
 }
 
-#if defined(_UNIX)
+#if defined(unix) || defined(__unix__) || defined(__unix)
 #include <sys/select.h>
 #include <termios.h>
 #include <curses.h>
@@ -668,7 +668,7 @@ int _kbhit(void)
     static const int STDIN = 0;
     static int initialized = 0;
     struct timeval timeout;
-    struct fd_set rdset;
+    fd_set rdset;
 
     if (initialized == 0)
 	{
