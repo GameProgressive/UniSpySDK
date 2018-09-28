@@ -93,7 +93,7 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 		return memalign(boundary, size);
 	}
 #elif defined (_WIN32)
-	#if (_MSC_VER < 1300)
+	#if defined(_MSC_VER) && (_MSC_VER < 1300)
 		//extern added for vc6 compatability.
 		extern void* __cdecl _aligned_malloc(size_t size, int boundary);
 	#endif
