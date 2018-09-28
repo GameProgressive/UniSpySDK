@@ -16,6 +16,7 @@ if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
+    option(RS_WINSOCK2 "Link against winsock2 instead of winsock." OFF)
 endif()
 
 # Do we optionally want to build the test executables?
@@ -27,6 +28,10 @@ if(RETROSPY_SERVER_NAME)
 endif()
 
 add_definitions(-DGS_PEER)
+
+if(RS_WINSOCK2)
+    add_definitions(-DGSI_WINSOCK2)
+endif()
 
 #add_subdirectory(brigades)
 add_subdirectory(common) # UDPEngine from common relies on gt2, but gt2 relies on common, similarly relies on ghttp!

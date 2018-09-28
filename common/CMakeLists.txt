@@ -23,10 +23,20 @@ add_library(rscommon
     md5c.c
 )
 
+# Handle linking threading library.
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
   target_compile_options(rscommon PUBLIC "-pthread")
+  set(RS_PLATFORM_LIBS "${CMAKE_THREAD_LIBS_INIT}")
 endif()
-if(CMAKE_THREAD_LIBS_INIT)
-  target_link_libraries(rscommon "${CMAKE_THREAD_LIBS_INIT}")
+
+# Handle linking sockets library.
+if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
+    if(RS_WINSOCK2)
+        set(RS_PLATFORM_LIBS "${RS_PLATFORM_LIBS}" ws2_32)
+    else()
+        set(RS_PLATFORM_LIBS "${RS_PLATFORM_LIBS}" wsock32)
+    endif()
 endif()
+
+target_link_libraries(rscommon "${RS_PLATFORM_LIBS}")
