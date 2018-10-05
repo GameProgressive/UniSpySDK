@@ -6,7 +6,6 @@ add_library(rssc
     sciReport.c
     sciSerialize.c
     sciWebServices.c
-    ../common/gsSoap.c
 )
 
 target_link_libraries(rssc rscommon rswebservice rshttp)

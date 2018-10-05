@@ -10,6 +10,7 @@ add_library(rshttp
     ghttpMain.c
     ghttpPost.c
     ghttpProcess.c
+    ../common/gsSoap.c
 )
 
 target_link_libraries(rshttp rscommon)

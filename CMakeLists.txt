@@ -34,20 +34,20 @@ if(RS_WINSOCK2)
 endif()
 
 #add_subdirectory(brigades)
-add_subdirectory(common) # UDPEngine from common relies on gt2, but gt2 relies on common, similarly relies on ghttp!
+add_subdirectory(common) # Most of the common stuff gets built into this.
 add_subdirectory(Chat)
 add_subdirectory(natneg)
 add_subdirectory(qr2) # depends on natneg
 add_subdirectory(gcdkey) # tests depend on qr2
-add_subdirectory(ghttp) # depends on common
-add_subdirectory(gt2) # depends on common
+add_subdirectory(ghttp) # depends on common includes gsSoap here instead of common as gsSoap relies on ghttp.
+add_subdirectory(gt2) # depends on common includes UDPEngine here instead of common as UDPEngine relies on gt2.
 add_subdirectory(GP) # tests depend on gt2 for the UDPEngine
 add_subdirectory(gstats) # depends on common
 add_subdirectory(pinger) # depends on common for DArray
 add_subdirectory(serverbrowsing) # depends on qr2
 add_subdirectory(Peer) # depends on qr2, Chat, pinger, serverbrowsing
 add_subdirectory(pt) # depends on ghttp
-add_subdirectory(sake) # depends on command and ghttp for parts of common. test relies on GP and gt2 for UDPEngine
+add_subdirectory(sake) # depends on common and ghttp. test relies on GP and gt2 for UDPEngine
 add_subdirectory(webservices)
 add_subdirectory(sc) # depends on common webservices ghttp
 add_subdirectory(Voice2)
