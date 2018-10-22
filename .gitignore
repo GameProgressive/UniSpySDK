@@ -348,7 +348,7 @@ OpenCover/
 ASALocalRun/
 
 *.idb
-/build/
+/build*
 
 # Netbeans IDE
 nbproject/
