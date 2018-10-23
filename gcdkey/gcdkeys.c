@@ -419,7 +419,7 @@ void gcd_think(void)
 {
 	static char indata[INBUF_LEN]; 
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	fd_set set; 
 	struct timeval timeout = {0,0};
 	int error;
@@ -578,7 +578,7 @@ static int init_incoming_socket()
 {
 	int ret;
 	struct sockaddr_in saddr;
-	int saddrlen;
+	socklen_t saddrlen;
 	
 	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (sock == INVALID_SOCKET)

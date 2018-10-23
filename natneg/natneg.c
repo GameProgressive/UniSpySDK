@@ -148,7 +148,7 @@ static unsigned short GetLocalPort(SOCKET sock)
 {
 	int ret;
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 
 	ret = getsockname(sock,(struct sockaddr *)&saddr, &saddrlen);
 
@@ -503,7 +503,7 @@ static void NegotiateThink(NATNegotiator neg)
 	//check for any incoming data
 	static char indata[NNINBUF_LEN]; //256 byte input buffer
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(struct sockaddr_in);
+	socklen_t saddrlen = sizeof(struct sockaddr_in);
 	int error;
 
 	if(activeNatify)

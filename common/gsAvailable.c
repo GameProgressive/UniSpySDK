@@ -147,7 +147,7 @@ GSIACResult GSIAvailableCheckThink(void)
 {
 	char packet[64];
 	SOCKADDR_IN address;
-	int len = sizeof(address);
+	socklen_t len = sizeof(address);
 	int rcode;
 	int disabledservices;
 

@@ -1755,19 +1755,14 @@ static SBError ProcessLanData(SBServerList *slist)
 {
 	char indata[1500];  // make sure we have enough room for a large UDP packet
 	struct   sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	int error;
 	int foundexisting;
 	SBServer server;
 
 	while (CanReceiveOnSocket(slist->slsocket)) //we break if the select fails
 	{
-#if defined(_PS3)
-		error = (int)recvfrom(slist->slsocket, indata, sizeof(indata) - 1, 0, (struct sockaddr *)&saddr, (socklen_t*)&saddrlen );
-#else
 		error = (int)recvfrom(slist->slsocket, indata, sizeof(indata) - 1, 0, (struct sockaddr *)&saddr, &saddrlen );
-#endif
-
 		if (gsiSocketIsError(error))
 			continue; 
 		//if we got data, then add it to the list...

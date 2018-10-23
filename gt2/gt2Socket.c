@@ -91,7 +91,7 @@ GT2Result gti2CreateSocket
 	int rcode;
 	unsigned int ip;
 	unsigned short port;
-	int len;
+	socklen_t len;
 
 	// startup the sockets engine if needed
 	SocketStartUp();

@@ -589,7 +589,7 @@ static void ProcessIncomingReplies(SBQueryEngine *engine, SBBool icmpSocket)
 	int i;
 	char indata[MAX_RECVFROM_SIZE]; 
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	SBServer server;
 	SOCKET recvSock = 0;
 

@@ -183,7 +183,7 @@ int DisableNagle(SOCKET sock)
 	{
 		int rcode;
 		int size;
-		int len;
+		socklen_t len;
 
 		len = sizeof(size);
 
@@ -199,7 +199,7 @@ int DisableNagle(SOCKET sock)
 	{
 		int rcode;
 		int size;
-		int len;
+		socklen_t len;
 
 		len = sizeof(size);
 

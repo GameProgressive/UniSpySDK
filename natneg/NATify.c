@@ -71,7 +71,7 @@ static unsigned short GetLocalPort(SOCKET sock)
 {
 	int ret;
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	ret = getsockname(sock,(struct sockaddr *)&saddr, &saddrlen);
 	if (gsiSocketIsError(ret))
 		return 0;
@@ -181,7 +181,7 @@ static int Think(SOCKET sock, NAT * nat)
 	unsigned char ptype;
 	NatNegPacket p;
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(struct sockaddr_in);
+	socklen_t saddrlen = sizeof(struct sockaddr_in);
 
 	// Is natification complete?
 	if(gotERT1 && gotERT2 && gotERT3 && 

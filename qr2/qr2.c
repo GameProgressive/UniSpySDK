@@ -259,12 +259,7 @@ qr2_error_t qr2_create_socket(/*[out]*/SOCKET *sock, const char *ip, /*[in/out]*
 	int maxport;
 	int lasterror = 0;
 	int baseport = *port;
-
-#if defined(_LINUX)
-	unsigned int saddrlen;
-#else
-	int saddrlen;
-#endif
+	socklen_t saddrlen;
 
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
 		"qr2_create_socket()\r\n");
@@ -447,12 +442,7 @@ void qr2_check_queries(qr2_t qrec)
 	static char indata[INBUF_LEN]; //256 byte input buffer
 	struct sockaddr_in saddr;
 	int error;
-
-#if defined(_LINUX)
-	unsigned int saddrlen = sizeof(struct sockaddr_in);
-#else
-	int saddrlen = sizeof(struct sockaddr_in);
-#endif
+	socklen_t saddrlen = sizeof(struct sockaddr_in);
 
 	if (!qrec->read_socket)
 		return; //not our job

@@ -779,7 +779,7 @@ static void piProcessIncoming(void)
 	int rcode;
 	unsigned char buffer[PINGER_UDP_PING_SIZE];
 	SOCKADDR_IN from;
-	int len;
+	socklen_t len;
 	gsi_time recvTime;
 	piUDPPing udpPing;
 	char data[PI_DATA_MAX_LEN];

@@ -1188,7 +1188,7 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 {
 	int rcode;
 	SOCKADDR_IN address;
-	int addressLen;
+	socklen_t addressLen;
 
 
 	// avoid overflowing stack

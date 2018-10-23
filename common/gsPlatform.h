@@ -82,6 +82,7 @@
 		#if defined(_MSC_VER)
 			#pragma comment(lib, "WSock32.lib")
 		#endif
+        typedef int socklen_t;
 	#endif
 	
 	#if (_MSC_VER > 1300)
