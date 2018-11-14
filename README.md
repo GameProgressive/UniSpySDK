@@ -5,7 +5,7 @@ See the [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for any info
 
 The Updated SDK (or modification of the original SDK) are licensed under BSD3. (See [LICENSE](https://github.com/GameProgressive/RetroSpySDK/blob/master/LICENSE) for more information)
 
-If you fall into any problem building or compiling, or simply want to contribute to the project, feel free to join #retrospy@freenode (IRC).
+If you fall into any problem building or compiling, or simply want to contribute to the project, feel free to join the IRC channel #retrospy@freenode.org or under the discord channel https://discord.gg/Tv85Am4.
 
 The Original SDK was licensed under BSD3. A copy of the license:
 
