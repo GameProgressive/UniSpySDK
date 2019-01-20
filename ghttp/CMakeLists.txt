@@ -15,6 +15,15 @@ add_library(rshttp
 
 target_link_libraries(rshttp rscommon)
 
+if (RS_HTTPLOG)
+	target_compile_definitions(rshttp PUBLIC HTTP_LOG=1)
+endif()
+
+# Extended log for HTTP
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+	target_compile_definitions(rshttp PUBLIC GHTTP_EXTENDEDERROR=1)
+endif()
+
 if(RS_BUILD_TESTS)
     add_executable(httptest ghttpc/ghttpc.c)
     target_link_libraries(httptest rshttp)
