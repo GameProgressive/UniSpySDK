@@ -30,6 +30,10 @@ if(THREADS_HAVE_PTHREAD_ARG)
   set(RS_PLATFORM_LIBS "${CMAKE_THREAD_LIBS_INIT}")
 endif()
 
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
+	target_compile_definitions(rscommon PUBLIC "GSI_COMMON_DEBUG=1")
+endif()
+
 # Handle linking sockets library.
 if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
     if(RS_WINSOCK2)
