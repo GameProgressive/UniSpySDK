@@ -12,11 +12,16 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
+option(RS_OPENSSL "Enable OpenSSL support" ON)
+
 if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
-    option(RS_WINSOCK2 "Link against winsock2 instead of winsock." OFF)
+
+	# WinSock1 is deprecated, it's better to use WinSock2
+    option(RS_WINSOCK2 "Link against Windows Socket 2 instead of Windows Socket 1." ON)
 endif()
 
 # Do we optionally want to build the test executables?
@@ -31,6 +36,14 @@ add_definitions(-DGS_PEER)
 
 if(RS_WINSOCK2)
     add_definitions(-DGSI_WINSOCK2)
+endif()
+
+if (RS_OPENSSL)
+	add_definitions(-DOPENSSL)
+	
+	find_package(OpenSSL REQUIRED)
+	
+	include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
 #add_subdirectory(brigades)
