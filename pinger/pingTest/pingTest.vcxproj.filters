@@ -5,12 +5,6 @@
       <UniqueIdentifier>{89047980-4030-4025-905f-ef8eeaaa612c}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="pinger">
-      <UniqueIdentifier>{ffa364c1-a980-477d-9208-cb76c843af58}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="common">
-      <UniqueIdentifier>{a6ad5592-3597-4b65-acdb-4aba63f98b6e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{bb033b0f-f753-4652-9bdf-fe439d22bf5f}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -24,67 +18,5 @@
     <ClCompile Include="pingTest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\pingerMain.c">
-      <Filter>pinger</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\darray.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsAssert.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsAvailable.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsDebug.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsMemory.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsPlatform.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsPlatformSocket.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsPlatformThread.c">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\gsPlatformUtil.c">
-      <Filter>common</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\pinger.h">
-      <Filter>pinger</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsAssert.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsAvailable.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsCommon.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsDebug.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsMemory.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsPlatform.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsPlatformSocket.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsPlatformThread.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\gsPlatformUtil.h">
-      <Filter>common</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

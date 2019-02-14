@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="peerAutoMatch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerCallbacks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerGlobalCallbacks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerHost.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerKeys.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerMain.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerMangle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerOperations.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerPing.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerPlayers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerQR.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerRooms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peerSB.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="peer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerAscii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerAutoMatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerCallbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerGlobalCallbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerHost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerKeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerMangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerOperations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerPing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerPlayers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerQR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerRooms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peerSB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
