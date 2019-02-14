@@ -29,7 +29,9 @@ the networking of the Query & Reporting 2 SDK and CDKey SDKs are available.
 If you intend to use the integration option for these SDKs, you must uncomment the 
 define below, or provide it as an option to your compiler.
 *******/
-#define QR2CDKEY_INTEGRATION
+#if !defined(QR2CDKEY_INTEGRATION)
+	#define QR2CDKEY_INTEGRATION
+#endif
 
 typedef void (*AuthCallBackFn)(int gameid, int localid, int authenticated, char *errmsg, void *instance);
 typedef void (*RefreshAuthCallBackFn)(int gameid, int localid, int hint, char *challenge, void *instance);
