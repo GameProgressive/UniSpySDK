@@ -36,6 +36,17 @@
 	#endif
 #endif
 
+// MacOS X detection
+#if defined(__APPLE__)
+	#include <TargetConditionals.h>
+
+	#if TARGET_OS_IPHONE
+		#define _IPHONE
+	#else
+		#define _MACOSX
+	#endif
+#endif
+
 #if defined(__linux__) || defined(__APPLE__)
 	#define _UNIX
 #endif
