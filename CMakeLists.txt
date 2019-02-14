@@ -15,6 +15,9 @@ endif()
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
 option(RS_OPENSSL "Enable OpenSSL support" ON)
 
+# This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
+#option(RS_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
+
 if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
@@ -45,6 +48,10 @@ if (RS_OPENSSL)
 	
 	include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
+
+#if (RS_MEM_MANAGED)
+add_definitions(-DGSI_MEM_MANAGED)
+#endif()
 
 #add_subdirectory(brigades)
 add_subdirectory(common) # Most of the common stuff gets built into this.
