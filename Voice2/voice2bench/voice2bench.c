@@ -62,7 +62,7 @@ static void Decode(GVSample * out, const GVByte * in, GVDecoderData data)
 
 #elif defined(_PSP) || defined(_WIN32)
 
-#include "../gsm-1.0-pl12/inc/gsm.h"
+#include "libgsm/inc/gsm.h"
 
 gsm EncoderState;
 
@@ -185,8 +185,8 @@ static void TestCodec(GVCodec codec, GVRate sampleRate, const char * name)
 
 	printf("Testing %s\n", name);
 
-
-	if(!Init(codec, sampleRate))
+	//if(!Init(codec, sampleRate))
+	if (!Init(codec))
 	{
 		printf("Failed to init\n");
 		return;
