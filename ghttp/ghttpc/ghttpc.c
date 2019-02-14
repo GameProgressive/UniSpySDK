@@ -167,10 +167,18 @@ static void ProgressCallback
 	{
 		// Display based on if we know the total size.
 		//////////////////////////////////////////////
+
+#if (GSI_MAX_INTEGRAL_BITS >= 64)
 		if(totalSize != -1)
+			_tprintf(_T(" (%lld / %lld bytes)\n"), bytesReceived, totalSize);
+		else
+			_tprintf(_T(" (%lld bytes)\n"), bytesReceived);
+#else
+		if (totalSize != -1)
 			_tprintf(_T(" (%d / %d bytes)\n"), bytesReceived, totalSize);
 		else
 			_tprintf(_T(" (%d bytes)\n"), bytesReceived);
+#endif
 	}
 	else
 		_tprintf(_T("\n"));

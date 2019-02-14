@@ -1,6 +1,6 @@
 
 #include "../gt2.h"
-#include "../../darray.h"
+#include "../../common/darray.h"
 #include <time.h>
 
 
@@ -377,11 +377,19 @@ void DisplayStats(void)
 	// Print stats.
 	///////////////
 	printf("Proxying since %s", gsiSecondsToString(&ctimeTime));
+#ifdef _USE_32BIT_TIME_T
 	printf("(%d days, %d hours, %d minutes, %d seconds)\n",
 		days,
 		hours,
 		minutes,
 		seconds);
+#else
+	printf("(%lld days, %lld hours, %lld minutes, %lld seconds)\n",
+		days,
+		hours,
+		minutes,
+		seconds);
+#endif
 	printf("%d connect attempts, %d (%d%%) accepted, %d (%d%%) rejected\n",
 		numConnectAttempts,
 		numAccepted,

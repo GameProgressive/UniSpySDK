@@ -318,7 +318,7 @@ void EnterChannelCallback(CHAT chat, CHATBool success, CHATEnterResult result, c
 		chatEnumUsers(theApp.m_chat, channel, EnumUsersCallback, pDoc, CHATTrue);
 		DWORD after = GetTickCount();
 		char buffer[128];
-		sprintf(buffer, "%dms to enum %d users in %s\n", after - before, pDoc->m_numUsers, pDoc->m_channelName);
+		sprintf(buffer, "%dms to enum %d users in %s\n", after - before, pDoc->m_numUsers, pDoc->m_channelName.GetString());
 		OutputDebugString(buffer);
 	}
 
