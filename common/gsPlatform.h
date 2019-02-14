@@ -85,6 +85,7 @@
 
 	#if defined(GSI_WINSOCK2)
 		#include <winsock2.h>
+		#include <ws2tcpip.h>
 		#if defined(_MSC_VER)
 			#pragma comment(lib, "ws2_32.lib")
 		#endif
