@@ -1329,7 +1329,7 @@ static void ConnectCallback
 			reason = "login failed";
 		else
 			reason = "unknown";
-		str.Format(_T("Connect: failure (%s)"), reason);
+		str.Format(_T("Connect: failure (%s)"), reason.GetString());
 	}
 	dlg->MessageBox(str);
 
@@ -1380,18 +1380,18 @@ static void NickErrorCallback
 	if(type == PEER_UNIQUENICK_EXPIRED)
 	{
 		dlg->UpdateData();
-		str.Format(_T("This account's unique nick has expired.\nRegister '%s'?"), dlg->m_nick);
+		str.Format(_T("This account's unique nick has expired.\nRegister '%s'?"), dlg->m_nick.GetString());
 		rcode = dlg->MessageBox(str, NULL, MB_YESNO);
-		peerRegisterUniqueNick(peer, atoi(dlg->m_namespace), (rcode == IDYES)?((LPCSTR)dlg->m_nick):NULL, NULL);
+		peerRegisterUniqueNick(peer, atoi(dlg->m_namespace), (rcode == IDYES)?(dlg->m_nick.GetString()):NULL, NULL);
 		return;
 	}
 
 	if(type == PEER_NO_UNIQUENICK)
 	{
 		dlg->UpdateData();
-		str.Format(_T("This account has no unique nick.\nRegister '%s'?"), dlg->m_nick);
+		str.Format(_T("This account has no unique nick.\nRegister '%s'?"), dlg->m_nick.GetString());
 		rcode = dlg->MessageBox(str, NULL, MB_YESNO);
-		peerRegisterUniqueNick(peer, atoi(dlg->m_namespace), (rcode == IDYES)?((LPCSTR)dlg->m_nick):NULL, NULL);
+		peerRegisterUniqueNick(peer, atoi(dlg->m_namespace), (rcode == IDYES)?(dlg->m_nick.GetString()):NULL, NULL);
 		return;
 	}
 
@@ -1933,7 +1933,7 @@ void CPeerTestDlg::OnButton12()
 		}
 
 		CString caption;
-		caption.Format(_T("Info for %s"), m_selectedNick);
+		caption.Format(_T("Info for %s"), m_selectedNick.GetString());
 		MessageBox(buffer, caption);
 	}
 }
@@ -2078,7 +2078,7 @@ BOOL CPeerTestDlg::DestroyWindow()
 	if(file)
 	{
 		_ftprintf(file, _T("%s\n%s\n%s\n%s\n%s\n%s\n"),
-			m_title, m_secretKey, m_nick, m_email, m_loginPassword, m_namespace);
+			m_title.GetString(), m_secretKey.GetString(), m_nick.GetString(), m_email.GetString(), m_loginPassword.GetString(), m_namespace.GetString());
 		fclose(file);
 	}
 	
@@ -2094,9 +2094,9 @@ void CPeerTestDlg::OnButton16()
 		gsi_char buffer[256];
 
 		if(peerGetPlayerPing(m_peer, m_selectedNick, &ping))
-			_stprintf(buffer, _T("%s has a %dms ping"), m_selectedNick, ping);
+			_stprintf(buffer, _T("%s has a %dms ping"), m_selectedNick.GetString(), ping);
 		else
-			_stprintf(buffer, _T("Failed to get a ping for %s"), m_selectedNick);
+			_stprintf(buffer, _T("Failed to get a ping for %s"), m_selectedNick.GetString());
 
 		MessageBox(buffer);
 	}

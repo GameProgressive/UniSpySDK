@@ -1404,7 +1404,7 @@ void CScRaceSampleDlg::ReportStats()
 		opponentTeam = SCRACE_HOST_TEAM;
 	}
 
-	sprintf(myTeamName, "%s's Team", m_loginDlg.m_nick);
+	sprintf(myTeamName, "%s's Team", m_loginDlg.m_nick.GetString());
 	sprintf(opponentTeamName, "%s's Team", m_remoteCertificate.mProfileNick);
 
 

@@ -452,14 +452,14 @@ void CGhttpmfcDlg::OnDestroy()
 	fp = fopen("url.cache", "wt");
 	if(fp)
 	{
-		fprintf(fp, "%s", m_url);
+		fprintf(fp, "%s", m_url.GetString());
 		fclose(fp);
 	}
 
 	fp = fopen("saveas.cache", "wt");
 	if(fp)
 	{
-		fprintf(fp, "%s", m_saveAs);
+		fprintf(fp, "%s", m_saveAs.GetString());
 		fclose(fp);
 	}
 
