@@ -13,7 +13,7 @@ Copyright 2000 GameSpy Industries, Inc
 #include "gt2aMain.h"
 #include "gt2aSound.h"
 #include "gt2aMath.h"
-#include "../../darray.h"
+#include "../../common/darray.h"
 
 #define MAX_DUPLICATES   8
 

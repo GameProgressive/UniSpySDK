@@ -12,8 +12,8 @@ Copyright 2000 GameSpy Industries, Inc
 #define _GT2AMAIN_H_
 
 #include <stdio.h>
-#include <GL/glut.h>
-#include "../../nonport.h"
+#include <GL/freeglut.h>
+#include "../../common/nonport.h"
 #include "../gt2.h"
 #include "../gt2Encode.h"
 
