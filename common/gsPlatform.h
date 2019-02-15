@@ -245,9 +245,12 @@
 	#include <revolution/soex.h>
 	#include <revolution/ncd.h>	
     #include <limits.h>
+	#include <sys/timeb.h>
 
 	// Raw sockets are undefined on Revolution
 	#define SB_NO_ICMP_SUPPORT
+
+	typedef int socklen_t;
 
 // Unsupported platform or no platform defined!
 #else

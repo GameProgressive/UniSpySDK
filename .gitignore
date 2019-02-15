@@ -357,3 +357,9 @@ nbproject/
 gpdebug.txt
 login.txt
 gp.info
+
+# Revolution binaries
+*.wad
+*.elf
+rvl_debug/
+rvl_release/

@@ -1,0 +1,77 @@
+# Common toolchain rule for Revolution SDK
+
+ifeq ($(strip ${CWFOLDER_RVL}),)
+$(error Please set CWFOLDER_RVL to a valid Codewarrior for Wii path)
+endif
+
+ifeq ($(strip ${REVOLUTION_SDK_ROOT}),)
+$(error Please set REVOLUTION_SDK_ROOT to a valid RVL_SDK path)
+endif
+
+ifeq ($(strip ${REVOLUTION_EXT_ROOT}),)
+$(error Please set REVOLUTION_EXT_ROOT to a valid RevoEX path)
+endif
+
+DEBUG_OUTPUT_DIRECTORY = rvl_debug/
+RELEASE_OUTPUT_DIRECTORY = rvl_release/
+
+$(shell mkdir -p $(DEBUG_OUTPUT_DIRECTORY) > /dev/null)
+$(shell mkdir -p $(RELEASE_OUTPUT_DIRECTORY) > /dev/null)
+
+TOOL_BIN = $(CWFOLDER_RVL)PowerPC_EABI_Tools/Command_Line_Tools
+SUPPORT_DIR = $(CWFOLDER_RVL)PowerPC_EABI_Support
+
+CC = "$(TOOL_BIN)/mwcceppc.exe"
+LD = "$(TOOL_BIN)/mwldeppc.exe"
+AR = ar
+
+MSL_DEFINITIONS = -D_MSL_TIME_T_AVAILABLE -D_MSL_CLOCK_T_AVAILABLE -D_MSL_OS_TIME_SUPPORT -D_MSL_OS_DISK_FILE_SUPPORT
+INCDIR = -I"$(SUPPORT_DIR)\MSL\MSL_C\MSL_Common\Include" -I"$(SUPPORT_DIR)\MSL\MSL_C\PPC_EABI\Include" -I"${REVOLUTION_EXT_ROOT}\include" -I"${REVOLUTION_SDK_ROOT}include"
+
+CFLAGS := $(CFLAGS) -D_REVOLUTION -DGS_PEER -DGSI_MEM_MANAGED -DRVL_OS -msgstyle gcc -lang c99 -enum int -w all -gccinc -cwd include $(INCDIR) $(MSL_DEFINITIONS)
+CFLAGS_DEBUG := $(CFLAGS_DEBUG) -O0 -g
+CFLAGS_RELEASE := $(CFLAGS_RELEASE) -O4 -Op
+
+ifeq ($(TARGET_TYPE), Static)
+TARGET = lib$(TARGET_NAME).a
+endif
+
+ifeq ($(TARGET_TYPE), Dynamic)
+TARGET = $(TARGET_NAME).so
+endif
+
+ifeq ($(TARGET_TYPE), Application)
+TARGET = $(TARGET_NAME).elf
+endif
+
+ifeq ($(BUILD_TYPE), Debug)
+OBJDIR = $(DEBUG_OUTPUT_DIRECTORY)
+CFLAGS += $(CFLAGS_DEBUG)
+else
+OBJDIR = $(RELEASE_OUTPUT_DIRECTORY)
+CFLAGS += $(CFLAGS_RELEASE)
+endif
+
+OBJFILES = $(CFILES:%.c=$(OBJDIR)%.o)
+
+$(OBJDIR)%.o : %.c
+	@echo Compiling $<...
+	@$(CC) -c -o $@ $(CFLAGS) $<
+
+ifeq ($(TARGET_TYPE), Application)
+$(TARGET): $(OBJFILES)
+	@echo Linking $@...
+	@$(LD) -o $@ $^ $(LDFLAGS)
+endif
+
+ifeq ($(TARGET_TYPE), Static)
+$(TARGET) : $(OBJFILES)
+	@echo Creating $@...
+	@$(AR) rcs $@ $^
+endif
+
+ifeq ($(TARGET_TYPE), Dynamic)
+$(TARGET): $(OFILES)
+	@echo Linking $@...
+	@$(LD) -o $@ $^ $(LDFLAGS)
+endif
