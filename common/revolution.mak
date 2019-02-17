@@ -19,7 +19,8 @@ CFILES = darray.c \
     gsStringUtil.c \
     gsXML.c \
     hashtable.c \
-    md5c.c
+    md5c.c \
+	gsSoap.c
 
 TARGET_NAME = RSCommon
 
