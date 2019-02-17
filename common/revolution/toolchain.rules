@@ -25,16 +25,28 @@ CC = "$(TOOL_BIN)/mwcceppc.exe"
 LD = "$(TOOL_BIN)/mwldeppc.exe"
 
 MSL_DEFINITIONS = -D_MSL_TIME_T_AVAILABLE -D_MSL_CLOCK_T_AVAILABLE -D_MSL_OS_TIME_SUPPORT -D_MSL_OS_DISK_FILE_SUPPORT
+
 INCDIR = -I"$(SUPPORT_DIR)\MSL\MSL_C\MSL_Common\Include" -I"$(SUPPORT_DIR)\MSL\MSL_C\PPC_EABI\Include" -I"${REVOLUTION_EXT_ROOT}\include" -I"${REVOLUTION_SDK_ROOT}include"
+
 DEFAULT_LIBS = -lMSL_C.PPCEABI.bare.H.a -lRuntime.PPCEABI.H.a -lTRK_Hollywood_Revolution.a
-DEFAULT_LIBS_DEBUG = -leuartD.a -lexiD.a -ldbD.a -lsoD.a -lnwc24D.a -losD.a -lncdD.a -lnetD.a -lipcD.a -lbaseD.a -ldbD.a
-DEFAULT_LIBS_RELEASE = -leuart.a -lexi.a -ldb.a -lso.a -lnwc24.a -los.a -lncd.a -lnet.a -lipc.a -lbase.a -ldb.a
+DEFAULT_LIBS_DEBUG = -leuartD.a -lexiD.a -ldbD.a -lsoD.a -lnwc24D.a -losD.a -lncdD.a -lnetD.a -lipcD.a -lbaseD.a -ldbD.a -ldvdD.a
+DEFAULT_LIBS_RELEASE = -leuart.a -lexi.a -ldb.a -lso.a -lnwc24.a -los.a -lncd.a -lnet.a -lipc.a -lbase.a -ldb.a -ldvd.a
+
+APPLICATION_LIBS := $(APPLICATION_LIBS)
+APPLICATION_LIBS_DEBUG := $(APPLICATION_LIBS_DEBUG)
+APPLICATION_LIBS_RELEASE := $(APPLICATION_LIBS)
+
 LNKFLAGS := $(LNKFLAGS) -L"$(SUPPORT_DIR)\Runtime\Src" -L"C:\Workspace\Nintendo\NDEV\lib" -L"$(SUPPORT_DIR)\RSO_Support\Lib" -L"$(SUPPORT_DIR)\REL_Support\Lib" -L"$(SUPPORT_DIR)\MSL\MSL_C++\PPC_EABI\Lib" -L"$(SUPPORT_DIR)\MSL\MSL_Extras\MSL_Gamecube\Lib" -L"$(SUPPORT_DIR)\MetroTRK" -L"$(SUPPORT_DIR)\MSL\MSL_C\PPC_EABI\Lib" -L"$(SUPPORT_DIR)\Runtime\Lib" -L"${REVOLUTION_EXT_ROOT}\RVL\lib" -L"${REVOLUTION_SDK_ROOT}RVL\lib" -m main
 
 CFLAGS := $(CFLAGS) -D_REVOLUTION -DGS_PEER -DGSI_MEM_MANAGED -DRVL_OS -fp hard -msgstyle gcc -lang c99 -enum int -w all -gccinc -cwd include $(INCDIR) $(MSL_DEFINITIONS)
 CFLAGS_DEBUG := $(CFLAGS_DEBUG) -O0 -g
 CFLAGS_RELEASE := $(CFLAGS_RELEASE) -O4 -Op
+
 LDFLAGS := -msgstyle gcc -w on -fp hard
+
+ifeq ($(BUILD_TYPE), Debug)
+TARGET_NAME := $(TARGET_NAME)D
+endif
 
 ifeq ($(TARGET_TYPE), Static)
 TARGET = lib$(TARGET_NAME).a
@@ -52,13 +64,15 @@ ifeq ($(BUILD_TYPE), Debug)
 OBJDIR = $(DEBUG_OUTPUT_DIRECTORY)
 CFLAGS += $(CFLAGS_DEBUG)
 DEFAULT_LIBS += $(DEFAULT_LIBS_DEBUG)
+APPLICATION_LIBS += $(APPLICATION_LIBS_DEBUG)
 else
 OBJDIR = $(RELEASE_OUTPUT_DIRECTORY)
 CFLAGS += $(CFLAGS_RELEASE)
 DEFAULT_LIBS += $(DEFAULT_LIBS_RELEASE)
+APPLICATION_LIBS += $(APPLICATION_LIBS_RELEASE)
 endif
 
-LNKFLAGS += $(DEFAULT_LIBS)
+LNKFLAGS += $(DEFAULT_LIBS) $(APPLICATION_LIBS)
 
 OBJFILES = $(CFILES:%.c=$(OBJDIR)%.o)
 
