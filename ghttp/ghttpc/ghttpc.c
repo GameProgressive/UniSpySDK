@@ -73,7 +73,7 @@ static gsi_char * resultStrings[] =
 
 
 #ifdef __MWERKS__  // CodeWarrior will warn if function not prototyped
-int test_main(int argc, char **argv);
+int main(int argc, char **argv);
 #endif
 
 #ifdef GSI_COMMON_DEBUG
@@ -196,7 +196,7 @@ static void CheckRequest(GHTTPRequest request, int index)
 		results[index].startTime = current_time();
 }
 
-int test_main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int i;
 	static char buffer[10000] = "";
