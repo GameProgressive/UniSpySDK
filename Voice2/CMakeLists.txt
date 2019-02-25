@@ -42,6 +42,15 @@ if(RS_BUILD_TESTS)
             set(PLATFORM_INCLUDES ${PLATFORM_INCLUDES} ${DirectX_DSOUND_INCLUDE_DIR})
             set(PLATFORM_LIBRARIES ${PLATFORM_LIBRARIES} ${DirectX_DSOUND_LIBRARY})
         endif()
+
+        # Find libgsm for the voice2bench program.
+        # Appears to only be needed for win32 or psp builds of voice2bench
+        find_package(Gsm)
+
+        if(NOT GSM_FOUND)
+            add_subdirectory(voice2bench/libgsm)
+            set(GSM_LIBRARIES gsm)
+        endif()
     endif()
 
     # If its not UNIX or it is UNIX and is APPLE.
@@ -52,4 +61,8 @@ if(RS_BUILD_TESTS)
         #target_include_directories(voicetest BEFORE PRIVATE ${PLATFORM_INCLUDES})
         #target_compile_definitions(voicetest PRIVATE test_main=main GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN)
     endif()
+
+    add_executable(voicebench voice2bench/voice2bench.c)
+    target_link_libraries(voicebench rsvoice2 ${PLATFORM_LIBRARIES} ${GSM_LIBRARIES})
+    target_include_directories(voicebench BEFORE PRIVATE ${PLATFORM_INCLUDES})
 endif()
