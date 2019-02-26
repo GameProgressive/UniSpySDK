@@ -19,7 +19,9 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 	//   we'd lose the ability to determine the engine name in other places
 	if (engine == GHTTPEncryptionEngine_Default)
 	{
-		#if defined(MATRIXSSL)
+        #if 0 // defined(OPENSSL)
+            engine = GHTTPEncryptionEngine_OpenSsl;
+		#elif defined(MATRIXSSL)
 			engine = GHTTPEncryptionEngine_MatrixSsl;
 		#elif defined(REVOEXSSL)
 			engine = GHTTPEncryptionEngine_RevoEx;
@@ -57,7 +59,9 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 		//              Assert that the specified engine is the one supported
 		if (engine != GHTTPEncryptionEngine_Default)
 		{
-			#if defined(MATRIXSSL)
+			#if 0 // defined(OPENSSL)
+				GS_ASSERT(engine==GHTTPEncryptionEngine_OpenSsl);
+			#elif defined(MATRIXSSL)
 				GS_ASSERT(engine==GHTTPEncryptionEngine_MatrixSsl);
 			#elif defined(REVOEXSSL)
 				GS_ASSERT(engine==GHTTPEncryptionEngine_RevoEx);
@@ -82,13 +86,204 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// *********************  OPENSSL ENCRYPTION ENGINE  *********************** //
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+#if 0 //defined(OPENSSL)
+#include <openssl/ssl.h>
+
+typedef struct gsOpenSSLInterface
+{
+	SSL_CTX *mContext;
+    GHTTPBool mConnected; // means "connected to socket", not "connected to remote machine"
+} gsOpenSSLInterface;
+
+int verify_callback(int preverify, X509_STORE_CTX* x509_ctx)
+{
+	/* For error codes, see http://www.openssl.org/docs/apps/verify.html  */
+
+	int depth = X509_STORE_CTX_get_error_depth(x509_ctx);
+	int err = X509_STORE_CTX_get_error(x509_ctx);
+
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"verify_callback (depth=%d)(preverify=%d)\n", depth, preverify);
+
+	if (preverify == 0)
+	{
+		if (err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError, 
+				"  Error = X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY\n");
+		else if (err == X509_V_ERR_CERT_UNTRUSTED)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = X509_V_ERR_CERT_UNTRUSTED\n");
+		else if (err == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN\n");
+		else if (err == X509_V_ERR_CERT_NOT_YET_VALID)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = X509_V_ERR_CERT_NOT_YET_VALID\n");
+		else if (err == X509_V_ERR_CERT_HAS_EXPIRED)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = X509_V_ERR_CERT_HAS_EXPIRED\n");
+		else if (err == X509_V_OK)
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = X509_V_OK\n");
+		else
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+				"  Error = %d\n", err);
+	}
+
+#if !defined(NDEBUG)
+	return 1;
+#else
+	return preverify;
+#endif
+}
+
+// Init the engine
+GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor)
+{
+    int i = 0;
+    gsOpenSSLInterface* sslInterface = NULL;
+
+    // There is only one place where this function should be called,
+    //  and it should check if the engine has been initialized
+    GS_ASSERT(theEncryptor->mInitialized == GHTTPFalse);
+    GS_ASSERT(theEncryptor->mInterface == NULL);
+
+    // allocate the interface (need one per connection)
+    theEncryptor->mInterface = gsimalloc(sizeof(gsOpenSSLInterface));
+    if (theEncryptor->mInterface == NULL)
+    {
+        // memory allocation failed
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_WarmError,
+            "Failed to allocate SSL interface (out of memory: %d bytes)\r\n", sizeof(gsOpenSSLInterface));
+        return GHIEncryptionResult_Error;
+    }
+    memset(theEncryptor->mInterface, 0, sizeof(gsOpenSSLInterface));
+    sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
+
+	// Init the OpenSSL library
+	SSL_library_init();
+	SSL_load_error_strings();
+	OPENSSL_config(NULL);
+
+    {
+		unsigned long ssl_err = 0;
+
+		sslInterface->mContext = SSL_CTX_new(TLSv1_method());
+		ssl_err = ERR_get_error();
+
+		GS_ASSERT(sslInterface->mContext != NULL);
+		if (!(sslInterface->mContext != NULL))
+		{
+			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+				"Failed to allocate OpenSSL context.\r\n");
+			return GHIEncryptionResult_Error;
+		}
+
+		SSL_CTX_set_verify(sslInterface->mContext, SSL_VERIFY_PEER, verify_callback);
+		SSL_CTX_set_verify_depth(sslInterface->mContext, 5);
+    }
+
+    theEncryptor->mInitialized = GHTTPTrue;
+    theEncryptor->mSessionStarted = GHTTPFalse;
+    theEncryptor->mSessionEstablished = GHTTPFalse; 
+    theEncryptor->mEncryptOnBuffer = GHTTPFalse;
+    theEncryptor->mEncryptOnSend = GHTTPTrue;
+    theEncryptor->mLibSendsHandshakeMessages = GHTTPTrue;
+
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+        "GameSpy SSL (OpenSSL engine) initialized\r\n");
+
+    return GHIEncryptionResult_Success;
+}
+
+
+// Destroy the engine
+GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor)
+{
+	// TODO
+    return GHIEncryptionResult_Success;
+}
+
+
+GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor)
+{
+    // TODO
+    return GHIEncryptionResult_Success;
+}
+
+// Encrypt and send some data
+GHIEncryptionResult ghiEncryptorSslEncryptSend(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor,
+    const char * thePlainTextBuffer,
+    int          thePlainTextLength,
+    int *        theBytesSentOut)
+{
+    // TODO
+    return GHIEncryptionResult_Success;
+}
+
+// Receive and decrypt some data
+GHIEncryptionResult ghiEncryptorSslDecryptRecv(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor,
+    char * theDecryptedBuffer,
+    int *  theDecryptedLength)
+{
+    // TODO
+    return GHIEncryptionResult_Success;
+}
+
+GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor,
+    const char * thePlainTextBuffer,
+    int          thePlainTextLength,
+    char *       theEncryptedBuffer,
+    int *        theEncryptedLength)
+{
+    GS_FAIL(); // Should never call this for OpenSSL SSL!  It uses encrypt on send
+
+    GSI_UNUSED(connection);
+    GSI_UNUSED(theEncryptor);
+    GSI_UNUSED(thePlainTextBuffer);
+    GSI_UNUSED(thePlainTextLength);
+    GSI_UNUSED(theEncryptedBuffer);
+    GSI_UNUSED(theEncryptedLength);
+
+    return GHIEncryptionResult_Error;
+}
+
+GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection,
+    struct GHIEncryptor  * theEncryptor,
+    const char * theEncryptedBuffer,
+    int *        theEncryptedLength,
+    char *       theDecryptedBuffer,
+    int *        theDecryptedLength)
+{
+    GS_FAIL(); // Should never call this for OpenSSL SSL!  It uses decrypt on recv
+
+    GSI_UNUSED(connection);
+    GSI_UNUSED(theEncryptor);
+    GSI_UNUSED(theEncryptedBuffer);
+    GSI_UNUSED(theEncryptedLength);
+    GSI_UNUSED(theDecryptedBuffer);
+    GSI_UNUSED(theDecryptedLength);
+
+    return GHIEncryptionResult_Error;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // *********************  MATRIXSSL ENCRYPTION ENGINE  ********************* //
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef MATRIXSSL
+#elif defined(MATRIXSSL)
 
 // SSL requires a certificate validator
 static int ghiSslCertValidator(struct sslCertInfo* theCertInfo, void* theUserData)
