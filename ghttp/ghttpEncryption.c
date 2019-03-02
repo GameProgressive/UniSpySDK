@@ -11,8 +11,9 @@
 #if defined(MATRIXSSL)
 #include <matrixssl/matrixssl.h>
 #endif
-#if defined(OPENSSL)
-#include <>
+#if 0 //defined(OPENSSL)
+#include <openssl/x509.h>
+#include <openssl/ssl.h>
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
