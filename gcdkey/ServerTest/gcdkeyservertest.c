@@ -1,18 +1,11 @@
-/******
-gcdkeyservertest.c
-GameSpy CDKey SDK Server Sample
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy CDKey SDK documentation for more 
- information
-
-******/
-
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeyservertest.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "../gcdkeys.h"
 #include "../../common/gsCommon.h"
@@ -24,11 +17,11 @@ devsupport@gamespy.com
 
 #define MAXCLIENTS 64
 #define MY_GAMEID 0		// This is assigned by GameSpy
-#define MY_GAMENAME "gmtest"
+#define MY_GAMENAME _T("gmtest")
 #define PORT 2000
 
-// a structure for storing client information.. you will probably have most/all
-// of these things in your client structure / object
+// A structure for storing client information. 
+// You will probably have most/all of these things in your client structure/object.
 typedef struct
 {
 	SOCKET sock;
@@ -109,7 +102,7 @@ int test_main(int argc, char **argv)
 	client_t clients[MAXCLIENTS];
 	SOCKET ssock;
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	fd_set set; 
 	struct timeval timeout = {0,0};
 	int error;

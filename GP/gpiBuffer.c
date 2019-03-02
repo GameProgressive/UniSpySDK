@@ -1,15 +1,11 @@
-/*
-gpiBuffer.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiBuffer.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -34,7 +30,7 @@ gpiAppendCharToBuffer(
 	int size;
 	char * output;
 
-	assert(outputBuffer != NULL);
+	GS_ASSERT(outputBuffer != NULL);
 
 	// Init locals.
 	///////////////
@@ -78,9 +74,9 @@ gpiAppendStringToBufferLen(
 	int size;
 	char * output;
 
-	assert(string != NULL);
-	assert(stringLen >= 0);
-	assert(outputBuffer != NULL);
+	GS_ASSERT(string != NULL);
+	GS_ASSERT(stringLen >= 0);
+	GS_ASSERT(outputBuffer != NULL);
 
 	if(!string)
 		return GP_NO_ERROR;
@@ -95,7 +91,7 @@ gpiAppendStringToBufferLen(
 	///////////////////////////////////
 	if((size - len) < stringLen)
 	{
-		size += max(GPI_READ_SIZE, stringLen);
+		size += GS_MAX(GPI_READ_SIZE, stringLen);
 		output = (char*)gsirealloc(output, (unsigned int)size + 1);
 		if(output == NULL)
 			Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -276,7 +272,7 @@ gpiSendOrBufferStringLenToPeer(
 	unsigned int total;
 	unsigned int remaining;
 
-	assert(peer->outputBuffer.buffer != NULL);
+	GS_ASSERT(peer->outputBuffer.buffer != NULL);
 	
 	sent = 0;
 	iconnection = (GPIConnection *)*connection;
@@ -428,10 +424,10 @@ gpiRecvToBuffer(
 	int total;
 	GPIBool closed;
 
-	assert(sock != INVALID_SOCKET);
-	assert(inputBuffer != NULL);
-	assert(bytesRead != NULL);
-	assert(connClosed != NULL);
+	GS_ASSERT(sock != INVALID_SOCKET);
+	GS_ASSERT(inputBuffer != NULL);
+	GS_ASSERT(bytesRead != NULL);
+	GS_ASSERT(connClosed != NULL);
 
 	// Init locals.
 	///////////////
@@ -519,7 +515,7 @@ gpiRecvToBuffer(
 	*bytesRead = total;
 	*connClosed = closed;
 
-	GSI_UNUSED(id); //to get rid of codewarrior warnings
+	GSI_UNUSED(id); // Resolves some CodeWarrior warnings
 
 	return GP_NO_ERROR;
 }
@@ -542,7 +538,7 @@ gpiSendFromBuffer(
 	int pos;
 	int len;
 
-	assert(outputBuffer != NULL);
+	GS_ASSERT(outputBuffer != NULL);
 
 	buffer = outputBuffer->buffer;
 	len = outputBuffer->len;
@@ -579,9 +575,9 @@ gpiSendFromBuffer(
 		pos += total;
 	}
 
-	assert(len >= 0);
-	assert(pos >= 0);
-	assert(pos <= len);
+	GS_ASSERT(len >= 0);
+	GS_ASSERT(pos >= 0);
+	GS_ASSERT(pos <= len);
 
 	// Set outputs.
 	///////////////
@@ -604,7 +600,7 @@ GPResult gpiSendBufferToPeer(GPConnection * connection, unsigned int ip, unsigne
 	unsigned int len;
 	unsigned int total = 0;
 	GSUdpPeerState aPeerState;
-	assert(outputBuffer != NULL);
+	GS_ASSERT(outputBuffer != NULL);
 
 	buffer = (unsigned char *)outputBuffer->buffer;
 	len = (unsigned int)outputBuffer->len;
@@ -616,8 +612,9 @@ GPResult gpiSendBufferToPeer(GPConnection * connection, unsigned int ip, unsigne
 	if(remaining == 0)
 		return GP_NO_ERROR;
 
-	// length of message remaining must be smaller than total buffer size minus gt2 reliable msg header size minus
-	// in order to send the message in one shot.
+	// The length of the message remaining must be smaller than total buffer size minus 
+	// gt2 reliable msg header size minus the message header length in order to send 
+	// the message in one shot.
 	if ((int)remaining <= (gsUdpEngineGetPeerOutBufferFreeSpace(ip, port) - GS_UDP_RELIABLE_MSG_HEADER - GS_UDP_MSG_HEADER_LEN))
 	{
 		gsUdpEngineSendMessage(ip, port, iconnection->mHeader, &buffer[pos], remaining, gsi_true);

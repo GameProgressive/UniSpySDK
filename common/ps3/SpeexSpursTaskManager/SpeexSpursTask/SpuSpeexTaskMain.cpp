@@ -226,7 +226,7 @@ void gviSpursSpeexDecodeAdd(SpursSpeexTaskOutput *spuTaskOut)
 
 	// decode it
 	rcode = speex_decode((void *)gviSpursSpeexStateBuffer, &gviSpursSpeexBits, speexBuffer);
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 	//spuDebugPrintf("[Speex][SPU] done with speex decode\n");
 	// convert the output from floats
 	for(i = 0 ; i < gviSpursSpeexTaskDesc.mOutputBufferSize ; i++)
@@ -266,7 +266,7 @@ void gviSpursSpeexDecodeSet(SpursSpeexTaskOutput *spuTaskOut)
 
 	// decode it
 	rcode = speex_decode((void *)gviSpursSpeexStateBuffer, &gviSpursSpeexBits, speexBuffer);
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 
 	// convert the output from floats
 	for(i = 0 ; i < gviSpursSpeexTaskDesc.mOutputBufferSize ; i++)

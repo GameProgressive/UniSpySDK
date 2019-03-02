@@ -1,15 +1,11 @@
-/*
-gpiSearch.h
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiSearch.h
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _GPISEARCH_H_
 #define _GPISEARCH_H_
@@ -30,6 +26,7 @@ Please see the GameSpy Presence SDK documentation for more information
 #define GPI_SEARCH_SUGGEST_UNIQUE       8
 #define GPI_SEARCH_OTHERS_BUDDY_LIST    9
 #define GPI_SEARCH_PROFILE_UNIQUENICK  10
+#define GPI_SEARCH_PROFILE_BUDDYLIST   11
 
 // A timeout used to abort searches taking too long
 #define GPI_SEARCH_TIMEOUT 60000

@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsAvailable.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsCommon.h"
 #include "gsAvailable.h"
 
@@ -29,8 +38,8 @@ static struct
 
 static int get_sockaddrin(const char * hostname, int port, SOCKADDR_IN * saddr)
 {
-	GS_ASSERT(hostname)
-	GS_ASSERT(saddr)
+	GS_ASSERT(hostname != NULL);
+	GS_ASSERT(saddr != NULL);
 
 	saddr->sin_family = AF_INET;
 	saddr->sin_port = htons((unsigned short)port);
@@ -55,12 +64,21 @@ static void SendPacket(void)
 
 void GSIStartAvailableCheckA(const char * gamename)
 {
+#if GS_USE_REFLECTOR
+	GS_ASSERT(gamename != NULL);
+
+	// store the gamename
+	gsiSafeStrcpyA(__GSIACGamename, gamename, sizeof(__GSIACGamename));
+
+	// clear the sock
+	AC.sock = INVALID_SOCKET;
+#else
 	char hostname[64];
 	int override;
 	int rcode;
 	int len;
 
-	GS_ASSERT(gamename)
+	GS_ASSERT(gamename != NULL);
 
 	// store the gamename
 	strcpy(__GSIACGamename, gamename);
@@ -97,12 +115,14 @@ void GSIStartAvailableCheckA(const char * gamename)
 
 	// no retries yet
 	AC.retryCount = 0;
+#endif
 }
+
 #ifdef GSI_UNICODE
-void GSIStartAvailableCheckW(const unsigned short * gamename)
+void GSIStartAvailableCheckW(const gsi_char * gamename)
 {
 	char gamename_A[32];
-	GS_ASSERT(gamename)
+	GS_ASSERT(gamename != NULL);
 
 	UCS2ToAsciiString(gamename, gamename_A);
 

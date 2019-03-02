@@ -1,12 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsStringUtil.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
 // Conversion Utility for ASCII, UTF8 and USC2 (Unicode) character sets
 //
 // See RFC2279 for reference
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+
 #include "gsCommon.h"
 #include "gsStringUtil.h"
 
@@ -37,7 +41,7 @@ extern "C" {
 int _ReadUCS2CharFromUTF8String(const UTF8String theUTF8String,  UCS2Char* theUnicodeChar, int theMaxLength)
 {
 #ifndef _PS2
-	assert(theUnicodeChar != NULL);
+	GS_ASSERT(theUnicodeCharOut != NULL);
 #endif
 
 	if (theMaxLength == 0)
@@ -126,7 +130,7 @@ int _ReadUCS2CharFromUTF8String(const UTF8String theUTF8String,  UCS2Char* theUn
 int _UCS2CharToUTF8String(UCS2Char theUCS2Char, UTF8String theUTF8String)
 {
 #ifndef _PS2
-	assert(theUTF8String != NULL);
+	GS_ASSERT(theUTF8String != NULL);
 #endif
 
 	// Screen out simple ascii (includes NULL terminator)
@@ -173,13 +177,13 @@ int AsciiToUTF8String(const char* theAsciiString, UTF8String theUTF8String)
 	// Allow for NULL here since SDKs allow for NULL string arrays
 	if (theAsciiString == NULL)
 	{
-		*theUTF8String = 0x00;
+		*theUTF8String = 0;
 		return 1;
 	}
 	else
 	{
 		// Copy the string, keeping track of length
-		unsigned int aLength = 0;
+		int aLength = 0;
 		while (*theAsciiString != '\0')
 		{
 			*(theUTF8String++) = *(theAsciiString++);
@@ -217,7 +221,7 @@ int UTF8ToAsciiString(const UTF8String theUTF8String, char* theAsciiString)
 	// Allow for NULL here since SDKs allow for NULL string arrays
 	if (theUTF8String == NULL)
 	{
-		*theAsciiString = 0x00;
+		*theAsciiString = 0;
 		return 1;
 	}
 
@@ -322,7 +326,7 @@ int _UTF8ToUCS2ConversionLengthOnly(const UTF8String theUTF8String)
 	int length = 0;
 	const UTF8String theReadPos = theUTF8String;
 
-	assert(theUTF8String != NULL);
+	GS_ASSERT(theUTF8String != NULL);
 	if (theUTF8String == NULL)
 		return 0;
 
@@ -367,8 +371,10 @@ int _UCS2ToUTF8ConversionLengthOnly(const UCS2String theUCS2String)
 {
 	int length = 0;
 	const UCS2String theReadPos = theUCS2String;
-	assert(theUCS2String != NULL);
-	while (*theReadPos != 0x0000)
+
+	GS_ASSERT(theUCS2String != NULL);
+	
+	while (*theReadPos != 0)
 	{
 		// Values <= 0x7F are single byte ascii
 		if (*theReadPos <= 0x7F)
@@ -384,8 +390,7 @@ int _UCS2ToUTF8ConversionLengthOnly(const UCS2String theUCS2String)
 		theReadPos++;
 	}
 
-	// don't count the null as a character, this conforms
-	// with ANSI strlen functions
+	// don't count the null as a character, this conforms with ANSI strlen functions
 	return length;
 }
 
@@ -482,7 +487,8 @@ UCS2String* UTF8ToUCS2StringArrayAlloc(const UTF8String* theUTF8StringArray, int
 
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// UCS2ToUTF8StringArrayAlloc
+//
 // Convert a UCS2StringArray to a UTF8StringArray, allocate space for the UTF8Strings
 //
 //  [in]	UCS2StringArray, array of NULL terminated UCS2Strings
@@ -492,6 +498,7 @@ UCS2String* UTF8ToUCS2StringArrayAlloc(const UTF8String* theUTF8StringArray, int
 //
 //	  Remarks:
 //		The callee is responsible for freeing the allocated memory block
+///////////////////////////////////////////////////////////////////////////////
 UTF8String* UCS2ToUTF8StringArrayAlloc(const UCS2String* theUCS2StringArray, int theNumStrings)
 {
 	// Allow for NULL here since SDKs allow for NULL string arrays
@@ -500,6 +507,7 @@ UTF8String* UCS2ToUTF8StringArrayAlloc(const UCS2String* theUCS2StringArray, int
 	else
 	{
 		UTF8String* aUTF8StringArray = (UTF8String*)gsimalloc(sizeof(UTF8String)*theNumStrings);
+
 		int stringNum = 0;
 		while(stringNum < theNumStrings)
 		{
@@ -520,18 +528,29 @@ UTF8String* UCS2ToUTF8StringArrayAlloc(const UCS2String* theUCS2StringArray, int
 //  [in/out]	theAsciiString, ascii representation
 //
 //  returns the length of the Ascii string
+///////////////////////////////////////////////////////////////////////////////
+// UCS2ToAsciiString
+// Summary
+//          Converts a NULL terminated a Unicode (2 byte char) string
+//			to a NULL terminated ASCII string  
+// Parameters 
+//          theUCS2String		: [in]  A pointer to the UCS2String string
+//          theAsciiString		: [out] A pointer to the ASCII string
+// Return
+//		Number of ASCII characters in theAsciiString
 //
-//	  Remarks:
-//		callee is responsible for allocating memory for theAsciiString
+// Remarks
 //		Invalid ASCII characters are truncated
-//		The ASCII buffer must be at least 1/2 the size of the UCS2String
+//		Memory for theAsciiString must be allocated with its size 
+//		being 1/4 the size of theUCS2String
+///////////////////////////////////////////////////////////////////////////////	
 int UCS2ToAsciiString(const UCS2String theUCS2String, char* theAsciiString)
 {
 	int length = 0;
 	const UCS2String aReadPos = theUCS2String;
 	char* aWritePos = theAsciiString;
 
-	assert(theAsciiString != NULL);
+	GS_ASSERT(theAsciiString != NULL);
 
 	// Allow for NULL here since SDKs allow for NULL string arrays
 	if (theUCS2String == NULL)
@@ -556,29 +575,32 @@ int UCS2ToAsciiString(const UCS2String theUCS2String, char* theAsciiString)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// AsciiToUCS2String
+// Summary
+//          Converts a NULL terminated ASCII string into a Unicode (2 byte char) string 
+// Parameters
+//          theAsciiString		: [in] A pointer to the ASCII string
+//          theUCS2String		: [out] A pointer to the UCS2String string
+// Return
+//		Number of Unicode characters in theUCS2String
+//
+// Remarks
+//		theUCS2String is NULL terminated
+//		Memory for theUCS2String must be allocated with its size 
+//		being 2 times the size of theAsciiString
 ///////////////////////////////////////////////////////////////////////////////
-// Convert an ASCII string to a UCS2String
-//
-//  [in]		theAsciiString, NULL terminated ASCII string
-//  [in/out]	theUCS2String, UCS2String to be filled with the converted ASCII
-//
-//  returns the length of the unicode string
-//
-//	  Remarks:
-//		The callee is responsible for allocating memory for theUCS2String
-//		the size returned should always be 2x the size passed in
 int AsciiToUCS2String(const char* theAsciiString, UCS2String theUCS2String)
 {
-	int length = 0;
-	const char* aReadPos = theAsciiString;
-	UCS2String aWritePos = theUCS2String;
+	int			length		= 0;
+	const char* aReadPos	= theAsciiString;
+	UCS2String  aWritePos	= theUCS2String;
 
-	assert(theUCS2String != NULL);
+	GS_ASSERT(theUCS2String != NULL);
 
 	// Allow for NULL here since SDKs allow for NULL string arrays
 	if (theAsciiString == NULL)
 	{
-		*theUCS2String = 0x0000;
+		*theUCS2String = 0;
 		return 1;
 	}
 
@@ -596,7 +618,6 @@ int AsciiToUCS2String(const char* theAsciiString, UCS2String theUCS2String)
 	return length;
 }
 
-/*
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Convert a UCS2String to a UTF8String with a maximum length
@@ -638,7 +659,7 @@ int UTF8ToUCS2StringLen(const UTF8String theUTF8String, UCS2String theUCS2String
 	// Allow for NULL here since SDKs allow for NULL string arrays
 	if (theUTF8String == NULL)
 	{
-		*anOutStream = 0x0000;
+		*anOutStream = 0;
 		return 1;
 	}
 
@@ -666,7 +687,7 @@ int UTF8ToUCS2StringLen(const UTF8String theUTF8String, UCS2String theUCS2String
 	}
 
 	// NULL terminate the UCS2String
-	*anOutStream = 0x0000;
+	*anOutStream = 0;
 	aNumCharsWritten++;
 	
 	return aNumCharsWritten;
@@ -678,6 +699,3 @@ int UTF8ToUCS2StringLen(const UTF8String theUTF8String, UCS2String theUCS2String
 #ifdef __cplusplus
 } //extern "C"
 #endif	
-
-
-

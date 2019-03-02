@@ -1,12 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-#ifndef __CORE_H__
-#define __CORE_H__
+// File:	gsCore.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Core task/callback manager.
 
+#ifndef __GSCORE_H__
+#define __GSCORE_H__
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// Core task/callback manager
 #include "gsCommon.h"
 #include "darray.h"
 
@@ -20,6 +25,18 @@ extern "C"
 ///////////////////////////////////////////////////////////////////////////////
 #define GSICORE_DYNAMIC_TASK_LIST
 #define GSICORE_MAXTASKS       40
+#define SESSIONTOKEN_LENGTH    37
+#define SESSIONTOKEN_HEADER    "SessionToken:"
+#define AUTHERROR_LENGTH       100
+#define AUTHERROR_HEADER       "Error:"
+#define AUTHERRORCODE_LENGTH   3
+#define AUTHERRORCODE_HEADER   "ErrorCode:"
+#define GAMEID_LENGTH          10
+#define GAMEID_HEADER          "GameID:"
+#define PROFILEID_LENGTH       20
+#define PROFILEID_HEADER       "ProfileID:"
+#define HEADERS_LENGTH         300
+#define ACCESSKEY_HEADER  "AccessKey:"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,4 +142,4 @@ GSTask* gsiCoreCreateTask(void);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#endif // __CORE_H__
+#endif // __GSCORE_H__

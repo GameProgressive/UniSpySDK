@@ -1,19 +1,16 @@
-/******
-gcdkeyc.c
-GameSpy CDKey SDK Client Code
-  
-Copyright 1999-2007 GameSpy Industries, Inc
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeyc.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy CDKey SDK documentation for more 
- information
-
-******/
 #include "../common/md5.h"
 #include "gcdkeyc.h"
+#include "../common/gsCommon.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,4 +63,3 @@ void gcd_compute_response(char *cdkey, char *challenge, char response[RESPONSE_S
 #ifdef __cplusplus
 }
 #endif
-

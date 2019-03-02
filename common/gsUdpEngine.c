@@ -1,8 +1,15 @@
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsUdpEngine.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
 // UDP Communication Engine
-#include "gsUdpEngine.h"
 
+#include "gsUdpEngine.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,7 +509,6 @@ GSUdpErrorCode gsUdpEngineInitialize(unsigned short thePort, int theIncomingBufS
 	GSUdpEngineObject *aUdp = gsUdpEngineGetEngine();
 	
 	// Setup our gt2 buffer sizes for reliable messages
-	
 	incomingBufferSize = theIncomingBufSize != 0 ? theIncomingBufSize : GS_UDP_DEFAULT_IN_BUFFSIZE;
 	outgoingBufferSize = theOutgoingBufSize != 0 ? theOutgoingBufSize : GS_UDP_DEFAULT_OUT_BUFFSIZE;
 

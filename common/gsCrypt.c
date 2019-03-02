@@ -1,11 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsCrypt.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Based on PKCS #1 v2.1, RSA Laboratories June 14, 2002.
+// Please refer to gsCrypt.h for public interface functions.
+
 #include "gsCrypt.h"
 #include "gsLargeInt.h"
 #include "gsSHA1.h"
-
-// **Please refer to gsCrypt.h for public interface functions**
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,18 +1,25 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsPlatformUtil.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsCommon.h"
 #include "gsPlatformUtil.h"
 
 // Include platform separated functions
 #if defined(_X360)
-	//#include "x360/gsUtilX360.c"
+	#include "x360/gsUtilX360.c"
 #elif defined(_XBOX)
 	//#include "xbox/gsUtilXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsUtilWin32.c"
-#elif defined(__linux__)
+#elif defined(_LINUX)
 	#include "linux/gsUtilLinux.c"
-#elif defined(__APPLE__)
+#elif defined(_MACOSX) || defined (_IPHONE)
 	#include "macosx/gsUtilMacOSX.c"
 #elif defined(_NITRO)
 	#include "nitro/gsUtilNitro.c"
@@ -44,7 +51,7 @@ typedef struct GSIResolveHostnameInfo
     char * hostname;
     unsigned int ip;
 
-#if defined(_WIN32) /*|| defined(_PS2)*/ || defined(_UNIX) || defined (_REVOLUTION)
+#if defined(_WIN32) /*|| defined(_PS2)*/ || defined(_UNIX) || defined(_REVOLUTION) || defined(_PS3)
     int finishedResolving;
     GSIThreadID threadID;
 #endif
@@ -61,53 +68,36 @@ typedef struct GSIResolveHostnameInfo
 // * threading enabled
 // * and async lookup enabled
 ////////////////////////////////////////////////////////////////////////////////
-#if	(defined(_WIN32) || /*defined(_PS2) ||*/ defined(_UNIX) || defined (_REVOLUTION)) && !defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS)
+#if	(defined(_WIN32) || /*defined(_PS2) ||*/ defined(_UNIX) || defined (_REVOLUTION) || defined(_PS3)) && !defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS)
 
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32) /*|| defined(_PS2)*/
-	#if defined(_WIN32)
-		DWORD WINAPI gsiResolveHostnameThread(void * arg)
-	/*#elif defined(_PS2)
-		static void gsiResolveHostnameThread(void * arg)*/
-	#endif
+DWORD WINAPI gsiResolveHostnameThread(void * arg)
+{
+	HOSTENT * hostent;
+	GSIResolveHostnameHandle handle = (GSIResolveHostnameHandle)arg;
+
+	SocketStartUp();
+
+	// do the gethostbyname
+	hostent = gethostbyname(handle->hostname);
+	if(hostent)
 	{
-		HOSTENT * hostent;
-		GSIResolveHostnameHandle handle = (GSIResolveHostnameHandle)arg;
+		// got the ip
+		handle->ip = *(unsigned int *)hostent->h_addr_list[0];
+	}
+	else
+	{
+		// didn't resolve
+		handle->ip = GSI_ERROR_RESOLVING_HOSTNAME;
+	}
 
-		SocketStartUp();
-		
-		#ifdef SN_SYSTEMS
-		sockAPIregthr();
-		#endif
+	SocketShutDown();
 
-		// do the gethostbyname
-		hostent = gethostbyname(handle->hostname);
-		if(hostent)
-		{
-			// got the ip
-			handle->ip = *(unsigned int *)hostent->h_addr_list[0];
-		}
-		else
-		{
-			// didn't resolve
-			handle->ip = GSI_ERROR_RESOLVING_HOSTNAME;
-		}
+	// finished resolving
+	handle->finishedResolving = 1;
 
-		SocketShutDown();
-
-		// finished resolving
-		handle->finishedResolving = 1;
-
-		#ifdef SN_SYSTEMS
-		sockAPIderegthr();
-		#endif
-
-		// explicitly exit the thread to free resources
-		gsiExitThread(handle->threadID);
-
-		#if defined(_WIN32)
-		return 0;
-		#endif
+	return 0;
 }
 #endif //defined _WIN32
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,16 +158,18 @@ static void *gsiResolveHostnameThread(void * arg)
 // NOTE: The compiler option "-lpthread" must used for this
 #if defined(_UNIX)
 ////////////////////////////////////////////////////////////////////////////////
-static void gsiResolveHostnameThread(void * arg)
+static void * gsiResolveHostnameThread(void * arg)
 {
-	GSIResolveHostnameHandle handle = (GSIResolveHostnameHandle)arg;
-	struct addrinfo hints, *result = NULL;
-	int error;
-	char *ip;
+	struct addrinfo hints; 
+    int error;
+    char *ip;
+    struct addrinfo *result = NULL;
+    GSIResolveHostnameHandle handle = (GSIResolveHostnameHandle)arg;
+	
 
 	SocketStartUp();
 
-	memset(&hints, 0, sizeof(hints));
+	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = PF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
@@ -200,7 +192,7 @@ static void gsiResolveHostnameThread(void * arg)
 	}
 	else
 	{
-		// couldnt reach host - debug output is printed later
+		// couldn't reach host - debug output is printed later
 		handle->ip = GSI_ERROR_RESOLVING_HOSTNAME;
 	}
 
@@ -211,10 +203,45 @@ static void gsiResolveHostnameThread(void * arg)
 
 	// explicitly exit the thread to free resources
 	gsiExitThread(handle->threadID);
+
+	return NULL;
 }
 #endif //_UNIX
 ////////////////////////////////////////////////////////////////////////////////
 
+#if defined(_PS3)
+#include <netdb.h>
+static void gsiResolveHostnameThread(uint64_t arg)
+{
+	GSIResolveHostnameHandle handle = (GSIResolveHostnameHandle)((uint32_t)arg);
+	struct hostent * host;
+
+ 	gsDebugFormat(GSIDebugCat_Common, GSIDebugType_State, GSIDebugLevel_Comment, 
+ 		"call to gethostbyname starting\n");
+
+	// DNS lookup (works with pthreads)
+	host = gethostbyname(handle->hostname);
+
+	if (host)
+	{
+ 		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_State, GSIDebugLevel_Comment, 
+ 			"call to gethostbyname complete\n");
+		// got the ip
+		handle->ip = *(unsigned int *)host->h_addr_list[0];		
+	}
+	else
+	{
+		// couldn't reach host - debug output is printed later
+		handle->ip = GSI_ERROR_RESOLVING_HOSTNAME;
+	}
+
+	// finished resolving
+	handle->finishedResolving = 1;
+
+	// explicitly exit the thread to free resources
+	gsiExitThread(handle->threadID);
+}
+#endif
 
 int gsiStartResolvingHostname(const char * hostname, GSIResolveHostnameHandle * handle)
 {
@@ -245,7 +272,7 @@ int gsiStartResolvingHostname(const char * hostname, GSIResolveHostnameHandle * 
 		"(Asynchrounous) DNS lookup starting\n");
 
 	// start the thread
-	if(gsiStartThread(gsiResolveHostnameThread, (0x1000), info, &info->threadID) == -1)
+	if(gsiStartThread(gsiResolveHostnameThread, (0x1000), (void *)info, &info->threadID) == -1)
 	{
 		gsifree(info->hostname);
 		info->hostname = NULL;
@@ -304,7 +331,7 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 ///////////////////////////////////////////////////////////////////////////////
 // ********** NON-ASYNC DNS ********** //
 // 
-// These are the non-threaded version of the above functions.
+// These are the non-threaded versions of the above functions.
 // The following platforms have synchronous DNS lookups:
 // _NITRO || _XBOX || _X360 || _PS3 || _PS2 || _PSP
 ///////////////////////////////////////////////////////////////////////////////
@@ -361,22 +388,28 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 char * goastrdup(const char *src)
 {
 	char *res;
+	size_t len;
+
 	if(src == NULL)      //PANTS|02.11.00|check for NULL before strlen
 		return NULL;
-	res = (char *)gsimalloc(strlen(src) + 1);
+	len = strlen(src) + 1;
+	res = (char *)gsimalloc(len);
 	if(res != NULL)      //PANTS|02.02.00|check for NULL before strcpy
-		strcpy(res, src);
+		memcpy(res, src, len);
 	return res;
 }
 
 unsigned short * goawstrdup(const unsigned short *src)
 {
 	unsigned short *res;
+	size_t len;
+
 	if(src == NULL)      
 		return NULL;
-	res = (unsigned short *)gsimalloc((wcslen((wchar_t*)src) + 1) * sizeof(unsigned short));
-	if(res != NULL)      
-		wcscpy((wchar_t*)res, (const wchar_t*)src);
+	len = (wcslen((wchar_t*)src) + 1) * sizeof(unsigned short);
+	res = (unsigned short *)gsimalloc(len);
+	if(res != NULL)
+		memcpy(res, src, len);
 	return res;
 }
 
@@ -579,7 +612,7 @@ gsi_time current_time()  //returns current time in milliseconds
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 
 #elif defined(_NITRO)
-	assert(OS_IsTickAvailable() == TRUE);
+	GS_ASSERT(OS_IsTickAvailable() == TRUE);
 	return (gsi_time)OS_TicksToMilliSeconds(OS_GetTick());
 
 #elif defined(_PSP)
@@ -604,12 +637,12 @@ gsi_time current_time()  //returns current time in milliseconds
 	return (gsi_time)(sys_time_get_system_time()/1000);
 
 #elif defined(_REVOLUTION)
-	OSTick aTickNow= OSGetTick();
+	OSTime aTickNow= OSGetTick();
 	gsi_time aMilliseconds = (gsi_time)OSTicksToMilliseconds(aTickNow);
 	return aMilliseconds;
 #else
 	// unrecognized platform! contact devsupport
-	assert(0);
+	GS_FAIL();
 #endif
 	
 }
@@ -694,7 +727,7 @@ gsi_time current_time_hires()  // returns current time in microseconds
 #endif
 
 #ifdef _NITRO
-	assert(OS_IsTickAvailable() == TRUE);
+	GS_ASSERT(OS_IsTickAvailable() == TRUE);
 	return (gsi_time)OS_TicksToMicroSeconds(OS_GetTick());
 #endif
 
@@ -740,7 +773,7 @@ void msleep(gsi_time msec)
 #elif defined (_REVOLUTION)
 	OSSleepMilliseconds(msec);
 #else
-	assert(0); // missing platform handler, contact devsupport
+	GS_FAIL(); // missing platform handler, contact devsupport
 #endif
 }
 
@@ -1249,7 +1282,7 @@ void B64Decode(const char *input, char *output, int inlen, int * outlen, int enc
 			break;
 		else 
 		{
-			//	(assert(0)); //bad input data
+			//	(GS_ASSERT(0)); //bad input data
 			if (outlen)
 				*outlen = 0;
 			output[0] = '\0';
@@ -1311,7 +1344,7 @@ void B64Encode(const char *input, char *output, int inlen, int encodingType)
 //assume interval of 3
 	while (todo > 0)
 	{
-		TripToQuart(input, output, min(todo, 3));
+		TripToQuart(input, output, GS_MIN(todo, 3));
 		output += 4;
 		input += 3;
 		todo -= 3;
@@ -1396,7 +1429,7 @@ gsi_bool B64EncodeStream(B64StreamData *data, char output[4])
 		default: encoding = defaultEncoding;
 	}
 
-	TripToQuart(data->input, output, min(data->len, 3));
+	TripToQuart(data->input, output, GS_MIN(data->len, 3));
 	data->input += 3;
 	data->len -= 3;
 
@@ -1833,7 +1866,7 @@ const char * GOAGetUniqueID_Internal(void)
 	ret = RegQueryValueExA(thekey, (LPCSTR)"Crypt", 0, &thetype, (LPBYTE)keyval, &len);
 #else
 	FILE *f;
-	f = fopen("id.bin","r");
+	f = gsifopen("id.bin","r");
 	if (!f)
 		ret = 0;
 	else
@@ -1841,6 +1874,7 @@ const char * GOAGetUniqueID_Internal(void)
 		ret = fread(keyval,1,19,f);
 		keyval[ret] = 0;
 		fclose(f);
+		ret = 0; //fix to avoid Mac OS and LINUX servers from regenerating crypt ID's
 	}
 #endif
 
@@ -1854,10 +1888,10 @@ const char * GOAGetUniqueID_Internal(void)
 		}
 		RegSetValueExA(thekey, (LPCSTR)"Crypt", 0, REG_SZ, (const LPBYTE)keyval, strlen(keyval)+1);
 #else
-		f = fopen("id.bin","w");
+		f = gsifopen("id.bin","w");
 		if (f)
 		{
-			fwrite(keyval,1,19,f);
+			ret = fwrite(keyval,1,19,f);
 			fclose(f);
 		} else
 			keyval[0] = 0; //don't generate one each time!!
@@ -1889,7 +1923,6 @@ const char * GOAGetUniqueID_Internal(void);
 #if (!defined(_PS2) && !defined(_PS3) && !defined(_XBOX) && !defined(_PSP)) || defined(UNIQUEID)
 GetUniqueIDFunction GOAGetUniqueID = GOAGetUniqueID_Internal;
 #endif
-
 
 FILE * gsifopen(const char *filename, const char *mode)
 {

@@ -1,12 +1,11 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpBuffer.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "ghttpBuffer.h"
 #include "ghttpConnection.h"
@@ -27,9 +26,9 @@ GHTTPBool ghiResizeBuffer
 	char * tempPtr;
 	int newSize;
 
-	assert(buffer);
-	assert(sizeIncrement > 0);
-	assert(buffer->fixed == GHTTPFalse); // implied by sizeIncrement > 0
+	GS_ASSERT(buffer);
+	GS_ASSERT(sizeIncrement > 0);
+	GS_ASSERT(buffer->fixed == GHTTPFalse); // implied by sizeIncrement > 0
 
 	// Check args.
 	//////////////
@@ -63,10 +62,10 @@ GHTTPBool ghiInitBuffer
 {
 	GHTTPBool bResult;
 
-	assert(connection);
-	assert(buffer);
-	assert(initialSize > 0);
-	assert(sizeIncrement > 0);
+	GS_ASSERT(connection);
+	GS_ASSERT(buffer);
+	GS_ASSERT(initialSize > 0);
+	GS_ASSERT(sizeIncrement > 0);
 
 	// Check args.
 	//////////////
@@ -112,10 +111,10 @@ GHTTPBool ghiInitFixedBuffer
 	int size
 )
 {
-	assert(connection);
-	assert(buffer);
-	assert(userBuffer);
-	assert(size > 0);
+	GS_ASSERT(connection);
+	GS_ASSERT(buffer);
+	GS_ASSERT(userBuffer);
+	GS_ASSERT(size > 0);
 
 	// Check args.
 	//////////////
@@ -155,10 +154,10 @@ GHTTPBool ghiInitReadOnlyBuffer
 	int size             // The size of the buffer.
 )
 {
-	assert(connection);
-	assert(buffer);
-	assert(userBuffer);
-	assert(size > 0);
+	GS_ASSERT(connection);
+	GS_ASSERT(buffer);
+	GS_ASSERT(userBuffer);
+	GS_ASSERT(size > 0);
 
 	// Check args.
 	//////////////
@@ -194,7 +193,7 @@ void ghiFreeBuffer
 	GHIBuffer * buffer
 )
 {
-	assert(buffer);
+	GS_ASSERT(buffer);
 
 	// Check args.
 	//////////////
@@ -220,9 +219,9 @@ GHTTPBool ghiAppendDataToBuffer
 	GHTTPBool bResult;
 	int newLen;
 
-	assert(buffer);
-	assert(data);
-	assert(dataLen >= 0);
+	GS_ASSERT(buffer);
+	GS_ASSERT(data);
+	GS_ASSERT(dataLen >= 0);
 
 	// Check args.
 	//////////////
@@ -287,9 +286,9 @@ GHTTPBool ghiEncryptDataToBuffer
 	int bufSpace = 0;
 	int pos = 0;
 
-	assert(buffer);
-	assert(data);
-	assert(dataLen >= 0);
+	GS_ASSERT(buffer);
+	GS_ASSERT(data);
+	GS_ASSERT(dataLen >= 0);
 
 	// Check args.
 	//////////////
@@ -319,7 +318,7 @@ GHTTPBool ghiEncryptDataToBuffer
 
 	do 
 	{	
-		int fragmentLen = min(dataLen, GS_SSL_MAX_CONTENTLENGTH);
+		int fragmentLen = GS_MIN(dataLen, GS_SSL_MAX_CONTENTLENGTH);
 		
 		// Call the encryptor function
 		//    bufSize is reduced by the number of bytes written
@@ -375,7 +374,7 @@ GHTTPBool ghiAppendCharToBuffer
 )
 {
 	GHTTPBool bResult;
-	assert(buffer);
+	GS_ASSERT(buffer);
 
 	// Check args.
 	//////////////
@@ -433,7 +432,7 @@ void ghiResetBuffer
 	GHIBuffer * buffer
 )
 {
-	assert(buffer);
+	GS_ASSERT(buffer);
 
 	buffer->len = 0;
 	buffer->pos = 0;
@@ -511,8 +510,8 @@ GHTTPBool ghiReadDataFromBuffer
 	
 	
 	// Verify parameters
-	assert(bufferIn != NULL);
-	assert(len != NULL);
+	GS_ASSERT(bufferIn != NULL);
+	GS_ASSERT(len != NULL);
 	if (*len == 0)
 		return GHTTPFalse;
 
@@ -522,7 +521,7 @@ GHTTPBool ghiReadDataFromBuffer
 		return GHTTPFalse;
 
 	// Calculate the actual number of bytes to copy
-	bytesToCopy = min(*len-1, bytesAvailable);
+	bytesToCopy = GS_MIN(*len-1, bytesAvailable);
 
 	// Copy the bytes
 	memcpy(bufferOut, bufferIn->data + bufferIn->pos, (size_t)bytesToCopy);
@@ -535,7 +534,7 @@ GHTTPBool ghiReadDataFromBuffer
 }
 
 
-// Read data from a buffer with a garunteed length
+// Read data from a buffer with a guaranteed length
 GHTTPBool ghiReadDataFromBufferFixed
 (
 	GHIBuffer * bufferIn,    // the GHIBuffer to read from
@@ -544,7 +543,7 @@ GHTTPBool ghiReadDataFromBufferFixed
 )
 {
 	// Verify parameters
-	assert(bufferIn != NULL);
+	GS_ASSERT(bufferIn != NULL);
 	if (bytesToCopy == 0)
 		return GHTTPTrue;
 

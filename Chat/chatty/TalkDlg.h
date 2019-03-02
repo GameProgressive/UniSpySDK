@@ -1,11 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	TalkDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_TALKDLG_H__87449421_C42C_11D3_BD38_00C0F056BC39__INCLUDED_)
 #define AFX_TALKDLG_H__87449421_C42C_11D3_BD38_00C0F056BC39__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TalkDlg.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CTalkDlg dialog

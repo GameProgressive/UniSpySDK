@@ -1,19 +1,19 @@
-/*
-gp.h
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
+///////////////////////////////////////////////////////////////////////////////
+// File:	gp.h
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
 #ifndef _GP_H_
 #define _GP_H_
 
-// necessary for gsi_char and UNICODE support
+// This is the main header file for the GameSpy Presence and Messaging (GP) SDK.
+// All structures and SDK API functions are defined in this file.
+
+// This is necessary for gsi_char and UNICODE support.
 #include "../common/gsCommon.h"
 
 #ifdef __cplusplus

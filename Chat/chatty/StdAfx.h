@@ -1,7 +1,14 @@
-// stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
+///////////////////////////////////////////////////////////////////////////////
+// File:	StdAfx.h
+// SDK:		GameSpy Chat SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Include file for standard system include files, or project specific 
+// include files that are used frequently, but are changed infrequently.
 
 #if !defined(AFX_STDAFX_H__4CAB521F_F4DE_4629_A857_08E96E0C89E8__INCLUDED_)
 #define AFX_STDAFX_H__4CAB521F_F4DE_4629_A857_08E96E0C89E8__INCLUDED_

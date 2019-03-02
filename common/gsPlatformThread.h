@@ -1,16 +1,20 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsPlatformThread.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __GSPLATFORMTHREAD_H__
 #define __GSPLATFORMTHREAD_H__
 
-
 #include "gsPlatform.h"
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,7 +64,7 @@ extern "C" {
 	typedef OSSemaphore GSISemaphoreID;
 	typedef struct
 	{
-		OSThread mThread;
+		OSThread *mThread;
 		void * mStack;
 	} GSIThreadID;
 	typedef void *(*GSThreadFunc)(void *arg);
@@ -86,18 +90,11 @@ extern "C" {
 #define GS_THREAD_RETURN_NEGATIVE return
 #elif defined(_PS3)
 	// Todo: Test PS3 ppu thread code, then remove this define
-	#define GSI_NO_THREADS
-	typedef int GSIThreadID;
+	//#define GSI_NO_THREADS
+	typedef sys_ppu_thread_t GSIThreadID;
 	typedef int GSISemaphoreID;
-	typedef struct 
-	{
-		// A critical section is a re-entrant semaphore
-		GSISemaphoreID mSemaphore;
-		GSIThreadID mOwnerThread;
-		gsi_u32 mEntryCount; // track re-entry
-		gsi_u32 mPad; // make 16bytes
-	} GSICriticalSection;
-	typedef void (*GSThreadFunc)(void *arg);
+	typedef sys_mutex_t GSICriticalSection;
+	typedef void (*GSThreadFunc)(uint64_t arg);
 #define GS_THREAD_RETURN_TYPE void
 #define GS_THREAD_RETURN return
 #define GS_THREAD_RETURN_NEGATIVE return
@@ -114,7 +111,7 @@ extern "C" {
 		pthread_t thread;
 		pthread_attr_t attr;
 	} GSIThreadID;
-	typedef void (*GSThreadFunc)(void *arg);
+	typedef void * (*GSThreadFunc)(void *arg);
 #define GS_THREAD_RETURN_TYPE void *
 #define GS_THREAD_RETURN return 0
 #define GS_THREAD_RETURN_NEGATIVE return -1
@@ -138,7 +135,8 @@ extern "C" {
 		gsi_u32 gsiInterlockedIncrement(gsi_u32* num);
 		gsi_u32 gsiInterlockedDecrement(gsi_u32* num);
 	#elif defined(_PS3)
-		// TODO - threading in PS3 uses pthreads, just like Linux
+		gsi_u32 gsiInterlockedIncrement(gsi_u32* num);
+		gsi_u32 gsiInterlockedDecrement(gsi_u32* num);
 	#elif defined(_NITRO)
 		gsi_u32 gsiInterlockedIncrement(gsi_u32* num);
 		gsi_u32 gsiInterlockedDecrement(gsi_u32* num);

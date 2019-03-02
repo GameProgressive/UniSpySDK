@@ -4,6 +4,10 @@ GameSpy Presence SDK
 
 devsupport@gamespy.com
 
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 ***********************************************************************
 Please see the GameSpy Presence SDK documentation for more information
 **********************************************************************/
@@ -37,18 +41,18 @@ typedef struct
 //FUNCTIONS
 ///////////
 GPResult gpiInitializeNpBasic();
-GPResult gpiCheckNpStatus(GPConnection * connection);
-GPResult gpiDestroyNpBasic(GPConnection * connection);
-GPResult gpiProcessNp(GPConnection * connection);
+GPResult gpiCheckNpStatus(GPConnection *connection);
+GPResult gpiDestroyNpBasic(GPConnection *connection);
+GPResult gpiProcessNp(GPConnection *connection);
 int gpiNpBasicCallback(int event, int retCode, uint32_t reqId, void *arg);
 
 GPResult gpiSyncNpBuddies(GPConnection * connection);
 void gpiSyncNpBuddiesCallback(GPConnection * pconnection, GPProfileSearchResponseArg * arg, void * param);
 
-GPResult gpiSyncNpBlockList(GPConnection * connection);
-void gpiSyncNpBlockListCallback(GPConnection * pconnection, GPProfileSearchResponseArg * arg, void * param);
+GPResult gpiSyncNpBlockList(GPConnection *connection);
+void gpiSyncNpBlockListCallback(GPConnection *pconnection, GPProfileSearchResponseArg *arg, void *param);
 
-GPResult gpiAddToNpBlockList(GPConnection * connection, int profileid);
-void gpiAddToNpBlockListInfoCallback(GPConnection * pconnection, GPGetInfoResponseArg * arg, void * param);
+GPResult gpiAddToNpBlockList(GPConnection *connection, int profileid);
+void gpiAddToNpBlockListInfoCallback(GPConnection *pconnection, GPGetInfoResponseArg *arg, void *param);
 
 #endif

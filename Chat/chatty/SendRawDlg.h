@@ -1,11 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	SendRawDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_SENDRAWDLG_H__543BE7A8_4BE8_4ED0_972D_2339364077F6__INCLUDED_)
 #define AFX_SENDRAWDLG_H__543BE7A8_4BE8_4ED0_972D_2339364077F6__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// SendRawDlg.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CSendRawDlg dialog

@@ -1,12 +1,11 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpCallbacks.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "ghttpCallbacks.h"
 #include "ghttpPost.h"
@@ -20,7 +19,7 @@ void ghiCallCompletedCallback
 	char * buffer;
 	GHTTPByteCount bufferLen;
 
-	assert(connection);
+	GS_ASSERT(connection);
 	
 #ifdef GSI_COMMON_DEBUG
 	if(connection->result != GHTTPSuccess)
@@ -69,7 +68,7 @@ void ghiCallProgressCallback
 	GHTTPByteCount bufferLen
 )
 {	
-	assert(connection);
+	GS_ASSERT(connection);
 
 	// Check for no callback.
 	/////////////////////////
@@ -94,7 +93,7 @@ void ghiCallPostCallback
 	GHIConnection * connection
 )
 {
-	assert(connection);
+	GS_ASSERT(connection);
 
 	// Check for no callback.
 	/////////////////////////

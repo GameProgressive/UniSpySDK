@@ -1,18 +1,18 @@
-/*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpCommon.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "ghttpCommon.h"
 
 // Disable compiler warnings for issues that are unavoidable.
 /////////////////////////////////////////////////////////////
 #if defined(_MSC_VER) // DevStudio
+
 // Level4, "conditional expression is constant". 
 // Occurs with use of the MS provided macro FD_SET
 #pragma warning ( disable: 4127 )
@@ -105,7 +105,7 @@ void ghiCreateLock(void)
 #ifdef WIN32
 	// We shouldn't already have a lock.
 	////////////////////////////////////
-	assert(!ghiGlobalLock);
+	GS_ASSERT(!ghiGlobalLock);
 
 	// Create the lock.
 	///////////////////
@@ -175,7 +175,7 @@ void ghiLogToFile(const char * buffer, int len, const char* fileName)
 	if(!buffer || !len)
 		return;
 
-	file = fopen(fileName, "ab");
+	file = gsifopen(fileName, "ab");
 	if(file)
 	{
 		fwrite(buffer, 1, len, file);
@@ -292,7 +292,7 @@ GHIRecvResult ghiDoReceive
 
 		// Don't receive too much.
 		//////////////////////////
-		len = min(len, ghiThrottleBufferSize);
+		len = GS_MIN(len, ghiThrottleBufferSize);
 	}
 
 	// Receive some data.
@@ -476,7 +476,7 @@ GHITrySendResult ghiTrySendThenBuffer
 		// Was it all sent?
 		///////////////////
 		if(rcode == len)
-			return GHITrySendSent;
+			return GHITrySendSent;	
 	}
 	
 	// Buffer whatever wasn't sent.
@@ -496,9 +496,9 @@ static GHTTPBool ghiParseProxyServer
 	char * strPort;
 
 	// Make sure each pointer is valid as well as what it points to
-	assert(server && *server);
-	assert(proxyAddress && !*proxyAddress);
-	assert(proxyPort);
+	GS_ASSERT(server && *server);
+	GS_ASSERT(proxyAddress && !*proxyAddress);
+	GS_ASSERT(proxyPort);
 
 	// Copy off the server address.
 	///////////////////////////////
@@ -594,4 +594,3 @@ void ghiThrottleSettings
 #if defined(_MSC_VER)
 #pragma warning ( default: 4127 )
 #endif // _MSC_VER
-

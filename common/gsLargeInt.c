@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsLargeInt.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsLargeInt.h"
 
 
@@ -151,7 +158,7 @@ gsi_bool gsiLargeIntSizePower2(const gsLargeInt_t *src1, const gsLargeInt_t *src
 		len2--;
 
 	// set to longer length
-	*lenout = (l_word)max(len1, len2);
+	*lenout = (l_word)GS_MAX(len1, len2);
 	
 	// search for power of two >= length
 	//   (this length is in digits, not bits)
@@ -316,7 +323,7 @@ gsi_bool gsLargeIntSub(const gsLargeInt_t *src1, const gsLargeInt_t *src2, gsLar
 gsi_bool gsiLargeIntSub(const l_word *src1, l_word length1, const l_word *src2, l_word length2, l_word *dest, l_word *lenout)
 {
 	l_dword borrow = 0; // to hold overflow
-	gsi_u32 shorterLen = min(length1, length2);
+	gsi_u32 shorterLen = GS_MIN(length1, length2);
 	gsi_u32 i=0;
 
 	GSLINT_ENTERTIMER(GSLintTimerSub);
@@ -420,7 +427,7 @@ static gsi_bool gsiLargeIntMult(const l_word *data1, l_word length1, const l_wor
 						return gsi_false; // overflow
 					}
 				}
-				if (digit > (gsi_i32)temp.mLength)
+				if ((gsi_i32)digit > (gsi_i32)temp.mLength)
 					temp.mLength = (l_word)digit;
 			}
 		}
@@ -626,8 +633,8 @@ static gsi_bool gsiLargeIntSubDivide(l_word *src, l_word length, const l_word *d
 	gsLargeInt_t quotientCopy; // copy of quotient, length padded for multiplication
 
 	GSLINT_ENTERTIMER(GSLintTimerSubDivide);
-	// assert(src > divisor)
-	// assert(src < (MAX_DIGIT_VALUE * divisor))
+	// GS_ASSERT(src > divisor)
+	// GS_ASSERT(src < (MAX_DIGIT_VALUE * divisor))
 	//if(dlen==1 && *divisor==0)
 	//	_asm {int 3} // division by zero
 
@@ -706,7 +713,7 @@ gsi_bool gsLargeIntKMult(const gsLargeInt_t *src1, const gsLargeInt_t *src2, gsL
 	}
 
 	// when length is small it's faster to use "normal" multiplication
-	if (max(src1->mLength,src2->mLength) < GS_LARGEINT_KARATSUBA_CUTOFF)
+	if (GS_MAX(src1->mLength,src2->mLength) < GS_LARGEINT_KARATSUBA_CUTOFF)
 		return gsLargeIntMult(src1, src2, dest);
 
 	// Check for size/length restrictions
@@ -1775,7 +1782,7 @@ gsi_bool gsLargeIntSetFromHexString(gsLargeInt_t *lint, const char* hexstream)
 			writePos++;
 			byteIndex = 0;
 		}
-		len-=min(2,len);
+		len-=GS_MIN(2,len);
 	}
 	return gsi_true;
 }
@@ -1842,7 +1849,7 @@ void gsLargeIntAddToMD5(const gsLargeInt_t * _lint, MD5_CTX * md5)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Length in bytes so leading zeroes can be dropped from hex strings
+// Length in bytes so leading zeros can be dropped from hex strings
 gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint)
 {
 	int intSize = (int)lint->mLength;

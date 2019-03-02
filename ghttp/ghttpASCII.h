@@ -1,12 +1,11 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpASCII.h
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 // ASCII PROTOTYPES FOR USE IN UNICODE MODE
 // INCLUDED TO SILENCE CODEWARRIOR WARNINGS
@@ -25,7 +24,7 @@ extern "C" {
 GHTTPRequest ghttpGetA
 (
 	const char * URL,       	// The URL for the file ("http://host.domain[:port]/path/filename").
-	GHTTPBool blocking,         // If true, this call doesn't return until the file has been recevied.
+	GHTTPBool blocking,         // If true, this call doesn't return until the file has been received.
 	ghttpCompletedCallback completedCallback,  // Called when the file has been received.
 	void * param                // User-data to be passed to the callbacks.
 );
@@ -51,7 +50,7 @@ GHTTPRequest ghttpGetExA
 	int bufferSize,             // The size of the user-supplied buffer in bytes.  0 if buffer is NULL.
 	GHTTPPost post,             // Optional data to be posted.
 	GHTTPBool throttle,         // If true, throttle this connection's download speed.
-	GHTTPBool blocking,         // If true, this call doesn't return until the file has been recevied.
+	GHTTPBool blocking,         // If true, this call doesn't return until the file has been received.
 	ghttpProgressCallback progressCallback,    // Called periodically with progress updates.
 	ghttpCompletedCallback completedCallback,  // Called when the file has been received.
 	void * param                // User-data to be passed to the callbacks.
@@ -64,7 +63,7 @@ GHTTPRequest ghttpSaveA
 (
 	const char * URL,       // The URL for the file ("http://host.domain[:port]/path/filename").
 	const char * filename,  // The path and name to store the file as locally.
-	GHTTPBool blocking,         // If true, this call doesn't return until the file has been recevied.
+	GHTTPBool blocking,         // If true, this call doesn't return until the file has been received.
 	ghttpCompletedCallback completedCallback,  // Called when the file has been received.
 	void * param                // User-data to be passed to the callbacks.
 );
@@ -81,7 +80,7 @@ GHTTPRequest ghttpSaveExA
 	const char * headers,   // Optional headers to pass with the request.  Can be NULL or "".
 	GHTTPPost post,             // Optional data to be posted.
 	GHTTPBool throttle,         // If true, throttle this connection's download speed.
-	GHTTPBool blocking,         // If true, this call doesn't return until the file has been recevied.
+	GHTTPBool blocking,         // If true, this call doesn't return until the file has been received.
 	ghttpProgressCallback progressCallback,    // Called periodically with progress updates.
 	ghttpCompletedCallback completedCallback,  // Called when the file has been received.
 	void * param                // User-data to be passed to the callbacks.

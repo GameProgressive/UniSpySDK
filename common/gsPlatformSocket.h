@@ -1,13 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsPlatformSocket.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// GSI Cross Platform Socket Wrapper
+
 #ifndef __GSSOCKET_H__
 #define __GSSOCKET_H__
 
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 #include "gsPlatform.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,7 +132,6 @@ gsiSocketGethostbyname(n) SOC_GetHostByName(n)
 #endif
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Platform socket types
@@ -222,7 +226,7 @@ gsiSocketGethostbyname(n) SOC_GetHostByName(n)
 
 	struct hostent* gsSocketGetHostByName(const char* name); // gsSocketPSP.c
 	const char* gsSocketInetNtoa(struct in_addr in);
-
+	typedef SceNetInetSocklen_t socklen_t;
 
 #endif // _PSP
 
@@ -436,6 +440,7 @@ int gsiShutdown(SOCKET s, int how);
 
 #if defined(_WIN32)
 	#define GOAGetLastError(s) WSAGetLastError()
+	typedef int socklen_t;
 #endif
 
 #if defined(_REVOLUTION)
@@ -451,6 +456,7 @@ int gsiShutdown(SOCKET s, int how);
 	#define SO_REUSEADDR SO_SO_REUSEADDR
 
 	typedef int SOCKET;
+	typedef int socklen_t;
 	typedef struct SOSockAddr SOCKADDR;
 	#define sockaddr SOSockAddr
 	typedef struct SOSockAddrIn SOCKADDR_IN;
@@ -487,8 +493,10 @@ int gsiShutdown(SOCKET s, int how);
 	int getsockopt(SOCKET sock, int level, int optname, char* optval, int* optlen);
 	int setsockopt(SOCKET sock, int level, int optname, const char* optval, int optlen);
 
+    // Revolution uses a custom DNS caching version of gethostbyname
+    struct hostent* gethostbyname( const char* name );
+
 	#define gethostbyaddr(a,l,t)	SOGetHostByAddr(a,l,t)
-	#define gethostbyname(n)		SOGetHostByName(n)
 
 	// thread safe DNS lookups
 	#define getaddrinfo(n,s,h,r)	SOGetAddrInfo(n,s,h,r)
@@ -521,6 +529,7 @@ int gsiShutdown(SOCKET s, int how);
 	#define SO_REUSEADDR SOC_SO_REUSEADDR
 
 	typedef int SOCKET;
+	typedef int socklen_t;
 	typedef struct SOSockAddr SOCKADDR;
 	#define sockaddr SOSockAddr
 	typedef struct SOSockAddrIn SOCKADDR_IN;
@@ -542,6 +551,7 @@ int gsiShutdown(SOCKET s, int how);
 
 	int socket(int pf, int type, int protocol);
 	int closesocket(SOCKET sock);
+	int closesocketsure(SOCKET sock, gsi_bool *notInCloseSocket);
 	int shutdown(SOCKET sock, int how);
 	int bind(SOCKET sock, const SOCKADDR* addr, int len);
 
@@ -643,7 +653,6 @@ gsi_u32 gsiGetBroadcastIP(void);
 #endif
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef __cplusplus
@@ -651,4 +660,3 @@ gsi_u32 gsiGetBroadcastIP(void);
 #endif
 
 #endif // __GSSOCKET_H__
-

@@ -1,15 +1,11 @@
-/*
-gpiUtility.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiUtility.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -40,8 +36,8 @@ strzcpy(
   size_t len
 )
 {
-	assert(dest != NULL);
-	assert(src != NULL);
+	GS_ASSERT(dest != NULL);
+	GS_ASSERT(src != NULL);
 
 	strncpy(dest, src, len);
 	dest[len - 1] = '\0';
@@ -103,10 +99,10 @@ gpiValueForKeyWithIndex(
 
     // Check for NULL.
     //////////////////
-    assert(command != NULL);
-    assert(key != NULL);
-    assert(value != NULL);
-    assert(len > 0);
+    GS_ASSERT(command != NULL);
+    GS_ASSERT(key != NULL);
+    GS_ASSERT(value != NULL);
+    GS_ASSERT(len > 0);
 
     // Find which char is the delimiter.
     ////////////////////////////////////
@@ -154,10 +150,10 @@ gpiValueForKey(
 
 	// Check for NULL.
 	//////////////////
-	assert(command != NULL);
-	assert(key != NULL);
-	assert(value != NULL);
-	assert(len > 0);
+	GS_ASSERT(command != NULL);
+	GS_ASSERT(key != NULL);
+	GS_ASSERT(value != NULL);
+	GS_ASSERT(len > 0);
 
 	// Find which char is the delimiter.
 	////////////////////////////////////
@@ -199,8 +195,8 @@ gpiValueForKeyAlloc(
 
 	// Check for NULL.
 	//////////////////
-	assert(command != NULL);
-	assert(key != NULL);
+	GS_ASSERT(command != NULL);
+	GS_ASSERT(key != NULL);
 
 	// Find which char is the delimiter.
 	////////////////////////////////////
@@ -297,9 +293,9 @@ gpiReadKeyAndValue(
 	int i;
 	char * start;
 
-	assert(buffer != NULL);
-	assert(key != NULL);
-	assert(value != NULL);
+	GS_ASSERT(buffer != NULL);
+	GS_ASSERT(key != NULL);
+	GS_ASSERT(value != NULL);
 
 	buffer += *index;
 	start = (char *)buffer;
@@ -404,4 +400,3 @@ gpiEncodeString(
 #if defined(_MSC_VER)
 #pragma warning ( default: 4127 )
 #endif // _MSC_VER
-

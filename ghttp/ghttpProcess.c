@@ -1,18 +1,20 @@
-/*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpProcess.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "ghttpProcess.h"
 #include "ghttpCallbacks.h"
 #include "ghttpPost.h"
 #include "ghttpMain.h"
 #include "ghttpCommon.h"
+
+#define GS_HEADER_BUFFER_LEN    4096
+#define GS_FILE_BUFFER_LEN      8192
 
 // Parse the URL into:
 //   server address (and IP)
@@ -29,13 +31,13 @@ static GHTTPBool ghiParseURL
 	char tempChar;
 	char * str;
 
-	assert(connection);
+	GS_ASSERT(connection);
 	if(!connection)
 		return GHTTPFalse;
 
 	// 2002.Apr.18.JED - Make sure we have an URL
 	/////////////////////////////////////////////
-	assert(connection->URL);
+	GS_ASSERT(connection->URL);
 	if(!connection->URL)
 		return GHTTPFalse;
 
@@ -160,18 +162,23 @@ void ghiDoSocketInit
 			
 		gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Debug, "Initializing SSL engine\n");
 		aResult = (connection->encryptor.mInitFunc)(connection, &connection->encryptor);
-		if (aResult == GHIEncryptionResult_Error)
+        if (aResult != GHIEncryptionResult_Success)
 		{
 			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_WarmError, "Failed to initialize SSL engine\n");
 			connection->completed = GHTTPTrue;
-			connection->result = GHTTPEncryptionError;
+            //connection->result = aResult;
+            connection->result = GHTTPEncryptionError;
 			return;
 		}
 	}
 
 	// Progress.
 	////////////
+#if GS_USE_REFLECTOR
+	connection->state = GHTTPConnecting;
+#else
 	connection->state = GHTTPHostLookup;
+#endif
 	ghiCallProgressCallback(connection, NULL, 0);
 }
 
@@ -324,6 +331,8 @@ void ghiDoLookupPending
 		connection->state = GHTTPConnecting;
 		ghiCallProgressCallback(connection, NULL, 0);
 	}
+#else
+	GSI_UNUSED(connection);
 #endif
 }
 
@@ -335,6 +344,9 @@ void ghiDoConnecting
 	GHIConnection * connection
 )
 {
+#if defined(_REVOLUTION)
+	int size = 8192;
+#endif
 	int rcode;
 	SOCKADDR_IN address;
 	int writeFlag;
@@ -366,16 +378,50 @@ void ghiDoConnecting
 			connection->socketError = GOAGetLastError(connection->socket);
 			return;
 		}
+#if defined(_REVOLUTION)
+		// Set the socket send buffer 8192
+		//////////////////////////////////
+		if (setsockopt(connection->socket, SOL_SOCKET, SO_SNDBUF, (const char*)&size, sizeof(size)) < 0)
+		{
+			connection->completed = GHTTPTrue;
+			connection->result = GHTTPSocketFailed;
+			connection->socketError = GOAGetLastError(connection->socket);
+			return;
+		}
+#endif
 
 		// If throttling, use a small receive buffer.
 		/////////////////////////////////////////////
 		if(connection->throttle)
 			SetReceiveBufferSize(connection->socket, ghiThrottleBufferSize);
+		
+        // For Nitro & SSL 
+        // The following makes sure that connection is done after SSL enabled
+#if (defined(_NITRO) && defined(TWLSSL))
+		if (connection->encryptor.mEngine == GHTTPEncryptionEngine_Twl)
+		{
+		    GHIEncryptionResult aResult;
+			aResult = (connection->encryptor.mStartFunc)(connection, &connection->encryptor);
+			if (aResult == GHIEncryptionResult_Error)
+			{
+				connection->completed = GHTTPTrue;
+				connection->result = GHTTPEncryptionError;
+			return;
+		}
+			
+			// use the same routine as http
+            connection->encryptor.mEngine = GHTTPEncryptionEngine_None;
+		}
+#endif
 
 		// Setup the server address.
 		////////////////////////////
 		memset(&address, 0, sizeof(SOCKADDR_IN));
 		address.sin_family = AF_INET;
+#if GS_USE_REFLECTOR
+		address.sin_addr.s_addr = gsReflectorIP; 
+		address.sin_port = gsReflectorPort; 
+#else
 		if (connection->proxyOverrideServer)
 			address.sin_port = htons(connection->proxyOverridePort);
 		else if(ghiProxyAddress)
@@ -383,6 +429,8 @@ void ghiDoConnecting
 		else
 			address.sin_port = htons(connection->serverPort);
 		address.sin_addr.s_addr = connection->serverIP;
+#endif
+
 
 		// Start the connect.
 		/////////////////////
@@ -420,13 +468,110 @@ void ghiDoConnecting
 	{
 		// Progress.
 		////////////
+#if GS_USE_REFLECTOR
+		connection->state = GHTTPReflectorHeader;
+#else
 		if (connection->encryptor.mEngine == GHTTPEncryptionEngine_None)
 			connection->state = GHTTPSendingRequest;
 		else
 			connection->state = GHTTPSecuringSession;
+#endif
 		ghiCallProgressCallback(connection, NULL, 0);
 	}
 } 
+
+/*********************
+** REFLECTOR HEADER **
+**********************/
+#if GS_USE_REFLECTOR
+void ghiDoReflectorHeader
+(
+	GHIConnection * connection
+)
+{
+	int oldPos;
+
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Sending Reflector Header\n");
+
+	// If we haven't filled the send buffer yet, do that first.
+	///////////////////////////////////////////////////////////
+	if(!connection->sendBuffer.len)
+	{
+		unsigned short port;
+		const char * hostname = NULL;
+		int hostnameLen;
+
+		// Check for using a proxy.
+		///////////////////////////
+		if (connection->proxyOverrideServer)
+		{
+			hostname = connection->proxyOverrideServer;
+			port = connection->proxyOverridePort;
+		}
+		else if(ghiProxyAddress)
+		{
+			hostname = ghiProxyAddress;
+			port = ghiProxyPort;
+		}
+		else
+		{
+			hostname = connection->serverAddress;
+			port = connection->serverPort;
+		}
+		hostnameLen = strlen(hostname);
+
+		// Version.
+		///////////
+		ghiAppendCharToBuffer(&connection->sendBuffer, 0);
+
+		// Port.
+		////////
+		ghiAppendCharToBuffer(&connection->sendBuffer, (port >> 8) & 0xFF);
+		ghiAppendCharToBuffer(&connection->sendBuffer, port & 0xFF);
+
+		// Hostname length.
+		///////////////////
+		ghiAppendCharToBuffer(&connection->sendBuffer, hostnameLen);
+
+		// Hostname.
+		////////////
+		ghiAppendDataToBuffer(&connection->sendBuffer, hostname, hostnameLen);
+	}
+
+	// Store the old position.
+	//////////////////////////
+	oldPos = connection->sendBuffer.pos;
+
+	// Send what we can.
+	////////////////////
+	if(!ghiSendBufferedData(connection))
+		return;
+	
+	// Log anything we sent.
+	////////////////////////
+	#ifdef HTTP_LOG
+	if(connection->sendBuffer.pos != oldPos)
+		ghiLogRequest(connection->sendBuffer.data + oldPos, connection->sendBuffer.pos - oldPos);
+	#endif
+
+	// Check for data still buffered.
+	/////////////////////////////////
+	if(connection->sendBuffer.pos < connection->sendBuffer.len)
+		return;
+
+	// Clear the send buffer.
+	/////////////////////////
+	ghiResetBuffer(&connection->sendBuffer);
+
+	// Finished sending.
+	////////////////////
+	if (connection->encryptor.mEngine == GHTTPEncryptionEngine_None)
+		connection->state = GHTTPSendingRequest;
+	else
+		connection->state = GHTTPSecuringSession;
+	ghiCallProgressCallback(connection, NULL, 0);
+}
+#endif
 
 /******************
 ** SSL HANDSHAKE **
@@ -628,7 +773,7 @@ void ghiDoSendingRequest
 		if (connection->sendHeaders == NULL || strstr(connection->sendHeaders, "User-Agent")==NULL)
 			ghiAppendHeaderToBuffer(writeBuffer, "User-Agent", "GameSpyHTTP/1.0");
 		
-		// Check for persistant connections.
+		// Check for persistent connections.
 		//////////////////////////////////////
 		if (connection->persistConnection)
 			ghiAppendHeaderToBuffer(writeBuffer, "Connection", "Keep-Alive");
@@ -744,7 +889,7 @@ void ghiDoPosting
 
 		// Make sure we already set the error stuff.
 		////////////////////////////////////////////
-		assert(connection->completed && connection->result);
+		GS_ASSERT(connection->completed && connection->result);
 
 		// Cleanup the posting state.
 		/////////////////////////////
@@ -1108,7 +1253,7 @@ static int ghiParseChunkSize
 	header = connection->chunkHeader;
 	len = connection->chunkHeaderLen;
 
-	assert(len);
+	GS_ASSERT(len);
 	GSI_UNUSED(len);
 
 	rcode = sscanf(header, "%x", &num);
@@ -1127,9 +1272,9 @@ static void ghiAppendToChunkHeaderBuffer
 	int len
 )
 {
-	assert(connection);
-	assert(data);
-	assert(len >= 0);
+	GS_ASSERT(connection);
+	GS_ASSERT(data);
+	GS_ASSERT(len >= 0);
 
 	// This can happen at the end of a header.
 	//////////////////////////////////////////
@@ -1145,7 +1290,7 @@ static void ghiAppendToChunkHeaderBuffer
 
 		// How many bytes are we copying?
 		/////////////////////////////////
-		numBytes = min(CHUNK_HEADER_SIZE - connection->chunkHeaderLen, len);
+		numBytes = GS_MIN(CHUNK_HEADER_SIZE - connection->chunkHeaderLen, len);
 		
 		// Move the (possibly partial) header into the buffer.
 		//////////////////////////////////////////////////////
@@ -1158,7 +1303,7 @@ static void ghiAppendToChunkHeaderBuffer
 	}
 }
 
-// Does any neccessary processing to incoming file data
+// Does any necessary processing to incoming file data
 // before it gets delivered.  This includes un-chunking.
 // Returns false on error.
 ////////////////////////////////////////////////////////
@@ -1169,9 +1314,9 @@ static GHTTPBool ghiProcessIncomingFileData
 	int len
 )
 {
-	assert(connection);
-	assert(data);
-	assert(len > 0);
+	GS_ASSERT(connection);
+	GS_ASSERT(data);
+	GS_ASSERT(len > 0);
 
 	// Is this a chunked transfer?
 	//////////////////////////////
@@ -1248,7 +1393,7 @@ static GHTTPBool ghiProcessIncomingFileData
 
 				// How many bytes of data are we dealing with?
 				//////////////////////////////////////////////
-				numBytes = min(connection->chunkBytesLeft, len);
+				numBytes = GS_MIN(connection->chunkBytesLeft, len);
 
 				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_RawDump,
 					"Read %d bytes of chunk\n", numBytes);
@@ -1320,7 +1465,7 @@ static GHTTPBool ghiProcessIncomingFileData
 			/////////////
 			else
 			{
-				assert(0);
+			    GS_FAIL();
 				return GHTTPFalse;
 			}
 		}
@@ -1333,13 +1478,26 @@ static GHTTPBool ghiProcessIncomingFileData
 	return ghiDeliverIncomingFileData(connection, data, len);
 }
 
+// Use to free up temporary buffer allocated for NITRO / REVOLUTION platforms
+static void ghiFreeTempBuffer(char * buffer)
+{
+#if defined(_NITRO) || defined(_REVOLUTION)
+    // Make sure to free buffer
+    ///////////////////////////
+	if (buffer)
+		gsifree(buffer);
+#else
+	GSI_UNUSED(buffer);
+#endif
+}
+
 /**********************
 ** RECEIVING HEADERS **
 **********************/
 void ghiDoReceivingHeaders
 (
-	GHIConnection * connection
-)
+ GHIConnection * connection
+ )
 {
 	char buffer[4096];
 	int bufferLen;
@@ -1393,98 +1551,100 @@ void ghiDoReceivingHeaders
 		}
 	}
 
-	// Cache a pointer to the front of the headers.
-	///////////////////////////////////////////////
-	headers = (connection->recvBuffer.data + connection->headerStringIndex);
+    // Cache a pointer to the front of the headers.
+    ///////////////////////////////////////////////
+    headers = (connection->recvBuffer.data + connection->headerStringIndex);
 
-	// Check if the headers are finished.
-	/////////////////////////////////////
-	if( ((connection->statusCode / 100) == 1) &&
-		 (strncmp(headers, "\r\n", 2) == 0 || strncmp(headers, "\xA\xA", 2) == 0)
-		 )
-	{
-		// If a continue doesn't have a header (immediate CRLF) move on to next status
-		endOfHeaders = headers;
-		hasHeaders = GHTTPFalse;
-	}
-	else
-	{
-		endOfHeaders = strstr(headers, CRLF CRLF);
-	}
-	if(!endOfHeaders)
-	{
-		endOfHeaders = strstr(headers, "\xA\xA"); // some servers seem to use LFs only?! Seen in 302 redirect. (28may01/bgw)
-	}
-	if(endOfHeaders)
-	{
-		char * fileStart;
-		int fileLength;
-		//int headersLength;
-		char * contentLength;
+    // Check if the headers are finished.
+    /////////////////////////////////////
+    if( ((connection->statusCode / 100) == 1) &&
+        (strncmp(headers, "\r\n", 2) == 0 || strncmp(headers, "\xA\xA", 2) == 0)
+        )
+    {
+        // If a continue doesn't have a header (immediate CRLF) move on to next status
+        endOfHeaders = headers;
+        hasHeaders = GHTTPFalse;
+    }
+    else
+    {
+        endOfHeaders = strstr(headers, CRLF CRLF);
+    }
+    if(!endOfHeaders)
+    {
+        endOfHeaders = strstr(headers, "\xA\xA"); // some servers seem to use LFs only?! Seen in 302 redirect. (28may01/bgw)
+    }
+    if(endOfHeaders)
+    {
+        char * fileStart;
+        int fileLength;
+        //int headersLength;
+        char * contentLength;
 
 #ifdef HTTP_LOG
-		int headersLength;
+        int headersLength;
 #endif
 
-		// Clear off the empty line.
-		////////////////////////////
-		if (GHTTPTrue == hasHeaders)
-			endOfHeaders += 2;
-		*endOfHeaders = '\0';
+        // Clear off the empty line.
+        ////////////////////////////
+        if (GHTTPTrue == hasHeaders)
+            endOfHeaders += 2;
+        *endOfHeaders = '\0';
 
-		// Figure out where the file starts, and how many bytes.
-		////////////////////////////////////////////////////////
+        // Figure out where the file starts, and how many bytes.
+        ////////////////////////////////////////////////////////
 #ifdef HTTP_LOG
-		headersLength = (endOfHeaders - headers);
+        headersLength = (endOfHeaders - headers);
 #endif
 
 		fileStart = (endOfHeaders + 2);
 		fileLength = (connection->recvBuffer.len - (fileStart - connection->recvBuffer.data));
 
-		// Set the headers buffer's new length.
-		///////////////////////////////////////
-		connection->recvBuffer.len = (endOfHeaders - connection->recvBuffer.data + 1);
-		connection->recvBuffer.pos = connection->recvBuffer.len;
+        // Set the headers buffer's new length.
+        ///////////////////////////////////////
+        connection->recvBuffer.len = (endOfHeaders - connection->recvBuffer.data + 1);
+        connection->recvBuffer.pos = connection->recvBuffer.len;
 
-		// Log it.
-		//////////
+        // Log it.
+        //////////
 #ifdef HTTP_LOG
-		ghiLogResponse(headers, headersLength);
-		ghiLogResponse("\n", 1);
+        ghiLogResponse(headers, headersLength);
+        ghiLogResponse("\n", 1);
 #endif
 
-		// Check for continue.
-		//////////////////////
-		if((connection->statusCode / 100) == 1)
-		{
-			if(fileLength)
-			{
-				// Move any data to the front of the buffer.
-				////////////////////////////////////////////
-				memmove(connection->recvBuffer.data, fileStart, (unsigned int)fileLength + 1);
-				connection->recvBuffer.len = fileLength;
-			}
-			else
-			{
-				// Reset the buffer.
-				/////////////////////////
-				ghiResetBuffer(&connection->recvBuffer);
-			}
+        // Check for continue.
+        //////////////////////
+        if((connection->statusCode / 100) == 1)
+        {
+            if(fileLength)
+            {
+                // Move any data to the front of the buffer.
+                ////////////////////////////////////////////
+                memmove(connection->recvBuffer.data, fileStart, (unsigned int)fileLength + 1);
+                connection->recvBuffer.len = fileLength;
+            }
+            else
+            {
+                // Reset the buffer.
+                /////////////////////////
+                ghiResetBuffer(&connection->recvBuffer);
+            }
 
-			// Some posts must wait for continue before uploading
-			// Check if we should return to posting
-			if (connection->postingState.waitPostContinue)
-			{
-				connection->postingState.waitPostContinue = GHTTPFalse;
-				connection->state = GHTTPPosting;
-				ghiCallProgressCallback(connection, NULL, 0);
-			}
+            // Some posts must wait for continue before uploading
+            // Check if we should return to posting
+            if (connection->postingState.waitPostContinue)
+            {
+                connection->postingState.waitPostContinue = GHTTPFalse;
+                connection->state = GHTTPPosting;
+                ghiCallProgressCallback(connection, NULL, 0);
+            }
 
-			// We're back to receiving status.
-			//////////////////////////////////
-			connection->state = GHTTPReceivingStatus;
-			ghiCallProgressCallback(connection, NULL, 0);
+            // We're back to receiving status.
+            //////////////////////////////////
+            connection->state = GHTTPReceivingStatus;
+            ghiCallProgressCallback(connection, NULL, 0);
 
+			
+			ghiFreeTempBuffer(buffer);
 			return;
 		}
 
@@ -1699,9 +1859,11 @@ void ghiDoReceivingFile
 			char * decryptedData;
 			int decryptedLen;
 
-			// Append new encrypted data to anything we've held over
-			//    We have to do this because we can't decrypt partial SSL messages
-			if (!ghiAppendDataToBuffer(&connection->decodeBuffer, buffer, bufferLen))
+            // Append new encrypted data to anything we've held over
+            //    We have to do this because we can't decrypt partial SSL messages
+            if (!ghiAppendDataToBuffer(&connection->decodeBuffer, buffer, bufferLen))
+			{
+                ghiFreeTempBuffer(buffer); 
 				return;
 
 			// Previously decrypted parts of the file have already been handled.
@@ -1735,6 +1897,8 @@ void ghiDoReceivingFile
 				return;
 		}
 
-		running_time = current_time() - start_time;
-	}
+        running_time = current_time() - start_time;
+    }
+    ghiFreeTempBuffer(buffer);
 }
+

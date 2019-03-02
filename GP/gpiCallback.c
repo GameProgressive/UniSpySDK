@@ -1,15 +1,11 @@
-/*
-gpiCallback.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiCallback.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -28,9 +24,9 @@ gpiCallErrorCallback(
 	GPICallback callback;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
-	assert(iconnection != NULL);
-	assert(result != GP_NO_ERROR);
-	assert((fatal == GP_FATAL) || (fatal == GP_NON_FATAL));
+	GS_ASSERT(iconnection != NULL);
+	GS_ASSERT(result != GP_NO_ERROR);
+	GS_ASSERT((fatal == GP_FATAL) || (fatal == GP_NON_FATAL));
 
 	if(fatal == GP_FATAL)
 		iconnection->fatalError = GPITrue;
@@ -103,8 +99,8 @@ gpiCallCallback(
 {
 	// Call the callback.
 	/////////////////////
-	assert(data->callback.callback != NULL);
-	assert(data->arg != NULL);
+	GS_ASSERT(data->callback.callback != NULL);
+	GS_ASSERT(data->arg != NULL);
 	data->callback.callback(connection, data->arg, data->callback.param);
 	if(data->type == GPI_ADD_MESSAGE)
 	{

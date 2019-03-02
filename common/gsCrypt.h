@@ -1,8 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsCrypt.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Based on PKCS #1 v2.1, RSA Laboratories June 14, 2002.
+
 #ifndef __GS_CRYPT_H__
 #define __GS_CRYPT_H__
-
 
 #include "gsLargeInt.h"
 #include "md5.h"
@@ -12,16 +20,6 @@
 extern "C" {
 #endif
 
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// RSA
-//
-//     Based on PKCS #1 v2.1, RSA Laboratories June 14, 2002
-//     
-//
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 #define GS_CRYPT_HASHSIZE          GS_CRYPT_SHA1_HASHSIZE
 
 #define GS_CRYPT_SHA1_HASHSIZE     20
@@ -37,9 +35,6 @@ extern "C" {
 #define GS_CRYPT_RSA_BYTE_SIZE     (GS_CRYPT_RSA_BINARY_SIZE/8) //1024/8 = 128
 
 #define GS_CRYPT_RSA_DATABLOCKSIZE (GS_CRYPT_RSA_BYTE_SIZE-GS_CRYPT_HASHSIZE-1)
-
-
-
 
 
 ///////////////////////////////////////////////////////////////////////////////

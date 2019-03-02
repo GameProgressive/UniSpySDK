@@ -1,6 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsLargeInt.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
 // Large Integer Library
+
 #ifndef __GSLARGEINT_H__
 #define __GSLARGEINT_H__
 
@@ -22,7 +30,8 @@ extern "C" {
 #define GS_LARGEINT_BINARY_SIZE		 (2048)   // *BIT* size (divide by 8 for byte size)
 #endif
 
-	//  !!!!!!WARNING!!!!!!  Encryption is fastest when digit type is the default system type, (ex: gsi_u32 on 32bit processor)
+//  !!!!!!WARNING!!!!!!  Encryption is fastest when digit type is the default 
+// system type, (ex: gsi_u32 on 32bit processor)
 #define GS_LARGEINT_DIGIT_TYPE       gsi_u32
 #define GS_LARGEINT_DIGIT_LONG_TYPE  gsi_u64
 

@@ -1,6 +1,11 @@
-// GameSpy Chat SDK C Test App
-// Dan "Mr. Pants" Schoenblum
-// dan@gamespy.com
+///////////////////////////////////////////////////////////////////////////////
+// File:	chatc.c
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -23,7 +28,7 @@
 /************
 ** GLOBALS **
 ************/
-// mj Nov 7th, zero out to known state globals.
+// mj Nov 7th: Zero out to known state globals.
 int port					=	0;
 CHAT chat					=	{0};
 gsi_char serverAddress[128]	=	{0};
@@ -53,7 +58,7 @@ int test_main(int argc, char **argv);
 	#define _tstrncasecmp strncasecmp
 #endif
 
-// Simulate case insensitive compare functions
+// Simulate case-insensitive compare functions.
 #if defined(GSI_UNICODE)
 int WideCaseCompare(const unsigned short* s1, const unsigned short* s2);
 int WideCaseNCompare(const unsigned short* s1, const unsigned short* s2, size_t count);

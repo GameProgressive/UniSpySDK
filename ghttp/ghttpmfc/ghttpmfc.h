@@ -1,5 +1,13 @@
-// ghttpmfc.h : main header file for the GHTTPMFC application
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpmfc.h
+// SDK:		GameSpy HTTP SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Main header file for the GHTTPMFC application.
 
 #if !defined(AFX_GHTTPMFC_H__30518F92_6CEC_4512_AC74_EF31A5DE2D1C__INCLUDED_)
 #define AFX_GHTTPMFC_H__30518F92_6CEC_4512_AC74_EF31A5DE2D1C__INCLUDED_

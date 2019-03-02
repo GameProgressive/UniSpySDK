@@ -1,6 +1,13 @@
-// ChildFrm.h : interface of the CChildFrame class
+///////////////////////////////////////////////////////////////////////////////
+// File:	ChildFrm.h
+// SDK:		GameSpy Chat SDK
 //
-/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Interface of the CChildFrame class.
 
 #if !defined(AFX_CHILDFRM_H__CECBEADE_E41E_4FB6_93DD_C3735CFC4679__INCLUDED_)
 #define AFX_CHILDFRM_H__CECBEADE_E41E_4FB6_93DD_C3735CFC4679__INCLUDED_

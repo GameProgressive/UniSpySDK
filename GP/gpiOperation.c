@@ -1,15 +1,11 @@
-/*
-gpiOperation.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiOperation.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -27,9 +23,9 @@ gpiFailedOpCallback(
 	GPICallback callback;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
-	assert(connection != NULL);
-	assert(*connection != NULL);
-	assert(operation != NULL);
+	GS_ASSERT(connection != NULL);
+	GS_ASSERT(*connection != NULL);
+	GS_ASSERT(operation != NULL);
 
 	callback = operation->callback;
 	if(callback.callback != NULL)
@@ -123,7 +119,7 @@ gpiFailedOpCallback(
 			break;
 		}
 		default:
-			assert(0);
+			GS_FAIL();
 		}
 	}
 
@@ -198,7 +194,7 @@ gpiDestroyOperation(
 		// One less.
 		////////////
 		iconnection->numSearches--;
-		assert(iconnection->numSearches >= 0);
+		GS_ASSERT(iconnection->numSearches >= 0);
 
 		// Close the socket.
 		////////////////////
@@ -351,7 +347,7 @@ gpiProcessOperation(
 	default:
 		gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_HotError,
 			"gpiProcessOperation was passed an operation with an invalid type (%d)\n", operation->type);
-		assert(0);
+		GS_FAIL();
 		break;
 	}
 

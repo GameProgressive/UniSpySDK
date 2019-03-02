@@ -1,12 +1,11 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpc.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "../../common/gsCommon.h"
 #include "../ghttp.h"
@@ -73,7 +72,7 @@ static gsi_char * resultStrings[] =
 
 
 #ifdef __MWERKS__  // CodeWarrior will warn if function not prototyped
-int main(int argc, char **argv);
+int test_main(int argc, char **argv);
 #endif
 
 #ifdef GSI_COMMON_DEBUG
@@ -190,13 +189,13 @@ static void ProgressCallback
 
 static void CheckRequest(GHTTPRequest request, int index)
 {
-	assert(index < MAX_REQUESTS);
+	GS_ASSERT(index < MAX_REQUESTS);
 	results[index].started = (request < 0)?GHTTPFalse:GHTTPTrue;
 	if(results[index].started)
 		results[index].startTime = current_time();
 }
 
-int main(int argc, char **argv)
+int test_main(int argc, char **argv)
 {
 	int i;
 	static char buffer[10000] = "";
@@ -253,7 +252,7 @@ int main(int argc, char **argv)
 
 	// stream a page
 	request = ghttpStreamEx(
-		_T("http://www.gamespy.net"),
+		_T("http://www.google.com"),
 		NULL,
 		NULL,
 		GHTTPFalse,
@@ -278,7 +277,7 @@ int main(int argc, char **argv)
 #if defined(_REVOLUTION)
 		_T("https://mariokartwii.race.gs.nintendowifi.net/RaceService/test.txt"),
 #else
-		_T("https://www.gamespyid.com/"),
+		_T("https://encrypted.google.com/"),
 #endif
 		NULL,
 		NULL,

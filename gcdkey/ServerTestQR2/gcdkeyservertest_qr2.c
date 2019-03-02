@@ -1,20 +1,18 @@
-/******
-gcdkeyservertest_qr2.c
-GameSpy CDKey SDK Server Sample - with Query & Reporting 2 SDK Integration
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeyservertest_qr2.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// This sample is similar to the gcdkeyservertest sample, except that it also
+// demonstrates support for Query & Reporting 2 SDK integration, as detailed 
+// in the documentation.
+// 
+// Please see the GameSpy CD Key SDK documentation for more information.
 
-Copyright 1999-2007 GameSpy Industries, Inc
- 
-devsupport@gamespy.com
-	
-******
-
-  This sample is similar to the gcdkeyservertest sample, except that it also
-  demonstrates support for Query & Reporting 2 SDK integration, as detailed in the documentation.
-
-		Please see the GameSpy CDKey SDK documentation for more 
-		information
-		
-******/
 #include "gcdkeys.h"
 #include "gcdkeyc.h"
 #include "../common/gsAvailable.h"
@@ -23,7 +21,7 @@ devsupport@gamespy.com
 #endif
 
 
-#define GAME_NAME       "gmtest"
+#define GAME_NAME       _T("gmtest")
 #define GAMEID	        0
 
 #define DEFAULT_KEY     "2dd4-893a-ce85-6411"   //used to have Host register himself
@@ -32,17 +30,17 @@ devsupport@gamespy.com
 
 void serverkey_callback(int keyid, qr2_buffer_t outbuf, void *userdata)
 {
-    switch (keyid)
-    {
-    case HOSTNAME_KEY:
-        qr2_buffer_add(outbuf, "Gamespy CDKEY TestServer");
-        break;
-    case GAMEVER_KEY:
-        qr2_buffer_add_int(outbuf, 10);
-        break;
-    default:
-        qr2_buffer_add(outbuf, "");
-    }
+	switch (keyid)
+	{
+	case HOSTNAME_KEY:
+		qr2_buffer_add(outbuf, _T("Gamespy CDKEY TestServer"));
+		break;
+	case GAMEVER_KEY:
+		qr2_buffer_add_int(outbuf, 10);
+		break;
+	default:
+		qr2_buffer_add(outbuf, _T(""));
+	}
 
 	GSI_UNUSED(userdata);
 }
@@ -52,7 +50,7 @@ void playerkey_callback(int keyid, int index, qr2_buffer_t outbuf, void *userdat
 	switch (keyid)
 	{
 	default:
-		qr2_buffer_add(outbuf, "");
+		qr2_buffer_add(outbuf, _T(""));
 		break;		
 	}
 
@@ -65,7 +63,7 @@ void teamkey_callback(int keyid, int index, qr2_buffer_t outbuf, void *userdata)
 	switch (keyid)
 	{
 	default:
-		qr2_buffer_add(outbuf, "");
+		qr2_buffer_add(outbuf, _T(""));
 		break;		
 	}
 
@@ -189,10 +187,10 @@ static void HostAuthorize(int gameid, int localid, int authenticated, char *errm
 // host SELF reauthorization
 static void HostRefreshAuthorize(int gameid, int localid, int hint, char *challenge, void *instance)
 {
-    char response[73];
-    printf("REAUTHENTICATING host\n");
-    gcd_compute_response(DEFAULT_KEY, challenge, response, CDResponseMethod_REAUTH);
-   	gcd_process_reauth(GAMEID, HOST_ID, hint, response);
+	char response[73];
+	printf("REAUTHENTICATING host\n");
+	gcd_compute_response(DEFAULT_KEY, challenge, response, CDResponseMethod_REAUTH);
+	gcd_process_reauth(GAMEID, HOST_ID, hint, response);
 
 	GSI_UNUSED(instance);
 	GSI_UNUSED(localid);
@@ -201,12 +199,12 @@ static void HostRefreshAuthorize(int gameid, int localid, int hint, char *challe
 
 void PublicAddressCallback(unsigned int ip, unsigned short port, void * userdata)
 {
-    //self validation using the public IP
-    char response[73];
+	//self validation using the public IP
+	char response[73];
 	char challenge[32];
 
-    strcpy(challenge, randomchallenge(8));
-    printf("authenticating host\n");
+	strcpy(challenge, randomchallenge(8));
+	printf("authenticating host\n");
 	gcd_compute_response(DEFAULT_KEY, challenge, response, CDResponseMethod_NEWAUTH);
 	gcd_authenticate_user(GAMEID, HOST_ID , ip, challenge, response, HostAuthorize, HostRefreshAuthorize, NULL);
 
@@ -227,7 +225,7 @@ d. Check for disconnects on the client sockets
 */
 int test_main(int argc, char **argv)
 {
-	
+
 	client_t clients[MAXCLIENTS];
 	SOCKET ssock;
 	struct sockaddr_in saddr;
@@ -238,7 +236,7 @@ int test_main(int argc, char **argv)
 	int i,len;
 	int quit = 0;
 	char buf[512];
-	char secret_key[9];
+	gsi_char secret_key[9];
 	GSIACResult result;
 
 	// check that the game's backend is available
@@ -250,7 +248,7 @@ int test_main(int argc, char **argv)
 		printf("The backend is not available\n");
 		return 1;
 	}
-	
+
 	/**
 	First we set up the Query & Reporting SDK - this is mostly taken from the "qrcsample" sample
 	**/
@@ -264,17 +262,17 @@ int test_main(int argc, char **argv)
 	secret_key[6] = '\0';
 
 	//call qr2_init with the query port number and gamename, default IP address, and no user data
-	if(qr2_init(NULL,NULL, 26900,GAME_NAME, secret_key, 1, 1, serverkey_callback, playerkey_callback,
+	if(qr2_init(NULL, NULL, 26900, GAME_NAME, secret_key, 1, 1, serverkey_callback, playerkey_callback,
 		teamkey_callback, keylist_callback, count_callback, adderror_callback, NULL) != 0)
 	{
 		printf("Error starting query sockets\n");
 		return -1;
 	}
 
-    //register for public address to do Host self validation in the callback
-    qr2_register_publicaddress_callback(NULL, PublicAddressCallback);
+	//register for public address to do Host self validation in the callback
+	qr2_register_publicaddress_callback(NULL, PublicAddressCallback);
 
-	
+
 	/* Once the QR SDK is initialized, you can initialize the CDKey SDK with the special QR
 	integration function. Pass in the GAMEID you were assigned. */
 	gcd_init_qr2(NULL, GAMEID);
@@ -304,12 +302,12 @@ int test_main(int argc, char **argv)
 		automatically passes any network traffic for the CDKey SDK to the SDK directly */
 		qr2_think(NULL);
 		gcd_think();
-		
-	
-		#ifdef _WIN32
-			quit = _kbhit();
-		#endif
-	
+
+
+#ifdef _WIN32
+		quit = _kbhit();
+#endif
+
 		FD_ZERO ( &set );
 		FD_SET ( ssock, &set );
 		for (i = 0 ; i < MAXCLIENTS ; i++)
@@ -335,9 +333,10 @@ int test_main(int argc, char **argv)
 					break;
 				}
 		}
-		
+
 		//client data
 		for (i = 0 ; i < MAXCLIENTS ; i++)
+		{
 			if (clients[i].sock != INVALID_SOCKET && FD_ISSET(clients[i].sock, &set))
 			{ 
 				len = recv(clients[i].sock,buf, 512, 0);
@@ -374,15 +373,13 @@ int test_main(int argc, char **argv)
 						gcd_process_reauth(GAMEID, i, hint, buf+10);
 					}
 				}
-
-
 			}
-            
+		}
 	}	
 	gcd_disconnect_all(GAMEID);
 	gcd_shutdown();
 	qr2_shutdown(NULL);
-	
+
 	SocketShutDown();
 	printf("All done!\n");
 	return 0;

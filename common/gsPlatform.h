@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsPlatform.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __GSPLATFORM_H__
 #define __GSPLATFORM_H__
 
@@ -51,6 +58,12 @@
 	#define _UNIX
 #endif
 
+#if defined(__linux__)
+	#ifndef _LINUX
+		#define _LINUX
+	#endif
+#endif
+
 #if defined(_XBOX) || defined (_X360)
 #if _XBOX_VER >= 200
 	#define _X360
@@ -85,20 +98,16 @@
 
 	#if defined(GSI_WINSOCK2)
 		#include <winsock2.h>
-		#include <ws2tcpip.h>
-		#if defined(_MSC_VER)
-			#pragma comment(lib, "ws2_32.lib")
-		#endif
 	#else
 		#include <winsock.h>
-		#if defined(_MSC_VER)
-			#pragma comment(lib, "WSock32.lib")
-		#endif
-        typedef int socklen_t;
 	#endif
 	
 	#if (_MSC_VER > 1300)
 		#define itoa(v, s, r) _itoa(v, s, r)
+	#endif
+
+	#ifndef WIN32
+		#define WIN32
 	#endif
 // PS2
 #elif defined(_PS2)
@@ -193,7 +202,7 @@
 	#include <nitroWiFi.h>
 	#include <extras.h>  // mwerks
     #include <limits.h>
-	
+	#include <time.h> //NAB - check if this causes any issues. It does not exist in the Nitro branch
 	// Raw sockets are undefined on Nitro
 	#define SB_NO_ICMP_SUPPORT
 
@@ -216,6 +225,8 @@
 	#include <utility\utility_common.h>
 	#include <utility\utility_netconf.h>
 	#include <utility\utility_module.h>
+	#include <utility\utility_sysparam.h>
+
 // PS3
 #elif defined(_PS3)
 	#include <netex/errno.h>
@@ -245,12 +256,11 @@
 	#include <revolution/soex.h>
 	#include <revolution/ncd.h>	
     #include <limits.h>
-	#include <sys/timeb.h>
+    #include <time.h>
 
+    #define GSI_DOMAIN_NAME "gs.nintendowifi.net"
 	// Raw sockets are undefined on Revolution
 	#define SB_NO_ICMP_SUPPORT
-
-	typedef int socklen_t;
 
 // Unsupported platform or no platform defined!
 #else
@@ -286,7 +296,7 @@
 
 #include <assert.h>
 
-#if defined(GS_NO_FILE) || defined(_PS2) || defined(_PS3) || defined(_NITRO) || defined(_PSP) || defined(_XBOX)
+#if defined(GS_NO_FILE) || defined(_PS2) || defined(_PS3) || defined(_PSP) || defined(_NITRO) || defined(_REVOLUTION) || defined(_XBOX)
 	#define NOFILE
 #endif
 
@@ -298,9 +308,14 @@
 	#define GSI_DOMAIN_NAME "gamespy.com"
 #endif
 
+#if !defined(GSI_OPEN_DOMAIN_NAME)
+	#define GSI_OPEN_DOMAIN_NAME_UNI _T("%s.api.gamespy.net") // unicode supported string blehhh
+	#define GSI_OPEN_DOMAIN_NAME "%s.api.gamespy.net"
+#endif
+
 //---------- Mac autorelease pool for working with CoreFoundation types ----------------------
 #if defined(_MACOSX) || defined(_IPHONE)
-	#include "macosx/macAutoreleasePool.h"
+#include "macosx/macAutoreleasePool.h"
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -316,7 +331,7 @@ typedef int               gsi_i32;
 typedef unsigned int      gsi_u32;
 typedef unsigned int      gsi_time;  // must be 32 bits
 
-// decprecated
+// Deprecated
 typedef gsi_i32           goa_int32;  // 2003.Oct.04.JED - typename deprecated
 typedef gsi_u32           goa_uint32; //  these types will be removed once all SDK's are updated
 
@@ -359,12 +374,28 @@ typedef int               gsi_bool;
 	typedef unsigned long long    gsi_u64;
 #endif // 64 bit types
 
-#ifndef GSI_UNICODE
-	#define gsi_char  char
+#if defined(__GNUC__)
+#define GSI_FMT64	"ll"
+#elif defined(_MSC_VER)
+#define GSI_FMT64	"I64"
 #else
-	#define gsi_char  unsigned short
-#endif // goa_char
+#define GSI_FMT64	""
+#endif
 
+
+#ifndef GSI_UNICODE	
+	#define gsi_char  char
+	#define GSI_WCHAR (char *)
+#else
+	// is Unicode
+	#define GSI_WCHAR (wchar_t *)
+	
+	#ifdef _UNIX		
+		#define gsi_char  gsi_u32	// for unix/linux, unicode is 4 bytes
+	#else
+		#define gsi_char  gsi_u16	// all other are 2 bytes
+	#endif
+#endif
 
 // expected ranges for integer types
 #define GSI_MIN_I8        CHAR_MIN
@@ -405,26 +436,40 @@ extern "C" {
 #undef _tfopen
 #undef _T
 #undef _tsnprintf
-
+#undef _tremove
+#undef _trename
 #ifdef GSI_UNICODE
 	#define _vftprintf  vfwprintf
 	#define _ftprintf   fwprintf
-	#define _stprintf   swprintf
 	#define _tprintf    wprintf
 	#define _tcscpy     wcscpy
 	#define _tcsncpy(d, s, l)	wcsncpy((wchar_t *)d, (wchar_t *)s, l)
 	#define _tcscat     wcscat
 	#define _tcslen     wcslen
 	#define _tcschr     wcschr
+	#define _tcsrchr   wcsrchr
 	#define _tcscmp(s1, s2)     wcscmp((wchar_t *)s1, (wchar_t *)s2)
 	#define _tfopen     _wfopen
+	#define _tremove _wremove
+    #define _trename _wrename
 	#define _T(a)       L##a
+	#define _STR_CST(a)		(gsi_u16 *)##a
+	#define _WRD_CST(a)		(wchar_t *)##a
 
-	#if defined(_WIN32) || defined(_PS2)
+	#if defined(_WIN32) || defined(_PS2) || defined(_PSP)
 		#define _tsnprintf _snwprintf
 	#else
 		#define _tsnprintf swprintf
 	#endif
+
+	#ifndef _PSP
+		#define _stprintf   swprintf
+		#define _vswprintf  vswprintf
+	#else
+		#define _stprintf   snwprintf
+		#define _vswprintf  vsnwprintf
+	#endif
+
 #else
 	#define _vftprintf  vfprintf
 	#define _ftprintf   fprintf
@@ -441,11 +486,16 @@ extern "C" {
 #else
 	#define _tcschr	    strchr
 #endif
+	#define _tcsrchr	strrchr
 	#define _tcscmp     strcmp
 	#define _tfopen     fopen
+	#define _tremove    remove
+    #define _trename    rename
 #ifndef _T	
 	#define _T(a)       a
 #endif
+	#define _STR_CST(a)		a
+	#define _WRD_CST(a)		a
 
 	#if defined(_WIN32)
 		#define _tsnprintf _snprintf
@@ -507,6 +557,25 @@ extern gsi_u16 gsiByteOrderSwap16(gsi_u16);
 extern gsi_u32 gsiByteOrderSwap32(gsi_u32);
 extern gsi_u64 gsiByteOrderSwap64(gsi_u64);
 
+
+// Wide-string character defines for use in printf
+//
+// Usage:
+//   GS_USTR - for gsi_char string that flips between unicode and ascii depending on GSI_UNICODE define
+//   GS_STR  - for char string that remains as ascii
+//
+#if defined(GSI_UNICODE)
+    #if defined(_PS3)
+        #define GS_STR  _T("%s")
+        #define GS_USTR _T("%ls")
+    #else
+        #define GS_STR  _T("%S")
+        #define GS_USTR _T("%s")
+    #endif
+#else
+    #define GS_STR  _T("%s")
+    #define GS_USTR _T("%s")
+#endif
 
 #ifdef __cplusplus
 }

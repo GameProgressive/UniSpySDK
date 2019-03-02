@@ -1,8 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsRC4.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsCommon.h"
 #include "gsRC4.h"
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +30,7 @@ void RC4Init(RC4Context *context, const unsigned char *key, int len)
 	unsigned char keyIndex = 0;
 
 	// must supply a key
-	assert(key != NULL && len != 0);
+	GS_ASSERT(key != NULL && len != 0);
 	if (key == NULL || len == 0)
 		return;
 
@@ -47,12 +53,13 @@ void RC4Init(RC4Context *context, const unsigned char *key, int len)
 ///////////////////////////////////////////////////////////////////////////////
 void RC4Encrypt(RC4Context *context, const unsigned char *src, unsigned char *dest, int len)
 {
-    int i = 0;
+    int i;
 	for (i=0; i<len; i++)
 	{
 		context->x = (unsigned char)(context->x + 1); // ok to wrap around from overflow
 		context->y = (unsigned char)(context->y + context->state[context->x]); // ditto
 		swap_byte(&context->state[context->x], &context->state[context->y]);
-		dest[i] = (unsigned char)(src[i] ^ context->state[(unsigned char)(context->state[context->x]+context->state[context->y])]);
+		dest[i] = (unsigned char)(src[i] ^ 
+			context->state[(unsigned char)(context->state[context->x]+context->state[context->y])]);
 	}
 }

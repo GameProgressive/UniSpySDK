@@ -1,15 +1,11 @@
-/*
-gpiConnect.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiConnect.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -21,6 +17,7 @@ Please see the GameSpy Presence SDK documentation for more information
 
 //DEFINES
 /////////
+
 // Connection Manager Address.
 //////////////////////////////
 #define GPI_CONNECTION_MANAGER_NAME    "gpcm." GSI_DOMAIN_NAME
@@ -84,7 +81,7 @@ gpiStartConnect(
 			if (anError != GS_UDP_NO_ERROR)
 			{
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_HotError, 
-					"Tryed all 100 ports after default port, giving up.\n");
+					"Tried all 100 ports after default port, giving up.\n");
 				CallbackFatalError(connection, GP_NETWORK_ERROR, GP_UDP_LAYER, 
 					"There was error starting the UDP layer.");
 			}
@@ -346,9 +343,8 @@ gpiConnect(
 	return GP_NO_ERROR;
 }
 
-static GPResult
-gpiSendLogin(
-  GPConnection * connection,
+static GPResult 
+gpiSendLogin(GPConnection * connection,
   GPIConnectData * data
 )
 {
@@ -382,7 +378,7 @@ gpiSendLogin(
 	else
 	{
 		// GS ID's do not stash the partner ID in the auth challenge to support legacy clients.
-		strcpy(partnerBuffer, "");
+		partnerBuffer[0] = '\0';
 	}
 
 	if(data->authtoken[0])
@@ -706,7 +702,7 @@ gpiProcessConnect(
 		else
 		{
 			// GS ID's do not stash the partner ID in the auth challenge to support legacy clients.
-			strcpy(partnerBuffer, "");
+			partnerBuffer[0] = '\0';
 		}
 
 		if(data->authtoken[0])
@@ -835,8 +831,35 @@ gpiCheckConnect(
 	
 	// We're now negotiating the connection.
 	////////////////////////////////////////
-	assert(state == GPI_CONNECTED);
+	GS_ASSERT(state == GPI_CONNECTED);
 	iconnection->connectState = GPI_NEGOTIATING;
+
+#if GS_USE_REFLECTOR
+	{
+		int hostnameLen = strlen(GPConnectionManagerHostname);
+		int i;
+
+		// Version.
+		///////////
+		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, 0);
+
+		// Port.
+		////////
+		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, (GPI_CONNECTION_MANAGER_PORT >> 8) & 0xFF);
+		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, GPI_CONNECTION_MANAGER_PORT & 0xFF);
+
+		// Hostname length.
+		///////////////////
+		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, (char)hostnameLen);
+
+		// Hostname.
+		////////////
+		for(i = 0; i < hostnameLen; i++)
+		{
+			gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, GPConnectionManagerHostname[i]);
+		}
+	}
+#endif
 
 	return GP_NO_ERROR;
 }

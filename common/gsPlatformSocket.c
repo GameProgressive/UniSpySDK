@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsPlatformSocket.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsPlatformSocket.h"
 #include "gsPlatformUtil.h"
 #include "gsMemory.h"
@@ -15,14 +22,10 @@
 	#include "xbox/gsSocketXBox.c"
 #elif defined(_WIN32)
 	#include "win32/gsSocketWin32.c"
-#elif defined(__linux__)
+#elif defined(_LINUX)
 	//#include "linux/gsSocketLinux.c"
-#elif defined(__APPLE__) && defined(__MACH__)
-#if TARGET_IPHONE_SIMULATOR == 1 || TARGET_OS_IPHONE == 1
-	#import <net/if.h>
-	#import <ifaddrs.h>
-#endif
-    //#include "macosx/gsSocketMacOSX.c"
+#elif defined(_MACOSX)
+	//#include "macosx/gsSocketMacOSX.c"
 #elif defined(_NITRO)
 	#include "nitro/gsSocketNitro.c"
 #elif defined(_PS2)
@@ -34,6 +37,9 @@
 	#include "psp/gsSocketPSP.c"
 #elif defined(_REVOLUTION)
 	#include "revolution/gsSocketRevolution.c"
+#elif defined(_IPHONE)
+	#import <net/if.h>
+	#import <ifaddrs.h>
 #else
 	#error "Missing or unsupported platform"
 #endif
@@ -183,9 +189,7 @@ int DisableNagle(SOCKET sock)
 	{
 		int rcode;
 		int size;
-		socklen_t len;
-
-		len = sizeof(size);
+		socklen_t len = sizeof(size);
 
 		rcode = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&size, &len);
 
@@ -199,9 +203,7 @@ int DisableNagle(SOCKET sock)
 	{
 		int rcode;
 		int size;
-		socklen_t len;
-
-		len = sizeof(size);
+		socklen_t len = sizeof(size);
 
 		rcode = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&size, &len);
 
@@ -239,8 +241,7 @@ int DisableNagle(SOCKET sock)
 		
 		struct timeval aTimeout = { 0, 0 };
 
-		if (theSocket == INVALID_SOCKET)
-			return -1;
+		GS_ASSERT(theSocket != INVALID_SOCKET);
 
 		// Setup the parameters.
 		////////////////////////
@@ -613,7 +614,6 @@ HOSTENT * getlocalhost(void)
 	}
 	freeifaddrs(addresses);
        return &localhost;
-
 #else
 	char hostname[256] = "";
 
@@ -731,4 +731,3 @@ gsi_u32 gsiGetBroadcastIP(void)
 #if defined(_MSC_VER)
 #pragma warning ( default: 4127 )
 #endif // _MSC_VER
-

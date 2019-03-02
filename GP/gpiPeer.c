@@ -1,15 +1,11 @@
-/*
-gpiPeer.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiPeer.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -658,7 +654,7 @@ gpiRemovePeer(
 			{
 				// Can't find this peer in the list!
 				////////////////////////////////////
-				assert(0);
+				GS_FAIL();
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_HotError,
 					"Tried to remove peer not in list.");
 				return;
@@ -965,6 +961,7 @@ gpiPeerStartConnect(
 		peer->ip = profile->buddyStatusInfo->buddyIp;
 		peer->port = profile->buddyStatusInfo->buddyPort;
 	}
+
 	// We're waiting for the connect to complete.
 	/////////////////////////////////////////////
 	peer->state = GPI_PEER_CONNECTING;
@@ -1147,7 +1144,7 @@ void gpiPeerMessageCallback(unsigned int ip, unsigned short port, unsigned char 
 	if((int)messageLength > (size - writePos))
 	{
 		unsigned char *reallocedBuff;
-		size = (writePos + max(GPI_READ_SIZE,(int)messageLength));
+		size = (writePos + GS_MAX(GPI_READ_SIZE,(int)messageLength));
 		reallocedBuff = (unsigned char *)gsirealloc(buff, (unsigned int)size + 1);
 		if(reallocedBuff == NULL)
 		{

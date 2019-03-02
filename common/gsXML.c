@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsXML.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsPlatform.h"
 #include "gsMemory.h"
 #include "gsXML.h"
@@ -7,6 +14,13 @@
 #include "darray.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// For Nintendo and the DWC - it now redefines *print functions as OS_* functions
+// to reduce DWC lib size, but they do not support floating point.
+#if defined(_NITRO) && defined(DWC_GAMESPYSDK_BUILD)
+    #undef sprintf
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 #define GS_XML_INITIAL_ELEMENT_ARRAY_COUNT	    32
 #define GS_XML_INITIAL_ATTRIBUTE_ARRAY_COUNT    16
@@ -461,6 +475,8 @@ static gsi_bool gsiXmlUtilParseElement(GSIXmlStreamReader * stream, char * buffe
 	}
 
 	GS_XML_CHECK(gsiXmlUtilSkipWhiteSpace(stream, buffer, len, pos));
+
+	
 
 	// Check for immediate termination (no value or children)
 	//    non-element tags end with the same character they start with
@@ -1407,7 +1423,7 @@ gsi_bool gsXmlMoveToStart(GSXmlStreamReader stream)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Move to next occurance of "matchtag" at any level
+// Move to next occurrence of "matchtag" at any level
 gsi_bool gsXmlMoveToNext(GSXmlStreamReader stream, const char * matchtag)
 {
 	GSIXmlStreamReader * reader = (GSIXmlStreamReader*)stream;
@@ -1619,8 +1635,8 @@ gsi_bool gsXmlReadChildAsStringNT(GSXmlStreamReader stream, const char * matchta
 	}
 	else
 	{
-		strncpy(valueOut, strValue, (size_t)min(maxLen, strLen));
-		valueOut[min(maxLen-1, strLen)] = '\0';
+		strncpy(valueOut, strValue, (size_t)GS_MIN(maxLen, strLen));
+		valueOut[GS_MIN(maxLen-1, strLen)] = '\0';
 		return gsi_true;
 	}
 }
@@ -1643,7 +1659,7 @@ gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * 
 	{
 		// Convert into destination buffer
 		unicodeLen = UTF8ToUCS2StringLen(utf8Value, (unsigned short *)valueOut, utf8Len);
-		valueOut[min(maxLen-1, unicodeLen)] = '\0';
+		valueOut[GS_MIN(maxLen-1, unicodeLen)] = '\0';
 		return gsi_true;
 	}
 }
@@ -1673,7 +1689,7 @@ gsi_bool gsXmlReadChildAsHexBinary(GSXmlStreamReader stream, const char * matcht
 				gsi_u32 temp = 0;
 				int writepos = 0;
 				int readpos = 0;
-				int bytesleft = min(maxLen*2, searchValueElem->mValue.mLen);
+				int bytesleft = GS_MIN(maxLen*2, searchValueElem->mValue.mLen);
 
 				// special case: zero length value
 				if (searchValueElem->mValue.mLen == 0 || searchValueElem->mValue.mData == NULL)
@@ -1688,7 +1704,7 @@ gsi_bool gsXmlReadChildAsHexBinary(GSXmlStreamReader stream, const char * matcht
 				{
 					*lenOut = searchValueElem->mValue.mLen / 2;
 
-					// note: read position left at this elemtent so next read can record the data
+					// Note: Read position left at this element so next read can record the data.
 					return gsi_true;
 				}
 

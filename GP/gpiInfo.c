@@ -1,15 +1,11 @@
-/*
-gpiInfo.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiInfo.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -131,7 +127,7 @@ gpiDateToInt(
 	
 	// Error check.
 	///////////////
-	assert(gpiIsValidDate(day, month, year));
+	GS_ASSERT(gpiIsValidDate(day, month, year));
 	if(!gpiIsValidDate(day, month, year))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid date.");
 
@@ -176,7 +172,7 @@ gpiIntToDate(
 
 	// Error check.
 	///////////////
-	assert(gpiIsValidDate(d, m, y));
+	GS_ASSERT(gpiIsValidDate(d, m, y));
 	if(!gpiIsValidDate(d, m, y))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid date.");
 
@@ -339,7 +335,7 @@ gpiProcessGetInfo(
 	if(!gpiValueForKey(input, "\\profileid\\", buffer, sizeof(buffer)))
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 	profileid = atoi(buffer);
-	assert(profileid > 0);
+	GS_ASSERT(profileid > 0);
 
 	// Get the profile - we might not have a profile object.
 	////////////////////////////////////////////////////////
@@ -946,11 +942,12 @@ gpiSetInfos(
 	case GP_SEX:
 		sex = (char)toupper(value[0]);
 		if(sex == 'M')
-			strcpy(buffer, "0");
+			buffer[0] = '0';
 		else if(sex == 'F')
-			strcpy(buffer, "1");
+			buffer[0] = '1';
 		else
-			strcpy(buffer, "2");
+			buffer[0] = '2';
+		buffer[1] = '\0';
 
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\sex\\", buffer));
 		break;

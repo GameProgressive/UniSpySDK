@@ -1,12 +1,11 @@
-/*
-GameSpy Chat SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	chatHandlers.c
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -37,8 +36,8 @@ devsupport@gamespy.com
 #define FILTER_TIMEOUT        60000
 #define NAMES_ARRAY_INC       100
 
-#define ASSERT_TYPE(type)     assert((type >= 0) && (type < NUM_TYPES));
-#define ASSERT_STR(str)       assert(str != NULL); assert(str[0] != '\0');
+#define ASSERT_TYPE(type)     GS_ASSERT((type >= 0) && (type < NUM_TYPES));
+#define ASSERT_STR(str)       GS_ASSERT(str != NULL); GS_ASSERT(str[0] != '\0');
 
 #define RPL_WELCOME                 "001"
 #define RPL_USRIP                   "302"
@@ -346,8 +345,8 @@ static ciServerMessageFilter * ciFindFilter(CHAT chat, int numMatches, ciFilterM
 	ciServerMessageFilter * filter;
 	CONNECTION;
 
-	assert(numMatches > 0);
-	assert(matches);
+	GS_ASSERT(numMatches > 0);
+	GS_ASSERT(matches);
 
 	for(filter = connection->filterList ; filter != NULL ; filter = filter->pnext)
 	{
@@ -382,8 +381,8 @@ static ciServerMessageFilter * ciFindGetKeyFilter(CHAT chat, const char * channe
 	ciServerMessageFilter * filter;
 	CONNECTION;
 
-	assert(channel);
-	assert(channel[0]);
+	GS_ASSERT(channel);
+	GS_ASSERT(channel[0]);
 
 	for(filter = connection->filterList ; filter != NULL ; filter = filter->pnext)
 	{
@@ -400,7 +399,7 @@ static ciServerMessageFilter * ciFindGetKeyFilter(CHAT chat, const char * channe
 
 static void ciDestroyFilter(ciServerMessageFilter * filter)
 {
-	assert(filter != NULL);
+	GS_ASSERT(filter != NULL);
 
 	gsifree(filter->data);
 	gsifree(filter->name);
@@ -414,7 +413,7 @@ static void ciRemoveFilter(CHAT chat, ciServerMessageFilter * filter)
 	ciServerMessageFilter * pprev = NULL;
 	CONNECTION;
 
-	assert(filter != NULL);
+	GS_ASSERT(filter != NULL);
 
 	for(pcurr = connection->filterList ; pcurr != NULL ; pcurr = pcurr->pnext)
 	{
@@ -446,7 +445,7 @@ static void ciFinishFilter(CHAT chat, ciServerMessageFilter * filter, void * par
 {
 	int i;
 
-	assert(filter);
+	GS_ASSERT(filter);
 	ASSERT_TYPE(filter->type);
 
 	// Check the type.
@@ -606,7 +605,7 @@ static void ciFinishFilter(CHAT chat, ciServerMessageFilter * filter, void * par
 	}
 	else
 	{
-		assert(0);
+		GS_FAIL();
 	}
 
 	// Remove the filter.
@@ -618,7 +617,7 @@ static void ciFinishFilter(CHAT chat, ciServerMessageFilter * filter, void * par
 ///////////////////////////////////////////////////////////////////////////
 static void ciFilterTimedout(CHAT chat, ciServerMessageFilter * filter)
 {
-	assert(filter);
+	GS_ASSERT(filter);
 	ASSERT_TYPE(filter->type);
 	
 	// Check the type.
@@ -797,7 +796,7 @@ static void ciFilterTimedout(CHAT chat, ciServerMessageFilter * filter)
 	}
 	else
 	{
-		assert(0);
+		GS_FAIL();
 	}
 }
 
@@ -846,7 +845,7 @@ CHATBool ciCheckFiltersForID(CHAT chat, int ID)
 	ciServerMessageFilter * filter;
 	CONNECTION;
 
-	assert(ID > 0);
+	GS_ASSERT(ID > 0);
 
 	for(filter = connection->filterList ; filter != NULL ; filter = filter->pnext)
 	{
@@ -925,8 +924,8 @@ int ciAddJOINFilter(CHAT chat, const char * channel, chatEnterChannelCallback ca
 	int rcode;
 	JOINData * data;
 
-	assert(password != NULL);
-	assert(strlen(password) < MAX_PASSWORD);
+	GS_ASSERT(password != NULL);
+	GS_ASSERT(strlen(password) < MAX_PASSWORD);
 
 	data = (JOINData *)gsimalloc(sizeof(JOINData));
 	if(data == NULL)
@@ -1190,7 +1189,7 @@ static ciModeChange * ciParseMode(char * mode, char ** params, int numParams)
 	CHATBool addParam = CHATFalse;
 	void * tempPtr;
 
-	assert(mode != NULL);
+	GS_ASSERT(mode != NULL);
 
 	// Check the initial enable mode.
 	/////////////////////////////////
@@ -1302,7 +1301,7 @@ static ciModeChange * ciParseMode(char * mode, char ** params, int numParams)
 		default:
 			// Unknown mode.
 			////////////////
-			//assert(0);
+			//GS_FAIL();
 			modeChange = -1;
 		}
 
@@ -1406,7 +1405,7 @@ static void ciApplyChangesToMode(CHATChannelMode * mode, ciModeChange * changes)
 			break;
 
 		default:
-			assert(0);
+			GS_FAIL();
 		}
 	}
 }
@@ -1428,7 +1427,7 @@ void ciPrivmsgHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciPrivmsgHandler called\n");
 #endif
 
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 
@@ -1538,7 +1537,7 @@ void ciNoticeHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciNoticeHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 	
@@ -1591,7 +1590,7 @@ void ciUTMHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciUTMHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 	
@@ -1644,7 +1643,7 @@ void ciATMHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciATMHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 	
@@ -1708,7 +1707,7 @@ void ciNickHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciNickHandler called\n");
 #endif
 	
-	assert(message->numParams == 1);
+	GS_ASSERT(message->numParams == 1);
 	if(message->numParams != 1)
 		return; //ERRCON
 
@@ -1724,7 +1723,7 @@ void ciNickHandler(CHAT chat, const ciServerMessage * message)
 
 		// Copy the new nick.
 		/////////////////////
-		assert(strlen(newNick) < MAX_NICK);
+		GS_ASSERT(strlen(newNick) < MAX_NICK);
 		strzcpy(connection->nick, newNick, MAX_NICK);
 
 		// Copy to the unicode version
@@ -1774,7 +1773,7 @@ void ciJoinHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciJoinHandler called\n");
 #endif
 	
-	assert(message->numParams == 1);
+	GS_ASSERT(message->numParams == 1);
 	if(message->numParams != 1)
 		return; //ERRCON
 
@@ -1789,13 +1788,13 @@ void ciJoinHandler(CHAT chat, const ciServerMessage * message)
 	{
 		mode = CHAT_OP;
 		nick++;
-		assert(*nick != '\0');
+		GS_ASSERT(*nick != '\0');
 	}
 	else if(*nick == '+')
 	{
 		mode = CHAT_VOICE;
 		nick++;
-		assert(*nick != '\0');
+		GS_ASSERT(*nick != '\0');
 	}
 	else
 	{
@@ -1964,7 +1963,7 @@ void ciKickHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciKickHandler called\n");
 #endif
 	
-	assert((message->numParams == 2) || (message->numParams == 3));
+	GS_ASSERT((message->numParams == 2) || (message->numParams == 3));
 	if((message->numParams != 2) && (message->numParams != 3))
 		return; //ERRCON
 
@@ -2042,7 +2041,7 @@ static void ciQuitEnumChannelsCallback(CHAT chat, const char * user, const char 
 	
 	ASSERT_STR(user);
 	ASSERT_STR(channel);
-	assert(reason != NULL);
+	GS_ASSERT(reason != NULL);
 
 	// Remove the user from the channel.
 	////////////////////////////////////
@@ -2091,7 +2090,7 @@ void ciQuitHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciQuitHandler called\n");
 #endif
 	
-	assert(message->numParams == 1);
+	GS_ASSERT(message->numParams == 1);
 	if(message->numParams != 1)
 		return; //ERRCON
 
@@ -2108,7 +2107,7 @@ static void ciKillEnumChannelsCallback(CHAT chat, const char * user, const char 
 	char *reason = (char *)param;
 	ASSERT_STR(user);
 	ASSERT_STR(channel);
-	assert(reason != NULL);
+	GS_ASSERT(reason != NULL);
 
 	// Remove the user from the channel.
 	////////////////////////////////////
@@ -2155,7 +2154,7 @@ void ciKillHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciKillHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 
@@ -2178,7 +2177,7 @@ void ciTopicHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciTopicHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 
@@ -2213,7 +2212,7 @@ void ciModeHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciModeHandler called\n");
 #endif
 	
-	assert(message->numParams >= 2);
+	GS_ASSERT(message->numParams >= 2);
 	if(message->numParams < 2)
 		return; //ERRCON
 
@@ -2286,7 +2285,7 @@ void ciModeHandler(CHAT chat, const ciServerMessage * message)
 		case MODE_OPS_OBEY_CHANNEL_LIMIT:
 			break;
 		default:
-			assert(0);
+			GS_FAIL();
 		}
 	}
 
@@ -2313,7 +2312,7 @@ void ciErrorHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrorHandler called\n");
 #endif
 
-	assert(message->numParams == 1);
+	GS_ASSERT(message->numParams == 1);
 	if(message->numParams != 1)
 		return; //ERRCON
 
@@ -2332,7 +2331,7 @@ void ciInviteHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciInviteHandler called\n");
 #endif
 	
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return; //ERRCON
 
@@ -2369,7 +2368,7 @@ void ciNameReplyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciNameReplyHandler called\n");
 #endif
 	
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -2403,19 +2402,19 @@ void ciNameReplyHandler(CHAT chat, const ciServerMessage * message)
 	nick = strtok(names, " ");
 	while(nick != NULL)
 	{
-		assert(nick[0] != '\0');
+		GS_ASSERT(nick[0] != '\0');
 		
 		// Check the mode.
 		//////////////////
 		if(nick[0] == '@')
 		{
-			assert(nick[1] != '\0');
+			GS_ASSERT(nick[1] != '\0');
 			mode = CHAT_OP;
 			nick++;
 		}
 		else if(nick[0] == '+')
 		{
-			assert(nick[1] != '\0');
+			GS_ASSERT(nick[1] != '\0');
 			mode = CHAT_VOICE;
 			nick++;
 		}
@@ -2431,14 +2430,14 @@ void ciNameReplyHandler(CHAT chat, const ciServerMessage * message)
 				tempPtr = (char **)gsirealloc(data->users, sizeof(char *) * (data->len + NAMES_ARRAY_INC));
 				if(tempPtr == NULL)
 				{
-					assert(0);
+					GS_FAIL();
 					return; //ERRCON
 				}
 				data->users = (char **)tempPtr;
 				tempPtr = (char **)gsirealloc(data->modes, sizeof(int) * (data->len + NAMES_ARRAY_INC));
 				if(tempPtr == NULL)
 				{
-					assert(0);
+					GS_FAIL();
 					return; //ERRCON
 				}
 				data->modes = (int *)tempPtr;
@@ -2451,7 +2450,7 @@ void ciNameReplyHandler(CHAT chat, const ciServerMessage * message)
 			str = (char *)gsimalloc((unsigned int)len);
 			if(str == NULL)
 			{
-				assert(0);
+				GS_FAIL();
 				return; //ERRCON
 			}
 			memcpy(str, nick, (unsigned int)len);
@@ -2487,7 +2486,7 @@ void ciEndOfNamesHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciEndOfNamesHandler called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -2583,7 +2582,7 @@ void ciRplTopicHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplTopicHandler called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -2638,7 +2637,7 @@ void ciRplNoTopicHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplNoTopicHandler called\n");
 #endif
 	
-	assert(message->numParams >= 2);
+	GS_ASSERT(message->numParams >= 2);
 	if(message->numParams < 2)
 		return; //ERRCON
 
@@ -2693,7 +2692,7 @@ void ciErrNickInUseHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplNickErrorHandler called\n");
 #endif
 
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -2725,7 +2724,7 @@ void ciErrNickInUseHandler(CHAT chat, const ciServerMessage * message)
 	{
 		// We should be connecting.
 		//////////////////////////
-		assert(connection->connecting);
+		GS_ASSERT(connection->connecting);
 		if(connection->connecting)
 			ciNickError(chat, CHAT_IN_USE, connection->nick, 0, NULL);
 	}
@@ -2744,7 +2743,7 @@ void ciRplWhoReplyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplWhoReplyHandler called\n");
 #endif
 
-	assert(message->numParams == 8);
+	GS_ASSERT(message->numParams == 8);
 	if(message->numParams != 8)
 		return; //ERRCON
 
@@ -2847,7 +2846,7 @@ void ciRplEndOfWhoHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplEndOfWhoHandler called\n");
 #endif
 
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -2906,8 +2905,8 @@ static char * ciParseValue(const char * flags, int * len)
 	int i;
 	char * str;
 
-	assert(flags);
-	assert(len);
+	GS_ASSERT(flags);
+	GS_ASSERT(len);
 
 	// First should be a '\'.
 	/////////////////////////
@@ -2952,7 +2951,7 @@ void ciRplGetKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplGetKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -3038,7 +3037,7 @@ void ciRplEndGetKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplEndGetKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -3086,7 +3085,7 @@ void ciRplGetCKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplGetCKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 5);
+	GS_ASSERT(message->numParams == 5);
 	if(message->numParams != 5)
 		return; //ERRCON
 
@@ -3266,7 +3265,7 @@ void ciRplEndGetCKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplEndGetCKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -3315,7 +3314,7 @@ void ciRplGetChanKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplGetChanKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -3541,7 +3540,7 @@ void ciRplUserIPHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplUserIPHandler called\n");
 #endif
 
-	assert(message->numParams >= 1);
+	GS_ASSERT(message->numParams >= 1);
 	if(message->numParams < 1)
 		return; //ERRCON
 
@@ -3585,8 +3584,8 @@ void ciRplListStartHandler(CHAT chat, const ciServerMessage * message)
 	if(filter != NULL)
 	{
 		LISTData * data = (LISTData *)filter->data;
-		assert(data != NULL);
-		//assert(!data->gotStart);
+		GS_ASSERT(data != NULL);
+		//GS_ASSERT(!data->gotStart);
 
 		data->gotStart = CHATTrue;
 	}
@@ -3603,7 +3602,7 @@ void ciRplListHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplListHandler called\n");
 #endif
 	
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 
@@ -3623,8 +3622,8 @@ void ciRplListHandler(CHAT chat, const ciServerMessage * message)
 			void * tempPtr;
 			LISTData * data = (LISTData *)filter->data;
 
-			assert(data != NULL);
-			//assert(data->gotStart);
+			GS_ASSERT(data != NULL);
+			//GS_ASSERT(data->gotStart);
 
 			// Get the channel.
 			///////////////////
@@ -3749,7 +3748,7 @@ void ciRplChannelModeIsHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplChannelModeIs called\n");
 #endif
 	
-	assert(message->numParams >=3);
+	GS_ASSERT(message->numParams >=3);
 	if(message->numParams < 3)
 		return; //ERRCON
 
@@ -3821,7 +3820,7 @@ void ciRplWhoisUserHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplWhoisUserHandler called\n");
 #endif
 	
-	assert(message->numParams == 6);
+	GS_ASSERT(message->numParams == 6);
 	if(message->numParams != 6)
 		return; //ERRCON
 
@@ -3887,7 +3886,7 @@ void ciRplWhoisUserHandler(CHAT chat, const ciServerMessage * message)
 		char * host;
 
 		BANData * data = (BANData *)filter->data;
-		assert(data != NULL);
+		GS_ASSERT(data != NULL);
 		ASSERT_STR(data->channel);
 
 		host = message->params[3];
@@ -3910,7 +3909,7 @@ void ciRplWhoisChannelsHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplWhoisChannelsHandler called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -3976,7 +3975,7 @@ void ciRplEndOfWhoisHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplEndOfWhoisHandler called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4015,7 +4014,7 @@ void ciRplBanListHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplBanListHandler called\n");
 #endif
 
-	assert(message->numParams >= 3);
+	GS_ASSERT(message->numParams >= 3);
 	if(message->numParams < 3)
 		return; //ERRCON
 
@@ -4033,8 +4032,8 @@ void ciRplBanListHandler(CHAT chat, const ciServerMessage * message)
 		int len;
 		void * tempPtr;
 		GETBANData * data = (GETBANData *)filter->data;
-		assert(data != NULL);
-		assert(data->numBans >= 0);
+		GS_ASSERT(data != NULL);
+		GS_ASSERT(data->numBans >= 0);
 
 		// Increase the ban list.
 		/////////////////////////
@@ -4065,7 +4064,7 @@ void ciRplEndOfBanListHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplEndOfBanListHandler called\n");
 #endif
 
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4100,7 +4099,7 @@ void ciRplWelcomeHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplWelcomeHandler called\n");
 #endif
 
-	assert(message->numParams == 2);
+	GS_ASSERT(message->numParams == 2);
 	if(message->numParams != 2)
 		return;
 
@@ -4141,7 +4140,7 @@ void ciRplSecureKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplSecureKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return;
 
@@ -4192,7 +4191,7 @@ void ciRplCDKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplCDKeyHandler called\n");
 #endif
 
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return;
 
@@ -4225,7 +4224,7 @@ void ciRplLoginHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciRplLoginHandler called\n");
 #endif
 
-	assert(message->numParams >= 3);
+	GS_ASSERT(message->numParams >= 3);
 	if(message->numParams < 3)
 		return;
 
@@ -4260,7 +4259,7 @@ void ciRplGetUdpRelayHandler(CHAT chat, const ciServerMessage * message)
 #ifdef FEEDBACK_HANDLERS
 	OutputDebugString("ciRplGetUdpRelayHandler called\n");
 #endif
-	assert(message->numParams >= 5);
+	GS_ASSERT(message->numParams >= 5);
 	if(message->numParams < 5)
 		return;
 
@@ -4298,7 +4297,7 @@ void ciErrNoSuchChannelHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrNoSuchChannel called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4376,7 +4375,7 @@ void ciErrTooManyChannelsHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrTooManyChannels called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4411,7 +4410,7 @@ void ciErrChannelIsFullHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrChannelIsFull called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4446,7 +4445,7 @@ void ciErrInviteOnlyChanHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrInviteOnlyChan called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4481,7 +4480,7 @@ void ciErrBannedFromChanHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrBannedFromChan called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4516,7 +4515,7 @@ void ciErrBadChannelKeyHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrBadChannelKey called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4551,7 +4550,7 @@ void ciErrBadChanMaskHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrBadChanMask called\n");
 #endif
 	
-	assert(message->numParams == 3);
+	GS_ASSERT(message->numParams == 3);
 	if(message->numParams != 3)
 		return; //ERRCON
 
@@ -4672,7 +4671,7 @@ void ciErrRegisterNickFailedHandler(CHAT chat, const ciServerMessage * message)
 	OutputDebugString("ciErrRegisterNickFailedHandler called\n");
 #endif
 
-	assert(message->numParams == 4);
+	GS_ASSERT(message->numParams == 4);
 	if(message->numParams != 4)
 		return; //ERRCON
 

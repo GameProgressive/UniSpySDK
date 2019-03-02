@@ -1,26 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-#ifndef __GSXML_H__
-#define __GSXML_H__
-
-
-#include "gsPlatform.h"
-#include "gsLargeInt.h"  // so that it can write large ints
-
-
-#if defined(__cplusplus)
-extern "C"
-{
-#endif
-
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsXML.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
 // GameSpy XML parser for soap messages
 //   Create the stream object and attach to an XML text buffer.  
 //   The stream will not modify the buffer.
 //   The buffer should not be released until after the stream is destroyed
-//
 //
 //	Limitations:
 //	  Processing instructions other than '<?xml' are not supported.
@@ -30,6 +20,16 @@ extern "C"
 //    Element names may contain only alphanumeric characters or '_'
 //    Elements may contain values OR child elements, not both.
 
+#ifndef __GSXML_H__
+#define __GSXML_H__
+
+#include "gsPlatform.h"
+#include "gsLargeInt.h"  // so that it can write large ints
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,7 @@ struct gsLargeInt_s; // forward declare in case of header order problems
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 GSXmlStreamWriter gsXmlCreateStreamWriter(const char ** namespaces, int count);
+
 GSXmlStreamReader gsXmlCreateStreamReader();
 void gsXmlFreeReader(GSXmlStreamReader stream);
 void gsXmlFreeWriter(GSXmlStreamWriter stream);

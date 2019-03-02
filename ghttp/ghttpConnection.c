@@ -1,12 +1,11 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpConnection.c
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "ghttpConnection.h"
 #include "ghttpCommon.h"
@@ -44,7 +43,7 @@ static int ghiFindFreeSlot
 			return i;
 	}
 
-	assert(ghiNumConnections == ghiConnectionsLen);
+	GS_ASSERT(ghiNumConnections == ghiConnectionsLen);
 
 	// Nothing found, resize the array.
 	///////////////////////////////////
@@ -178,13 +177,12 @@ GHTTPBool ghiFreeConnection
 	GHIConnection * connection
 )
 {
-	assert(connection);
-	assert(connection->request >= 0);
-	assert(connection->request < ghiConnectionsLen);
-	assert(connection->inUse);
+	GS_ASSERT(connection);
+	GS_ASSERT(connection->request >= 0);
+	GS_ASSERT(connection->request < ghiConnectionsLen);
+	GS_ASSERT(connection->inUse);
 
 	// Check args.
-	//////////////
 	if(!connection)
 		return GHTTPFalse;
 	if(!connection->inUse)
@@ -197,7 +195,6 @@ GHTTPBool ghiFreeConnection
 	ghiLock();
 
 	// Free data.
-	/////////////
 	gsifree(connection->URL);
 	gsifree(connection->serverAddress);
 	gsifree(connection->requestPath);
@@ -249,11 +246,9 @@ GHTTPBool ghiFreeConnection
 	}
 
 	// Free the slot.
-	/////////////////
 	connection->inUse = GHTTPFalse;
 
 	// One less connection.
-	///////////////////////
 	ghiNumConnections--;
 
 	ghiUnlock();
@@ -268,8 +263,8 @@ GHIConnection * ghiRequestToConnection
 {
 	GHIConnection * connection;
 
-	assert(request >= 0);
-	assert(request < ghiConnectionsLen);
+	GS_ASSERT(request >= 0);
+	GS_ASSERT(request < ghiConnectionsLen);
 
 	ghiLock();
 
@@ -317,8 +312,8 @@ void ghiRedirectConnection
 	GHIConnection * connection
 )
 {
-	assert(connection);
-	assert(connection->redirectURL);
+	GS_ASSERT(connection);
+	GS_ASSERT(connection->redirectURL);
 	
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Redirecting Connection\n");
 
@@ -327,7 +322,7 @@ void ghiRedirectConnection
 	connection->state = GHTTPSocketInit;
 
 #if !defined(GSI_NO_THREADS)
-    // Cancel and free asychronous lookup if it has not already been done
+    // Cancel and free asynchronous lookup if it has not already been done
     /////////////////////////////////////////////////////////////////////
     if (connection->handle)
     {

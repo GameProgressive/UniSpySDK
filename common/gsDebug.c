@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsDebug.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsCommon.h"
 #include "gsDebug.h"
 //#include <stdio.h>
@@ -7,7 +14,7 @@
 
 
 // THIS FILE ONLY INCLUDED WHEN USING GAMESPY DEBUG FUNCTIONS
-//    (don't put this above the header includes or VC will whine
+// (Putting this above the header includes may cause compiler warnings.)
 #ifdef GSI_COMMON_DEBUG
 
 #if defined(_NITRO)
@@ -115,10 +122,10 @@ void gsDebugVaList(GSIDebugCategory theCat, GSIDebugType theType,
 	GSIDebugLevel aCurLevel;
 
 	// Verify Parameters
-	assert(theCat   <= GSIDebugCat_Count);
-	assert(theType  <= GSIDebugType_Count);
-	assert(theLevel <= (1<<GSIDebugLevel_Count));
-	assert(theTokenStr);
+	GS_ASSERT(theCat   <= GSIDebugCat_Count);
+	GS_ASSERT(theType  <= GSIDebugType_Count);
+	GS_ASSERT(theLevel <= (1<<GSIDebugLevel_Count));
+	GS_ASSERT(theTokenStr);
 
 	// Make thread safe
 	if (gGSIDebugInstance.mInitialized == 0)
@@ -178,10 +185,10 @@ void gsDebugFormat(GSIDebugCategory theCat, GSIDebugType theType,
 	va_list aParameterList;
 
 	// Verify Parameters
-	assert(theCat   <= GSIDebugCat_Count);
-	assert(theType  <= GSIDebugType_Count);
-	assert(theLevel <= (1<<GSIDebugLevel_Count));
-	assert(theTokenStr);
+	GS_ASSERT(theCat   <= GSIDebugCat_Count);
+	GS_ASSERT(theType  <= GSIDebugType_Count);
+	GS_ASSERT(theLevel <= (1<<GSIDebugLevel_Count));
+	GS_ASSERT(theTokenStr);
 
 	// Find start of var arg list
 	va_start(aParameterList, theTokenStr);
@@ -204,7 +211,7 @@ static void HexEncode16(const char* theInStream, char* theOutStream,
 	char* aTextOutStream = (theOutStream+aTextOffSet); // set the write ptr
 	const unsigned int aWriteBit = theInLen & 1; // write on odd or even bytes?
 
-	assert(theInLen <= 16);
+	GS_ASSERT(theInLen <= 16);
 
 	// Set buffer to ' '
 	memset(theOutStream, ' ', aRowWidth);
@@ -253,7 +260,7 @@ void gsDebugBinary(GSIDebugCategory theCat, GSIDebugType theType,
 	// convert and display in 40 byte segments
 	while(aBytesLeft > 0)
 	{
-		gsi_i32 aBytesToRead = min(aBytesLeft, 16);
+		gsi_i32 aBytesToRead = GS_MIN(aBytesLeft, 16);
 
 		HexEncode16(aReadPos, aHexStr, (unsigned int)aBytesToRead);
 		gsDebugFormat(theCat, theType, theLevel, "  %s\r\n", aHexStr);
@@ -270,8 +277,8 @@ void gsSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType,
 					  GSIDebugLevel theLevel)
 {
 	// Verify Parameters
-	assert(theCat   <= GSIDebugCat_Count);
-	assert(theType  <= GSIDebugType_Count);
+	GS_ASSERT(theCat   <= GSIDebugCat_Count);
+	GS_ASSERT(theType  <= GSIDebugType_Count);
 
 	// Set for all categories?
 	if (theCat == GSIDebugCat_Count)
@@ -353,10 +360,10 @@ FILE* gsOpenDebugFile(const char* theFileName)
 	FILE* aFile = NULL;
 
 	// Verify parameters
-	assert(theFileName != NULL);
+	GS_ASSERT(theFileName != NULL);
 
 	// Open the new file (clear contents)
-	aFile = fopen(theFileName, "w+");
+	aFile = gsifopen(theFileName, "w+");
 	if (aFile != NULL)
 		gsSetDebugFile(aFile);
 

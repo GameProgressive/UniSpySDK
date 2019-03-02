@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	ConnectDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_CONNECTDLG_H__999D9DD8_12B0_4F46_BF46_F607FB3341A0__INCLUDED_)
 #define AFX_CONNECTDLG_H__999D9DD8_12B0_4F46_BF46_F607FB3341A0__INCLUDED_
 

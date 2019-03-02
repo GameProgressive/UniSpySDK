@@ -1,22 +1,15 @@
-/******
-gcdkeys.c
-GameSpy CDKey SDK Server Code
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy CDKey SDK documentation for more 
- information
-
-******/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeys.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /********
 INCLUDES
 ********/
-
 #include "gcdkeys.h"
 #include "../common/gsCommon.h"
 #include "../common/gsAvailable.h"
@@ -24,7 +17,7 @@ INCLUDES
 #include <time.h>
 
 #ifdef GUSE_ASSERTS
-	#define gassert(a) assert(a)
+	#define gassert(a) GS_ASSERT(a)
 #else
 	#define gassert(a)
 #endif

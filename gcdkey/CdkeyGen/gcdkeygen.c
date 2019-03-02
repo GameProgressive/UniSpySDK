@@ -1,26 +1,23 @@
-/******
-gcdkeygen.c
-GameSpy CDKey SDK CD Key Generation / Validation Example
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
-  This source is simply an example of how you might generate
-  CD Keys and how you would validate them on the client side.
-
-  You can use this algorithm, or a derivation thereof, or your own,
-  but always make sure that:
-  1. Your valid keys are a SMALL subset of the possible keys
-  2. The distribution of valid keys within the full set is even, but
-     not regular.
-
- Please see the GameSpy CDKey SDK documentation for more 
- information
-
-******/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeygen.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// This source is simply an example of how you might generate
+// CD Keys and how you would validate them on the client side.
+// 
+// You can use this algorithm, or a derivation thereof, or your own,
+// but always make sure that:
+// 1. Your valid keys are a SMALL subset of the possible keys
+// 2. The distribution of valid keys within the full set is even, but
+//    not regular.
+//
+// Please see the GameSpy CDKey SDK documentation for more 
+// information.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +31,7 @@ static int Util_RandInt(int low, int high);
 
 #define MINKEYSEED 0x0000100000
 #define MAXKEYSEED 0xFFFFFFFFFF
+
 /* 
 The CD Key is in the form:
 RSSS-SSSS-SSSR-CCCC
@@ -99,7 +97,7 @@ void DoGenerateKeys()
 		base += offset; //move up the base
 		//note: a 1 way xform on seed at this point would increase security
 		//print a 40 bit hex number to the string
-		sprintf(hexstr,"%.10I64x",seed);
+		sprintf(hexstr,"%.10" GSI_FMT64 "x",seed);
 
 		check = ((short)(seed % 65535)) ^ 0x9249; //these are "secret" check calculation values
 
@@ -132,7 +130,7 @@ int ValidateKey(char *key)
 	strncpy(hexstr + 5, key + 5, 4);
 	strncpy(hexstr + 9, key + 10, 3);
 	hexstr[12] = 0;
-	sscanf(hexstr,"%I64x",&seed);
+	sscanf(hexstr,"%" GSI_FMT64 "x",&seed);
 
 	//extract the check value
 	strncpy(hexstr + 2, key + 15, 4);
@@ -165,7 +163,7 @@ void DoValidateKeys()
 
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
 	char resp[10];
 	//display a menu

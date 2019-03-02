@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	ChannelModeDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_CHANNELMODEDLG_H__87449420_C42C_11D3_BD38_00C0F056BC39__INCLUDED_)
 #define AFX_CHANNELMODEDLG_H__87449420_C42C_11D3_BD38_00C0F056BC39__INCLUDED_
 

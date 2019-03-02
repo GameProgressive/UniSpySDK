@@ -1,11 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	KickReasonDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_KICKREASONDLG_H__25C49432_E9A9_4BEF_8C47_31F8DF889DF0__INCLUDED_)
 #define AFX_KICKREASONDLG_H__25C49432_E9A9_4BEF_8C47_31F8DF889DF0__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// KickReasonDlg.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CKickReasonDlg dialog

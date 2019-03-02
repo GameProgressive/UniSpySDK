@@ -1,15 +1,11 @@
-/*
-gpiPeer.h
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiPeer.h
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _GPIPEER_H_
 #define _GPIPEER_H_
@@ -183,4 +179,5 @@ void gpiPeerPingReplyCallback(unsigned int ip, unsigned short port, unsigned int
 void gpiPeerAddOp(GPIPeer *peer, GPIPeerOp *operation);
 void gpiPeerRemoveOp(GPIPeer *peer, GPIPeerOp *operation);
 void gpiCheckTimedOutPeerOperations(GPConnection * connection, GPIPeer * peer);
+
 #endif

@@ -1,22 +1,21 @@
- /*
-GameSpy GHTTP SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	ghttpCommon.h
+// SDK:		GameSpy HTTP SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _GHTTPCOMMON_H_
 #define _GHTTPCOMMON_H_
 
-#include "ghttp.h"
-#include "ghttpConnection.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "ghttp.h"
+#include "ghttpConnection.h"
 
 // HTTP Line-terminator.
 ////////////////////////
@@ -92,6 +91,7 @@ GHIRecvResult ghiDoReceive
 // Do a send on the connection's socket.
 // Returns number of bytes sent (0 or more).
 // If error, returns  (-1).
+// If need termination sending for a while, returns  (-2).
 ////////////////////////////////////////////
 int ghiDoSend
 (

@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	gsSSL.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __GSSSL_H__
 #define __GSSSL_H__
 
@@ -14,7 +21,7 @@ extern "C"
 {
 #endif
 
-	// SSL common types and defines.  Used by HTTP SSL encryption engine
+// SSL common types and defines.  Used by HTTP SSL encryption engine
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

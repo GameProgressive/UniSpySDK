@@ -1,6 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// gSOAP Glue
+// File:	gsSoap.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "gsCore.h"
 #include "gsSoap.h"
 #include "gsPlatformThread.h"
@@ -32,6 +38,16 @@ static GHTTPBool gsiSoapTaskHttpCompletedCallback(GHTTPRequest request, GHTTPRes
 GSSoapTask* gsiExecuteSoap(const char* theURL, const char* theService,
 					 GSXmlStreamWriter theRequestSoap, GSSoapCallbackFunc theCallbackFunc, 
 					 void* theUserData)
+{
+	return gsiExecuteSoapWithTimeout(theURL, theService, theRequestSoap, theCallbackFunc, 0, theUserData);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Execute a soap function (this should be the only call made from other SDKs)
+GSSoapTask* gsiExecuteSoapWithTimeout(const char* theURL, const char* theService,
+						   GSXmlStreamWriter theRequestSoap, GSSoapCallbackFunc theCallbackFunc, 
+						   gsi_time theTimeoutMs, void* theUserData)
 {
 	GSSoapTask* aSoapTask = NULL;
 	GSTask* aCoreTask = NULL;
@@ -72,6 +88,7 @@ GSSoapTask* gsiExecuteSoap(const char* theURL, const char* theService,
 
 	return aSoapTask;
 }
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,7 +249,7 @@ static void gsiSoapTaskExecute(void* theTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Called when the soap task needs to be cancelled
+// Called when the soap task needs to be canceled
 static void gsiSoapTaskCancel(void* theTask)
 {
 	GSSoapTask * soapTask = (GSSoapTask*)theTask;
@@ -253,6 +270,8 @@ static void gsiSoapTaskCallback(void* theTask, GSTaskResult theResult)
 {
 	// Call the developer callback
 	GSSoapTask* aSoapTask = (GSSoapTask*)theTask;
+
+	//ghttpGetHeaders(aSoapTask->mRequestId); // http 'connection' not in use so this returns null..
 
 	(aSoapTask->mCallbackFunc)(aSoapTask->mRequestResult, aSoapTask->mRequestSoap, 
 		aSoapTask->mResponseSoap, aSoapTask->mUserData);

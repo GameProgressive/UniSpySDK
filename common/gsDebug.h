@@ -1,5 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsDebug.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __GSIDEBUG_H__
 #define __GSIDEBUG_H__
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //  Advanced debug logging for GameSpy SDKs
@@ -12,6 +23,7 @@
 //  Todo:
 //      Allow user to specify IP to send debug output to (remote log for PS2)
 //#include "nonport.h"
+
 #include <stdarg.h>
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)

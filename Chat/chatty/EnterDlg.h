@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	EnterDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_ENTERDLG_H__56D121BA_9750_4FF9_AEA2_0CDAC1CB1DC2__INCLUDED_)
 #define AFX_ENTERDLG_H__56D121BA_9750_4FF9_AEA2_0CDAC1CB1DC2__INCLUDED_
 

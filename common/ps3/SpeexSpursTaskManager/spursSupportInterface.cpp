@@ -446,7 +446,7 @@ bool spursConfiguration_isSpursInitialized()
 
 SpursSupportInterface::SpursSupportInterface() 
 {
-	//assert(elfId < SPU_ELF_LAST);
+	//GS_ASSERT(elfId < SPU_ELF_LAST);
 	//m_elfId=elfId;
 	m_bQueueInitialized=false;
 

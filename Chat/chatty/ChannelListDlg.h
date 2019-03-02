@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	ChannelListDlg.h
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_CHANNELLISTDLG_H__2D417F5B_EB62_4913_BB7A_6B20477ED21D__INCLUDED_)
 #define AFX_CHANNELLISTDLG_H__2D417F5B_EB62_4913_BB7A_6B20477ED21D__INCLUDED_
 

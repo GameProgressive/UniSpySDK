@@ -1,10 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsAssert.h
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __GSIASSERT_H__
 #define __GSIASSERT_H__
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
 #endif
-///////////////////////////////////////////////////////////////////////////////
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Assert for GameSpy SDKs
 //
@@ -44,9 +54,9 @@ extern  void  gsDebugAssert			(const char *format,const char *szError,const char
 	// be ignored.
 	// ex// BAD:  GS_ASSERT( i== FN())		// FN() will never be called, i will never be set in release builds
 
-	#define GS_ASSERT(x)				{};		// ex// GS_ASSERT(		result == GS_OK )
-	#define GS_ASSERT_STR(x, t)			{};		// ex// GS_ASSERT_STR(	result == GS_OK ,"GSFunction failed")
-	#define GS_ASSERT_ALIGN_16(x)		{}; 
+	#define GS_ASSERT(x)
+	#define GS_ASSERT_STR(x,msg)
+	#define GS_ASSERT_ALIGN_16(x)
 	#define GS_FAIL()			
 	#define GS_FAIL_STR(x)			
 
@@ -54,13 +64,11 @@ extern  void  gsDebugAssert			(const char *format,const char *szError,const char
 ///////////////////////////////////////////////////////////////////////////////
 #else
 
-	#define GS_ASSERT(x)				{ if(!(x))			{  gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n",	"",					__FILE__,__LINE__); } };
-	#define GS_ASSERT_STR(x,t)			{ if(!(x))			{  gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n",	 t,					__FILE__,__LINE__); } };
-	#define GS_ASSERT_ALIGN_16(x)		{ if(((U32)(x))%16) {  gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n","16 byte misalign",	__FILE__,__LINE__); } };
-	#define GS_FAIL()										{  gsDebugAssert("FAIL  [%s] ln %s line:%d\n",	"",					__FILE__,__LINE__);	};											
-	#define GS_FAIL_STR(t)									{  gsDebugAssert("FAIL  [%s] ln %s line:%d\n",	t,					__FILE__,__LINE__);	};											
-																				  
-
+	#define GS_ASSERT(x)			((x) ? (void)0 : gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n", "", __FILE__, __LINE__))
+	#define GS_ASSERT_STR(x,msg)	((x) ? (void)0 : gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n", "", __FILE__, __LINE__))
+	#define GS_ASSERT_ALIGN_16(x)	((((U32)(x))&15) ? gsDebugAssert("ASSERT on '" #x "' [%s] in %s line:%d\n","16 byte misalign", __FILE__, __LINE__) : (void)0)
+	#define GS_FAIL()				gsDebugAssert("FAIL  [%s] ln %s line:%d\n", ""   , __FILE__, __LINE__)
+	#define GS_FAIL_STR(msg)		gsDebugAssert("FAIL  [%s] ln %s line:%d\n", (msg), __FILE__, __LINE__)
 
 #endif // GSI_COMMON_DEBUG
 

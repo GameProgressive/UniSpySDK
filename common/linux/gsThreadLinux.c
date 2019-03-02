@@ -2,8 +2,10 @@
 // Linux Threading Support (pthreads)
 // 
 // NOTE: when implementing this make sure the "-lpthread" compiler option is used
-//
-///////////////////////////////////////////////////////////////////////////////
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 ///////////////////////////////////////////////////////////////////////////////
 #include "../gsPlatformUtil.h"
 #include "../gsPlatformThread.h"
@@ -14,6 +16,7 @@
 #define _REENTRANT
 
 #define PTHREAD_NO_ERROR 0
+
 
 gsi_u32 gsiInterlockedIncrement(gsi_u32 * value)
 {

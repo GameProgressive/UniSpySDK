@@ -1,15 +1,11 @@
-/*
-gpiTransfer.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiTransfer.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -208,7 +204,7 @@ void gpiFreeTransfer
 	// Find the transfer.
 	/////////////////////
 	pos = ArraySearch(iconnection->transfers, transfer, gpiTransferCompare, 0, 0);
-	assert(pos != NOT_FOUND);
+	GS_ASSERT(pos != NOT_FOUND);
 	if(pos == NOT_FOUND)
 		return;
 
@@ -269,7 +265,7 @@ GPIFile * gpiAddFileToTransfer
 	GPIFile file;
 	char * str;
 
-	assert(name && name[0]);
+	GS_ASSERT(name && name[0]);
 
 	memset(&file, 0, sizeof(GPIFile));
 
@@ -422,13 +418,13 @@ int gpiGetTransferLocalIDByIndex
 	int num;
 
 	num = ArrayLength(iconnection->transfers);
-	assert(index >= 0);
-	assert(index < num);
+	GS_ASSERT(index >= 0);
+	GS_ASSERT(index < num);
 	if((index < 0) || (index >= num))
 		return -1;
 
 	transfer = (GPITransfer *)ArrayNth(iconnection->transfers, index);
-	assert(transfer);
+	GS_ASSERT(transfer);
 	if(!transfer)
 		return -1;
 
@@ -595,10 +591,10 @@ static GPIBool gpiHandleSendRequest
 	// Store the total size.
 	////////////////////////
 	transfer->totalSize = totalSize;
-
-	return GPITrue;
 	
 	GSI_UNUSED(bufferLen);
+
+	return GPITrue;
 }
 
 static GPIBool gpiHandleSendReply
@@ -663,9 +659,9 @@ static GPIBool gpiHandleSendReply
 		transfer->currentFile = 0;
 	}
 
-	return GPITrue;
-
 	GSI_UNUSED(bufferLen);
+
+	return GPITrue;
 }
 
 static GPIBool gpiHandleBegin
@@ -735,7 +731,7 @@ static GPIBool gpiHandleBegin
 	do
 	{
 		sprintf(buffer, "%sgpt_%d_%d_%d.gpt", transfer->baseDirectory, transfer->localID, fileIndex, rand());
-		file->file = fopen(buffer, "wb");
+		file->file = gsifopen(buffer, "wb");
 		count++;
 	}
 	while(!file->file && (count < 5));
@@ -826,7 +822,7 @@ static GPIBool gpiHandleEnd
 #ifdef GPI_CONFIRM_FILES
 		// We should be waiting for confirmation.
 		/////////////////////////////////////////
-		assert(file->flags & GPI_FILE_CONFIRMING);
+		GS_ASSERT(file->flags & GPI_FILE_CONFIRMING);
 
 		// Call the callback.
 		/////////////////////
@@ -861,7 +857,7 @@ static GPIBool gpiHandleEnd
 	{
 		// Check the file.
 		//////////////////
-		assert(file->file);
+		GS_ASSERT(file->file);
 		if(!file->file)
 			return GPIFalse;
 
@@ -1016,7 +1012,7 @@ static GPIBool gpiHandleData
 
 	// Check the file.
 	//////////////////
-	assert(file->file);
+	GS_ASSERT(file->file);
 	if(!file->file)
 		return GPIFalse;
 
@@ -1373,14 +1369,14 @@ GPResult gpiProcessCurrentFile
 	int i;
 	int total;
 
-	assert(transfer->currentFile >= 0);
-	assert(transfer->currentFile < ArrayLength(transfer->files));
+	GS_ASSERT(transfer->currentFile >= 0);
+	GS_ASSERT(transfer->currentFile < ArrayLength(transfer->files));
 
 	// Get the current file.
 	////////////////////////
 	file = (GPIFile *)ArrayNth(transfer->files, transfer->currentFile);
 
-	assert(!(file->flags & GPI_FILE_FAILED));
+	GS_ASSERT(!(file->flags & GPI_FILE_FAILED));
 
 #ifdef GPI_CONFIRM_FILES
 	// If it's being confirmed, just wait.
@@ -1443,7 +1439,7 @@ GPResult gpiProcessCurrentFile
 			{
 				// Open it.
 				///////////
-				file->file = fopen(file->path, "rb");
+				file->file = gsifopen(file->path, "rb");
 				if(file->file)
 				{
 					// Send the begin.
@@ -1672,7 +1668,7 @@ GPResult gpiProcessTransfer
 	if(transfer->throttle == 0)
 		return GP_NO_ERROR;
 
-	// Don't send files if we're not transfering yet.
+	// Don't send files if we're not transferring yet.
 	//////////////////////////////////////////////////
 	if(transfer->state < GPITransferTransferring)
 		return GP_NO_ERROR;
@@ -1834,7 +1830,7 @@ void gpiTransfersHandlePong
 		// Get this transfer.
 		/////////////////////
 		transfer = (GPITransfer *)ArrayNth(iconnection->transfers, i);
-		assert(transfer);
+		GS_ASSERT(transfer);
 
 		// Is it waiting on a pong from this profile?
 		/////////////////////////////////////////////

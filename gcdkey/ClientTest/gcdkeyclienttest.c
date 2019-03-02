@@ -1,17 +1,11 @@
-/******
-gcdkeyclienttest.c
-GameSpy CDKey SDK Client Sample
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy CDKey SDK documentation for more 
- information
-
-******/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gcdkeyclienttest.c
+// SDK:		GameSpy CD Key SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "../../common/gsCommon.h"
 #include "../gcdkeyc.h"
@@ -22,7 +16,7 @@ devsupport@gamespy.com
 
 #define BUFSIZE 256
 
-#define readstring(buffer) { fgets(buffer, sizeof(buffer), stdin); buffer[strlen(buffer) - 1] ='\0'; }
+#define readstring(buffer) { if (!fgets(buffer, sizeof(buffer), stdin)) buffer[0] = 0; else buffer[strlen(buffer) - 1] ='\0'; }
 
 int test_main(int argc, char **argv)
 {

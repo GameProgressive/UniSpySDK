@@ -1,12 +1,11 @@
-/*
-GameSpy Chat SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	chatMain.c
+// SDK:		GameSpy Chat SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -28,7 +27,8 @@ devsupport@gamespy.com
 /************
 ** GLOBALS **
 ************/
-// This can be overridden using an extern to pass a different versionID number to the chat server as part of the crypt negotiation
+// This can be overridden using an extern to pass a different versionID 
+// number to the chat server as part of the crypt negotiation.
 int ciVersionID = 1;
 
 /************
@@ -42,13 +42,13 @@ int ciVersionID = 1;
 								}while(ciCheckForID(chat, ID));\
 							}
 
-#define ASSERT_CHANNEL()    assert(channel != NULL); assert(channel[0] != '\0');
-#define ASSERT_NICK()       assert(nick != NULL); assert(nick[0] != '\0'); assert(strlen(nick) < MAX_NICK);
-#define ASSERT_USER(user)   assert(user != NULL); assert(user[0] != '\0'); assert(strlen(user) < MAX_USER);
-#define ASSERT_MESSAGE()    assert(message != NULL); assert(message[0] != '\0');
-#define ASSERT_TYPE(type)   assert((type == CHAT_MESSAGE) || (type == CHAT_ACTION) || (type == CHAT_NOTICE) || (type == CHAT_UTM) || (type == CHAT_ATM));
-#define ASSERT_PASSWORD()   assert(password != NULL); assert(password[0] != '\0');
-#define ASSERT_BAN()        assert(ban != NULL); assert(ban [0] != '\0');
+#define ASSERT_CHANNEL()    GS_ASSERT(channel != NULL); GS_ASSERT(channel[0] != '\0');
+#define ASSERT_NICK()       GS_ASSERT(nick != NULL); GS_ASSERT(nick[0] != '\0'); GS_ASSERT(strlen(nick) < MAX_NICK);
+#define ASSERT_USER(user)   GS_ASSERT(user != NULL); GS_ASSERT(user[0] != '\0'); GS_ASSERT(strlen(user) < MAX_USER);
+#define ASSERT_MESSAGE()    GS_ASSERT(message != NULL); GS_ASSERT(message[0] != '\0');
+#define ASSERT_TYPE(type)   GS_ASSERT((type == CHAT_MESSAGE) || (type == CHAT_ACTION) || (type == CHAT_NOTICE) || (type == CHAT_UTM) || (type == CHAT_ATM));
+#define ASSERT_PASSWORD()   GS_ASSERT(password != NULL); GS_ASSERT(password[0] != '\0');
+#define ASSERT_BAN()        GS_ASSERT(ban != NULL); GS_ASSERT(ban [0] != '\0');
 
 #define CI_NUM_TRANSLATED_NICKS   2
 
@@ -69,7 +69,7 @@ static CHATBool ciProcessServerMessage(CHAT chat, const ciServerMessage * messag
 {
 	int i;
 
-	assert(message != NULL);
+	GS_ASSERT(message != NULL);
 
 	// Figure out what type of message this is.
 	///////////////////////////////////////////
@@ -205,7 +205,7 @@ void ciSendNick(CHAT chat)
 	{
 		
 		// 10-13-2004: changed by Saad Nader
-		// check for nick length and for an invalid nick.
+		// Check for nick length and for an invalid nick.
 		/////////////////////////////////////////////////
 
 		int validateNick = ciNickIsValid(connection->nick);
@@ -339,9 +339,9 @@ static CHAT chatConnectDoit(CILoginType loginType,
 	const char * socketNick = "";
 	
 	//Added default server address and port
-	//assert(serverAddress != NULL);
-	assert(callbacks != NULL);
-	assert(connectCallback != NULL);
+	//GS_ASSERT(serverAddress != NULL);
+	GS_ASSERT(callbacks != NULL);
+	GS_ASSERT(connectCallback != NULL);
 	
 	// Check the arguments based on the login type.
 	///////////////////////////////////////////////
@@ -354,49 +354,49 @@ static CHAT chatConnectDoit(CILoginType loginType,
 	}
 	else if(loginType == CIUniqueNickLogin)
 	{
-		assert(namespaceID > 0);
+		GS_ASSERT(namespaceID > 0);
 		if(namespaceID <= 0)
 			return NULL;
-		assert(uniquenick && uniquenick[0]);
+		GS_ASSERT(uniquenick && uniquenick[0]);
 		if(!uniquenick || !uniquenick[0])
 			return NULL;
-		assert(password && password[0]);
+		GS_ASSERT(password && password[0]);
 		if(!password || !password[0])
 			return NULL;
 		socketNick = uniquenick;
 	}
 	else if(loginType == CIProfileLogin)
 	{
-		assert(namespaceID >= 0);
+		GS_ASSERT(namespaceID >= 0);
 		if(namespaceID < 0)
 			return NULL;
-		assert(email && email[0]);
+		GS_ASSERT(email && email[0]);
 		if(!email || !email[0])
 			return NULL;
-		assert(profilenick && profilenick[0]);
+		GS_ASSERT(profilenick && profilenick[0]);
 		if(!profilenick || !profilenick[0])
 			return NULL;
-		assert(password && password[0]);
+		GS_ASSERT(password && password[0]);
 		if(!password || !password[0])
 			return NULL;
 		socketNick = profilenick;
 	}
 	else if(loginType == CIPreAuthLogin)
 	{
-		assert(authtoken && authtoken[0]);
+		GS_ASSERT(authtoken && authtoken[0]);
 		if(!authtoken || !authtoken[0])
 			return NULL;
-		assert(partnerchallenge && partnerchallenge[0]);
+		GS_ASSERT(partnerchallenge && partnerchallenge[0]);
 		if(!partnerchallenge || !partnerchallenge[0])
 			return NULL;
 		socketNick = "preauth";
 	}
 	if(loginType != CINoLogin)
 	{
-		assert(gamename && gamename[0]);
+		GS_ASSERT(gamename && gamename[0]);
 		if(!gamename || !gamename[0])
 			return NULL;
-		assert(secretKey && secretKey[0]);
+		GS_ASSERT(secretKey && secretKey[0]);
 		if(!secretKey || !secretKey[0])
 			return NULL;
 	}
@@ -1079,11 +1079,11 @@ void chatChangeNickA(CHAT chat,
 	CONNECTION;
 	CONNECTED;
 
-	assert(newNick);
-	assert(newNick[0]);
-	assert(strlen(newNick) < MAX_NICK);
-	assert(callback);
-	assert(connection->connected);
+	GS_ASSERT(newNick);
+	GS_ASSERT(newNick[0]);
+	GS_ASSERT(strlen(newNick) < MAX_NICK);
+	GS_ASSERT(callback);
+	GS_ASSERT(connection->connected);
 
 	// chatRetryWithNick should be called while connecting.
 	///////////////////////////////////////////////////////
@@ -1175,8 +1175,8 @@ void chatFixNickA(char * newNick,
 	int c;
 	char oldNickCopy[MAX_CHAT_NICK];
 	char *pOldNick = oldNickCopy;
-	assert(oldNick);
-	assert(newNick);
+	GS_ASSERT(oldNick);
+	GS_ASSERT(newNick);
 	strzcpy(oldNickCopy, oldNick, MAX_CHAT_NICK);
 	//if(isdigit(*oldNick) || (*oldNick == '-'))
 	// 10-14-2004 Changed by Saad Nader
@@ -1219,8 +1219,8 @@ const char * chatTranslateNickA(char * nick,
 	int nickLen;
 	int extensionLen;
 
-	assert(nick);
-	assert(extension);
+	GS_ASSERT(nick);
+	GS_ASSERT(extension);
 
 	nickLen = (int)strlen(nick);
 	extensionLen = (int)strlen(extension);
@@ -1241,8 +1241,8 @@ const unsigned short * chatTranslateNickW(unsigned short * nick,
 	char extension_A[MAX_NICK];
 	const char * translatedNick_A;
 
-	assert(nick);
-	assert(extension);
+	GS_ASSERT(nick);
+	GS_ASSERT(extension);
 
 	UCS2ToAsciiString(nick, nick_A);
 	UCS2ToAsciiString(extension, extension_A);
@@ -1349,10 +1349,10 @@ void chatAuthenticateCDKeyA(CHAT chat,
 	CONNECTION;
 	CONNECTED;
 
-	assert(cdkey);
-	assert(cdkey[0]);
-	assert(callback);
-	assert(connection->connected);
+	GS_ASSERT(cdkey);
+	GS_ASSERT(cdkey[0]);
+	GS_ASSERT(callback);
+	GS_ASSERT(connection->connected);
 
 	// Check we're connected.
 	/////////////////////////
@@ -1417,7 +1417,7 @@ void chatEnumChannelsA(CHAT chat,
 	CONNECTION;
 	CONNECTED;
 
-	assert((callbackAll != NULL) || (callbackEach != NULL));
+	GS_ASSERT((callbackAll != NULL) || (callbackEach != NULL));
 
 	if(!filter)
 		filter = "";
@@ -1442,6 +1442,10 @@ void chatEnumChannelsW(CHAT chat,
 }
 #endif
 
+/*************
+** CHANNELS **
+*************/
+
 void chatEnterChannelA(CHAT chat,
 					  const char * channel,
 					  const char * password,
@@ -1455,7 +1459,7 @@ void chatEnterChannelA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callbacks != NULL);
+	GS_ASSERT(callbacks != NULL);
 
 	if(password == NULL)
 		password = "";
@@ -1611,7 +1615,7 @@ void chatGetChannelTopicA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	// Check if we already have the topic.
 	//////////////////////////////////////
@@ -1659,7 +1663,7 @@ void chatSetChannelModeA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(mode != NULL);
+	GS_ASSERT(mode != NULL);
 
 	// Build the mode string.
 	/////////////////////////
@@ -1726,7 +1730,7 @@ void chatGetChannelModeA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	// Are we in this channel?
 	//////////////////////////
@@ -1819,7 +1823,7 @@ void chatGetChannelPasswordA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	// Check that we're in the channel.
 	///////////////////////////////////
@@ -1829,7 +1833,7 @@ void chatGetChannelPasswordA(CHAT chat,
 	// Get the password.
 	////////////////////
 	password = ciGetChannelPassword(chat, channel);
-	assert(password != NULL);
+	GS_ASSERT(password != NULL);
 
 	// Get an ID.
 	/////////////
@@ -1866,7 +1870,7 @@ void chatSetChannelLimitA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(limit >= 0);
+	GS_ASSERT(limit >= 0);
 
 	if(limit)
 		ciSocketSendf(&connection->chatSocket, "MODE %s +l %d", channel, limit);
@@ -1895,7 +1899,7 @@ void chatEnumChannelBansA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	ciSocketSendf(&connection->chatSocket, "MODE %s +b", channel);
 
@@ -2063,14 +2067,14 @@ static void ciEnumUsersCallback(CHAT chat, const char * channel, int numUsers, c
 	// Check the args.
 	//////////////////
 	ASSERT_CHANNEL();
-	assert(numUsers >= 0);
+	GS_ASSERT(numUsers >= 0);
 #ifdef _DEBUG
 	{
 	int i;
 	if(numUsers > 0)
 	{
-		assert(users != NULL);
-		assert(modes != NULL);
+		GS_ASSERT(users != NULL);
+		GS_ASSERT(modes != NULL);
 	}
 	for(i = 0 ; i < numUsers ; i++)
 	{
@@ -2079,12 +2083,12 @@ static void ciEnumUsersCallback(CHAT chat, const char * channel, int numUsers, c
 	}
 	}
 #endif
-	assert(param != NULL);
+	GS_ASSERT(param != NULL);
 
 	// Get the data.
 	////////////////
 	data = (ciEnumUsersData *)param;
-	assert(data->callback != NULL);
+	GS_ASSERT(data->callback != NULL);
 
 	// Call the callback directly.
 	//////////////////////////////
@@ -2115,7 +2119,7 @@ void chatEnumUsersA(CHAT chat,
 	CONNECTED;
 
 	//ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	if(channel == NULL)
 		channel = "";
@@ -2222,7 +2226,7 @@ void chatGetUserInfoA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_USER(user);
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	ciSocketSendf(&connection->chatSocket, "WHOIS %s", user);
 
@@ -2256,7 +2260,7 @@ void chatGetBasicUserInfoA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_USER(nick);
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	// Check if we already have it.
 	///////////////////////////////
@@ -2326,7 +2330,7 @@ CHATBool chatGetBasicUserInfoNoWaitW(CHAT chat,
 	if(!connection->connected)
 		return CHATFalse;
 
-	assert(nick);
+	GS_ASSERT(nick);
 
 	UCS2ToAsciiString(nick, nick_A);
 	return ciGetUserBasicInfoW(chat, nick_A, user, address);
@@ -2344,7 +2348,7 @@ void chatGetChannelBasicUserInfoA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	ciSocketSendf(&connection->chatSocket, "WHO %s", channel);
 
@@ -2497,7 +2501,7 @@ void chatGetUserModeA(CHAT chat,
 
 	ASSERT_CHANNEL();
 	ASSERT_USER(user);
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	// Get the mode.
 	////////////////
@@ -2549,7 +2553,7 @@ CHATBool chatGetUserModeNoWaitA(CHAT chat,
 
 	ASSERT_CHANNEL();
 	ASSERT_USER(user);
-	assert(mode);
+	GS_ASSERT(mode);
 
 	// Get the mode.
 	////////////////
@@ -2584,7 +2588,7 @@ void chatGetUdpRelayA(CHAT chat,
 	CONNECTED;
 
 	ASSERT_CHANNEL();
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 
 	ciSocketSendf(&connection->chatSocket, "GETUDPRELAY %s", channel);
 
@@ -2683,10 +2687,10 @@ static void ciSendGetKey(CHAT chat,
 
 	CONNECTION;
 
-	assert(target && target[0]);
-	assert(cookie && cookie[0]);
-	assert(num >= 1);
-	assert(keys);
+	GS_ASSERT(target && target[0]);
+	GS_ASSERT(cookie && cookie[0]);
+	GS_ASSERT(num >= 1);
+	GS_ASSERT(keys);
 
 	// Start off the buffer.
 	////////////////////////
@@ -2738,8 +2742,8 @@ void chatGetGlobalKeysA(CHAT chat,
 	CONNECTION;
 	CONNECTED;
 
-	assert(num >= 0);
-	assert(keys);
+	GS_ASSERT(num >= 0);
+	GS_ASSERT(keys);
 
 	if(!target || !target[0])
 		target = connection->nick;
@@ -2776,8 +2780,8 @@ void chatGetGlobalKeysW(CHAT chat,
 	char** keys_A;
 	int i = 0;
 
-	assert(target);
-	assert(keys);
+	GS_ASSERT(target);
+	GS_ASSERT(keys);
 
 	target_A	= (char*)UCS2ToUTF8StringAlloc(target);
 	keys_A		= (char**)UCS2ToUTF8StringArrayAlloc(keys, num);
@@ -2869,9 +2873,9 @@ static CHATBool ciSendGetChannelKey(CHAT chat,
 
 	CONNECTION;
 
-	assert(channel && channel[0]);
-	assert(cookie && cookie[0]);
-	assert(!num || keys);
+	GS_ASSERT(channel && channel[0]);
+	GS_ASSERT(cookie && cookie[0]);
+	GS_ASSERT(!num || keys);
 
 	// Start off the buffer.
 	////////////////////////
@@ -2930,8 +2934,8 @@ static CHATBool ciSendGetChannelKey(CHAT chat,
 	///////////////////////////////////////////
 	if(!num && (!nick || !nick[0]))
 	{
-		strcpy(buffer + len, "*");
-		len++;
+		buffer[len] = '*';
+		buffer[++len] = '\0';
 	}
 
 	// Send it.
@@ -2956,8 +2960,8 @@ void chatGetChannelKeysA(CHAT chat,
 	CONNECTION;
 	CONNECTED;
 
-	assert(num >= 0);
-	assert(!num || keys);
+	GS_ASSERT(num >= 0);
+	GS_ASSERT(!num || keys);
 
 	// Get a cookie.
 	////////////////

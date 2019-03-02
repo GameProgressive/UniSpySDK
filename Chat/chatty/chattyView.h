@@ -1,6 +1,13 @@
-// chattyView.h : interface of the CChattyView class
+///////////////////////////////////////////////////////////////////////////////
+// File:	chattyView.h
+// SDK:		GameSpy Chat SDK
 //
-/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Interface of the CChattyView class.
 
 #if !defined(AFX_CHATTYVIEW_H__E1B25967_4DA7_4ABD_A404_9C60D59E1C60__INCLUDED_)
 #define AFX_CHATTYVIEW_H__E1B25967_4DA7_4ABD_A404_9C60D59E1C60__INCLUDED_

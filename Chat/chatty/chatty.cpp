@@ -1,5 +1,13 @@
-// chatty.cpp : Defines the class behaviors for the application.
+///////////////////////////////////////////////////////////////////////////////
+// File:	chatty.cpp
+// SDK:		GameSpy Chat SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Defines the class behaviors for the application.
 
 #include "stdafx.h"
 #include "chatty.h"
@@ -21,7 +29,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CChattyApp
-
 BEGIN_MESSAGE_MAP(CChattyApp, CWinApp)
 	//{{AFX_MSG_MAP(CChattyApp)
 	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)

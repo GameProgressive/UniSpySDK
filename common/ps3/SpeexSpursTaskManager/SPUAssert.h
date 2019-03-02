@@ -11,7 +11,7 @@
 #include <spu_printf.h>
 #define SPU_ASSERT(cond) do { if (__builtin_expect(!(cond), 0)) { spu_printf("SPU: Assertion failed!  Expression: " #cond "\n    in %s at " __FILE__ ":%i\n", __FUNCTION__, __LINE__); spu_hcmpeq((cond), 0); } } while (0)
 #else // __CELLOS_LV2__
-#define SPU_ASSERT(cond) assert(cond)
+#define SPU_ASSERT(cond) GS_ASSERT(cond)
 #endif //__CELLOS_LV2__
 
 #else  // _DEBUG
@@ -23,7 +23,7 @@
 // Later on we'll want no asserts in release builds
 //#define SPU_ASSERT(cond) do {} while (0)
 #else  // __CELLOS_LV2__
-#define SPU_ASSERT(cond)  assert(cond)
+#define SPU_ASSERT(cond)  GS_ASSERT(cond)
 #endif // __CELLOS_LV2__
 
 #endif // _DEBUG

@@ -1,5 +1,11 @@
-// ChannelModeDlg.cpp : implementation file
+///////////////////////////////////////////////////////////////////////////////
+// File:	ChannelModeDlg.cpp
+// SDK:		GameSpy Chat SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "stdafx.h"
 #include "chatty.h"
@@ -13,8 +19,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CChannelModeDlg dialog
-
-
 CChannelModeDlg::CChannelModeDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CChannelModeDlg::IDD, pParent)
 {

@@ -1,15 +1,11 @@
-/*
-gpiProfile.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiProfile.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -27,10 +23,8 @@ static char GPIInfoCacheFilename[FILENAME_MAX + 1] = "gp.info";
 //FUNCTIONS
 ///////////
 static int
-gpiProfilesTableHash(
-  const void *arg,
-  int numBuckets
-)
+gpiProfilesTableHash(const void *arg,
+					 int numBuckets)
 {
 	const GPIProfile * profile = (const GPIProfile *)arg;
 	return (profile->profileId % numBuckets);
@@ -47,10 +41,7 @@ gpiProfilesTableCompare(
 	return (profile1->profileId - profile2->profileId);
 }
 
-static void
-gpiProfilesTableFree(
-  void *arg
-)
+static void gpiProfilesTableFree(void *arg)
 {
 	GPIProfile * profile = (GPIProfile *)arg;
 	if(profile->buddyStatus)
@@ -77,10 +68,7 @@ gpiProfilesTableFree(
 	freeclear(profile->peerSig);
 }
 
-GPIBool
-gpiInitProfiles(
-  GPConnection * connection
-)
+GPIBool gpiInitProfiles(GPConnection * connection)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
@@ -101,12 +89,9 @@ gpiInitProfiles(
 
 #ifndef NOFILE
 
-static GPResult
-gpiOpenDiskProfiles(
-  GPConnection * connection,
-  GPIBool write,
-  GPIBool * failed
-)
+static GPResult gpiOpenDiskProfiles(GPConnection * connection,
+									GPIBool write,
+									GPIBool * failed)
 {
 	FILE * fp = NULL;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -114,9 +99,9 @@ gpiOpenDiskProfiles(
 	// Open the file.
 	/////////////////
 	if(write)
-		fp = fopen(GPIInfoCacheFilename, "wt");
+		fp = gsifopen(GPIInfoCacheFilename, "wt");
 	else
-		fp = fopen(GPIInfoCacheFilename, "rt");
+		fp = gsifopen(GPIInfoCacheFilename, "rt");
 	if(fp == NULL)
 	{
 		*failed = GPITrue;
@@ -134,9 +119,7 @@ gpiOpenDiskProfiles(
 }
 
 static void
-gpiCloseDiskProfiles(
-  GPConnection * connection
-)
+gpiCloseDiskProfiles(GPConnection * connection)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
@@ -148,13 +131,10 @@ gpiCloseDiskProfiles(
 	return;
 }
 
-static GPResult
-gpiReadDiskKeyValue(
-  GPConnection * connection,
-  GPIBool * failed,
-  char key[512],
-  char value[512]
-)
+static GPResult gpiReadDiskKeyValue(GPConnection * connection,
+									GPIBool * failed,
+									char key[512],
+									char value[512])
 {
 	int c;
 	FILE * fp;
@@ -217,18 +197,16 @@ gpiReadDiskKeyValue(
 	// Done.
 	////////
 	*failed = GPIFalse;
-	return GP_NO_ERROR;
 	
 	GSI_UNUSED(value);
 	GSI_UNUSED(key);
 	GSI_UNUSED(connection);
+
+	return GP_NO_ERROR;
 }
 
-static GPResult
-gpiReadDiskProfile(
-  GPConnection * connection,
-  GPIBool * failedOut
-)
+static GPResult gpiReadDiskProfile(GPConnection * connection,
+								   GPIBool * failedOut)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	FILE * fp;
@@ -445,16 +423,14 @@ gpiReadDiskProfile(
 			gpiSetInfoCache(connection, pProfile, &infoCache);
 	}
 	*failedOut = GPIFalse;
-	return GP_NO_ERROR;
 	
 	GSI_UNUSED(connection);
+
+	return GP_NO_ERROR;
 }
 
-static GPResult
-gpiReadVersion(
-  const GPConnection * connection,
-  int * version
-)
+static GPResult gpiReadVersion(const GPConnection * connection,
+							   int * version)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	FILE * fp;
@@ -468,17 +444,14 @@ gpiReadVersion(
 	if(fscanf(fp, "%d\n", version) != 1)
 		*version = 0;
 
-	return GP_NO_ERROR;
-	
 	GSI_UNUSED(connection);
 	GSI_UNUSED(version);
+	
+	return GP_NO_ERROR;
 }
 
-static void
-gpiWriteVersion(
-  GPConnection * connection,
-  int version
-)
+static void gpiWriteVersion(GPConnection * connection,
+							int version)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	FILE * fp;
@@ -495,10 +468,7 @@ gpiWriteVersion(
 	GSI_UNUSED(version);
 }
 
-GPResult
-gpiLoadDiskProfiles(
-  GPConnection * connection
-)
+GPResult gpiLoadDiskProfiles(GPConnection * connection)
 {
 	GPIBool failed;
 	int count;
@@ -540,12 +510,9 @@ gpiLoadDiskProfiles(
 	return GP_NO_ERROR;
 }
 
-static GPIBool
-gpiSaveDiskProfile(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void * data
-)
+static GPIBool gpiSaveDiskProfile(GPConnection * connection,
+								  GPIProfile * profile,
+								  void * data)
 {
 	FILE * fp;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -611,10 +578,7 @@ gpiSaveDiskProfile(
 	return GPITrue;
 }
 
-GPResult
-gpiSaveDiskProfiles(
-  GPConnection * connection
-)
+GPResult gpiSaveDiskProfiles(GPConnection * connection)
 {
 	GPIBool failed;
 
@@ -645,12 +609,9 @@ gpiSaveDiskProfiles(
 
 #endif
 
-GPResult
-gpiProcessNewProfile(
-  GPConnection * connection,
-  GPIOperation * operation,
-  const char * input
-)
+GPResult gpiProcessNewProfile(GPConnection * connection,
+							  GPIOperation * operation,
+							  const char * input)
 {
 	char buffer[16];
 	int pid;
@@ -695,18 +656,15 @@ gpiProcessNewProfile(
 	return GP_NO_ERROR;
 }
 
-GPIProfile *
-gpiProfileListAdd(
-  GPConnection * connection,
-  int id
-)
+GPIProfile * gpiProfileListAdd(GPConnection *connection,
+							   int id)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIProfileList * profileList = &iconnection->profileList;
 	GPIProfile profile;
 	GPIProfile * pProfile;
 
-	assert(id > 0);
+	GS_ASSERT(id > 0);
 
 	// Check the parameters. 2000.02.14.JED was not checked in release build.
 	/////////////////////////////////////////////////////////////////////////
@@ -746,12 +704,9 @@ gpiProfileListAdd(
 	return NULL;
 }
 
-GPIBool
-gpiGetProfile(
-  GPConnection * connection,
-  GPProfile profileid,
-  GPIProfile ** pProfile
-)
+GPIBool gpiGetProfile(GPConnection * connection, 
+					  GPProfile profileid,
+					  GPIProfile ** pProfile)
 {
 	GPIProfile * profile;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -765,15 +720,12 @@ gpiGetProfile(
 	return ((profile != NULL) ? GPITrue:GPIFalse);
 }
 
-GPResult
-gpiNewProfile(
-  GPConnection * connection,
-  const char nick[31],
-  GPEnum replace,
-  GPEnum blocking,
-  GPCallback callback,
-  void * param
-)
+GPResult gpiNewProfile(GPConnection * connection,
+					   const char nick[31], 
+					   GPEnum replace,
+					   GPEnum blocking,
+					   GPCallback callback,
+					   void * param)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIOperation * operation;
@@ -831,12 +783,9 @@ gpiNewProfile(
 	return GP_NO_ERROR;
 }
 
-GPResult gpiProcessDeleteProfle
-(
-  GPConnection * connection,
-  GPIOperation * operation,
-  const char * input
-)
+GPResult gpiProcessDeleteProfle(GPConnection * connection,
+								GPIOperation * operation,
+								const char * input)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPICallback callback;
@@ -876,12 +825,9 @@ GPResult gpiProcessDeleteProfle
 }
 
 
-GPResult
-gpiDeleteProfile(
-  GPConnection * connection,
-  GPCallback callback,
-  void *param
-)
+GPResult gpiDeleteProfile(GPConnection * connection,
+						  GPCallback callback,
+						  void *param)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIOperation * operation;
@@ -916,11 +862,8 @@ gpiDeleteProfile(
 	return GP_NO_ERROR;
 }
 
-void
-gpiRemoveProfileByID(
-  GPConnection * connection,
-  int profileid
-)
+void gpiRemoveProfileByID(GPConnection * connection,
+						  int profileid)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIProfile * profile;
@@ -929,11 +872,8 @@ gpiRemoveProfileByID(
 		TableRemove(iconnection->profileList.profileTable, profile);
 }
 
-void
-gpiRemoveProfile(
-  GPConnection * connection,
-  GPIProfile * profile
-)
+void gpiRemoveProfile(GPConnection * connection,
+					  GPIProfile * profile)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
@@ -948,11 +888,9 @@ typedef struct GPIFindProfileByUserData
 	GPIBool found;
 } GPIFindProfileByUserData;
 
-static GPIBool gpiCheckProfileForUser(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void *udata
-)
+static GPIBool gpiCheckProfileForUser(GPConnection * connection,
+									  GPIProfile * profile,
+									  void *udata)
 {
 	GPIFindProfileByUserData * data = (GPIFindProfileByUserData *)udata;
 
@@ -977,13 +915,10 @@ static GPIBool gpiCheckProfileForUser(
 	return GPITrue;
 }
 
-GPResult
-gpiFindProfileByUser(
-  GPConnection * connection,
-  char nick[GP_NICK_LEN],
-  char email[GP_EMAIL_LEN],
-  GPIProfile ** profile
-)
+GPResult gpiFindProfileByUser(GPConnection * connection,
+							  char nick[GP_NICK_LEN],
+							  char email[GP_EMAIL_LEN],
+							  GPIProfile ** profile)
 {
 	GPIFindProfileByUserData data;
 
@@ -1007,23 +942,17 @@ typedef struct GPIProfileMapData
 	void * data;
 } GPIProfileMapData;
 
-static int
-gpiProfileMapCallback(
-  void *arg,
-  void *udata
-)
+static int gpiProfileMapCallback(void *arg,
+								 void *udata)
 {
 	GPIProfile * profile = (GPIProfile *)arg;
 	GPIProfileMapData * data = (GPIProfileMapData *)udata;
 	return (int)data->func(data->connection, profile, data->data);
 }
 
-GPIBool
-gpiProfileMap(
-  GPConnection * connection,
-  gpiProfileMapFunc func,
-  void * data
-)
+GPIBool gpiProfileMap(GPConnection * connection,
+					  gpiProfileMapFunc func,
+					  void * data)
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIProfileMapData mapData;
@@ -1041,12 +970,9 @@ typedef struct GPIFindProfileData
 	GPIProfile * profile;
 } GPIFindProfileData;
 
-static GPIBool
-gpiCheckForBuddy(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void *udata
-)
+static GPIBool gpiCheckForBuddy(GPConnection * connection,
+								GPIProfile * profile,
+								void *udata)
 {
 	GPIFindProfileData * data = (GPIFindProfileData *)udata;
 	if (profile->buddyStatus && (data->index == profile->buddyStatus->buddyIndex))
@@ -1065,11 +991,8 @@ gpiCheckForBuddy(
 	return GPITrue;
 }
 
-GPIProfile *
-gpiFindBuddy(
-  GPConnection * connection,
-  int buddyIndex
-)
+GPIProfile *gpiFindBuddy(GPConnection *connection,
+						 int buddyIndex)
 {
 	GPIFindProfileData data;
 
@@ -1103,17 +1026,12 @@ void gpiRemoveBuddyStatusInfo(GPIBuddyStatusInfo *buddyStatusInfo)
 	freeclear(buddyStatusInfo);
 }
 
-GPIBool
-gpiCanFreeProfile(
-  GPIProfile * profile
-)
+GPIBool gpiCanFreeProfile(GPIProfile * profile)
 {
 	return ((profile && !profile->cache && !profile->buddyStatus && !profile->buddyStatusInfo && !profile->peerSig && !profile->authSig && !profile->blocked)) ? GPITrue:GPIFalse;
 }
 
-void gpiSetInfoCacheFilename(
-  const char filename[FILENAME_MAX + 1]
-)
+void gpiSetInfoCacheFilename(const char filename[FILENAME_MAX + 1])
 {
 	strzcpy(GPIInfoCacheFilename, filename, sizeof(GPIInfoCacheFilename));
 }
@@ -1122,11 +1040,8 @@ void gpiSetInfoCacheFilename(
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Blocked List functionality
-GPResult
-gpiAddToBlockedList(
-  GPConnection * connection,
-  int profileid
-)
+GPResult gpiAddToBlockedList(GPConnection * connection,
+							 int profileid)
 {
     GPIConnection * iconnection = (GPIConnection*)*connection;
     GPIProfile * profile;
@@ -1153,7 +1068,7 @@ gpiAddToBlockedList(
             freeclear(profile->buddyStatus->locationString);
             freeclear(profile->buddyStatus);
             iconnection->profileList.numBuddies--;
-            assert(iconnection->profileList.numBuddies >= 0);
+            GS_ASSERT(iconnection->profileList.numBuddies >= 0);
 #ifndef _PS2
             gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(unsigned long)index);
 #else
@@ -1175,7 +1090,7 @@ gpiAddToBlockedList(
             }
 
             iconnection->profileList.numBuddies--;
-            assert(iconnection->profileList.numBuddies >= 0);
+            GS_ASSERT(iconnection->profileList.numBuddies >= 0);
 #ifndef _PS2
             gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(unsigned long)index);
 #else
@@ -1193,7 +1108,6 @@ gpiAddToBlockedList(
 
 #ifdef _PS3
         // Only perform if profile isn't already locally blocked and the sync isnt taking place
-        ///////////////////////////////////////////////////////////////////////////////////////
         if (!iconnection->npSyncLock)
             gpiAddToNpBlockList(connection, profileid);
 #endif
@@ -1214,12 +1128,9 @@ gpiAddToBlockedList(
     return GP_NO_ERROR;
 }
 
-static GPIBool
-gpiFixBlockIndices(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void * data
-)
+static GPIBool gpiFixBlockIndices(GPConnection * connection,
+								  GPIProfile * profile,
+								  void * data)
 {
 #ifndef _PS2
     int baseIndex = (int)(unsigned long)data;
@@ -1234,11 +1145,8 @@ gpiFixBlockIndices(
     return GPITrue;
 }
 
-GPResult
-gpiRemoveFromBlockedList(
-  GPConnection * connection,
-  int profileid
-)
+GPResult gpiRemoveFromBlockedList(GPConnection * connection,
+								  int profileid)
 {
     GPIConnection * iconnection = (GPIConnection*)*connection;
     GPIProfile * profile;
@@ -1277,12 +1185,9 @@ gpiRemoveFromBlockedList(
     return GP_NO_ERROR;
 }
 
-static GPIBool
-gpiCheckForBlock(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void *udata
-)
+static GPIBool gpiCheckForBlock(GPConnection * connection,
+								GPIProfile * profile,
+								void *udata)
 {
     GPIFindProfileData * data = (GPIFindProfileData *)udata;
     if (profile->blocked && data->index == profile->blockIndex)
@@ -1296,11 +1201,8 @@ gpiCheckForBlock(
     return GPITrue;
 }
 
-GPIProfile *
-gpiFindBlockedProfile(
-  GPConnection * connection,
-  int blockIndex
-)
+GPIProfile *gpiFindBlockedProfile(GPConnection * connection,
+								  int blockIndex)
 {
     GPIFindProfileData data;
 
@@ -1312,11 +1214,8 @@ gpiFindBlockedProfile(
     return data.profile;
 }
 
-GPResult
-gpiProcessRecvBlockedList(
-  GPConnection * connection,
-  const char * input
-)
+GPResult gpiProcessRecvBlockedList(GPConnection * connection,
+								   const char * input)
 {
     int i=0, j=0;
     int num = 0;

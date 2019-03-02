@@ -1,15 +1,11 @@
-/*
-gpiSearch.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpiSearch.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
 //////////
@@ -19,6 +15,7 @@ Please see the GameSpy Presence SDK documentation for more information
 
 //DEFINES
 /////////
+
 // Search Manager Address.
 //////////////////////////
 #define GPI_SEARCH_MANAGER_NAME        "gpsp." GSI_DOMAIN_NAME
@@ -27,6 +24,7 @@ Please see the GameSpy Presence SDK documentation for more information
 
 //GLOBALS
 /////////
+
 char GPSearchManagerHostname[64] = GPI_SEARCH_MANAGER_NAME;
 //char GPSearchManagerHostname[64] = "localhost";
 
@@ -262,7 +260,7 @@ gpiProfileSearchUniquenick(
 	strzcpy(data->uniquenick, uniquenick, GP_UNIQUENICK_LEN);
 	if((namespaceIDs != NULL) && (numNamespaces > 0))
 	{
-		data->numNamespaces = min(numNamespaces, GP_MAX_NAMESPACEIDS);
+		data->numNamespaces = GS_MIN(numNamespaces, GP_MAX_NAMESPACEIDS);
 		memcpy(data->namespaceIDs, namespaceIDs, sizeof(namespaceIDs[0]) * data->numNamespaces);
 	}
 	else
@@ -573,6 +571,30 @@ gpiProcessSearch(
 			////////////////////////////////
 			if(state == GPI_CONNECTED)
 			{
+#if GS_USE_REFLECTOR
+				int hostnameLen = strlen(GPSearchManagerHostname);
+				int i;
+
+				// Version.
+				///////////
+				gpiAppendCharToBuffer(connection, &data->outputBuffer, 0);
+
+				// Port.
+				////////
+				gpiAppendCharToBuffer(connection, &data->outputBuffer, (GPI_SEARCH_MANAGER_PORT >> 8) & 0xFF);
+				gpiAppendCharToBuffer(connection, &data->outputBuffer, GPI_SEARCH_MANAGER_PORT & 0xFF);
+
+				// Hostname length.
+				///////////////////
+				gpiAppendCharToBuffer(connection, &data->outputBuffer, (char)hostnameLen);
+
+				// Hostname.
+				////////////
+				for(i = 0; i < hostnameLen; i++)
+				{
+					gpiAppendCharToBuffer(connection, &data->outputBuffer, GPSearchManagerHostname[i]);
+				}
+#endif
 				// Send a request based on type.
 				////////////////////////////////
 				if(data->type == GPI_SEARCH_PROFILE)
@@ -763,7 +785,7 @@ gpiProcessSearch(
 				}
 				else
 				{
-					assert(0);
+					GS_FAIL();
 				}
 
 				gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\gamename\\");
@@ -1564,7 +1586,7 @@ gpiProcessSearch(
 				}
 				else
 				{
-					assert(0);
+					GS_FAIL();
 				}
 
 				// Flag the operation for removal.
@@ -1623,7 +1645,7 @@ gpiProcessSearches(
 				//////////////////////////////////////////
 				if(!((GPISearchData *)operation->data)->processing)
 				{
-					assert(num < iconnection->numSearches);
+					GS_ASSERT(num < iconnection->numSearches);
 					searchList[num++] = operation;
 					((GPISearchData *)operation->data)->processing = GPITrue;
 				}
