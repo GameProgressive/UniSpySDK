@@ -9,7 +9,10 @@
 
 #include "ghttpCommon.h"
 #if defined(MATRIXSSL)
-#include "../matrixssl/matrixssl.h"
+#include <matrixssl/matrixssl.h>
+#endif
+#if defined(OPENSSL)
+#include <>
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +34,8 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 			engine = GHTTPEncryptionEngine_MatrixSsl;
 		#elif defined(REVOEXSSL)
 			engine = GHTTPEncryptionEngine_RevoEx;
+		#elif defined(TWLSSL)
+		    engine = GHTTPEncryptionEngine_Twl;
 		#else
 			engine = GHTTPEncryptionEngine_GameSpy;
 		#endif
@@ -71,6 +76,8 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 				GS_ASSERT(engine==GHTTPEncryptionEngine_MatrixSsl);
 			#elif defined(REVOEXSSL)
 				GS_ASSERT(engine==GHTTPEncryptionEngine_RevoEx);
+			#elif defined(TWLSSL)
+				GS_ASSERT(engine==GHTTPEncryptionEngine_Twl);				
 			#else
 				GS_ASSERT(engine==GHTTPEncryptionEngine_GameSpy);
 			#endif
@@ -90,6 +97,55 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 		connection->encryptor.mLibSendsHandshakeMessages = GHTTPFalse;
 		return GHTTPTrue;
 	}
+}
+
+
+#if defined(TWLSSL)
+static GHTTPBool ghiEncryptorSetTwlRootCA( char *url, void *theRootCAList);
+static GHTTPBool ghiEncryptorCleanupTwlRootCA( char *url);
+#endif
+
+// Used only by TWL.
+GHTTPBool ghiEncyptorSetRootCAList( char *url, void *theRootCAList)
+{
+    GHTTPBool result = GHTTPFalse;
+#if defined(TWLSSL)
+
+    GS_ASSERT(url);
+    GS_ASSERT(theRootCAList);
+
+    if (!theRootCAList || !url || strcmp(url, "")== 0) 
+    {
+
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+            "%s(@%s:%d):SSL - Null pointer or empty url string; url=0x%X, theRootCAList=0x%X\n", 
+            __FILE__, __FUNCTION__, __LINE__, url, theRootCAList);		        
+
+        return result;
+    }
+    
+    result = ghiEncryptorSetTwlRootCA(url, theRootCAList);
+
+#else 
+
+    GSI_UNUSED(url);
+    GSI_UNUSED(theRootCAList);
+#endif
+     
+    return result;
+}
+
+// Used only by TWL.
+GHTTPBool ghiEncyptorCleanupRootCAList( char *url)
+{
+    GHTTPBool result = GHTTPFalse;
+#if defined(TWLSSL)
+    result = ghiEncryptorCleanupTwlRootCA(url);
+#else 
+    GSI_UNUSED(url);
+#endif
+     
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -873,6 +929,576 @@ GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection
 	GSI_UNUSED(theDecryptedLength);
 
 	return GHIEncryptionResult_Error;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// ***********************  TWL SSL ENCRYPTION ENGINE  **********************//
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+#elif defined(TWLSSL)
+#include <nitro.h>
+#include <nitroWiFi.h>
+
+typedef struct GHTTPTwlCaList
+{
+    SOCCaInfo** mCaInfo;
+    int         mCaBuiltins;  
+}GHTTPTwlCaList;
+
+typedef struct GHTTPCertificateInfo
+{
+    char           *mUrl;
+    GHTTPTwlCaList *mCaList;
+    unsigned int   mIpAddress;
+    int            mInUseCounter;
+} GHTTPCertificateInfo;
+
+static DArray ghttpCertList = NULL;
+
+typedef struct gsTwlSslInterface
+{
+	SOCSslConnection *mId;
+	GHTTPBool mConnected; // means "connected to socket", not "connected to remote machine"
+} gsTwlSslInterface;
+
+static int ghiCompareCertUrl(const void *arrayElem, const void *newElem)
+{
+    char *urlInList = (char *)((GHTTPCertificateInfo*)arrayElem)->mUrl;
+    char *urlNew    = (char *)((GHTTPCertificateInfo*)newElem)->mUrl;
+
+    return strcmp(urlInList, urlNew);
+}
+
+static GHTTPTwlCaList* ghiEncryptorGetRootCAList(char *url)
+{
+    GHTTPBool result = GHTTPTrue;
+    GHTTPCertificateInfo certInfo;
+    int pos = NOT_FOUND;
+    
+    if (url == NULL || ghttpCertList == NULL || strcmp(url, "")==0)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+		        "%s(@%s:%d):SSL - Null pointer or empty URL string; url=0x%X, ghttpCertList=0x%X\n", 
+		        __FILE__, __FUNCTION__, __LINE__, url, ghttpCertList);		        
+		return NULL;
+    }
+    
+    // find the element in the cert list with given URL
+    certInfo.mUrl = ghiGetServerAddressFromUrl(url);
+    
+    pos = ArraySearch(ghttpCertList, &certInfo, ghiCompareCertUrl, 0 ,gsi_true);
+    
+    // before continuing further free the allocated memory
+    gsifree(certInfo.mUrl) ;
+    
+    if (pos == NOT_FOUND)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+		        "%s(@%s:%d):SSL - Could not find Url in the Cert List. url=%s\n", 
+		        __FILE__, __FUNCTION__, __LINE__, url);
+		return NULL;
+    }
+    else
+    {
+        GHTTPCertificateInfo *certInfoToReturn;
+        // It already is in the List so just Increment the use counter
+        certInfoToReturn = (GHTTPCertificateInfo *)ArrayNth(ghttpCertList, pos);
+        return certInfoToReturn -> mCaList;
+    }
+}
+
+static GHTTPCertificateInfo* ghiEncryptorGetCertInfo(char *url)
+{
+    GHTTPBool result = GHTTPTrue;
+    GHTTPCertificateInfo certInfo;
+    int pos = NOT_FOUND;
+    
+    if (url == NULL || ghttpCertList == NULL || strcmp(url, "")==0)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+		        "%s(@%s:%d):SSL - Null pointer or empty URL string; url=0x%X, ghttpCertList=0x%X\n", 
+		        __FILE__, __FUNCTION__, __LINE__, url, ghttpCertList);		        
+		return NULL;
+    }
+    
+    // find the element in the cert list with given URL
+    certInfo.mUrl = ghiGetServerAddressFromUrl(url);
+    
+    pos = ArraySearch(ghttpCertList, &certInfo, ghiCompareCertUrl, 0 ,gsi_true);
+    
+    // before continuing further free the allocated memory
+    gsifree(certInfo.mUrl) ;
+    
+    if (pos == NOT_FOUND)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+		        "%s(@%s:%d):SSL - Could not find Url in the Cert List. url=%s\n", 
+		        __FILE__, __FUNCTION__, __LINE__, url);
+		return NULL;
+    }
+    else
+    {
+        GHTTPCertificateInfo *certInfoToReturn;
+        // It already is in the List so just Increment the use counter
+        certInfoToReturn = (GHTTPCertificateInfo *)ArrayNth(ghttpCertList, pos);
+        return certInfoToReturn;
+    }
+}
+
+static void ghiFreeCertificateInfo(void *elem)
+{
+    GHTTPCertificateInfo *certInfo = elem;
+    
+    GS_ASSERT(certInfo);
+    certInfo->mCaList = NULL;
+    gsifree(certInfo->mUrl);
+    certInfo->mUrl = NULL;
+}
+
+
+GHTTPBool ghiEncryptorSetTwlRootCA( char *url, void* theRootCAList)
+{
+    GHTTPBool result = GHTTPTrue;
+    GHTTPCertificateInfo certInfo;
+    int pos = NOT_FOUND;
+
+    if (url == NULL || theRootCAList == NULL || strcmp(url, "")==0)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+            "%s(@%s:%d):SSL - Null pointer or empty url string; url=0x%X, theRootCAList=0x%X\n", 
+            __FILE__, __FUNCTION__, __LINE__, url, theRootCAList);
+
+        result = GHTTPFalse;
+        return result;
+    }
+
+    if (ghttpCertList == NULL)
+    {
+        // initialize cert list
+        ghttpCertList = ArrayNew(sizeof(GHTTPCertificateInfo), 1, ghiFreeCertificateInfo);
+
+        if (ghttpCertList == NULL)
+        {
+            gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_HotError,
+                "%s(@%s:%d):SSL - Out of memory. Cannot allocate memory for ghttpCertList\n", 
+                __FILE__, __FUNCTION__, __LINE__);
+
+            result = GHTTPFalse;
+            return result;
+        }
+    }
+    certInfo.mUrl = ghiGetServerAddressFromUrl(url);
+    certInfo.mCaList = theRootCAList;
+    certInfo.mInUseCounter = 1;
+
+    pos = ArraySearch(ghttpCertList, &certInfo, ghiCompareCertUrl, 0 ,gsi_true);
+    if (pos == NOT_FOUND)
+    {
+        ArrayInsertSorted(ghttpCertList, &certInfo,ghiCompareCertUrl );
+    }
+    else
+    {
+        // free the allocated memory
+        gsifree(certInfo.mUrl);
+
+        // It already is in the List so just Increment the use counter
+        ((GHTTPCertificateInfo *)ArrayNth(ghttpCertList, pos))->mInUseCounter++;
+    }
+
+    return result;
+}
+
+
+GHTTPBool ghiEncryptorCleanupTwlRootCA(char *url)
+{
+    GHTTPBool result = GHTTPTrue;
+    GHTTPCertificateInfo certInfo;
+    int pos = NOT_FOUND;
+
+    if (url == NULL || ghttpCertList == NULL || strcmp(url, "")==0)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+            "%s(@%s:%d):SSL - Null pointer or empty url string; url=0x%X, ghttpCertList=0x%X\n", 
+            __FILE__, __FUNCTION__, __LINE__, url, ghttpCertList);
+
+        result = GHTTPFalse;
+        return result;
+    }
+
+    // find the element in the cert list with given URL
+    certInfo.mUrl = ghiGetServerAddressFromUrl(url);
+
+    pos = ArraySearch(ghttpCertList, &certInfo, ghiCompareCertUrl, 0 ,gsi_true);
+    if (pos == NOT_FOUND)
+    {
+        // cert list is empty
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
+            "%s(@%s:%d):SSL - Could not find Url in the Cert List. url=%s\n", 
+            __FILE__, __FUNCTION__, __LINE__, url);
+
+        result = GHTTPFalse;
+    }
+    else
+    {
+        GHTTPCertificateInfo *certInfoToUpdate = NULL;
+
+        // It already is in the List so just Increment the use counter
+        certInfoToUpdate = (GHTTPCertificateInfo *)ArrayNth(ghttpCertList, pos);
+        -- certInfoToUpdate->mInUseCounter;
+        if (certInfoToUpdate->mInUseCounter <=0)
+        {
+            // remove this entry from the list
+            ArrayDeleteAt(ghttpCertList, pos);
+            if (ArrayLength(ghttpCertList) == 0)
+            {
+                // no more entries remove the list
+                ArrayFree(ghttpCertList);
+                ghttpCertList = NULL;
+            }
+        }
+    }
+    // Free the memory allocated for the search
+    gsifree(certInfo.mUrl);
+    return result;
+}
+    
+static int SslAuthCallback(int result, SOCSslConnection* con, int level)
+{
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Notice,
+		"%s(@%s:%d):SSL - RECEIVED CERTFICATE\n",
+		__FILE__, __FUNCTION__, __LINE__);
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Notice,	
+	    "l:%d\n\ts:%s\n\tCN=%s\n", 
+	    level, con->subject,con->cn);     
+    
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Notice,	
+	    "\ti:%s\n\tsn: %s\n", 
+	    con->issuer, con->server_name );           
+    
+    
+    if (result & SOC_CERT_OUTOFDATE)
+    {
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d): Certificate is out-of-date - Ignoring\r\n", 
+	        __FILE__, __FUNCTION__, __LINE__);
+        result &= ~SOC_CERT_OUTOFDATE;
+    }
+
+    if (result & SOC_CERT_BADSERVER)
+    {
+       gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d): SSL: Server name does not match - (DO NOT IGNORE)\r\n", 
+	        __FILE__, __FUNCTION__, __LINE__);
+    }
+
+    switch (result & SOC_CERT_ERRMASK)
+    {
+    case SOC_CERT_NOROOTCA:
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d): SSL: No root CA installed.(DO NOT IGNORE)\r\n", 
+	        __FILE__, __FUNCTION__, __LINE__);
+        break;
+
+    case SOC_CERT_BADSIGNATURE:
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d): SSL: Bad signature.(DO NOT IGNORE)\n", 
+	        __FILE__, __FUNCTION__, __LINE__);
+        break;
+
+    case SOC_CERT_UNKNOWN_SIGALGORITHM:
+       gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d):SSL: Unknown signature algorithm\n",
+	        __FILE__, __FUNCTION__, __LINE__);
+        break;
+
+    case SOC_CERT_UNKNOWN_PUBKEYALGORITHM:
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+	        "%s(@%s:%d):SSL: Unknown public key alrorithm\n",
+	        __FILE__, __FUNCTION__, __LINE__);
+        break;
+    }
+
+	GSI_UNUSED(con);
+	GSI_UNUSED(level);
+
+    return result; 
+}
+
+static SOCSslConnection* ghiTwlSSLInit(char *url)
+{
+	SOCSslConnection *sslCon = NULL;
+    GHTTPCertificateInfo* certInfo = ghiEncryptorGetCertInfo(url);
+	
+    static u32  ssl_seed[OS_LOW_ENTROPY_DATA_SIZE / sizeof(u32)];
+    
+    if ((certInfo != NULL) && (certInfo->mCaList != NULL))
+    {
+        if ((certInfo->mCaList->mCaInfo != NULL) && 
+            (certInfo->mCaList->mCaBuiltins >0))
+        {   
+            OS_GetLowEntropyData(ssl_seed);
+            SOC_AddRandomSeed(ssl_seed, sizeof(ssl_seed));
+
+            // Check if the root ca list is initialized
+    
+	        sslCon = (SOCSslConnection *) gsimalloc(sizeof(SOCSslConnection));
+            if (sslCon != NULL)
+            {
+                memset(sslCon, 0, sizeof( SOCSslConnection));
+                sslCon->server_name   = certInfo->mUrl;
+                sslCon->ca_info 	  = certInfo->mCaList->mCaInfo;
+                sslCon->ca_builtins   = certInfo->mCaList->mCaBuiltins;
+	            sslCon->auth_callback = SslAuthCallback;
+            }
+            else
+            {
+                // memory allocation failed
+		        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_WarmError,
+			        "%s(@%s:%d): TWL Failed to allocate memory for ssl connection\r\n", 
+			        __FILE__, __FUNCTION__, __LINE__);
+            }
+        }   
+        else
+        {
+            gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_WarmError,
+			    "%s(@%s:%d): TWL Uninitialized certificate list\r\n", 
+			    __FILE__, __FUNCTION__, __LINE__);
+        }
+    }
+    else
+    {
+		gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_WarmError,
+			"%s(@%s:%d): TWL Uninitialized certificate list\r\n", 
+			__FILE__, __FUNCTION__, __LINE__);
+    }
+    return sslCon;
+    
+}
+
+GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
+											struct GHIEncryptor  * theEncryptor)
+{
+	int i=0;
+	gsTwlSslInterface* sslInterface = NULL;
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d)\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
+
+	// There is only one place where this function should be called,
+	//  and it should check if the engine has been initialized
+	GS_ASSERT(theEncryptor->mInitialized == GHTTPFalse);
+	GS_ASSERT(theEncryptor->mInterface == NULL);
+
+	// allocate the interface (need one per connection)
+	theEncryptor->mInterface = gsimalloc(sizeof(gsTwlSslInterface));
+	if (theEncryptor->mInterface == NULL)
+	{
+		// memory allocation failed
+		gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Memory, GSIDebugLevel_WarmError,
+			"%s(@%s:%d):Failed to allocate SSL interface (out of memory: %d bytes)\r\n", 
+			__FILE__, __FUNCTION__, __LINE__, sizeof(gsTwlSslInterface));
+		return GHIEncryptionResult_Error;
+	}
+	memset(theEncryptor->mInterface, 0, sizeof(gsTwlSslInterface));
+	sslInterface = (gsTwlSslInterface*)theEncryptor->mInterface;
+	sslInterface->mId = ghiTwlSSLInit(connection->URL);
+	sslInterface->mConnected = GHTTPFalse;
+    if (sslInterface->mId == NULL)
+    {
+        // The certificate data is uninitialized
+        gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		    "%s(@%s:%d):GameSpy SSL (TWL) certificate is uninitialized\r\n",
+		    __FILE__, __FUNCTION__, __LINE__);
+        return GHIEncryptionResult_Error;
+    }
+	theEncryptor->mInitialized = GHTTPTrue;
+	theEncryptor->mSessionStarted = GHTTPFalse;
+	theEncryptor->mSessionEstablished = GHTTPFalse;
+	theEncryptor->mEncryptOnBuffer = GHTTPFalse;
+	theEncryptor->mEncryptOnSend = GHTTPTrue;
+	theEncryptor->mLibSendsHandshakeMessages = GHTTPTrue;
+
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d):GameSpy SSL (TWL engine) initialized\r\n",
+		__FILE__, __FUNCTION__, __LINE__);
+
+    GSI_UNUSED(connection);
+	return GHIEncryptionResult_Success;
+}
+
+GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection * connection,
+											struct GHIEncryptor  * theEncryptor)
+{
+	gsTwlSslInterface* sslInterface = (gsTwlSslInterface*)theEncryptor->mInterface;
+	int result = 0;
+	
+	GS_ASSERT(theEncryptor->mSessionStarted == GHTTPFalse);
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d)\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
+
+    	
+	if (!sslInterface->mConnected)
+	{
+	    result = SOC_EnableSsl(connection->socket, sslInterface->mId);
+		if (result < 0) // 0 or higher is successful
+		{
+			switch(result)
+			{
+				case SOC_EINVAL:
+					gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+						"%s(@%s:%d):GameSpy SSL (TWL) Invalid processing. Socket config is invalid\r\n",
+						__FILE__, __FUNCTION__, __LINE__);
+					break;
+				case SOC_EMFILE:
+					gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+						"%s(@%s:%d):GameSpy SSL (TWL) Cannot create any more socket descriptors.\r\n"
+						__FILE__, __FUNCTION__, __LINE__);
+					break;
+				
+				case SOC_ENETRESET:
+					gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+						"%s(@%s:%d):GameSpy SSL (TWL) Socket library is not initialized.\r\n",
+						__FILE__, __FUNCTION__, __LINE__);
+					break;
+				case SOC_ENOBUFS:
+					gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+						"%s(@%s:%d):GameSpy SSL (TWL)Insufficient resources.\r\n",
+						__FILE__, __FUNCTION__, __LINE__);
+					break;
+
+				default:
+					gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+						"%s(@%s:%d):GameSpy SSL (TWL) SOC_EnableSsl failed (Unknown Error = %d)\r\n", 
+						__FILE__, __FUNCTION__, __LINE__, result);
+					break;
+			}
+			connection->completed = GHTTPTrue;
+		    connection->result = GHTTPConnectFailed;
+		    connection->socketError = result;
+			return GHIEncryptionResult_Error;
+		}
+		sslInterface->mConnected = GHTTPTrue;
+		    }
+		    
+
+	GS_ASSERT(sslInterface->mConnected == GHTTPTrue);
+    
+	// Success	
+	theEncryptor->mSessionStarted = GHTTPTrue;
+	theEncryptor->mSessionEstablished = GHTTPTrue;
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+	"%s(@%s:%d)return success\r\n",
+	__FILE__, __FUNCTION__, __LINE__ );
+
+	return GHIEncryptionResult_Success;
+}
+
+// Encrypt and send some data
+GHIEncryptionResult ghiEncryptorSslEncryptSend(struct GHIConnection * connection,
+												 struct GHIEncryptor  * theEncryptor,
+												 const char * thePlainTextBuffer,
+												 int          thePlainTextLength,
+												 int *        theBytesSentOut)
+{
+    GS_FAIL();
+
+	GSI_UNUSED(connection);
+	GSI_UNUSED(theEncryptor);
+	GSI_UNUSED(thePlainTextBuffer);
+	GSI_UNUSED(thePlainTextLength);
+	GSI_UNUSED(theBytesSentOut);	
+
+	return GHIEncryptionResult_Success;
+}
+
+// Receive and decrypt some data
+GHIEncryptionResult ghiEncryptorSslDecryptRecv(struct GHIConnection * connection,
+												 struct GHIEncryptor  * theEncryptor,
+												 char * theDecryptedBuffer,
+												 int *  theDecryptedLength)
+{
+    GS_FAIL();
+
+	GSI_UNUSED(connection);
+	GSI_UNUSED(theEncryptor);
+	GSI_UNUSED(theDecryptedBuffer);
+	GSI_UNUSED(theDecryptedLength);
+
+	return GHIEncryptionResult_Success;
+}
+
+GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection,
+												 struct GHIEncryptor  * theEncryptor,
+												 const char * thePlainTextBuffer,
+												 int          thePlainTextLength,
+												 char *       theEncryptedBuffer,
+												 int *        theEncryptedLength)
+{
+	GS_FAIL(); // Should never call this for TWL SSL!  It uses encrypt on send
+
+	GSI_UNUSED(connection);
+	GSI_UNUSED(theEncryptor);
+	GSI_UNUSED(thePlainTextBuffer);
+	GSI_UNUSED(thePlainTextLength);
+	GSI_UNUSED(theEncryptedBuffer);
+	GSI_UNUSED(theEncryptedLength);
+	
+	return GHIEncryptionResult_Error;
+}
+
+GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection,
+												 struct GHIEncryptor  * theEncryptor,
+												 const char * theEncryptedBuffer,
+												 int *        theEncryptedLength,
+												 char *       theDecryptedBuffer,
+												 int *        theDecryptedLength)
+{
+	GS_FAIL(); // Should never call this for TWL SSL!  It uses decrypt on recv
+
+	GSI_UNUSED(connection);
+	GSI_UNUSED(theEncryptor);
+	GSI_UNUSED(theEncryptedBuffer);
+	GSI_UNUSED(theEncryptedLength);
+	GSI_UNUSED(theDecryptedBuffer);
+	GSI_UNUSED(theDecryptedLength);
+
+	return GHIEncryptionResult_Error;
+}
+
+GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection,
+											   struct GHIEncryptor  * theEncryptor)
+{
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d):GameSpy SSL (Twl) engine cleanup called\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
+	if (theEncryptor != NULL)
+	{
+		gsTwlSslInterface* sslInterface = (gsTwlSslInterface *)theEncryptor->mInterface;
+		if (sslInterface != NULL)
+		{
+            if (sslInterface->mId != NULL)
+            {
+                gsifree(sslInterface->mId);
+            }
+			gsifree(sslInterface);
+			theEncryptor->mInterface = NULL;
+		}
+		theEncryptor->mInitialized = GHTTPFalse;
+		theEncryptor->mSessionStarted = GHTTPFalse;
+		theEncryptor->mSessionEstablished = GHTTPFalse;
+	}
+
+	GSI_UNUSED(connection);
+
+	return GHIEncryptionResult_Success;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

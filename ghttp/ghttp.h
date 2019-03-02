@@ -154,6 +154,10 @@ typedef enum
 
 	GHTTPEncryptionEngine_Default		// 5: Use GameSpy unless another engine is defined
 										//    with MATRIXSSL or REVOEXSSL.
+
+	GHTTPEncryptionEngine_OpenSSL,		// 6: Use OpenSSL encryption for all the services
+										//    and platforms; must #define OPENSSL and include
+										//    openssl source files.
 } GHTTPEncryptionEngine;
 
 ///////////////////////////////////////////////////////////////////////////////
