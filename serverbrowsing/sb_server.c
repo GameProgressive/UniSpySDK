@@ -798,8 +798,8 @@ static int KeyValHashKey(const void *elem, int numbuckets)
 
 static int GS_STATIC_CALLBACK KeyValCompareKey(const void *entry1, const void *entry2)
 {
-	GS_ASSERT(entry1)
-	GS_ASSERT(entry2)
+	GS_ASSERT(entry1);
+	GS_ASSERT(entry2);
 	if	(
 			(((SBKeyValuePair *)entry1)->key == NULL)  ||
 			(((SBKeyValuePair *)entry2)->key == NULL)  

@@ -347,7 +347,7 @@ int count_callback(qr2_key_type keytype, void *userdata)
 // called if our registration with the GameSpy master server failed
 void adderror_callback(qr2_error_t error, gsi_char *errmsg, void *userdata)
 {
-	GS_ASSERT(errmsg)
+	GS_ASSERT(errmsg);
 	AppDebug("Error adding server: %d, %s\n", error, errmsg);
 	GSI_UNUSED(userdata);
 }
