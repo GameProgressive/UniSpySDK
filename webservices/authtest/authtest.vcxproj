@@ -107,7 +107,7 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>$(ProjectDir)..\..\libs\Win Debug\AuthService.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -130,7 +130,7 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>$(ProjectDir)..\..\libs\Win Release\AuthService.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -155,7 +155,7 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>$(ProjectDir)..\..\libs\Win Unicode Debug\AuthService.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -177,7 +177,7 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>$(ProjectDir)..\..\libs\Win Unicode Release\AuthService.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -187,6 +187,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="authtest.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\win32\win32common.vcxproj">
+      <Project>{f51d094d-fbe1-4773-89f0-1321c5210cec}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ghttp\ghttp.vcxproj">
+      <Project>{1338a207-2f4f-4fca-9305-79a4609d7296}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\gt2\gt2.vcxproj">
+      <Project>{e6c66fdf-1934-4a5f-a80e-01e0576abfac}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\webservices.vcxproj">
+      <Project>{d869a1c6-9ea1-47e8-88aa-05e40ef63367}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
