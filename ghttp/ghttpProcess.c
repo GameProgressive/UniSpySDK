@@ -1865,6 +1865,7 @@ void ghiDoReceivingFile
 			{
                 ghiFreeTempBuffer(buffer); 
 				return;
+			}
 
 			// Previously decrypted parts of the file have already been handled.
 			connection->recvBuffer.len = connection->recvBuffer.pos;

@@ -60,7 +60,7 @@ static void FreeElement(DArray array, int n)
  */
 static void ArrayGrow(DArray array)
 {
-	GS_ASSERT(array->elemsize)	// sanity check -mj Oct 31st
+	GS_ASSERT(array->elemsize);	// sanity check -mj Oct 31st
 	array->capacity +=  array->growby;
 	array->list = gsirealloc(array->list, (size_t) array->capacity * array->elemsize);
 	GS_ASSERT(array->list);
@@ -71,9 +71,9 @@ static void ArrayGrow(DArray array)
  */
 static void SetElement(DArray array, const void *elem, int pos)
 {
-	GS_ASSERT(array)			// safety check -mj Oct 31st
-	GS_ASSERT(elem)	
-	GS_ASSERT(array->elemsize)	
+	GS_ASSERT(array);			// safety check -mj Oct 31st
+	GS_ASSERT(elem);	
+	GS_ASSERT(array->elemsize);	
 
 	memcpy(ArrayNth(array,pos), elem, (size_t)array->elemsize);
 }
@@ -113,8 +113,8 @@ void ArrayFree(DArray array)
 		FreeElement(array, i);
 	}
 	// mj to do: move these asserts into gsi_free.  maybe, depends on whether user overloads them
-	GS_ASSERT(array->list)
-	GS_ASSERT(array)
+	GS_ASSERT(array->list);
+	GS_ASSERT(array);
 	gsifree(array->list);
 	gsifree(array);
 }
@@ -147,7 +147,7 @@ void ArraySetDataPtr(DArray array, void *ptr, int count, int capacity)
 
 int ArrayLength(const DArray array)
 {
-	GS_ASSERT(array)
+	GS_ASSERT(array);
 	return array->count;
 }
 
@@ -173,7 +173,7 @@ void ArrayAppend(DArray array, const void *newElem)
 
 void ArrayInsertAt(DArray array, const void *newElem, int n)
 {
-	GS_ASSERT (array)
+	GS_ASSERT (array);
 	GS_ASSERT ( (n >= 0) && (n <= array->count));
 
 	if (array->count == array->capacity)
@@ -191,7 +191,7 @@ void ArrayInsertSorted(DArray array, const void *newElem, ArrayCompareFn compara
 	void *res;
 	int found;
 
-	GS_ASSERT (array)
+	GS_ASSERT (array);
 	GS_ASSERT (comparator);
 
 	res=mybsearch(newElem, array->list,	array->count, array->elemsize, comparator, &found);
@@ -202,7 +202,7 @@ void ArrayInsertSorted(DArray array, const void *newElem, ArrayCompareFn compara
 
 void ArrayRemoveAt(DArray array, int n)
 {
- 	GS_ASSERT (array)
+ 	GS_ASSERT (array);
   	GS_ASSERT( (n >= 0) && (n < array->count));
 
 	if (n < array->count - 1) //if not last element
@@ -213,7 +213,7 @@ void ArrayRemoveAt(DArray array, int n)
 
 void ArrayDeleteAt(DArray array, int n)
 {
- 	GS_ASSERT (array)
+ 	GS_ASSERT (array);
    	GS_ASSERT ( (n >= 0) && (n < array->count));
 
 	FreeElement(array,n);
@@ -223,7 +223,7 @@ void ArrayDeleteAt(DArray array, int n)
 
 void ArrayReplaceAt(DArray array, const void *newElem, int n)
 {
- 	GS_ASSERT (array)
+ 	GS_ASSERT (array);
 	GS_ASSERT ( (n >= 0) && (n < array->count));
 
 	FreeElement(array, n);
@@ -233,7 +233,7 @@ void ArrayReplaceAt(DArray array, const void *newElem, int n)
 
 void ArraySort(DArray array, ArrayCompareFn comparator)
 {
- 	GS_ASSERT (array)
+ 	GS_ASSERT (array);
 	qsort(array->list, (size_t)array->count, (size_t)array->elemsize, comparator);
 }
 
@@ -263,7 +263,7 @@ void ArrayMap(DArray array, ArrayMapFn fn, void *clientData)
 {
 	int i;
 
- 	GS_ASSERT (array)
+ 	GS_ASSERT (array);
 	GS_ASSERT(fn);
 
 	for (i = 0; i < array->count; i++)

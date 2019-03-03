@@ -152,7 +152,7 @@ typedef enum
 										//    REVOEXSSL and include RevoEX SSL source files.
     GHTTPEncryptionEngine_Twl,          // 4: #define TWLSSL and include Twl SSL source files
 
-	GHTTPEncryptionEngine_Default		// 5: Use GameSpy unless another engine is defined
+	GHTTPEncryptionEngine_Default,		// 5: Use GameSpy unless another engine is defined
 										//    with MATRIXSSL or REVOEXSSL.
 
 	GHTTPEncryptionEngine_OpenSSL,		// 6: Use OpenSSL encryption for all the services

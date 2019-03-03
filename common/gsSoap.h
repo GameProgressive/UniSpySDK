@@ -58,6 +58,13 @@ GSSoapTask* gsiExecuteSoap(const char *theURL, const char *theService,
 					 GSXmlStreamWriter theSoapData, GSSoapCallbackFunc theCallbackFunc,
 					 void *theUserData);
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Execute a soap call (Uses GameSpy core object)
+GSSoapTask* gsiExecuteSoapWithTimeout(const char *theURL, const char *theService,
+						   GSXmlStreamWriter theSoapData, GSSoapCallbackFunc theCallbackFunc,
+						   gsi_time theTimeoutMs, void *theUserData);
+
 // Alternate version with GSSoapCustomFunc parameter allows client access
 // to soap object to set DIME attachments
 GSSoapTask* gsiExecuteSoapCustom(const char* theURL, const char* theService, 

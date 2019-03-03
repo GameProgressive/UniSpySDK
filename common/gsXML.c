@@ -359,7 +359,7 @@ static void gsiXmlUtilAttributeFree(void * elem)
 const char * gsXmlWriterGetData (GSXmlStreamWriter stream)
 {
 	GSIXmlStreamWriter * writer = (GSIXmlStreamWriter*)stream;
-	GS_ASSERT(stream != NULL)
+	GS_ASSERT(stream != NULL);
 	return writer->mBuffer;
 }
 

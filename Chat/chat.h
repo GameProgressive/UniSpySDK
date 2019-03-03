@@ -1290,7 +1290,7 @@ typedef void (* chatEnumChannelsCallbackAll)(CHAT chat,
 //		 passing in a partial name and wildcard.<p>
 // See Also
 //		ChatConnect, ChatDisconnect
-CHATOperationResult chatEnumChannels(CHAT chat,
+/*CHATOperationResult*/void chatEnumChannels(CHAT chat,
 	const gsi_char * filter,
 	chatEnumChannelsCallbackEach callbackEach,
 	chatEnumChannelsCallbackAll callbackAll,
@@ -1323,7 +1323,7 @@ CHATOperationResult chatEnumChannels(CHAT chat,
 //		Channels are not sent back in any particular order.
 //		The maxNumberOfChannels should not be zero.
 //		Use chatEnumChannels if there is no limit requested.<p>
-CHATOperationResult chatEnumChannelsWithLimit(CHAT chat,
+/*CHATOperationResult*/void chatEnumChannelsWithLimit(CHAT chat,
 	gsi_u32 maxNumberOfChannels,
 	const gsi_char * filter,
 	chatEnumChannelsCallbackEach callbackEach,

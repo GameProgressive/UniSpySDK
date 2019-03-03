@@ -23,7 +23,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <windows.h>
+
+#include "../../common/gsPlatform.h"
 
 static void Util_RandSeed(unsigned long seed);
 static int Util_RandInt(int low, int high);

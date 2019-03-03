@@ -41,7 +41,7 @@ extern "C" {
 int _ReadUCS2CharFromUTF8String(const UTF8String theUTF8String,  UCS2Char* theUnicodeChar, int theMaxLength)
 {
 #ifndef _PS2
-	GS_ASSERT(theUnicodeCharOut != NULL);
+	GS_ASSERT(theUnicodeChar != NULL);
 #endif
 
 	if (theMaxLength == 0)
@@ -634,7 +634,6 @@ int UCS2ToUTF8StringLength(const UCS2String theUCS2String, UTF8String theUTF8Str
 {
 	return 0;
 }
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

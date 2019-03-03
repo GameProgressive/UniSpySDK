@@ -607,8 +607,8 @@ gsi_bool qr2_buffer_add_int(qr2_buffer_t outbuf, int value)
 
 gsi_bool qr2_buffer_addA(qr2_buffer_t outbuf, const char *value)
 {
-	GS_ASSERT(outbuf)
-	GS_ASSERT(value)
+	GS_ASSERT(outbuf);
+	GS_ASSERT(value);
 	{
 		int copylen;
 		copylen = (int)strlen(value) + 1;
