@@ -587,7 +587,7 @@ static void gti2RemoveHoldMessage(GT2Connection connection, GTI2IncomingBufferMe
 		if(message->start > moveAfter)
 		{
 			message->start -= shortenBy;
-			moveEnd = max(moveEnd, message->start + message->len);
+			moveEnd = GS_MAX(moveEnd, message->start + message->len);
 		}
 	}
 

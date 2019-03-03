@@ -336,7 +336,7 @@ gpiProcessConnectionManager(
 			len = (next - iconnection->socketBuffer.buffer);
 			if(len > iconnection->inputBufferSize)
 			{
-				iconnection->inputBufferSize += max(GPI_READ_SIZE, len);
+				iconnection->inputBufferSize += GS_MAX(GPI_READ_SIZE, len);
 				tempPtr = (char*)gsirealloc(iconnection->inputBuffer, (unsigned int)iconnection->inputBufferSize + 1);
 				if(tempPtr == NULL)
 					Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -786,15 +786,15 @@ gpiReport(
 	report("-----------------");
 	gpiProfileMap(connection, gpiReportProfile, NULL);
 
-	sprintf(buf, "%d profiles %d bytes (%d avg)", nProfiles, nTotalMemory, nTotalMemory / max(nProfiles, 1));
+	sprintf(buf, "%d profiles %d bytes (%d avg)", nProfiles, nTotalMemory, nTotalMemory / GS_MAX(nProfiles, 1));
 	report(buf);
 	if(nProfiles)
 	{
 		sprintf(buf, "UserID: %d (%d%%)", nUserID, nUserID * 100 / nProfiles);
 		report(buf);
-		sprintf(buf, "BuddyStatus: %d (%d%%) %d bytes (%d avg)", nBuddyStatus, nBuddyStatus * 100 / nProfiles, nBuddyMemory, nBuddyMemory / max(nBuddyStatus, 1));
+		sprintf(buf, "BuddyStatus: %d (%d%%) %d bytes (%d avg)", nBuddyStatus, nBuddyStatus * 100 / nProfiles, nBuddyMemory, nBuddyMemory / GS_MAX(nBuddyStatus, 1));
 		report(buf);
-		sprintf(buf, "InfoCache: %d (%d%%) %d bytes (%d avg)", nInfoCache, nInfoCache * 100 / nProfiles, nInfoMemory, nInfoMemory / max(nInfoCache, 1));
+		sprintf(buf, "InfoCache: %d (%d%%) %d bytes (%d avg)", nInfoCache, nInfoCache * 100 / nProfiles, nInfoMemory, nInfoMemory / GS_MAX(nInfoCache, 1));
 		report(buf);
 		sprintf(buf, "AuthSig: %d (%d%%)", nAuthSig, nAuthSig * 100 / nProfiles);
 		report(buf);
