@@ -359,9 +359,13 @@ login.txt
 gp.info
 *.bak
 
+# Other VS build types
+Template/
+UnicodeRelease/
+UnicodeDebug/
+
 # Revolution binaries
 *.wad
 *.elf
 rvl_debug/
 rvl_release/
-
