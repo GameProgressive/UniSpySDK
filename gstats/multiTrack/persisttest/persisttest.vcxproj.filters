@@ -2,11 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{b3eea6e9-8209-419d-819f-4c103e2f34b4}</UniqueIdentifier>
+      <UniqueIdentifier>{dccb5d69-5336-4b6b-9ea7-a30aa3d4bb21}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="chatc.c">
+    <ClCompile Include="persisttest.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
