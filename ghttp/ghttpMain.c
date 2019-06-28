@@ -21,6 +21,55 @@ devsupport@gamespy.com
 #include "ghttpCommon.h"
 
 
+const char*
+ghttpResultString(int result)
+{
+	switch (result)
+	{
+		case GHTTPSuccess:
+			return "Successfully retrieved file.";
+		case GHTTPOutOfMemory:
+			return "A memory allocation failed.";
+		case GHTTPBufferOverflow:
+			return "The user-supplied buffer was too small to hold the file.";
+		case GHTTPParseURLFailed:
+			return "There was an error parsing the URL.";
+		case GHTTPHostLookupFailed:
+			return "Failed looking up the hostname.";
+		case GHTTPSocketFailed:
+			return "Failed to create/initialize/read/write a socket.";
+		case GHTTPConnectFailed:
+			return "Failed connecting to the http server.";
+		case GHTTPBadResponse:
+			return "Error understanding a response from the server.";
+		case GHTTPRequestRejected:
+			return "The request has been rejected by the server.";
+		case GHTTPUnauthorized:
+			return "Not authorized to get the file.";
+		case GHTTPForbidden:
+			return "The server has refused to send the file.";
+		case GHTTPFileNotFound:
+			return "Failed to find the file on the server.";
+		case GHTTPServerError:
+			return "The server has encountered an internal error.";
+		case GHTTPFileWriteFailed:
+			return "An error occurred writing to the local file.";
+		case GHTTPFileReadFailed:
+			return "There was an error reading from a local file.";
+		case GHTTPFileIncomplete:
+			return "Download started but was interrupted.";
+		case GHTTPFileToBig:
+			return "The file is too big to be downloaded (size exceeds range of internal data types).";
+		case GHTTPEncryptionError:
+			return "Error with encryption engine.";
+		case GHTTPRequestCancelled:
+			return "User requested cancel and/or graceful close.";
+		default:
+			return "Unrecognized ghttp error code.";
+	}
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Ascii versions which must be available even in the unicode build

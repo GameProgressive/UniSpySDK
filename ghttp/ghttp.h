@@ -204,6 +204,23 @@ typedef int GHTTPRequest;
 typedef struct GHIPost * GHTTPPost;
 //DOM-IGNORE-END
 
+//////////////////////////////////////////////////////////////////////////////
+// ghttpResultString
+// Summary
+// 		Given a GHTTPResult, returns a meaningful character string describing the result.
+// Parameters
+//		result        : [in] A GHTTPResult value.
+// Returns
+//		A nul-byte terminated character string describing the HTTP result corresponding to the value given.
+// Remarks
+//		The returned string is read-only and should not be modified.
+// See Also
+//		ghttpGetEx, ghttpSaveEx, ghttpStream, ghttpStreamEx, ghttpHeadEx,
+//		 ghttpPostEx
+const char* ghttpResultString
+(
+	int result
+);
 
 //////////////////////////////////////////////////////////////////////////////
 // ghttpProgressCallback
