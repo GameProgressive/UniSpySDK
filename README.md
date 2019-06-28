@@ -1,4 +1,4 @@
-# RetroSpy Software Development Kit
+# RetroSpy Software Development Kit [![Travis](https://travis-ci.org/GameProgressive/RetroSpySDK.svg?branch=master)](https://travis-ci.org/GameProgressive/RetroSpySDK) [![Appveyor](https://ci.appveyor.com/api/projects/status/github/gameprogressive/retrospysdk?branch=master&svg=true)](https://ci.appveyor.com/project/arves100/retrospysdk)
 RetroSpy is a project that aim to create a working Server and SDK that will emulate the GameSpy service. (like 2011-2012 service)
 
 See the [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for any information about compiling and using the SDK.
