@@ -190,6 +190,9 @@
     <ProjectReference Include="..\..\common\win32\win32common.vcxproj">
       <Project>{f51d094d-fbe1-4773-89f0-1321c5210cec}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\natneg\natneg.vcxproj">
+      <Project>{fe7db30d-02b0-4e90-861a-30f76343e437}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\pinger\pinger.vcxproj">
       <Project>{ce37cd7f-1f13-48a3-a372-e96151b01be0}</Project>
     </ProjectReference>

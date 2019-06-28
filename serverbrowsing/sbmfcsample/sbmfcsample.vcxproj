@@ -190,6 +190,12 @@
     <ProjectReference Include="..\..\common\win32\win32common.vcxproj">
       <Project>{f51d094d-fbe1-4773-89f0-1321c5210cec}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\natneg\natneg.vcxproj">
+      <Project>{fe7db30d-02b0-4e90-861a-30f76343e437}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\qr2\qr2.vcxproj">
+      <Project>{77247cb4-15ab-464e-aef1-bce353a818dd}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\serverbrowsing.vcxproj">
       <Project>{c0a9fa4c-7b01-4c78-954d-bb5b9cba58d9}</Project>
     </ProjectReference>
