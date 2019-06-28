@@ -7,6 +7,8 @@
 // by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
 // manner not expressly authorized by IGN or GameSpy is prohibited.
 
+#define GSA_OPEN_AUTHSERVICE 1
+
 #include "../../common/gsCommon.h"
 #include "../../common/gsCore.h"
 #include "../../common/gsAvailable.h"
