@@ -64,26 +64,5 @@ add_subdirectory(sake) # depends on common and ghttp. test relies on GP and gt2 
 add_subdirectory(webservices)
 add_subdirectory(sc) # depends on common webservices ghttp
 add_subdirectory(Voice2)
+add_subdirectory(RetroSpy)
 
-add_library(retrospy dllmain.c)
-
-target_link_libraries(retrospy SHARED
-    #rsbrigades
-    rscommon
-    rschat
-    rscdkey
-    rshttp
-    rsgp
-    rsstats
-    rsgt2
-    rsnatneg
-    rspeer
-    rspinger
-    rspt
-    rsqr2
-    rssake
-    rssc
-    rsserverbrowsing
-    rsvoice2
-    rswebservices
-)
