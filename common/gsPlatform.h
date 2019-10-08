@@ -309,8 +309,8 @@
 #endif
 
 #if !defined(GSI_OPEN_DOMAIN_NAME)
-	#define GSI_OPEN_DOMAIN_NAME_UNI _T("%s.api.gamespy.net") // unicode supported string blehhh
-	#define GSI_OPEN_DOMAIN_NAME "%s.api.gamespy.net"
+	#define GSI_OPEN_DOMAIN_NAME_UNI _T("%s.api." RS_HTTP_PROTOCOL_URL) // unicode supported string blehhh
+	#define GSI_OPEN_DOMAIN_NAME "%s.api." RS_HTTP_PROTOCOL_URL
 #endif
 
 #if !defined(RS_HTTPS)

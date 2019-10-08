@@ -140,11 +140,11 @@ void CTrackDlg::SetupUser()
 
 	CString url;
 	int event;
-	url.Format("http://sdkdev.gamespy.com/games/st_highscore/web/playertimes.asp?pid=%d", m_loginDlg.m_profile);
+	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_highscore/web/playertimes.asp?pid=%d", m_loginDlg.m_profile);
 	ghttpGet(url, GHTTPFalse, PlayerBestTimesPageCompleted, NULL);
 	for(event = 1 ; event <= 3 ; event++)
 	{
-		url.Format("http://sdkdev.gamespy.com/games/st_highscore/web/top_%d.txt", event);
+		url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_highscore/web/top_%d.txt", event);
 		ghttpGet(url, GHTTPFalse, TopTimePageCompleted, (void *)event);
 	}
 
@@ -170,7 +170,7 @@ BOOL CTrackDlg::OnInitDialog()
 
 	// Use the development system.
 	//////////////////////////////
-	strcpy(StatsServerHostname, "sdkdev.gamespy.com");
+	strcpy(StatsServerHostname, "sdkdev." GSI_DOMAIN_NAME);
 
 	// Set the gamename and secret key.
 	///////////////////////////////////

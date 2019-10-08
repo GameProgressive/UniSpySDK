@@ -292,7 +292,7 @@ BOOL CLadderTrackDlg::SetupHosting()
 	{
 		// Use the development system.
 		//////////////////////////////
-		strcpy(StatsServerHostname, "sdkdev.gamespy.com");
+		strcpy(StatsServerHostname, "sdkdev." GSI_DOMAIN_NAME);
 
 		// Set the gamename and secret key.
 		///////////////////////////////////
@@ -445,9 +445,9 @@ GHTTPBool PlayerPositionPageCompleted
 void CLadderTrackDlg::UpdatePlayerPositions()
 {
 	CString url;
-	url.Format("http://sdkdev.gamespy.com/games/st_ladder/web/playerposition.asp?pid=%d", m_loginDlg.m_profile);
+	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_loginDlg.m_profile);
 	ghttpGet(url, GHTTPFalse, PlayerPositionPageCompleted, (void *)TRUE);
-	url.Format("http://sdkdev.gamespy.com/games/st_ladder/web/playerposition.asp?pid=%d", m_remoteProfile);
+	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_remoteProfile);
 	ghttpGet(url, GHTTPFalse, PlayerPositionPageCompleted, (void *)FALSE);
 }
 
