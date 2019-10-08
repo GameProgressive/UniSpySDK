@@ -313,6 +313,12 @@
 	#define GSI_OPEN_DOMAIN_NAME "%s.api.gamespy.net"
 #endif
 
+#if !defined(RS_HTTPS)
+	#define RS_HTTP_PROTOCOL_URL "http://"
+#else
+	#define RS_HTTP_PROTOCOL_URL "https://"
+#endif
+
 //---------- Mac autorelease pool for working with CoreFoundation types ----------------------
 #if defined(_MACOSX) || defined(_IPHONE)
 #include "macosx/macAutoreleasePool.h"

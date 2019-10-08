@@ -288,13 +288,13 @@ gsi_bool SAKE_CALL sakeGetFileDownloadURL(SAKE sake, int fileId, gsi_char url[SA
 		#ifdef GSI_UNICODE
 		{
 			// use capital %S to convert the gamename to a wide string
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("http://%S.sake.%S/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
-				sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
+			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S.sake.%S/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
+				RS_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
 		}
 		#else
 		{
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("http://%s.sake.%s/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
-				sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
+			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s.sake.%s/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
+				RS_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
 		}
 		#endif
 	}
@@ -344,13 +344,13 @@ gsi_bool SAKE_CALL sakeGetFileUploadURL(SAKE sake, gsi_char url[SAKE_MAX_URL_LEN
 		#ifdef GSI_UNICODE
 		{
 			// use capital %S to convert the gamename to a wide string
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("http://%S.sake.%S/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-				sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
+			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S.sake.%S/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
+				RS_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
 		}
 		#else
 		{
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("http://%s.sake.%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-				sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
+			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s.sake.%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
+				RS_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
 		}
 		#endif
 	}

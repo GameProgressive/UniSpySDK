@@ -15,6 +15,7 @@ endif()
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
 option(RS_OPENSSL "Enable OpenSSL support" ON)
 option(RS_HTTPLOG "Enable HTTP logging" OFF)
+option(RS_SECURESECONNECT "Enable connecting to RetroSpy services with a secure protocol (HTTPS)" ON)
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
 #option(RS_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
@@ -40,6 +41,10 @@ add_definitions(-DGS_PEER)
 
 if(RS_WINSOCK2)
     add_definitions(-DGSI_WINSOCK2)
+endif()
+
+if(RS_SECURESECONNECT)
+	add_definitions(-DRS_HTTPS)
 endif()
 
 #if (RS_MEM_MANAGED)

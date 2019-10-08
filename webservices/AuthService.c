@@ -16,15 +16,15 @@
 #define WS_AUTHSERVICE_PROTOVERSION      1
 
 #define WS_AUTHSERVICE_NAMESPACE         "ns1"
-#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"http://gamespy.net/AuthService/LoginProfile\""
-#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"http://gamespy.net/AuthService/LoginUniqueNick\""
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"http://gamespy.net/AuthService/LoginRemoteAuth\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"http://gamespy.net/AuthService/LoginPs3Cert\""
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginProfile\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginRemoteAuth\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""
 
 #define WS_AUTHSERVICE_NAMESPACE_COUNT  1
 const char * WS_AUTHSERVICE_NAMESPACES[WS_AUTHSERVICE_NAMESPACE_COUNT] =
 {
-	WS_AUTHSERVICE_NAMESPACE "=\"http://gamespy.net/AuthService/\""
+	WS_AUTHSERVICE_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/\""
 };
 
 const char WS_AUTHSERVICE_SIGNATURE_KEY[] = 
@@ -52,7 +52,9 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 	"010001";
 
 // This is declared as an extern so it can be overriden when testing
-#define WS_LOGIN_SERVICE_URL_FORMAT   "https://%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+
+#define WS_LOGIN_SERVICE_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
 
 typedef struct WSIRequestData

@@ -477,8 +477,8 @@ GS_THREAD_RETURN_TYPE gsbiUploadThreadFunc(void *arg)
 
 	_tsnprintf(uploadUrl, 
 		       sizeof(gsi_char) * GSB_SERVICE_MAX_URL_LEN, 
-			   _T("http://brigades.sake.gamespy.com/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-               GSB_UPLOAD_GID,
+			   _T("%sbrigades.sake.gamespy.com/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
+               RS_HTTP_PROTOCOL_URL, GSB_UPLOAD_GID,
 			   uploadData->mInstance->mCertificate.mProfileId);
 
 
