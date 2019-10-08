@@ -671,8 +671,13 @@ static GHTTPBool DownloadCompletedCallback(GHTTPRequest request, GHTTPResult res
 		return GHTTPTrue;
 	}
 
+#if (GSI_MAX_INTEGRAL_BITS >= 64)
+	printf("File Download: Downloaded %lld byte file\n", bufferLen);
+#else
 	printf("File Download: Downloaded %d byte file\n", bufferLen);
- 
+#endif
+
+
 	return GHTTPTrue;
 }
 
