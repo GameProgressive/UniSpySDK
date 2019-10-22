@@ -2,6 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0550F45B-87E2-4CAA-B5D0-8898F5E50CBC}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\win32\win32common.vcxproj", "{F51D094D-FBE1-4773-89F0-1321C5210CEC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ghttp", "ghttp\ghttp.vcxproj", "{1338A207-2F4F-4FCA-9305-79A4609D7296}"
@@ -9,8 +11,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ghttpc", "ghttp\ghttpc\ghttpc.vcxproj", "{75D6C79F-699B-4C66-ADC8-818E77295A08}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GP", "GP\GP.vcxproj", "{73FD8394-2799-4875-9B77-2DB5F5243CD2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0550F45B-87E2-4CAA-B5D0-8898F5E50CBC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpstress", "GP\gpstress\gpstress.vcxproj", "{ADC08350-16C5-4822-A04A-1AD5133CF64D}"
 EndProject
