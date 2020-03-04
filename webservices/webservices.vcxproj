@@ -75,8 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthService.h" />
-    <ClInclude Include="AuthService2007.h" />
-    <ClInclude Include="AuthServiceOpen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,7 +22,7 @@
     <ProjectGuid>{1AB01231-08D1-41C5-829A-6297850B0663}</ProjectGuid>
     <RootNamespace>persisttest</RootNamespace>
     <ProjectName>persisttest</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
