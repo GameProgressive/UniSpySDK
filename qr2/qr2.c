@@ -36,8 +36,6 @@ qr2_error_t qr2_initA(/*[out]*/qr2_t *qrec, const char *ip, int baseport, const 
 DEFINES
 ********/
 #define MASTER_PORT 27900
-#define MASTER_ADDR "master." GSI_DOMAIN_NAME
-	//#define MASTER_ADDR "207.199.80.230"
 #define FIRST_HB_TIME 10000 /* 10 sec */
 #define HB_TIME 60000 /* 1 minute */
 #define KA_TIME 20000 /* 20 sec */
