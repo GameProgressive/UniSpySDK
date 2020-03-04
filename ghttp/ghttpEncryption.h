@@ -96,6 +96,9 @@ typedef struct GHIEncryptor
 	GHTTPEncryptorStartFunc     mStartFunc;  // start the handshake process
 	GHTTPEncryptorEncryptFunc   mEncryptFunc;
 	GHTTPEncryptorDecryptFunc   mDecryptFunc;
+#if defined(TWLSSL) && defined(_NITRO)	
+	gsi_bool  mNotInCloseSocket; // This is special when TWLSSL & NITRO
+#endif
 } GHIEncryptor;
 
 

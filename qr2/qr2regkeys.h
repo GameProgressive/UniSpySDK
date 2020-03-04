@@ -1,4 +1,11 @@
-
+///////////////////////////////////////////////////////////////////////////////
+// File:	qr2regkeys.h
+// SDK:		GameSpy Query and Reporting 2 (QR2) SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _QR2REGKEYS_H_
 #define _QR2REGKEYS_H_

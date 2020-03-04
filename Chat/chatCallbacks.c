@@ -1183,10 +1183,13 @@ static void ciCallCallback(CHAT chat, ciCallbackData * data)
 
 	case CALLBACK_ENUM_CHANNELS_ALL:
 	{
+		ciConnection *connection = (ciConnection *)chat;
+		
 		ciCallbackEnumChannelsAllParams * callbackParams = (ciCallbackEnumChannelsAllParams *)data->callbackParams;
 		chatEnumChannelsCallbackAll callback = (chatEnumChannelsCallbackAll)data->callback;
 #ifndef GSI_UNICODE
 		callback(chat, SUCCESS, NUM_CHANNELS, (const char **)CHANNELS, (const char **)TOPICS, NUM_USERS, param);
+		connection->pendingListing = CHATFalse;
 		break;
 #else
 		unsigned short** channels_W = UTF8ToUCS2StringArrayAlloc((const char **)CHANNELS, NUM_CHANNELS);
@@ -1194,6 +1197,7 @@ static void ciCallCallback(CHAT chat, ciCallbackData * data)
 		callback(chat, SUCCESS, NUM_CHANNELS, (const unsigned short**)channels_W, (const unsigned short**)topics_W, NUM_USERS, param);
 		FREE_STRING_ARRAY(channels_W, NUM_CHANNELS);
 		FREE_STRING_ARRAY(topics_W, NUM_CHANNELS);
+		connection->pendingListing = CHATFalse;
 		break;
 #endif		
 	}

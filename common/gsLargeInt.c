@@ -779,8 +779,6 @@ static gsi_bool gsiLargeIntKMult(const l_word *data1, const l_word *data2, l_wor
 		temp2.mLength = 0;
 		temp3.mLength = 0;
 
-		//printf("Karasuba splitting at %d (1/2 = %d)\r\n", length, halfLen);
-
 		// Karatsuba:  k = 12*34
 		//  a = (1*3)
 		//  b = (1+2)*(3+4)-a-c
@@ -797,24 +795,16 @@ static gsi_bool gsiLargeIntKMult(const l_word *data1, const l_word *data2, l_wor
 		//      Stores in TH of dest, so later *B^N isn't necessary
 		//      For the example, this puts 1*3 into the high half 03xx
 		gsiLargeIntKMult(&data1[halfLen], &data2[halfLen], halfLen, &dest[length], lenout, (l_word)(maxlen-length));
-		//printf("Calculated A (%d) = ", *lenout);
-		//gsiLargeIntPrint(&dest[length], *lenout);
 
 		// Compute c. (BH of data1 * BH of data2)
 		//      For the example, this puts 2*4 into the low half xx08
 		gsiLargeIntKMult(data1, data2, halfLen, dest, lenout, maxlen);
-		//printf("Calculated C (%d) = ", *lenout);
-		//gsiLargeIntPrint(dest, *lenout);
 
 		// Compute b1. (TH of data1 + BH of data1) 
 		gsiLargeIntAdd(&data1[halfLen], halfLen, data1, halfLen, temp1.mData, &temp1.mLength, GS_LARGEINT_MAX_DIGITS);
-		//printf("Calculated B1 (%d) = ", temp1.mLength);
-		//gsiLargeIntPrint(temp1.mData, temp1.mLength);
 
 		// Compute b2. (TH of data2 + BH of data2)
 		gsiLargeIntAdd(&data2[halfLen], halfLen, data2, halfLen, temp2.mData, &temp2.mLength, GS_LARGEINT_MAX_DIGITS);
-		//printf("Calculated B2 (%d) = ", temp2.mLength);
-		//gsiLargeIntPrint(temp2.mData, temp2.mLength);
 
 		// Compute b3. (b1*b2) (*B^N)
 		//      For the example, (1+2)(3+4)*B^N = 21*B^N = 0210
@@ -833,11 +823,7 @@ static gsi_bool gsiLargeIntKMult(const l_word *data1, const l_word *data2, l_wor
 			gsiLargeIntKMult(temp1.mData, temp2.mData, *lenout, &temp3.mData[halfLen], &temp3.mLength, (l_word)(GS_LARGEINT_MAX_DIGITS-halfLen));
 		}
 		temp3.mLength = (l_word)(temp3.mLength + halfLen); // fix length for temp3
-		//if (temp3.mLength > GS_LARGEINT_INT_SIZE)
-		//	_asm {int 3} // this should be at most temp1.mLength+temp2.mLength
 		memset(temp3.mData, 0, halfLen*sizeof(l_word));
-		//printf("Calculated B3 (%d) = ", temp3.mLength);
-		//gsiLargeIntPrint(&temp3.mData[halfLen], temp3.mLength-halfLen);
 
 		// Compute final b. (b3-a-c) (*B^N)
 		//      Note: The subtraction is in terms of (*B^N)
@@ -846,8 +832,6 @@ static gsi_bool gsiLargeIntKMult(const l_word *data1, const l_word *data2, l_wor
 		temp3.mLength = (l_word)(temp3.mLength + halfLen);
 		gsiLargeIntSub( dest        , length, &temp3.mData[halfLen], (l_word)(temp3.mLength-halfLen), &temp3.mData[halfLen], &temp3.mLength);
 		temp3.mLength = (l_word)(temp3.mLength + halfLen);
-		//printf("Calculated B (%d) = ", temp3.mLength);
-		//gsiLargeIntPrint(temp3.mData, temp3.mLength);
 
 		// Add em up
 		//      Dest already contains A+C, so Add B
@@ -1199,13 +1183,11 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 			 249, 125, 251, 63, 253, 127, 255};
 
 
-			//printf("[gsint] Digit %d = %d\r\n", i, digitval);
 			if (i==0)
 			{
 				int counter = 0;
 
 				memcpy(dest, &lut[oddtab[digitval]], sizeof(gsLargeInt_t));
-				//printf("[gsint] Set start to %d\r\n", dest->mData[0]);
 
 				for (counter = twotab[digitval]; counter> 0; counter--)
 				{
@@ -1214,14 +1196,12 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 						gsifree(lut);
 						return gsi_false;
 					}
-					//printf("[gsint] First digit, squared to %d\r\n", dest->mData[0]);
 				}
 			}
 			else if (digitval != 0)
 			{
 				int counter = 0;
 				int lutindex = oddtab[digitval]; // we only precalculate the odd powers
-				//int lutindex = (oddtab[digitval]+1)/2; // we only precalculate the odd powers
 
 				for (counter = (int)(k-twotab[digitval]); counter> 0; counter--)
 				{
@@ -1230,7 +1210,6 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 						gsifree(lut);
 						return gsi_false;
 					}
-					//printf("[gsint]    Squared to %d\r\n", dest->mData[0]);
 				}
 		
 				if (gsi_is_false(gsiLargeIntMultM(dest, &lut[lutindex], &mod, modPrime, dest)))
@@ -1238,7 +1217,6 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 					gsifree(lut);
 					return gsi_false;
 				}
-				//printf("[gsint]    Mult by [%d](%d) to %d\r\n", lutindex, lut[lutindex].mData[0], dest->mData[0]);
 				for (counter = twotab[digitval]; counter> 0; counter--)
 				{
 					if (gsi_is_false(gsiLargeIntMultM(dest,dest, &mod, modPrime, dest)))
@@ -1246,7 +1224,6 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 						gsifree(lut);
 						return gsi_false;
 					}
-					//printf("[gsint]    Squared to %d\r\n", dest->mData[0]);
 				}
 			}
 			else
@@ -1259,7 +1236,6 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 						gsifree(lut);
 						return gsi_false;
 					}
-					//printf("[gsint]    Squared to %d\r\n", dest->mData[0]);
 				}
 			}
 		}
@@ -1674,18 +1650,6 @@ gsi_bool gsiLargeIntMultM(gsLargeInt_t *x, gsLargeInt_t *y, const gsLargeInt_t *
 }
 
 #endif
-/*
-//    Computes (src*src*r^-1)%mod
-static gsi_bool gsiLargeIntSquareM(const gsLargeInt_t *src, const gsLargeInt_t *mod, gsi_u32 modPrime, gsi_u32 R, gsLargeInt_t *dest)
-{
-	GSI_UNUSED(src);
-	GSI_UNUSED(mod);
-	GSI_UNUSED(modPrime);
-	GSI_UNUSED(R);
-	GSI_UNUSED(dest);
-	assert(0);
-	return gsi_true;
-}*/
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1749,12 +1713,12 @@ gsi_bool gsLargeIntSetFromHexString(gsLargeInt_t *lint, const char* hexstream)
 {
 	l_word* writePos = lint->mData;
 	gsi_u32 temp;
-	int len = 0;
+	unsigned int len;
 	int byteIndex = 0;
 
 	GS_ASSERT(hexstream != NULL);
 	
-	len = (int)strlen(hexstream);
+	len = strlen(hexstream);
 	if (len == 0)
 	{
 		lint->mLength = 0;
@@ -1854,10 +1818,10 @@ gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint)
 {
 	int intSize = (int)lint->mLength;
 	int byteSize = 0;
-	int i=0;
+	unsigned int i;
 	l_word mask = 0xFF;
 
-	// skip leading zeroes
+	// skip leading zeros
 	while(intSize > 0 && lint->mData[intSize-1] == 0)
 		intSize --;
 	if (intSize == 0)

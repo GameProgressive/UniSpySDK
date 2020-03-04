@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	qr2regkeys.c
+// SDK:		GameSpy Query and Reporting 2 (QR2) SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "qr2regkeys.h"
 
@@ -70,7 +78,7 @@ void qr2_internal_key_list_append(char* theKey)
 {
 	QR2KeyListNode* aNewNode;
 
-	assert(theKey != NULL);
+	GS_ASSERT(theKey != NULL);
 
 	// Init the new node
 	aNewNode = (QR2KeyListNode*)gsimalloc(sizeof(QR2KeyListNode));
@@ -139,6 +147,7 @@ void qr2_register_keyA(int keyid, const char *key)
 
 	qr2_registered_key_list[keyid] = key;
 }
+
 void qr2_register_keyW(int keyid, const unsigned short *key)
 {
 	char* key_A = NULL;

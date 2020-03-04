@@ -443,9 +443,9 @@ gpiProcessConnectionManager(
 			return GP_NO_ERROR;
 		}
 
-		//PANTS|05.23.00 - removed sleep
-		//crt - added it back 6/13/00
-		//PANTS|07.10.00 - only sleep if looping
+		// 05.23.00 - removed sleep
+		// 06/13/00 - added it back
+		// 07.10.00 - only sleep if looping
 		loop = gpiOperationsAreBlocking(connection);
 		if(loop)
 			msleep(10);
@@ -476,23 +476,13 @@ gpiProcess(
 	GPResult result = GP_NO_ERROR;
 	GPIBool loop;
 
-	assert((iconnection->connectState == GPI_NOT_CONNECTED) ||
+	GS_ASSERT((iconnection->connectState == GPI_NOT_CONNECTED) ||
 	       (iconnection->connectState == GPI_CONNECTING) ||
 	       (iconnection->connectState == GPI_NEGOTIATING) ||
 	       (iconnection->connectState == GPI_CONNECTED) ||
 	       (iconnection->connectState == GPI_DISCONNECTED) ||
 		   (iconnection->connectState == GPI_PROFILE_DELETING));
 
-	// Check if no connection was attempted.
-	////////////////////////////////////////
-/*	if(iconnection->connectState == GPI_NOT_CONNECTED)
-		return GP_NO_ERROR;
-
-	// Check for a disconnection.
-	/////////////////////////////
-	if(iconnection->connectState == GPI_DISCONNECTED)
-		return GP_NO_ERROR;
-*/
 	// Check if we're connecting.
 	/////////////////////////////
 	if(iconnection->connectState == GPI_CONNECTING)
@@ -500,7 +490,7 @@ gpiProcess(
 		do
 		{
 			result = gpiCheckConnect(connection);
-			//PANTS|07.10.00 - only sleep if looping
+			//07.10.00 - only sleep if looping
 			loop = (((result == GP_NO_ERROR) && (blockingOperationID != 0) && (iconnection->connectState == GPI_CONNECTING))) ? GPITrue:GPIFalse;
 			if(loop)
 				msleep(10);
@@ -519,15 +509,16 @@ gpiProcess(
 			{
 				// Couldn't find the connect operation.
 				///////////////////////////////////////
-				assert(0);
+				GS_ASSERT(0);
 			}
 		}
 	}
 
 	// Only do this stuff if we're connected.
 	/////////////////////////////////////////
-	if((iconnection->connectState == GPI_CONNECTED) || (iconnection->connectState == GPI_NEGOTIATING) || 
-		(iconnection->connectState == GPI_PROFILE_DELETING))
+	if (iconnection->connectState == GPI_CONNECTED || 
+		iconnection->connectState == GPI_NEGOTIATING || 
+		iconnection->connectState == GPI_PROFILE_DELETING)
 	{
 #ifdef _PS3
         // initialize NP during the sync delay, if initialized wait for status == online
@@ -604,7 +595,7 @@ gpiProcess(
 	}
 	else
 	{
-		//assert(!((result != GP_NO_ERROR) && (iconnection->connectState != GPI_CONNECTED)));
+		//GS_ASSERT(!((result != GP_NO_ERROR) && (iconnection->connectState != GPI_CONNECTED)));
 	}
 
 	return result;

@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	qr2.c
+// SDK:		GameSpy Query and Reporting 2 (QR2) SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 /********
 INCLUDES
 ********/
@@ -124,8 +133,8 @@ qr2_error_t qr2_create_socket(/*[out]*/SOCKET *sock, const char *ip, /*[in/out]*
 /* PUBLIC FUNCTIONS */
 /****************************************************************************/
 
-/* qr2_init: Initializes the sockets, etc. Returns an error value
-if an error occured, or 0 otherwise */
+/* qr2_init: Initializes the sockets, etc.
+ * Returns an error value if an error occurred, or 0 otherwise */
 qr2_error_t qr2_init_socketA(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, const char *gamename, const char *secret_key,
 					 int ispublic, int natnegotiate,
 					 qr2_serverkeycallback_t server_key_callback,
@@ -154,8 +163,8 @@ qr2_error_t qr2_init_socketA(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, cons
 		cr = *qrec;
 	}
 	srand((unsigned int)current_time());
-	strcpy(cr->gamename,gamename);
-	strcpy(cr->secret_key,secret_key);
+	gsiSafeStrcpyA(cr->gamename, gamename, sizeof(cr->gamename));
+	gsiSafeStrcpyA(cr->secret_key, secret_key, sizeof(cr->secret_key));
 	cr->qport = boundport;
 	cr->lastheartbeat = 0;
 	cr->lastka = 0;
@@ -276,7 +285,7 @@ qr2_error_t qr2_create_socket(/*[out]*/SOCKET *sock, const char *ip, /*[in/out]*
 	while (baseport < maxport)
 	{
 		get_sockaddrin(ip,baseport,&saddr,NULL);
-		if (saddr.sin_addr.s_addr == htonl(0x7F000001)) //localhost -- we don't want that!
+		if (saddr.sin_addr.s_addr == htonl(0x7F000001)) //localhost -- we don't want that
 			saddr.sin_addr.s_addr = INADDR_ANY;
 		
 		lasterror = bind(hbsock, (struct sockaddr *)&saddr, sizeof(saddr));
@@ -420,7 +429,6 @@ void qr2_register_denyresponsetoip_callback(qr2_t qrec, qr2_denyqr2responsetoipc
 	qrec->denyresp2_ip_callback = dertoipcallback;
 }
 
-
 /* qr2_think: Processes any waiting queries, and sends a
 heartbeat if needed  */
 void qr2_think(qr2_t qrec)
@@ -488,7 +496,7 @@ void qr2_check_send_heartbeat(qr2_t qrec)
 		return; //no sockets to work with!
 	}
 
-	//check if we need to send a heartbet
+	//check if we need to send a heartbeat
 	if (qrec->listed_state > 0 && tc - qrec->lastheartbeat > FIRST_HB_TIME) 
 	{ //check to see if we haven't gotten a query yet
 		if (qrec->listed_state >= MAX_FIRST_COUNT)
@@ -512,7 +520,7 @@ void qr2_check_send_heartbeat(qr2_t qrec)
 	else if (qrec->userstatechangerequested && (tc - qrec->lastheartbeat > MIN_STATECHANGED_HB_TIME))
 		send_heartbeat(qrec,1);  // Send out pending statechange request
 	else if (tc - qrec->lastheartbeat > HB_TIME || qrec->lastheartbeat == 0 || tc < qrec->lastheartbeat)
-		send_heartbeat(qrec,0);  // Send out a normal hearbeat
+		send_heartbeat(qrec,0);  // Send out a normal heartbeat
 	
 	if (current_time() - qrec->lastka > KA_TIME) //send a keep alive (to keep NAT port mappings the same if possible)
 		send_keepalive(qrec);
@@ -586,7 +594,7 @@ void qr2_shutdown(qr2_t qrec)
 
 gsi_bool qr2_keybuffer_add(qr2_keybuffer_t keybuffer, int keyid)
 {
-	// mj these are codetime not runtime errors, changing to assert
+	// these are codetime not runtime errors, changed to assert
 	if (keybuffer->numkeys >= MAX_REGISTERED_KEYS)
 		return gsi_false;
 	if (keyid < 1 || keyid > MAX_REGISTERED_KEYS)
@@ -652,6 +660,8 @@ Returns the hostent in savehent if it is not NULL */
 static int get_sockaddrin(const char *host, int port, struct sockaddr_in *saddr, struct hostent **savehent)
 {
 	struct hostent *hent = NULL;
+
+	memset(saddr, 0, sizeof(struct sockaddr_in));   //don't assume the sockaddr getting sent to this call has been zero'd out
 
 	saddr->sin_family = AF_INET;
 	saddr->sin_port = htons((unsigned short)port);
@@ -791,7 +801,7 @@ static void compute_challenge_response(qr2_t qrec, qr2_buffer_t buf, char *chall
 	if (challenge[challengelen - 1] != 0)
 		return; //invalid - must be NTS
 	
-	strcpy(encrypted_val, challenge);
+	gsiSafeStrcpyA(encrypted_val, challenge, sizeof(encrypted_val));
 	gs_encrypt((uchar *)qrec->secret_key, (int)strlen(qrec->secret_key), (uchar *)encrypted_val, challengelen - 1);
 	gs_encode((uchar *)encrypted_val,challengelen - 1, (uchar *)(buf->buffer + buf->len));
 	buf->len += (int)strlen(buf->buffer + buf->len) + 1;
@@ -847,7 +857,7 @@ static void qr_build_partial_query_reply(qr2_t qrec, qr2_buffer_t buf, qr2_key_t
 	
 	if (keytype == key_player || keytype == key_team) //need to add the player/team counts
 	{
-		if (AVAILABLE_BUFFER_LEN(buf) < sizeof(cttemp))
+		if (AVAILABLE_BUFFER_LEN(buf) < (int)sizeof(cttemp))
 			return; //no more space
 		playerteamcount = qrec->playerteam_count_callback(keytype, qrec->udata);
 		cttemp = htons((unsigned short)playerteamcount);
@@ -1219,7 +1229,7 @@ static void qr_process_client_message(qr2_t qrec, char *buf, int len)
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_Notice,
 		"Processing client message\r\n");
 
-	//see if it's a natneg request..
+	//see if it's a natneg request.
 	if (len >= NATNEG_MAGIC_LEN + 4)
 	{
 		for (i = 0 ; i < NATNEG_MAGIC_LEN ; i++)
@@ -1245,7 +1255,7 @@ static void qr_process_client_message(qr2_t qrec, char *buf, int len)
 			{
 				// fake that we passed the availability check
 				__GSIACResult = GSIACAvailable;
-				strcpy(__GSIACGamename, qrec->gamename);
+				gsiSafeStrcpyA(__GSIACGamename, qrec->gamename, sizeof(__GSIACGamename));
 			}
 
 			// do the negotiation
@@ -1626,17 +1636,6 @@ void qr2_parse_queryA(qr2_t qrec, char *query, int len, struct sockaddr *sender)
 		buf.buffer, buf.len);
 }
 
-/* NOT necessary since qr2_parse_query uses char not unsigned short
-#if defined(GSI_UNICODE)
-void qr2_parse_queryW(qr2_t qrec, unsigned short *query, int len, struct sockaddr *sender)
-{
-	char query_A[4096];
-	UCS2ToUTF8String(query, query_A);
-	qr2_parse_queryA(qrec, query_A, len, sender);
-}
-#endif*/
-
-
 /* send_keepalive: Send a keepalive packet to the hbmaster3 */
 static void send_keepalive(qr2_t qrec)
 {
@@ -1692,8 +1691,8 @@ static void send_heartbeat(qr2_t qrec, int statechanged)
 	//add the rest of our keys
 	if (statechanged != 2) //don't need if we are exiting
 	{
-		// The hbmaster will crap out if the packet is malformed
-		//   which might happen if the buffer isn't large enough
+		// The hbmaster will fail if the packet is malformed
+		// which might happen if the buffer isn't large enough
 		// So first copy dump the keys into a temporary buffer
 		struct qr2_buffer_s temp;
 		memcpy(temp.buffer, buf.buffer, (size_t)buf.len);
@@ -1712,7 +1711,6 @@ static void send_heartbeat(qr2_t qrec, int statechanged)
 	}	
 	else
 	{
-		// PANTS - 2002.6.28
 		// add an extra NUL to end the server keys
 		if (AVAILABLE_BUFFER_LEN(&buf) >= 1)
 			buf.buffer[buf.len++] = 0;
@@ -1737,5 +1735,3 @@ static void send_heartbeat(qr2_t qrec, int statechanged)
 #ifdef __cplusplus
 }
 #endif
-
-

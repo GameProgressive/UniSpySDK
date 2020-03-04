@@ -128,6 +128,13 @@ typedef enum
 	CHATBadChannelMask       // Not sure if any servers use this, or what it means! (ERR_BADCHANMASK)
 } CHATEnterResult;
 
+typedef enum CHATOperationResult
+{
+	CHATOperationResult_SUCCESS,
+	CHATOperationResult_INVALID_PARAM,
+	CHATOperationResult_ENUM_ALREADY_PENDING,
+	CHATOperationResult_MAX
+} CHATOperationResult;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,6 +152,7 @@ typedef enum
 #define chatTranslateNick			chatTranslateNickA
 #define chatAuthenticateCDKey		chatAuthenticateCDKeyA
 #define chatEnumChannels			chatEnumChannelsA
+#define chatEnumChannelsWithLimit   chatEnumChannelsWithLimitA
 #define chatEnterChannel			chatEnterChannelA
 #define chatLeaveChannel			chatLeaveChannelA
 #define chatSendChannelMessage		chatSendChannelMessageA
@@ -193,6 +201,7 @@ typedef enum
 #define chatTranslateNick			chatTranslateNickW
 #define chatAuthenticateCDKey		chatAuthenticateCDKeyW
 #define chatEnumChannels			chatEnumChannelsW
+#define chatEnumChannelsWithLimit   chatEnumChannelsWithLimitW
 #define chatEnterChannel			chatEnterChannelW
 #define chatLeaveChannel			chatLeaveChannelW
 #define chatSendChannelMessage		chatSendChannelMessageW
@@ -1290,7 +1299,7 @@ typedef void (* chatEnumChannelsCallbackAll)(CHAT chat,
 //		 passing in a partial name and wildcard.<p>
 // See Also
 //		ChatConnect, ChatDisconnect
-/*CHATOperationResult*/void chatEnumChannels(CHAT chat,
+CHATOperationResult chatEnumChannels(CHAT chat,
 	const gsi_char * filter,
 	chatEnumChannelsCallbackEach callbackEach,
 	chatEnumChannelsCallbackAll callbackAll,
@@ -1323,7 +1332,7 @@ typedef void (* chatEnumChannelsCallbackAll)(CHAT chat,
 //		Channels are not sent back in any particular order.
 //		The maxNumberOfChannels should not be zero.
 //		Use chatEnumChannels if there is no limit requested.<p>
-/*CHATOperationResult*/void chatEnumChannelsWithLimit(CHAT chat,
+CHATOperationResult chatEnumChannelsWithLimit(CHAT chat,
 	gsi_u32 maxNumberOfChannels,
 	const gsi_char * filter,
 	chatEnumChannelsCallbackEach callbackEach,
@@ -1466,7 +1475,7 @@ void chatEnterChannel(CHAT chat,
 //		ChatConnect, ChatDisconnect
 void chatLeaveChannel(CHAT chat,
 	const gsi_char * channel,
-	const gsi_char * reason);   // PANTS|03.13.01
+	const gsi_char * reason); 
 
 //////////////////////////////////////////////////////////////
 // chatSendChannelMessage
@@ -2424,9 +2433,6 @@ void chatGetChannelKeys(CHAT chat,
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// This ASCII versions must be available even when GSI_UNICODE is defined
 #ifdef GSI_UNICODE
 	CHATBool chatGetBasicUserInfoNoWaitA(CHAT chat,
 		const char * nick,

@@ -430,9 +430,9 @@ int InitStatsThink()
 
 /****************************************************************************/
 // Blocking version of InitStatsAsync, for backwards compatability
-int InitStatsConnection(int gameport)
+int InitStatsConnection(int gameport_)
 {
-	int aResult = InitStatsAsync(gameport, 0);
+	int aResult = InitStatsAsync(gameport_, 0);
 	while (aResult == GE_CONNECTING)
 	{
 		aResult = InitStatsThink();

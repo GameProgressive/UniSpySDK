@@ -312,6 +312,7 @@ typedef GHTTPBool (* ghttpCompletedCallback)
 	GHTTPResult result,         // The result (success or an error).
 	char * buffer,              // The file's bytes (only valid if ghttpGetFile[Ex] was used).
 	GHTTPByteCount bufferLen,   // The file's length.
+	char * headers,
 	void * param                // User-data.
 );
 

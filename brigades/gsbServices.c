@@ -22,7 +22,7 @@
 // This string is used as part of the SOAP messages
 const char * GSB_NAMESPACES[GSB_NAMESPACE_COUNT] =
 {
-	GSB_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL "gamespy.net/brigades/2008/08\"",
+	GSB_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/brigades/2008/08\"",
 };
 
 

@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sakeRequestRead.c
+// SDK:		GameSpy Sake Persistent Storage SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sakeRequestInternal.h"
 #include "sakeRequest.h"
 
@@ -670,5 +677,3 @@ SAKEStartRequestResult SAKE_CALL sakeiStartGetRandomRecordRequest(SAKERequest re
 
 	return sakeiStartRequest(request, &info);
 }
-
-

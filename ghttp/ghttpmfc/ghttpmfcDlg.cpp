@@ -178,6 +178,7 @@ static GHTTPBool CompletedCallback
 	GHTTPResult result,
 	char * buffer,
 	GHTTPByteCount bufferLen,
+	char * headers,
 	void * param
 )
 {
@@ -230,6 +231,7 @@ static GHTTPBool CompletedCallback
 	GSI_UNUSED(bufferLen);
 	GSI_UNUSED(buffer);
 	GSI_UNUSED(request);
+	GSI_UNUSED(headers);
 }
 
 void ProgressCallback

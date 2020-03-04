@@ -1499,57 +1499,83 @@ void ghiDoReceivingHeaders
  GHIConnection * connection
  )
 {
-	char buffer[4096];
-	int bufferLen;
-	GHIRecvResult result;
-	GHTTPBool hasHeaders = GHTTPTrue;
-	char * headers;
-	char * endOfHeaders = NULL;
+    GHIRecvResult result;
+    GHTTPBool hasHeaders = GHTTPTrue;
+    char * headers;
+    char * endOfHeaders = NULL;
+    int bufferLen;
 
-	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Receiving Headers\n");
+#if defined(_NITRO) || defined(_REVOLUTION)
+    // For Nitro and Revolution , use heap since stack is limited in size
+    /////////////////////////////////////////////////////////////////////
+    char * buffer = (char *)gsimalloc(GS_HEADER_BUFFER_LEN);
+    if(buffer == NULL)
+    {
+        connection->completed = GHTTPTrue;
+        connection->result = GHTTPOutOfMemory;
+        return;
+    }
+#else
+    char buffer[GS_HEADER_BUFFER_LEN];
+#endif
 
-	// Get data.
-	////////////
-	bufferLen = sizeof(buffer);
-	result = ghiDoReceive(connection, buffer, &bufferLen);
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Receiving Headers\n");
 
-	// Handle error, no data, conn closed.
-	//////////////////////////////////////
-	if(result == GHIError)
-		return;
-	if(result == GHINoData)
-		return;
+    // Get data.
+    ////////////
+    bufferLen = GS_HEADER_BUFFER_LEN;
+    result = ghiDoReceive(connection, buffer, &bufferLen);
 
-	// Only append data if we got data.
-	///////////////////////////////////
-	if(result == GHIRecvData)
+    // Handle error, no data, conn closed.
+    //////////////////////////////////////
+    if(result == GHIError)
 	{
-		// Check for encryption.
-		////////////////////////
-		if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
-			connection->encryptor.mEncryptOnBuffer == GHTTPTrue)
-		{
-			// Append new encrypted data to anything we've held over
-			//    We have to do this because we can't decrypt partial SSL messages
-			if (!ghiAppendDataToBuffer(&connection->decodeBuffer, buffer, bufferLen))
-				return;
+        ghiFreeTempBuffer(buffer);
+		return;
+	}
+    if(result == GHINoData)
+	{
+        ghiFreeTempBuffer(buffer);
+		return;
+	}
 
-			// Decrypt as much as we can
-			if (!ghiDecryptReceivedData(connection))
+    // Only append data if we got data.
+    ///////////////////////////////////
+    if(result == GHIRecvData)
+    {
+        // Check for encryption.
+        ////////////////////////
+        if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
+            connection->encryptor.mEncryptOnBuffer == GHTTPTrue)
+        {
+            // Append new encrypted data to anything we've held over
+            //    We have to do this because we can't decrypt partial SSL messages
+            if (!ghiAppendDataToBuffer(&connection->decodeBuffer, buffer, bufferLen))
 			{
-				connection->completed = GHTTPTrue;
-				connection->result = GHTTPEncryptionError;
+				ghiFreeTempBuffer(buffer);
 				return;
 			}
-		}
-		else
-		{
-			// Add the data directly to the buffer.
-			///////////////////////////////////////
-			if(!ghiAppendDataToBuffer(&connection->recvBuffer, buffer, bufferLen))
+
+            // Decrypt as much as we can
+            if (!ghiDecryptReceivedData(connection))
+            {
+                connection->completed = GHTTPTrue;
+                connection->result = GHTTPEncryptionError;
+				ghiFreeTempBuffer(buffer);
 				return;
-		}
-	}
+            }
+        }
+        else
+        {
+            // Add the data directly to the buffer.
+            ///////////////////////////////////////
+            if(!ghiAppendDataToBuffer(&connection->recvBuffer, buffer, bufferLen))
+			{
+				ghiFreeTempBuffer(buffer);
+				return;
+			}
+        }
+    }
 
     // Cache a pointer to the front of the headers.
     ///////////////////////////////////////////////
@@ -1596,8 +1622,10 @@ void ghiDoReceivingHeaders
         headersLength = (endOfHeaders - headers);
 #endif
 
-		fileStart = (endOfHeaders + 2);
-		fileLength = (connection->recvBuffer.len - (fileStart - connection->recvBuffer.data));
+		connection->recvHeaders = goastrdup(headers);
+
+        fileStart = (endOfHeaders + 2);
+        fileLength = (connection->recvBuffer.len - (fileStart - connection->recvBuffer.data));
 
         // Set the headers buffer's new length.
         ///////////////////////////////////////
@@ -1648,167 +1676,175 @@ void ghiDoReceivingHeaders
 			return;
 		}
 
-		// Check for redirection.
-		/////////////////////////
-		if((connection->statusCode / 100) == 3)
-		{
-			char * location;
+        // Check for redirection.
+        /////////////////////////
+        if((connection->statusCode / 100) == 3)
+        {
+            char * location;
 
-			// Are we over our redirection count?
-			/////////////////////////////////////
-			if(connection->redirectCount > 10)
-			{
-				connection->completed = GHTTPTrue;
-				connection->result = GHTTPFileNotFound;
+            // Are we over our redirection count?
+            /////////////////////////////////////
+            if(connection->redirectCount > 10)
+            {
+                connection->completed = GHTTPTrue;
+                connection->result = GHTTPFileNotFound;
+				ghiFreeTempBuffer(buffer);
 				return;
-			}
+            }
 
-			// Find the new location.
-			/////////////////////////
-			location = strstr(headers, "Location:");
-			if(location)
-			{
-				char * end;
+            // Find the new location.
+            /////////////////////////
+            location = strstr(headers, "Location:");
+            if(location)
+            {
+                char * end;
 
-				// Find the start of the URL.
-				/////////////////////////////
-				location += 9;
-				while(isspace(*location))
-					location++;
+                // Find the start of the URL.
+                /////////////////////////////
+                location += 9;
+                while(isspace(*location))
+                    location++;
 
-				// Find the end.
-				////////////////
-				for(end = location; *end && !isspace(*end) ; end++)  { };
-				*end = '\0';
+                // Find the end.
+                ////////////////
+                for(end = location; *end && !isspace(*end) ; end++)  { };
+                *end = '\0';
 
-				// Check if this is not a full URL.
-				///////////////////////////////////
-				if(*location == '/')
-				{
-					int len;
+                // Check if this is not a full URL.
+                ///////////////////////////////////
+                if(*location == '/')
+                {
+                    int len;
 
-					// Recompose the URL ourselves.
-					///////////////////////////////
-					len = (int)(strlen(connection->serverAddress) + 13 + strlen(location) + 1);
-					connection->redirectURL = (char *)gsimalloc((unsigned int)len);
-					if(!connection->redirectURL)
-					{
-						connection->completed = GHTTPTrue;
-						connection->result = GHTTPOutOfMemory;
-					}
-					sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
-				}
-				else
-				{
-					// Set the redirect URL.
-					////////////////////////
-					connection->redirectURL = goastrdup(location);
-					if(!connection->redirectURL)
-					{
-						connection->completed = GHTTPTrue;
-						connection->result = GHTTPOutOfMemory;
-					}
-				}
+                    // Recompose the URL ourselves.
+                    ///////////////////////////////
+                    len = (int)(strlen(connection->serverAddress) + 13 + strlen(location) + 1);
+                    connection->redirectURL = (char *)gsimalloc((unsigned int)len);
+                    if(!connection->redirectURL)
+                    {
+                        connection->completed = GHTTPTrue;
+                        connection->result = GHTTPOutOfMemory;
+                    }
+                    sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
+                }
+                else
+                {
+                    // Set the redirect URL.
+                    ////////////////////////
+                    connection->redirectURL = goastrdup(location);
+                    if(!connection->redirectURL)
+                    {
+                        connection->completed = GHTTPTrue;
+                        connection->result = GHTTPOutOfMemory;
+                    }
+                }
 
+				ghiFreeTempBuffer(buffer);
 				return;
-			}
-		}
+            }
+        }
 
-		// If we know the file-length, set it.
-		//////////////////////////////////////
-		contentLength = strstr(headers, "Content-Length:");
-		if(contentLength)
-		{
-			// Verify that the download size is something we can handle
-			///////////////////////////////////////////////////////////
+        // If we know the file-length, set it.
+        //////////////////////////////////////
+        contentLength = strstr(headers, "Content-Length:");
+        if(contentLength)
+        {
+            // Verify that the download size is something we can handle
+            ///////////////////////////////////////////////////////////
 #if (GSI_MAX_INTEGRAL_BITS >= 64)
-			char  szMaxSize[] = "9223372036854775807"; // == GSI_MAX_I64       
+            char  szMaxSize[] = "9223372036854775807"; // == GSI_MAX_I64       
 #else
-			char  szMaxSize[] = "2147483647";          // == GSI_MAX_I32
+            char  szMaxSize[] = "2147483647";          // == GSI_MAX_I32
 #endif
-			char* pStart  = contentLength+16;
-			char* pEnd    = pStart;
-			int   nMaxLen = (int)strlen(szMaxSize);
+            char* pStart  = contentLength+16;
+            char* pEnd    = pStart;
+            int   nMaxLen = (int)strlen(szMaxSize);
 
-			// Skip to the end of the line
-			while( pEnd && *pEnd != '\0' && *pEnd != '\n' && *pEnd != '\r' && *pEnd != ' ' )
-				pEnd++;
+            // Skip to the end of the line
+            while( pEnd && *pEnd != '\0' && *pEnd != '\n' && *pEnd != '\r' && *pEnd != ' ' )
+                pEnd++;
 
- 			if( pEnd-pStart > nMaxLen )
-			{
-				// Wow, that IS a big number
-				connection->completed = GHTTPTrue;
-				connection->result = GHTTPFileToBig;
-				return;
+            if( pEnd-pStart > nMaxLen )
+            {
+                // Wow, that IS a big number
+                connection->completed = GHTTPTrue;
+                connection->result = GHTTPFileToBig;
+				ghiFreeTempBuffer(buffer);
+				return;            
 			}
-			else
-			if( pEnd-pStart == nMaxLen )
-			{
-				// Same length, maybe a bigger number
-				if( strncmp(pStart,szMaxSize,(unsigned int)(pEnd-pStart)) >= 0 )
-				{
-					connection->completed = GHTTPTrue;
-					connection->result = GHTTPFileToBig;
-					return;
-				}
-			}
+            else
+                if( pEnd-pStart == nMaxLen )
+                {
+                    // Same length, maybe a bigger number
+                    if( strncmp(pStart,szMaxSize,(unsigned int)(pEnd-pStart)) >= 0 )
+                    {
+                        connection->completed = GHTTPTrue;
+                        connection->result = GHTTPFileToBig;
+						ghiFreeTempBuffer(buffer);
+						return; 
+					}
+                }
 
-			// Record the full size of the expected download
-			////////////////////////////////////////////////
+                // Record the full size of the expected download
+                ////////////////////////////////////////////////
 #if (GSI_MAX_INTEGRAL_BITS >= 64)
-			connection->totalSize = _atoi64(pStart);
+                connection->totalSize = _atoi64(pStart);
 #else
-			connection->totalSize = atoi(pStart);
+                connection->totalSize = atoi(pStart);
 #endif
-		}
+        }
 
-		// Check the chunky.
-		////////////////////
-		connection->chunkedTransfer = (strstr(headers, "Transfer-Encoding: chunked") != NULL)?GHTTPTrue:GHTTPFalse;
-		if(connection->chunkedTransfer)
-		{
-			connection->chunkHeader[0] = '\0';
-			connection->chunkHeaderLen = 0;
-			connection->chunkBytesLeft = 0;
-			connection->chunkReadingState = CRHeader;
-		}
+        // Check the chunky.
+        ////////////////////
+        connection->chunkedTransfer = (strstr(headers, "Transfer-Encoding: chunked") != NULL)?GHTTPTrue:GHTTPFalse;
+        if(connection->chunkedTransfer)
+        {
+            connection->chunkHeader[0] = '\0';
+            connection->chunkHeaderLen = 0;
+            connection->chunkBytesLeft = 0;
+            connection->chunkReadingState = CRHeader;
+        }
 
-		// If we're just getting headers, or only posting data, we're done.
-		///////////////////////////////////////////////////////////////////
-		if((connection->type == GHIHEAD) || (connection->type == GHIPOST))
-		{
-			connection->completed = GHTTPTrue;
+        // If we're just getting headers, or only posting data, we're done.
+        ///////////////////////////////////////////////////////////////////
+        if((connection->type == GHIHEAD) || (connection->type == GHIPOST))
+        {
+            connection->completed = GHTTPTrue;
+            ghiFreeTempBuffer(buffer);
 			return;
-		}
+        }
 
-		// We're receiving file data now.
-		/////////////////////////////////
-		connection->state = GHTTPReceivingFile;
+        // We're receiving file data now.
+        /////////////////////////////////
+        connection->state = GHTTPReceivingFile;
 
-		// Is this an empty file?
-		/////////////////////////
-		if(contentLength && !connection->totalSize)
-		{
-			connection->completed = GHTTPTrue;
+        // Is this an empty file?
+        /////////////////////////
+        if(contentLength && !connection->totalSize)
+        {
+            connection->completed = GHTTPTrue;
+            ghiFreeTempBuffer(buffer);
 			return;
-		}
+        }
 
-		// If any of the body has arrived, handle it.
-		/////////////////////////////////////////////
-		if(fileLength > 0)
-			ghiProcessIncomingFileData(connection, fileStart, fileLength);
+        // If any of the body has arrived, handle it.
+        /////////////////////////////////////////////
+        if(fileLength > 0)
+            ghiProcessIncomingFileData(connection, fileStart, fileLength);
 
-		// Don't reset the buffer -- we store status and header info
-		//ghiResetBuffer(&connection->recvBuffer);
-	}
-	else if(result == GHIConnClosed)
-	{
-		// The conn was closed, and we didn't finish the headers - bad.
-		///////////////////////////////////////////////////////////////
-		connection->completed = GHTTPTrue;
-		connection->result = GHTTPBadResponse;
-		connection->socketError = GOAGetLastError(connection->socket);
-	}
+        // Don't reset the buffer -- we store status and header info
+        //ghiResetBuffer(&connection->recvBuffer);
+    }
+    else if(result == GHIConnClosed)
+    {
+        // The conn was closed, and we didn't finish the headers - bad.
+        ///////////////////////////////////////////////////////////////
+        connection->completed = GHTTPTrue;
+        connection->result = GHTTPBadResponse;
+        connection->socketError = GOAGetLastError(connection->socket);
+    }
+    
+    ghiFreeTempBuffer(buffer);
 }
 
 /*******************
@@ -1816,48 +1852,88 @@ void ghiDoReceivingHeaders
 *******************/
 void ghiDoReceivingFile
 (
-	GHIConnection * connection
-)
+ GHIConnection * connection
+ )
 {
-	char buffer[8192];
-	int bufferLen;
-	GHIRecvResult result;
-	gsi_time start_time   = current_time();
-	gsi_time running_time = 0;
+    GHIRecvResult result;
+    gsi_time start_time   = current_time();
+    gsi_time running_time = 0;
+    int bufferLen =0;
 
-	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Receiving File\n");
+#if defined(_NITRO) || defined(_REVOLUTION)
+    // For Nitro and Revolution, use heap since stack is limited in size
+    ////////////////////////////////////////////////////////////////////
+    char * buffer = (char*)gsimalloc(GS_FILE_BUFFER_LEN);
+    if(buffer == NULL)
+    {
+        connection->completed = GHTTPTrue;
+        connection->result = GHTTPOutOfMemory;
+        return;
+    }
+#else
+    char buffer[GS_FILE_BUFFER_LEN];
+#endif
 
-	while(!connection->completed && (running_time < connection->maxRecvTime))
-	{
-		// Get data.
-		////////////
-		bufferLen = sizeof(buffer);
-		result = ghiDoReceive(connection, buffer, &bufferLen);
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, "Receiving File\n");
 
-		// Handle error, no data, conn closed.
-		//////////////////////////////////////
-		if(result == GHIError)
-			return;
-		if(result == GHINoData)
-			return;
-		if(result == GHIConnClosed)
+    // The following prevents being stuck in the Recv File state
+    while(!connection->completed && (running_time < connection->maxRecvTime))
+    {
+        // Get data.
+        ////////////
+        bufferLen = GS_FILE_BUFFER_LEN; 
+        result = ghiDoReceive(connection, buffer, &bufferLen);
+
+        // Handle error, no data, conn closed.
+        //////////////////////////////////////
+        if(result == GHINoData)
 		{
-			// The file is done (hopefully).
-			////////////////////////////////
-			connection->completed = GHTTPTrue;
+            ghiFreeTempBuffer(buffer); 
+            
+            // We are idle, so update the idle time while receiving data.
+            if (connection->receiveFileIdleTime == 0)
+            {
+                connection->receiveFileIdleTime = current_time();
+            }
+            else if ((current_time() - connection->receiveFileIdleTime) >= MAX_RECVFILE_IDLE_TIMEOUT)
+            {
+                gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
+				"Receive File Idle Timeout %d ===== \r\n", (current_time() - connection->receiveFileIdleTime));
 
-			if (connection->totalSize > 0 && connection->fileBytesReceived < connection->totalSize)
-				connection->result = GHTTPFileIncomplete;
+                connection->receiveFileIdleTime = 0;
+                connection->completed = GHTTPTrue;
+                connection->result    = GHTTPRecvFileTimeout;
+            }
 			return;
 		}
-
-		// Check for encryption.
-		////////////////////////
-		if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
-			connection->encryptor.mEncryptOnBuffer == GHTTPTrue)
+		
+		// We have received something so reset the idle time
+		connection->receiveFileIdleTime = 0;
+		
+		if(result == GHIError)
 		{
-			char * decryptedData;
-			int decryptedLen;
+            ghiFreeTempBuffer(buffer); 
+			return;
+		}
+        if(result == GHIConnClosed)
+        {
+            // The file is done (hopefully).
+            ////////////////////////////////
+            connection->completed = GHTTPTrue;
+
+            if (connection->totalSize > 0 && connection->fileBytesReceived < connection->totalSize)
+                connection->result = GHTTPFileIncomplete;
+            ghiFreeTempBuffer(buffer); 
+			return;
+        }
+
+        // Check for encryption.
+        ////////////////////////
+        if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
+            connection->encryptor.mEncryptOnBuffer == GHTTPTrue)
+        {
+            char * decryptedData;
+            int decryptedLen;
 
             // Append new encrypted data to anything we've held over
             //    We have to do this because we can't decrypt partial SSL messages
@@ -1867,36 +1943,43 @@ void ghiDoReceivingFile
 				return;
 			}
 
-			// Previously decrypted parts of the file have already been handled.
-			connection->recvBuffer.len = connection->recvBuffer.pos;
+            // Previously decrypted parts of the file have already been handled.
+            connection->recvBuffer.len = connection->recvBuffer.pos;
 
-			// Decrypt as much as we can
-			if (!ghiDecryptReceivedData(connection))
-			{
-				connection->completed = GHTTPTrue;
-				connection->result = GHTTPEncryptionError;
+            // Decrypt as much as we can
+            if (!ghiDecryptReceivedData(connection))
+            {
+                connection->completed = GHTTPTrue;
+                connection->result = GHTTPEncryptionError;
+                ghiFreeTempBuffer(buffer); 
 				return;
-			}
+            }
 
-			// Check for decrypted data.
-			////////////////////////////
-			decryptedLen = (connection->recvBuffer.len - connection->recvBuffer.pos);
-			if(decryptedLen)
-			{
-				// Process the data.
-				////////////////////
-				decryptedData = (connection->recvBuffer.data + connection->recvBuffer.pos);
-				if(!ghiProcessIncomingFileData(connection, decryptedData, decryptedLen))
+            // Check for decrypted data.
+            ////////////////////////////
+            decryptedLen = (connection->recvBuffer.len - connection->recvBuffer.pos);
+            if(decryptedLen)
+            {
+                // Process the data.
+                ////////////////////
+                decryptedData = (connection->recvBuffer.data + connection->recvBuffer.pos);
+                if(!ghiProcessIncomingFileData(connection, decryptedData, decryptedLen))
+				{
+                    ghiFreeTempBuffer(buffer); 
 					return;
-			}
-		}
-		else
-		{
-			// Process the data.
-			////////////////////
-			if(!ghiProcessIncomingFileData(connection, buffer, bufferLen))
+				}
+            }
+        }
+        else
+        {
+            // Process the data.
+            ////////////////////
+            if(!ghiProcessIncomingFileData(connection, buffer, bufferLen))
+			{
+                ghiFreeTempBuffer(buffer); 
 				return;
-		}
+			}
+        }
 
         running_time = current_time() - start_time;
     }

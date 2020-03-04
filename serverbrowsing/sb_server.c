@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	sb_server.c
+// SDK:		GameSpy Server Browsing SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sb_internal.h"
 #include "sb_ascii.h"
 
@@ -146,16 +155,15 @@ const char *SBServerGetStringValueA(SBServer server, const char *keyname, const 
 {
 	SBKeyValuePair kv, *ptr;
 	
-	// 11-03-2004 : Saad Nader
 	// Check if we are getting a valid server 
-	//  before doing anything!
+	//  before doing anything.
 	///////////////////////////////////////////
-	assert(server);
+	GS_ASSERT(server);
 	if (!server)
 		return NULL;
 	kv.key = keyname;
 	ptr =  (SBKeyValuePair *)TableLookup(server->keyvals, &kv);
-	if (ptr == NULL)
+	if (ptr == NULL || strlen(ptr->value) == 0)
 		return def;
 	return ptr->value;
 }
@@ -450,7 +458,7 @@ SBServer SBServerGetNext(SBServer server)
 static int CheckValidKey(char *key)
 {
 	const char *InvalidKeys[]={"queryid","final"};
-	int i;
+	unsigned int i;
 	for (i = 0; i < sizeof(InvalidKeys)/sizeof(InvalidKeys[0]); i++)
 	{
 		if (strcmp(key,InvalidKeys[i]) == 0)

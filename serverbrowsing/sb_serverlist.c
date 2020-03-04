@@ -1,7 +1,15 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	sb_serverlist.c
+// SDK:		GameSpy Server Browsing SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sb_serverbrowsing.h"
 #include "sb_internal.h"
 #include "sb_ascii.h"
-
 
 #define SERVER_GROWBY 100
 
@@ -10,13 +18,7 @@
 
 #define MAX_OUTGOING_REQUEST_SIZE (MAX_FIELD_LIST_LEN + MAX_FILTER_LEN + 255)
 
-
-
-
-
-
-static SBServerList *g_sortserverlist; //global serverlist for sorting info!!
-
+static SBServerList *g_sortserverlist; //global server list for sorting info
 
 //private function used to compare the key values based on a previously defined sortkey
 static int prevKeyCompare(SBServer server1, SBServer server2)
@@ -315,7 +317,7 @@ void SBReleaseStr(SBServerList *slist, const char *str)
 	SBRefString ref, *val;
 	ref.str = str;
 	val = (SBRefString *)TableLookup(SBRefStrHash(slist), &ref);
-	assert(val != NULL);
+	GS_ASSERT(val != NULL);
 	if (val == NULL)
 		return; //not found!
 	val->refcount--;
@@ -355,7 +357,7 @@ int NTSLengthSB(char *buf, int len)
 
 void SBServerListInit(SBServerList *slist, const char *queryForGamename, const char *queryFromGamename, const char *queryFromKey, int queryFromVersion, SBBool lanBrowse, SBListCallBackFn callback, void *instance)
 {
-	assert(slist != NULL);
+	GS_ASSERT(slist != NULL);
 	// 11-03-2004 : Added by Saad Nader
 	// fix for LANs and unnecessary availability check
 	///////////////////////////////////////////////////
@@ -372,12 +374,12 @@ void SBServerListInit(SBServerList *slist, const char *queryForGamename, const c
 	slist->state = sl_disconnected;
 	SBAllocateServerList(slist);
 	SBRefStrHash(slist); //make sure it's initialized
-	strcpy(slist->queryforgamename, queryForGamename);
-	strcpy(slist->queryfromgamename, queryFromGamename);
-	strcpy(slist->queryfromkey, queryFromKey);
+	gsiSafeStrcpyA(slist->queryforgamename, queryForGamename, sizeof(slist->queryforgamename));
+	gsiSafeStrcpyA(slist->queryfromgamename, queryFromGamename, sizeof(slist->queryfromgamename));
+	gsiSafeStrcpyA(slist->queryfromkey, queryFromKey, sizeof(slist->queryfromkey));
 	slist->ListCallback = callback;
 	slist->MaploopCallback = NULL; //populate when requested
-	assert(callback != NULL);
+	GS_ASSERT(callback != NULL);
 	slist->instance = instance;
 	slist->mypublicip = 0;
 	slist->slsocket = INVALID_SOCKET;
@@ -442,7 +444,7 @@ static int StringHash(const char *s, int numbuckets)
 
 static SBError ServerListConnect(SBServerList *slist)
 {
-	struct   sockaddr_in saddr;
+	struct   sockaddr_in masterSAddr;
 	struct hostent *hent;
 	char masterHostname[128];
 	int masterIndex;
@@ -450,18 +452,18 @@ static SBError ServerListConnect(SBServerList *slist)
 
 	masterIndex = StringHash(slist->queryforgamename, NUM_MASTER_SERVERS);
 	if (SBOverrideMasterServer != NULL)
-		strcpy(masterHostname, SBOverrideMasterServer);
+		gsiSafeStrcpyA(masterHostname, SBOverrideMasterServer, sizeof(masterHostname));
 	else //use the default format...
 		sprintf(masterHostname,"%s.ms%d." GSI_DOMAIN_NAME, slist->queryforgamename, masterIndex);
-	saddr.sin_family = AF_INET;
-	saddr.sin_port = htons(MSPORT2);
-	saddr.sin_addr.s_addr = inet_addr(masterHostname);
-	if (saddr.sin_addr.s_addr == INADDR_NONE)
+	masterSAddr.sin_family = AF_INET;
+	masterSAddr.sin_port = htons(MSPORT2);
+	masterSAddr.sin_addr.s_addr = inet_addr(masterHostname);
+	if (masterSAddr.sin_addr.s_addr == INADDR_NONE)
 	{
 		hent = gethostbyname(masterHostname);
 		if (!hent)
 			return sbe_dnserror; 
-		memcpy(&saddr.sin_addr.s_addr,hent->h_addr_list[0], sizeof(saddr.sin_addr.s_addr));
+		memcpy(&masterSAddr.sin_addr.s_addr,hent->h_addr_list[0], sizeof(masterSAddr.sin_addr.s_addr));
 	}
 
 	if (slist->slsocket == INVALID_SOCKET)
@@ -470,7 +472,7 @@ static SBError ServerListConnect(SBServerList *slist)
 		if (slist->slsocket == INVALID_SOCKET)
 			return sbe_socketerror;
 	}
-	if (connect ( slist->slsocket, (struct sockaddr *) &saddr, sizeof saddr ) != 0)
+	if (connect ( slist->slsocket, (struct sockaddr *) &masterSAddr, sizeof masterSAddr ) != 0)
 	{
 		closesocket(slist->slsocket);
 		slist->slsocket = INVALID_SOCKET;
@@ -614,7 +616,7 @@ SBError SBServerListConnectAndQuery(SBServerList *slist, const char *fieldList, 
 	unsigned short netLen;
 	char *requestBuf;
 	char outgoingRequest[MAX_OUTGOING_REQUEST_SIZE + 1];
-	assert(slist->state == sl_disconnected);
+	GS_ASSERT(slist->state == sl_disconnected);
 
 	
 	if (fieldList == NULL)
@@ -883,7 +885,7 @@ static int AllKeysPresent(SBServerList *slist, char *buf, int len)
 			} //else it's a popular string - just the index is present
 			break;
 		default:
-			assert(0);
+			GS_FAIL();
 			return 0; //error - unknown key type
 		}
 		if (len < 0)
@@ -1166,7 +1168,7 @@ Byte Values
 
 static SBError ProcessMainListData(SBServerList *slist)
 {
-	int reqlen;
+	int bytesRead;
 	int keyoffset;
 	int keylen;
 	char *inbuf = slist->inbuffer;
@@ -1176,13 +1178,16 @@ static SBError ProcessMainListData(SBServerList *slist)
 	case pi_cryptheader:
 		if (inlen < 1)
 			break;
-		reqlen = (((unsigned char)(inbuf[0])) ^ 0xEC) + 2;
-		if (inlen < reqlen)
+		// We get the length of data up to the key
+		// We add 2 because we're ignoring the lengths in two of the bytes
+		bytesRead = (((unsigned char)(inbuf[0])) ^ 0xEC) + 2;
+		if (inlen < bytesRead)
 			break; //not there yet
-		keyoffset = reqlen;
-		keylen = ((unsigned char)(inbuf[reqlen - 1])) ^ 0xEA;
-		reqlen += keylen;
-		if (inlen < reqlen)
+
+		keyoffset = bytesRead;
+		keylen = ((unsigned char)(inbuf[bytesRead - 1])) ^ 0xEA;
+		bytesRead += keylen;
+		if (inlen < bytesRead)
 			break; //not there yet
 		//otherwise we have the whole crypt header and can init our crypt key
 		InitCryptKey(slist, inbuf + keyoffset, keylen);
@@ -1193,8 +1198,8 @@ static SBError ProcessMainListData(SBServerList *slist)
 		memcpy(&slist->backendgameflags, &inbuf[1], 2);
 		slist->backendgameflags = ntohs(slist->backendgameflags);
 
-		inbuf += reqlen;
-		inlen -= reqlen;
+		inbuf += bytesRead;
+		inlen -= bytesRead;
 		//decrypt any remaining data!
 		GOADecrypt(&(slist->cryptkey), (unsigned char *)inbuf, inlen);
 		//and fall through
@@ -1287,10 +1292,10 @@ static SBError ProcessMainListData(SBServerList *slist)
 			break;
 		do
 		{
-			reqlen =  IncomingListParseServer(slist, inbuf, inlen);
-			if (reqlen == -2)
+			bytesRead =  IncomingListParseServer(slist, inbuf, inlen);
+			if (bytesRead == -2)
 				return sbe_allocerror;			
-			else if (reqlen == -1) //that was the last server!
+			else if (bytesRead == -1) //that was the last server!
 			{
 				inlen -= 5;
 				inbuf += 5;
@@ -1299,16 +1304,16 @@ static SBError ProcessMainListData(SBServerList *slist)
 				slist->ListCallback(slist, slc_initiallistcomplete, SBNullServer, slist->instance);
 				break;
 			}
-			inbuf += reqlen;
-			inlen -= reqlen;
+			inbuf += bytesRead;
+			inlen -= bytesRead;
 			if (slist->inbuffer == NULL)
-				reqlen = 0; //break out - they disconnected
-		} while (reqlen != 0);
+				bytesRead = 0; //break out - they disconnected
+		} while (bytesRead != 0);
 		break;
 	default:
 		break;
 	}
-	assert(inlen >= 0);
+	GS_ASSERT(inlen >= 0);
 	if (slist->inbuffer == NULL)
 		return sbe_noerror; //don't keep processing - they disconnected
 	if (inlen != 0) //need to shift it over..
@@ -1371,7 +1376,6 @@ Results
 	4 bytes - last seen time (UTC Unix time)
 	gamename - NTS (empty if they are searching for only a single game)
 */
-
 static SBError ProcessPlayerSearch(SBServerList *slist, char *buf, int len)
 {
 	unsigned char isFinal;
@@ -1428,8 +1432,6 @@ static SBError ProcessPlayerSearch(SBServerList *slist, char *buf, int len)
  Maps
    Mapname - NTS
 */
-
-
 static SBError ProcessMaploop(SBServerList *slist, char *buf, int len)
 {
 	time_t changeTime;
@@ -1569,7 +1571,7 @@ static SBError ProcessAdHocData(SBServerList *slist)
 		}
 		
 		slist->inbufferlen -= msglen;
-		assert(slist->inbufferlen >= 0);
+		GS_ASSERT(slist->inbufferlen >= 0);
 		if (slist->inbufferlen != 0 && slist->inbuffer != NULL) //if anything is left, shift it over..
 		{
 			memmove(slist->inbuffer, slist->inbuffer + msglen, (size_t)slist->inbufferlen);
@@ -1762,7 +1764,12 @@ static SBError ProcessLanData(SBServerList *slist)
 
 	while (CanReceiveOnSocket(slist->slsocket)) //we break if the select fails
 	{
+#if defined(_PS3)
+		error = (int)recvfrom(slist->slsocket, indata, sizeof(indata) - 1, 0, (struct sockaddr *)&saddr, (socklen_t*)&saddrlen );
+#else
 		error = (int)recvfrom(slist->slsocket, indata, sizeof(indata) - 1, 0, (struct sockaddr *)&saddr, &saddrlen );
+#endif
+
 		if (gsiSocketIsError(error))
 			continue; 
 		//if we got data, then add it to the list...
@@ -1805,7 +1812,3 @@ SBError SBListThink(SBServerList *slist)
 	//see if any data is available...
 	
 }
-
-
-
-

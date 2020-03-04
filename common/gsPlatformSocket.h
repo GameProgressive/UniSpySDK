@@ -35,9 +35,6 @@ extern "C" {
 
 
 #if (0) 
-// to do for Saad and Martin, move towards this and phase out the #define jungle.
-// we will trade a little speed for a lot of portability, and stability
-// also out debug libs will assert all params comming in.
 typedef enum
 {
 	GS_SOCKERR_NONE = 0,   
@@ -87,7 +84,6 @@ typedef enum
 
 typedef int GSI_SOCKET;
 
-// mj - may need to pragma pack this, otherwise, it will pad after u_short
 typedef struct 
 {
 	// this is the same as the "default" winsocks

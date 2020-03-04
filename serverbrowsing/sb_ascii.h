@@ -1,20 +1,14 @@
-/******
-GameSpy Server Browsing SDK
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy Server Browsing SDK documentation for more 
- information
-
-******/
-
+///////////////////////////////////////////////////////////////////////////////
+// File:	sb_ascii.h
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
 // PROTOTYPES FOR ASCII VERSIONS
-// This is required to silence CodeWarrior warnings about functions not having a prototype
-
+// This is required to silence CodeWarrior warnings about functions not having a prototype.
 
 #ifndef _SB_ASCII_H
 #define _SB_ASCII_H

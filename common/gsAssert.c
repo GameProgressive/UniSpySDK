@@ -61,9 +61,9 @@ void gsDebugAssert(const char *szError,
 		
 
 		#ifdef _CONSOLE   //,_MBCS
-
-			printf("%s",string);
-			while(1);
+			gsi_bool test = gsi_true;
+			gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_HotError, "%s\n", string);
+			while (test) {}
 
 		#else
 		{		
@@ -103,19 +103,13 @@ void gsDebugAssert(const char *szError,
 
 #elif defined _PS2
 
-	// already included in gsPlatform.h
-	/*
-	#include <eetypes.h>
-	#include <eekernel.h>
-	*/
-
 	// ErrorMessage: Displays message and goes into an infinite loop
 	// continues rendering
 	void  _gsDebugAssert(const char *string)
 	{
 
 		scePrintf(string);
-		while (1);
+		while (1) {}
 	}
 
 
@@ -123,18 +117,16 @@ void gsDebugAssert(const char *szError,
 #elif defined _MACOSX
 	void  _gsDebugAssert(const char *string)
 	{
-		printf(string);
-
-		while (1);
+		printf("%s\n", string);
+		while (1) {}
 	}
 
 
 #elif defined _LINUX
 	void  _gsDebugAssert(const char *string)
 	{
-		printf(string);
-		
-		while(1);
+		printf("%s\n", string);
+		while (1) {}
 	}
 
 
@@ -158,8 +150,8 @@ void gsDebugAssert(const char *szError,
 	// continues rendering
 	void  _gsDebugAssert(const char *string)
 	{
-		printf("%s", string);
-		while(1);
+		printf("%s\n", string);
+		while (1) {}
 	}
 
 #endif

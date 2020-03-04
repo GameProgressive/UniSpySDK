@@ -112,11 +112,12 @@ typedef struct ciConnection
 	CHATBool quiet;
 
 	char secretKey[MAX_SECRETKEY];
-
+	char gameName[MAX_GAMENAME];
 	CILoginType loginType;
 
 	int userID;
 	int profileID;
+	CHATBool pendingListing;
 } ciConnection;
 
 void ciSendNickAndUser(CHAT chat);

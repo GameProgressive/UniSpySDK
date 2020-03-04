@@ -40,6 +40,7 @@ typedef struct
 	GSXmlStreamReader mResponseSoap;
 
 	char *    mResponseBuffer; // so we can free it later
+	char *    mHeadersBuffer;
 	GHTTPPost mPostData; // so we can free it later
 
 	void *   mUserData;
@@ -74,6 +75,10 @@ GSSoapTask* gsiExecuteSoapCustom(const char* theURL, const char* theService,
 
 void gsiCancelSoap(GSSoapTask * theTask);
 
+// Parse the headers string to look for 'SessionToken' and grab the value
+gsi_bool gsiSoapGetSessionTokenFromHeaders(const char *headers, char valueBuffer[SESSIONTOKEN_LENGTH]);
+
+GSAuthErrorCode gsiSoapGetAuthErrorFromHeaders(char *headers, char valueBuffer[AUTHERROR_LENGTH]);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -1120,7 +1120,7 @@ gpiProcessSearch(
 					if(callback.callback != NULL)
 					{
 						GPFindPlayersResponseArg * arg;
-						GPFindPlayerMatch * match;
+						GPFindPlayerMatch * match2;
 						
 						// Start setting up the arg.
 						////////////////////////////
@@ -1157,13 +1157,13 @@ gpiProcessSearch(
 								arg->matches = (GPFindPlayerMatch *)gsirealloc(arg->matches, sizeof(GPFindPlayerMatch) * arg->numMatches);
 								if(arg->matches == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-								match = &arg->matches[arg->numMatches - 1];
-								memset(match, 0, sizeof(GPFindPlayerMatch));
-								match->status = GP_ONLINE;
+								match2 = &arg->matches[arg->numMatches - 1];
+								memset(match2, 0, sizeof(GPFindPlayerMatch));
+								match2->status = GP_ONLINE;
 
 								// Get the profile id.
 								//////////////////////
-								match->profile = atoi(value);
+								match2->profile = atoi(value);
 
 								// PANTS|05.16.00
 								// Changed to be order independent, and ignore unrecognized keys.
@@ -1183,11 +1183,11 @@ gpiProcessSearch(
 									// Set the field based on the key.
 									//////////////////////////////////
 									if(strcmp(key, "status") == 0)
-										strzcpy(match->statusString, value, GP_STATUS_STRING_LEN);
+										strzcpy(match2->statusString, value, GP_STATUS_STRING_LEN);
 									else if(strcmp(key, "nick") == 0)
-										strzcpy(match->nick, value, GP_NICK_LEN);
+										strzcpy(match2->nick, value, GP_NICK_LEN);
 									if(strcmp(key, "statuscode") == 0)
-										match->status = (GPEnum)atoi(value);
+										match2->status = (GPEnum)atoi(value);
 									else if((strcmp(key, "psr") == 0) || (strcmp(key, "psrdone") == 0))
 									{
 										doneParsingMatch = GPITrue;
@@ -1197,11 +1197,11 @@ gpiProcessSearch(
 									// Set the field based on the key.
 									//////////////////////////////////
 									if(strcmp(key, "status") == 0)
-										UTF8ToUCS2StringLen(value, match->statusString, GP_STATUS_STRING_LEN);
+										UTF8ToUCS2StringLen(value, match2->statusString, GP_STATUS_STRING_LEN);
 									else if(strcmp(key, "nick") == 0)
-										UTF8ToUCS2StringLen(value, match->nick, GP_NICK_LEN);
+										UTF8ToUCS2StringLen(value, match2->nick, GP_NICK_LEN);
 									if(strcmp(key, "statuscode") == 0)
-										match->status = (GPEnum)atoi(value);
+										match2->status = (GPEnum)atoi(value);
 									else if((strcmp(key, "psr") == 0) || (strcmp(key, "psrdone") == 0))
 									{
 										doneParsingMatch = GPITrue;

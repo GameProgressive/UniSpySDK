@@ -458,22 +458,26 @@ GHTTPBool ghiSendBufferedData
 	//////////////////////////
 	do
 	{
-		rcode = GSISocketSelect(connection->socket, NULL, &writeFlag, &exceptFlag);
-		if((gsiSocketIsError(rcode)) || ((rcode == 1) && exceptFlag))
+		if (connection->encryptor.mEngine == GHTTPEncryptionEngine_None ||
+			connection->encryptor.mEncryptOnBuffer == GHTTPTrue)
 		{
-			connection->completed = GHTTPTrue;
-			connection->result = GHTTPSocketFailed;
-			if(gsiSocketIsError(rcode))
-				connection->socketError = GOAGetLastError(connection->socket);
-			else
-				connection->socketError = 0;
-			return GHTTPFalse;
-		}
-		if((rcode < 1) || !writeFlag)
-		{
-			// Can't send anything.
-			///////////////////////
-			return GHTTPTrue;
+			rcode = GSISocketSelect(connection->socket, NULL, &writeFlag, &exceptFlag);
+			if((gsiSocketIsError(rcode)) || ((rcode == 1) && exceptFlag))
+			{
+				connection->completed = GHTTPTrue;
+				connection->result = GHTTPSocketFailed;
+				if(gsiSocketIsError(rcode))
+					connection->socketError = GOAGetLastError(connection->socket);
+				else
+					connection->socketError = 0;
+				return GHTTPFalse;
+			}
+			if((rcode < 1) || !writeFlag)
+			{
+				// Can't send anything.
+				///////////////////////
+				return GHTTPTrue;
+			}
 		}
 
 		// Figure out what, and how much, to send.
@@ -484,8 +488,12 @@ GHTTPBool ghiSendBufferedData
 		// Do the send.
 		///////////////
 		rcode = ghiDoSend(connection, data, len);
-		if(gsiSocketIsError(rcode))
+		switch (rcode) {
+		case -1: // error
 			return GHTTPFalse;
+		case -2: // try again
+			return GHTTPTrue;
+		}
 
 		// Update the position.
 		///////////////////////

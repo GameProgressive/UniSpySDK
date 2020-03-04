@@ -75,7 +75,7 @@ static const char * ciGetTime(void)
 		sprintf(buffer, "%02d.%02d.%02d %02d:%02d.%02d", now->tm_mon + 1, now->tm_mday, now->tm_year, now->tm_hour, now->tm_min, now->tm_sec);
 	}
 	else
-		strcpy(buffer, "00.00.00 00:00.00");
+		gsiSafeStrcpyA(buffer, "00.00.00 00:00.00", sizeof(buffer));
 
 	return buffer;
 #endif
@@ -247,6 +247,9 @@ CHATBool ciSocketConnect(ciSocket * sock,
 	if(sock->sock == INVALID_SOCKET)
 		return CHATFalse;
 
+	// Make the socket non-blocking so that we don't block on the connect function
+	SetSockBlocking(sock->sock, 0);
+	
 	// Enable keep-alive to check socket connection
 	////////////////////////////////////////////////
 #if !defined(INSOCK) && !defined(_NITRO) && !defined(_REVOLUTION)
@@ -260,13 +263,17 @@ CHATBool ciSocketConnect(ciSocket * sock,
 	rcode = connect(sock->sock, (SOCKADDR *)&address, sizeof(SOCKADDR_IN));
 	if(gsiSocketIsError(rcode))
 	{
-		closesocket(sock->sock);
-		return CHATFalse;
+		int error = GOAGetLastError(sock->sock);
+		if((error != WSAEWOULDBLOCK) && (error != WSAEINPROGRESS) && (error != WSAETIMEDOUT))
+		{
+			closesocket(sock->sock);
+			return CHATFalse;
+		}
 	}
 
 	// We're connected.
 	///////////////////
-	sock->connectState = ciConnected;
+	sock->connectState = ciConnecting;
 
 	return CHATTrue;
 }
@@ -1028,4 +1035,32 @@ ciServerMessage * ciSocketRecv(ciSocket * sock)
 	// Got a message.
 	/////////////////
 	return &sock->lastMessage;
+}
+
+// function to let us know if we have connected yet.
+CHATBool ciSocketCheckConnect(CHAT chat)
+{
+	CHATBool writeFlag, exceptFlag;
+	CONNECTION;
+	
+	ciSocketSelect(connection->chatSocket.sock, NULL, &writeFlag, &exceptFlag);
+	if (exceptFlag)
+	{
+		// the server rejected us so we should let the developer/user 
+		// know that the connection will not work!
+		connection->chatSocket.connectState = ciDisconnected;
+		connection->disconnected = CHATTrue;
+		if (connection->connectCallback)
+			connection->connectCallback(chat, CHATFalse, CHAT_DISCONNECTED, connection->connectParam);
+		return CHATFalse;
+	}
+	else if (writeFlag)
+	{
+		connection->chatSocket.connectState = ciConnected;
+		return CHATTrue;
+	}
+	else 
+	{
+		return CHATFalse;
+	}
 }

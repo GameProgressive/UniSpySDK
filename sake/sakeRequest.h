@@ -1,11 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sakeRequest.h
+// SDK:		GameSpy Sake Persistent Storage SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __SAKEREQUEST_H__
 #define __SAKEREQUEST_H__
 
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 #include "sakeMain.h"
 #include "sakeRequestInternal.h"
 
@@ -21,7 +25,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 #define GSI_SAKE_SERVICE_NAMESPACE_COUNT     1
 #define GSI_SAKE_SERVICE_NAMESPACE           "ns1"
-#define GSI_SAKE_SERVICE_NAMESPACE_URL       RS_HTTP_PROTOCOL_URL "gamespy.net/sake"
+#define GSI_SAKE_SERVICE_NAMESPACE_URL       RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake"
 extern const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT];
 
 
@@ -79,8 +83,6 @@ SAKEStartRequestResult SAKE_CALL sakeiStartGetRecordCountRequest(SAKERequest req
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 #if defined(__cplusplus)
 } // extern "C"
 #endif

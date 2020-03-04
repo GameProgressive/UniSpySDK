@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	NATify.c
+// SDK:		GameSpy NAT Negotiation SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include <stddef.h>
 #include "nninternal.h"
 #include "NATify.h"
@@ -217,6 +226,11 @@ static int Think(SOCKET sock, NAT * nat)
 			if(ptype == NN_ERTTEST)
 			{
 				memcpy(&p, data, INITPACKET_SIZE);		
+#ifdef _NITRO
+				/* Incorporate Kiwada's fix for DS */
+				memcpy(&(p.Packet.Init.localip), data + 15, sizeof(int));
+				memcpy(&(p.Packet.Init.localport), data + 19, sizeof(short));
+#endif
 
 				switch(p.Packet.Init.porttype)
 				{
@@ -246,6 +260,11 @@ static int Think(SOCKET sock, NAT * nat)
 			else if(ptype == NN_ADDRESS_REPLY)
 			{
 				memcpy(&p, data, INITPACKET_SIZE);		
+#ifdef _NITRO
+				/* Incorporate Kiwada's fix for DS */
+				memcpy(&(p.Packet.Init.localip), data + 15, sizeof(int));
+				memcpy(&(p.Packet.Init.localport), data + 19, sizeof(short));
+#endif
 
 				p.cookie = (int)ntohl(p.cookie);
 

@@ -146,7 +146,7 @@ void chatAuthenticateCDKeyA(CHAT chat,
 *************/
 // Enumerates the channels available on a chat server.
 //////////////////////////////////////////////////////
-void chatEnumChannelsA(CHAT chat,
+CHATOperationResult chatEnumChannelsA(CHAT chat,
 									  const char * filter,
 									  chatEnumChannelsCallbackEach callbackEach,
 									  chatEnumChannelsCallbackAll callbackAll,
@@ -156,6 +156,15 @@ void chatEnumChannelsA(CHAT chat,
 /*************
 ** CHANNELS **
 *************/
+// Enumerates the channels available on a chat server.
+//////////////////////////////////////////////////////
+CHATOperationResult chatEnumChannelsWithLimitA(CHAT chat,
+											   gsi_u32 maxNumberOfChannels,
+											   const char * filter,
+											   chatEnumChannelsCallbackEach callbackEach,
+											   chatEnumChannelsCallbackAll callbackAll,
+											   void * param,
+											   CHATBool blocking);
 
 // Enters a channel.
 ////////////////////

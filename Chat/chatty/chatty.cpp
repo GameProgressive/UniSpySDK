@@ -109,17 +109,6 @@ BOOL CChattyApp::InitInstance()
 		return FALSE;
 	m_pMainWnd = pMainFrame;
 
-	// Parse command line for standard shell commands, DDE, file open
-	// Removed for VS .NET
-	/*
-	CCommandLineInfo cmdInfo;
-	cmdInfo.m_nShellCommand = CCommandLineInfo.FileNothing;
-	ParseCommandLine(cmdInfo);
-	
-	// Dispatch commands specified on the command line
-	if (!ProcessShellCommand(cmdInfo))
-		return FALSE;
-	*/
 	// The main window has been initialized, so show and update it.
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();

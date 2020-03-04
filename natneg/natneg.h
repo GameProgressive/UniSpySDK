@@ -1,18 +1,14 @@
-
-/******
-GameSpy NAT Negotiation SDK
-  
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy NAT Negotiation SDK documentation for more 
- information
-
-******/
-
+///////////////////////////////////////////////////////////////////////////////
+// File:	natneg.h
+// SDK:		GameSpy NAT Negotiation SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+//-------------------------------------
+// Please see the GameSpy NAT Negotiation SDK documentation for more 
+// information.
 
 #ifndef _NATNEG_H_
 #define _NATNEG_H_

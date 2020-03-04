@@ -1,5 +1,13 @@
-// sbmfcsample.h : main header file for the SBMFCSAMPLE application
+///////////////////////////////////////////////////////////////////////////////
+// File:	sbmfcsample.h
+// SDK:		GameSpy Server Browsing SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Main header file for the SBMFCSAMPLE application.
 
 #if !defined(AFX_SBMFCSAMPLE_H__F2EE1BD5_6089_4F00_9E83_2D0A7C9AA592__INCLUDED_)
 #define AFX_SBMFCSAMPLE_H__F2EE1BD5_6089_4F00_9E83_2D0A7C9AA592__INCLUDED_
@@ -40,7 +48,6 @@ public:
 
 
 /////////////////////////////////////////////////////////////////////////////
-
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 

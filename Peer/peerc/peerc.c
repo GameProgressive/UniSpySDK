@@ -1,6 +1,11 @@
-// GameSpy Peer SDK C Test App
-// Dan "Mr. Pants" Schoenblum
-// dan@gamespy.com
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerc.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*********
 INCLUDES 
@@ -146,10 +151,6 @@ static void RoomMessageCallback
 )
 {
 	_tprintf(_T(" (%s) %s: %s\n"), RtoS[roomType], nick, message);
-	//if(strcasecmp(message, _T("quit")) == 0)
-	//	stop = PEERTrue;
-	//else if((strlen(message) > 5) && (strncasecmp(message, _T("echo"), 4) == 0))
-	//	peerMessageRoom(peer, roomType, message + 5, messageType);
 
 	GSI_UNUSED(param);
 	GSI_UNUSED(peer);
@@ -729,7 +730,7 @@ int test_main(int argc, char **argv)
 
 	// Loop for a while
 	startTime = current_time();
-	while((current_time() - startTime) < (1000))
+	while((current_time() - startTime) < (10000))
 	{
 		peerThink(peer);
 		msleep(10);
@@ -746,7 +747,7 @@ int test_main(int argc, char **argv)
 
 	// Loop for a while
 	startTime = current_time();
-	while((current_time() - startTime) < (1000))
+	while((current_time() - startTime) < (10000))
 	{
 		peerThink(peer);
 		msleep(10);

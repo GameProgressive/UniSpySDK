@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	natneg.c
+// SDK:		GameSpy NAT Negotiation SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "nninternal.h"
 #include "../common/darray.h"
 #include "../common/gsAvailable.h"
@@ -58,7 +67,7 @@ static NATNegotiator FindNegotiatorForCookie(int cookie)
 		return NULL;
 	for (i = 0 ; i < ArrayLength(negotiateList) ; i++)
 	{
-		//we go backwards in case we need to remove one..
+		// We go backwards in case we need to remove one..
 		NATNegotiator neg = (NATNegotiator)ArrayNth(negotiateList, i);
 		if (neg->cookie == cookie)
 			return neg;
@@ -68,9 +77,9 @@ static NATNegotiator FindNegotiatorForCookie(int cookie)
 
 static NATNegotiator AddNegotiator()
 {
-	
+
 	struct _NATNegotiator _neg;
-	
+
 
 	memset(&_neg, 0, sizeof(_neg));
 
@@ -101,6 +110,9 @@ void NNFreeNegotiateList()
 {
 	if (negotiateList != NULL)
 	{
+		gsDebugFormat(GSIDebugCat_NatNeg, GSIDebugType_State, GSIDebugLevel_Notice,
+			"NNFreeNegotiateList: Freeing %d negotiators\n", ArrayLength(negotiateList));
+
 		ArrayFree(negotiateList);
 		negotiateList = NULL;
 	}
@@ -172,9 +184,13 @@ static void SendReportPacket(NATNegotiator neg)
 
 	if(strlen(__GSIACGamename) > 0)
 		memcpy(&p.Packet.Report.gamename, __GSIACGamename, sizeof(p.Packet.Report.gamename));
-		
+
 	gsDebugFormat(GSIDebugCat_NatNeg, GSIDebugType_Network, GSIDebugLevel_Notice,
-		"Sending REPORT to %s:%d (result: %d)\n", inet_ntoa(*(struct in_addr *)&matchup1ip), MATCHUP_PORT1, p.Packet.Report.negResult);
+		"SendReportPacket(cookie=%d): Sending REPORT to %s:%d (result: %d)\n", 
+		neg->cookie,
+		inet_ntoa(*(struct in_addr *)&matchup1ip), 
+		MATCHUP_PORT1, 
+		p.Packet.Report.negResult);
 
 	SendPacket(neg->negotiateSock, matchup1ip, MATCHUP_PORT1, &p, REPORTPACKET_SIZE);
 }
@@ -188,16 +204,17 @@ static void StartReport(NATNegotiator neg, NegotiateResult result, SOCKET socket
 
 	if(result == nr_inittimeout || result == nr_deadbeatpartner)
 	{
+		gsDebugFormat(GSIDebugCat_NatNeg, GSIDebugType_State, GSIDebugLevel_Notice,
+			"StartReport(cookie=%d): Negotiation failed, cancelling\n", neg->cookie); 
 		neg->state = ns_finished;
-//		neg->state = ns_reportack;
 		neg->completedCallback(neg->result, neg->connectedSocket, (struct sockaddr_in *)&neg->remoteaddr, neg->userdata);
-		
-		// Close the socket here - no need to keep it open, connected Socket is INVALID
-		//neg->negotiateSock = INVALID_SOCKET;
 		NNCancel(neg->cookie);
 	}
 	else
 	{
+		gsDebugFormat(GSIDebugCat_NatNeg, GSIDebugType_State, GSIDebugLevel_Notice,
+			"StartReport(cookie=%d): Negotiation finished, sending report\n", neg->cookie); 
+
 		SendReportPacket(neg);	
 		neg->state = ns_reportsent;
 		neg->retryTime = current_time() + REPORT_RETRY_TIME;

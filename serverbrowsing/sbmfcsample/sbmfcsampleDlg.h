@@ -1,5 +1,11 @@
-// sbmfcsampleDlg.h : header file
+///////////////////////////////////////////////////////////////////////////////
+// File:	sbmfcsampleDlg.h
+// SDK:		GameSpy Server Browsing SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #if !defined(AFX_SBMFCSAMPLEDLG_H__8B726D03_AF99_4938_A63C_18525912E55D__INCLUDED_)
 #define AFX_SBMFCSAMPLEDLG_H__8B726D03_AF99_4938_A63C_18525912E55D__INCLUDED_

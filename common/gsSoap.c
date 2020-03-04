@@ -28,7 +28,7 @@ static GSTaskResult gsiSoapTaskThink(void* theTask);
 
 // Http triggered callbacks (don't take action now, wait for task callbacks)
 static GHTTPBool gsiSoapTaskHttpCompletedCallback(GHTTPRequest request, GHTTPResult result, 
-											 char * buffer, GHTTPByteCount bufferLen, 
+											 char * buffer, GHTTPByteCount bufferLen, char * headers, 
 											 void * param);
 
 
@@ -55,7 +55,7 @@ GSSoapTask* gsiExecuteSoapWithTimeout(const char* theURL, const char* theService
 	aSoapTask = (GSSoapTask*)gsimalloc(sizeof(GSSoapTask));
 	if (aSoapTask == NULL)
 		return NULL; // out of memory
-	
+
 	aSoapTask->mCallbackFunc = theCallbackFunc;
 	aSoapTask->mCustomFunc   = NULL;
 	aSoapTask->mURL          = theURL;
@@ -84,7 +84,7 @@ GSSoapTask* gsiExecuteSoapWithTimeout(const char* theURL, const char* theService
 
 	aSoapTask->mCoreTask = aCoreTask;
 
-	gsiCoreExecuteTask(aCoreTask, 0);
+	gsiCoreExecuteTask(aCoreTask, theTimeoutMs);
 
 	return aSoapTask;
 }
@@ -148,21 +148,109 @@ void gsiCancelSoap(GSSoapTask * theTask)
 		gsiCoreCancelTask(theTask->mCoreTask);
 }
 
+// Check soap response headers for "Error:" - eg "Error: Invalid Access Key" - and "ErrorCode:"
+GSAuthErrorCode gsiSoapGetAuthErrorFromHeaders(char *headers, char valueBuffer[AUTHERROR_LENGTH])
+{
+	char * header;
+	char * errorCodeString;
+	char * headersCopy;
+	GSAuthErrorCode errorCode = GSAuthErrorCode_None;
+	const char * errorHeaderName = AUTHERROR_HEADER;
+	const char * errorCodeHeaderName = AUTHERRORCODE_HEADER;
+
+	GS_ASSERT(headers);
+
+	headersCopy = goastrdup(headers);
+
+	// find the error header in the list of headers
+	header = strstr(headers, errorHeaderName);
+	if(header)
+	{
+		char * tempValueBuffer;
+		// skip the header name
+		header += strlen(errorHeaderName);
+
+		tempValueBuffer = strtok(header, "\n");
+		tempValueBuffer++; // remove leading space
+		
+		strcpy(valueBuffer, tempValueBuffer);
+	}
+
+	// find the errorCode header in the list of headers
+	header = strstr(headersCopy, errorCodeHeaderName);
+	if(header)
+	{
+		// skip the header name
+		header += strlen(errorCodeHeaderName);
+
+		errorCodeString = strtok(header, "\n");
+		errorCodeString++; // remove leading space
+
+		errorCode = (GSAuthErrorCode) atoi(errorCodeString);
+	}
+	
+	gsifree(headersCopy);
+	headersCopy = NULL;
+
+	return errorCode;
+}
+
+// Check soap response headers for "SessionToken:" - passed after Access Key is verified by apigee
+gsi_bool gsiSoapGetSessionTokenFromHeaders(const char *headers, char valueBuffer[SESSIONTOKEN_LENGTH])
+{
+	char * header;
+	int rcode;
+	const char * headerName = SESSIONTOKEN_HEADER;
+
+	GS_ASSERT(headers);
+
+	// find this header in the list of headers
+	header = strstr(headers, headerName);
+	if(header)
+	{
+		// skip the header name
+		header += strlen(headerName);
+
+		// scan in the result
+		rcode = sscanf(header, " %s", valueBuffer);
+		
+		if(rcode == 1)
+			return gsi_true;
+	}
+
+	return gsi_false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 				    //////////  HTTP CALLBACKS  //////////
 
 static GHTTPBool gsiSoapTaskHttpCompletedCallback(GHTTPRequest request, GHTTPResult result, 
-											 char * buffer, GHTTPByteCount bufferLen, 
+											 char * buffer, GHTTPByteCount bufferLen, char * headers, 
 											 void * param)
 {
 	gsi_bool parseResult = gsi_false;
+	char sessionToken[SESSIONTOKEN_LENGTH];
+	char authError[AUTHERROR_LENGTH];
+	GSAuthErrorCode errorCode;
 
 	GSSoapTask* aSoapTask = (GSSoapTask*)param;
 	aSoapTask->mRequestResult = result;
 	aSoapTask->mCompleted = gsi_true;
 	aSoapTask->mResponseBuffer = buffer;
+	aSoapTask->mHeadersBuffer = headers;
+
+	// check response headers for error
+	errorCode = gsiSoapGetAuthErrorFromHeaders(headers, authError);
+	if (errorCode != GSAuthErrorCode_None)
+	{
+		gsiCoreSetAuthError(authError);
+		gsiCoreSetAuthErrorCode(errorCode);
+	}
+
+	// set session token if we have one in the response headers (eg. after auth service login)
+	if (gsiSoapGetSessionTokenFromHeaders(headers, sessionToken))
+		gsiCoreSetSessionToken(sessionToken);
 
 	if (result == GHTTPSuccess)
 	{
@@ -220,6 +308,12 @@ static void gsiSoapTaskExecute(void* theTask)
 {
 	GSSoapTask* aSoapTask = (GSSoapTask*)theTask;
 	//int threadID = 0;
+	char headerString[HEADERS_LENGTH];
+	char sessionToken[SESSIONTOKEN_LENGTH];
+	char gameIdString[GAMEID_LENGTH];
+	char profileIdString[PROFILEID_LENGTH];
+	//int gameIdLength = intDigits(gameId);
+	//char * gameIdString;
 
 	// make sure we aren't reusing a task without first resetting it
 	GS_ASSERT(gsi_is_false(aSoapTask->mCompleted));
@@ -240,8 +334,26 @@ static void gsiSoapTaskExecute(void* theTask)
 	if (aSoapTask->mCustomFunc != NULL)
 		(aSoapTask->mCustomFunc)(aSoapTask->mPostData, aSoapTask->mUserData);
 
+	// make sure to include session token (and other stuff) in headers if we have one set 
+	// (needed for apigee verification)
+	strcpy(headerString, aSoapTask->mService);
+	if (gsiCoreGetSessionToken(sessionToken))
+	{
+		strcat(headerString, "\r\n" SESSIONTOKEN_HEADER " ");
+		strcat(headerString, sessionToken);
+	}
+	if (gsiCoreGetGameId(gameIdString))
+	{
+		strcat(headerString, "\r\n" GAMEID_HEADER " ");
+		strcat(headerString, gameIdString);
+	}
+	if (gsiCoreGetProfileId(profileIdString))
+	{
+		strcat(headerString, "\r\n" PROFILEID_HEADER " ");
+		strcat(headerString, profileIdString);
+	}
 
-	aSoapTask->mRequestId = ghttpGetExA(aSoapTask->mURL, aSoapTask->mService, 
+	aSoapTask->mRequestId = ghttpGetExA(aSoapTask->mURL, headerString, 
 		NULL, 0, aSoapTask->mPostData, GHTTPFalse, GHTTPFalse, NULL,
 		gsiSoapTaskHttpCompletedCallback, (void*)aSoapTask);
 }
@@ -258,7 +370,6 @@ static void gsiSoapTaskCancel(void* theTask)
 		if (soapTask->mRequestId >= 0)
 			ghttpCancelRequest(soapTask->mRequestId);
 		soapTask->mRequestResult = GHTTPRequestCancelled;
-		soapTask->mCompleted = gsi_true;
 	}
 }
 
@@ -292,7 +403,10 @@ static gsi_bool gsiSoapTaskCleanup(void *theTask)
 	if (aSoapTask->mResponseBuffer != NULL)
 		gsifree(aSoapTask->mResponseBuffer);
 	if (aSoapTask->mPostData != NULL)
-		ghttpFreePost(aSoapTask->mPostData); // this also frees the request soap xml
+	{
+	    
+		ghttpFreePostAndUpdateConnection(aSoapTask->mRequestId, aSoapTask->mPostData); // this also frees the request soap xml
+    }
 	gsifree(aSoapTask);
 	
 	return gsi_true;

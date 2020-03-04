@@ -29,6 +29,7 @@ typedef struct Result
 	GHTTPResult result;
 } Result;
 
+static int retVal = 0; 	// exit code 0 = PASS, 1 = FAIL
 static int pendingRequests;
 static Result results[MAX_REQUESTS];
 
@@ -107,10 +108,12 @@ static GHTTPBool CompletedCallback
 	GHTTPResult result,
 	char * buffer,
 	GHTTPByteCount bufferLen,
+	char * headers,
 	void * param
 )
 {
-	int index = (int)param;
+
+	int index = *(int *)(param);
 
 	pendingRequests--;
 
@@ -127,8 +130,11 @@ static GHTTPBool CompletedCallback
 	if(result == GHTTPSuccess)
 		_tprintf(_T("%d finished\n"), index);
 	else
+	{
+		retVal = 1;
 		_tprintf(_T("%d failed: %s\n"), index, resultStrings[result]);
-
+	}
+	
 	// Don't free this buffer, its from the stack.
 	//////////////////////////////////////////////
 	if(index == 1)
@@ -139,6 +145,7 @@ static GHTTPBool CompletedCallback
 	GSI_UNUSED(request);
 	GSI_UNUSED(buffer);
 	GSI_UNUSED(bufferLen);
+	GSI_UNUSED(headers);
 
 	return GHTTPTrue;
 }
@@ -154,7 +161,7 @@ static void ProgressCallback
 	void * param
 )
 {
-	int index = (int)param;
+	int index = *(int *)(param);
 
 	// Show the current state.
 	//////////////////////////
@@ -219,7 +226,7 @@ int test_main(int argc, char **argv)
 		_T("http://www.gamespy.net/images/dev_serv_main.jpg"),
 		GHTTPFalse,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 	CheckRequest(request, pendingRequests);
 	pendingRequests++;
 
@@ -234,7 +241,7 @@ int test_main(int argc, char **argv)
 		GHTTPFalse,
 		ProgressCallback,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 	CheckRequest(request, pendingRequests);
 	pendingRequests++;
 
@@ -245,7 +252,7 @@ int test_main(int argc, char **argv)
 		_T("logo.jpg"),
 		GHTTPFalse,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 	CheckRequest(request, pendingRequests);
 	pendingRequests++;
 #endif
@@ -259,7 +266,7 @@ int test_main(int argc, char **argv)
 		GHTTPFalse,
 		ProgressCallback,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 	CheckRequest(request, pendingRequests);
 	pendingRequests++;
 
@@ -268,7 +275,7 @@ int test_main(int argc, char **argv)
 		_T(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/index.html"),
 		GHTTPFalse,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 	CheckRequest(request, pendingRequests);
 	pendingRequests++;
 
@@ -285,7 +292,7 @@ int test_main(int argc, char **argv)
 		GHTTPFalse,
 		ProgressCallback,
 		CompletedCallback,
-		(void *)pendingRequests);
+		&pendingRequests);
 
 	//if(!IS_GHTTP_ERROR(request))
 	//	ghttpSetRequestEncryptionEngine(request, GHTTPEncryptionEngine_GameSpy);
@@ -316,5 +323,10 @@ int test_main(int argc, char **argv)
 	GSI_UNUSED(argc);
 	GSI_UNUSED(argv);
 
-	return 0;
+	if( retVal )
+		_tprintf(_T("TEST FAILED\n"));
+	else
+		_tprintf(_T("TEST PASSED\n"));
+	
+	return retVal;
 }

@@ -390,11 +390,11 @@ char * goastrdup(const char *src)
 	char *res;
 	size_t len;
 
-	if(src == NULL)      //PANTS|02.11.00|check for NULL before strlen
+	if(src == NULL)      //02.11.00|check for NULL before strlen
 		return NULL;
 	len = strlen(src) + 1;
 	res = (char *)gsimalloc(len);
-	if(res != NULL)      //PANTS|02.02.00|check for NULL before strcpy
+	if(res != NULL)      //02.02.00|check for NULL before strcpy
 		memcpy(res, src, len);
 	return res;
 }

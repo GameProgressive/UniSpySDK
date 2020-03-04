@@ -50,3 +50,4 @@ PROG_OBJS = \
 
 #Include the stuff common to the GameSpy.net SDKs
 include ../../../common/macosx/Makefile.common
+CFLAGS := $(CFLAGS) -Wno-missing-field-initializers

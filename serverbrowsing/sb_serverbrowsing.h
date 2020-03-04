@@ -1,16 +1,14 @@
-/******
-GameSpy Server Browsing SDK
-  
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
- Please see the GameSpy Server Browsing SDK documentation for more 
- information
-
-******/
+///////////////////////////////////////////////////////////////////////////////
+// File:	sb_serverbrowsing.h
+// SDK:		GameSpy Server Browsing SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Please see the GameSpy Server Browsing SDK documentation for more 
+// information.
 
 
 #ifndef _SB_SERVERBROWSING_H

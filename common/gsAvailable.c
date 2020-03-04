@@ -81,7 +81,7 @@ void GSIStartAvailableCheckA(const char * gamename)
 	GS_ASSERT(gamename != NULL);
 
 	// store the gamename
-	strcpy(__GSIACGamename, gamename);
+	gsiSafeStrcpyA(__GSIACGamename, gamename, sizeof(__GSIACGamename));
 
 	// clear the sock
 	AC.sock = INVALID_SOCKET;

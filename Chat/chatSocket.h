@@ -22,6 +22,7 @@
 typedef enum ciConnectState
 {
 	ciNotConnected,
+	ciConnecting,
 	ciConnected,
 	ciDisconnected
 } ciConnectState;
@@ -91,5 +92,7 @@ CHATBool ciSocketSendf(ciSocket * sock,
 				   ...);
 
 ciServerMessage * ciSocketRecv(ciSocket * sock);
+
+CHATBool ciSocketCheckConnect(CHAT chat);
 
 #endif

@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sake.h
+// SDK: 	GameSpy Sake Persistent Storage SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __SAKE_H__
 #define __SAKE_H__
 
@@ -19,13 +26,13 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef SAKE_CALL
-	#define SAKE_CALL
+#define SAKE_CALL
 #endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// URL for sake webservice
+// Storage for the Sake web-service URL
 #define SAKE_MAX_URL_LENGTH 128
 extern char sakeiSoapUrl[SAKE_MAX_URL_LENGTH];
 
@@ -33,13 +40,16 @@ extern char sakeiSoapUrl[SAKE_MAX_URL_LENGTH];
 ///////////////////////////////////////////////////////////////////////////////
 // General
 typedef struct SAKEInternal *SAKE;
-
+//////////////////////////////////////////////////////////////
+// SAKEStartupResult
+// Summary
+//		Value returned from the call to sakeStartup.
 typedef enum
 {
-	SAKEStartupResult_SUCCESS,
-	SAKEStartupResult_NOT_AVAILABLE,
-	SAKEStartupResult_CORE_SHUTDOWN,
-	SAKEStartupResult_OUT_OF_MEMORY
+	SAKEStartupResult_SUCCESS,			// Startup succeeded.
+	SAKEStartupResult_NOT_AVAILABLE,	// The Sake service is unavailable.
+	SAKEStartupResult_CORE_SHUTDOWN,	// Error in the gsCore.
+	SAKEStartupResult_OUT_OF_MEMORY		// Not enough memory to initialize Sake.
 } SAKEStartupResult;
 
 SAKEStartupResult SAKE_CALL sakeStartup(SAKE *sakePtr);

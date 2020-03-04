@@ -1,17 +1,14 @@
-/***********************
-sbctest.c
-GameSpy Server Browsing SDK 
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-******
-
-See the ReadMe file for sbctest info, and consult the GameSpy Server Browsing
-SDK documentation for more information on implementing the serverbrowsing SDK.
-
-************************/
+///////////////////////////////////////////////////////////////////////////////
+// File:	sbctest.c
+// SDK:		GameSpy Server Browsing SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// See the ReadMe file for sbctest info, and consult the GameSpy Server Browsing
+// SDK documentation for more information on implementing the Server Browsing SDK.
 
 /********
 INCLUDES
@@ -27,6 +24,7 @@ INCLUDES
 DEFINES
 ********/
 #define GAME_NAME		_T("gmtest")
+#define SECRET_KEY		_T("HA6zkS")
 
 // ensure cross-platform compatibility for printf
 #ifdef UNDER_CE
@@ -68,7 +66,7 @@ static void AppDebug(const unsigned short* format, ...)
     char tmp[2056];
 	va_list aList;
 	va_start(aList, format);
-	vswprintf(buf, 1024, format, aList);
+	_vswprintf(buf, 1024, format, aList);
 
     UCS2ToAsciiString(buf, tmp);
 	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice,
@@ -179,7 +177,6 @@ int test_main(int argc, char **argp)
 	ServerBrowser sb;  // server browser object initialized with ServerBrowserNew
 
 	/* ServerBrowserNew parameters */
-	gsi_char  secret_key[9];    // your title's assigned secret key
 	int version = 0;           // ServerBrowserNew parameter; set to 0 unless otherwise directed by GameSpy
 	int maxConcUpdates = 20;	// max number of queries the ServerBrowsing SDK will send out at one time
 	SBBool lanBrowse = SBFalse;   // set true for LAN only browsing
@@ -208,7 +205,7 @@ int test_main(int argc, char **argp)
 	int totalServers; // keep track of the total number of servers in our server list
 	gsi_char * defaultString = _T(""); // default string for SBServerGet functions - returns if specified string key is not found
 
-	// for debug output on these platforms
+  	// for debug output on these platforms
 #if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined (_NITRO)
 	#ifdef GSI_COMMON_DEBUG
 		// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
@@ -220,15 +217,6 @@ int test_main(int argc, char **argp)
 		gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Verbose);
 	#endif
 #endif
-
-	// set the secret key, in a semi-obfuscated manner
-	secret_key[0] = 'H';
-	secret_key[1] = 'A';
-	secret_key[2] = '6';
-	secret_key[3] = 'z';
-	secret_key[4] = 'k';
-	secret_key[5] = 'S';
-	secret_key[6] = '\0';
 
 	// check that the game's backend is available
 	GSIStartAvailableCheck(GAME_NAME);
@@ -242,12 +230,17 @@ int test_main(int argc, char **argp)
 	
 	AppDebug(_T("Creating server browser for %s\n\n"), GAME_NAME);
 	// create a new server browser object
-	sb = ServerBrowserNew (GAME_NAME, GAME_NAME, secret_key, version, maxConcUpdates, QVERSION_QR2, lanBrowse, SBCallback, userData);
+	sb = ServerBrowserNew (GAME_NAME, GAME_NAME, SECRET_KEY, version, maxConcUpdates, QVERSION_QR2, lanBrowse, SBCallback, userData);
 
 /** Populate the server browser's server list by doing an Update **/
 	AppDebug(_T("Starting server browser update\n"));
 	// begin the update (async)
-	ServerBrowserUpdate(sb, async, discOnComplete, basicFields, numFields, serverFilter);
+	int nError = ServerBrowserUpdate(sb, async, discOnComplete, basicFields, numFields, serverFilter);
+	if(nError)
+	{
+		printf("ServerBrowserUpdate Error 0x%x\n", nError);
+		return nError;
+	}
 	
 	// think while the update is in progress
 	while ((ServerBrowserThink(sb) == sbe_noerror) && (UpdateFinished == gsi_false))
@@ -269,6 +262,12 @@ int test_main(int argc, char **argp)
 		for(i = 0; i < totalServers; i++)
 		{
 			server = ServerBrowserGetServer(sb, i);  // get the SBServer object at index 'i' in the server list
+			if(!server)
+			{
+				printf("ServerBrowserGetServer Error!\n");
+				return -1;
+			}
+
 			// print the server host along with its ping
 			AppDebug(_T("  %s  ping: %dms\n"), SBServerGetStringValue(server, _T("hostname"), defaultString), SBServerGetPing(server));
 		}
@@ -285,7 +284,12 @@ int test_main(int argc, char **argp)
 	// note that filtering by "ping" is not possible, since ping is determined by the client - not the master server
 
 	// begin the update (async)
-	ServerBrowserUpdate(sb, async, discOnComplete, basicFields, numFields, serverFilter);
+	nError = ServerBrowserUpdate(sb, async, discOnComplete, basicFields, numFields, serverFilter);
+	if(nError)
+	{
+		printf("ServerBrowserUpdate w/ Filters Error 0x%x\n", nError);
+		return nError;
+	}
 
 	UpdateFinished = gsi_false; // this was set to true from the last update, so we set it back until the new update completes
 
@@ -307,6 +311,11 @@ int test_main(int argc, char **argp)
 		for(i = 0; i < totalServers; i++)
 		{
 			server = ServerBrowserGetServer(sb, i);  // get the SBServer object at index 'i' in the server list
+			if(!server)
+			{
+				printf("ServerBrowserGetServer Error!\n");
+				return -1;
+			}
 			
 			// check if the hostname server key is "GameSpy QR2 Sample"
 			if (!(_tcscmp(SBServerGetStringValue(server, _T("hostname"), defaultString), _T("GameSpy QR2 Sample")))) 

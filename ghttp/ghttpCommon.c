@@ -305,46 +305,70 @@ GHIRecvResult ghiDoReceive
 		int recvLength = len;
 		
 		result = ghiEncryptorSslDecryptRecv(connection, &connection->encryptor, buffer, &recvLength);
-		if (result == GHIEncryptionResult_Success)
-			rcode = recvLength;
-		else
-			rcode = -1; // signal termination of connection
+		
+		// Check for an error.
+		//////////////////////
+		if (result == GHIEncryptionResult_Success) {
+			if (recvLength == -1) {
+				// means try again after wait
+				return GHINoData;
+			} else {
+				rcode = recvLength;
+			}
+		} else {
+			// There was a real error.
+			//////////////////////////
+			connection->completed = GHTTPTrue;
+			connection->result = GHTTPSocketFailed;
+			connection->socketError = 0;
+			connection->connectionClosed = GHTTPTrue;
+
+			return GHIError;
+		}
 	}
 	else
 	{
 		rcode = recv(connection->socket, buffer, len, 0);
-	}
-	
-
-	// There was an error.
-	//////////////////////
-	if(gsiSocketIsError(rcode))
-	{
-		// Get the error code.
+		
+		// There was an error.
 		//////////////////////
-		socketError = GOAGetLastError(connection->socket);
-
-		// Check for a closed connection.
-		/////////////////////////////////
-		if(socketError == WSAENOTCONN)
+		if(gsiSocketIsError(rcode))
 		{
+			// Get the error code.
+			//////////////////////
+			socketError = GOAGetLastError(connection->socket);
+
+
+			// Check for a closed connection.
+			/////////////////////////////////
+			if(socketError == WSAENOTCONN)
+			{
+				connection->connectionClosed = GHTTPTrue;
+                gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
+                    "Got an error from recv: %d. Connection Closed\n", socketError);
+				return GHIConnClosed;
+			}
+
+			// Check for nothing waiting.
+			/////////////////////////////
+			if((socketError == WSAEWOULDBLOCK) || (socketError == WSAEINPROGRESS) || (socketError == WSAETIMEDOUT))
+            {
+                gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
+                    "Got an error from recv: %d. No Data\n", socketError);
+				return GHINoData;
+            }
+			// There was a real error.
+			//////////////////////////
+            gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
+                "Got an error from recv: %d\n", socketError);
+
+			connection->completed = GHTTPTrue;
+			connection->result = GHTTPSocketFailed;
+			connection->socketError = socketError;
 			connection->connectionClosed = GHTTPTrue;
-			return GHIConnClosed;
+
+			return GHIError;
 		}
-
-		// Check for nothing waiting.
-		/////////////////////////////
-		if((socketError == WSAEWOULDBLOCK) || (socketError == WSAEINPROGRESS) || (socketError == WSAETIMEDOUT))
-			return GHINoData;
-
-		// There was a real error.
-		//////////////////////////
-		connection->completed = GHTTPTrue;
-		connection->result = GHTTPSocketFailed;
-		connection->socketError = socketError;
-		connection->connectionClosed = GHTTPTrue;
-
-		return GHIError;
 	}
 
 	// The connection was closed.
@@ -393,34 +417,44 @@ int ghiDoSend
 	
 		// Check for an error.
 		//////////////////////
-		if(result != GHIEncryptionResult_Success)
-			rcode = -1; // signal termination of connection
-		else
-			rcode = bytesSent;
+		if (result == GHIEncryptionResult_Success) {
+			if (bytesSent == -1) {
+				// means try again after wait
+				return -2;
+			} else {
+				rcode = bytesSent;
+			}
+		} else {
+			connection->completed = GHTTPTrue;
+			connection->result = GHTTPSocketFailed;
+			connection->socketError = 0;
+			
+			return -1;
+		}
 	}
 	else
 	{
 		// send directly to socket
 		rcode = send(connection->socket, buffer, len, 0);
-	}
+		
+		// Check for an error.
+		//////////////////////
+		if(gsiSocketIsError(rcode))
+		{
+			int error;
 
-	// Check for an error.
-	//////////////////////
-	if(gsiSocketIsError(rcode))
-	{
-		int error;
+			// Would block just means 0 bytes sent.
+			///////////////////////////////////////
+			error = GOAGetLastError(connection->socket);
+			if((error == WSAEWOULDBLOCK) || (error == WSAEINPROGRESS) || (error == WSAETIMEDOUT))
+				return 0;
 
-		// Would block just means 0 bytes sent.
-		///////////////////////////////////////
-		error = GOAGetLastError(connection->socket);
-		if((error == WSAEWOULDBLOCK) || (error == WSAEINPROGRESS) || (error == WSAETIMEDOUT))
-			return 0;
+			connection->completed = GHTTPTrue;
+			connection->result = GHTTPSocketFailed;
+			connection->socketError = error;
 
-		connection->completed = GHTTPTrue;
-		connection->result = GHTTPSocketFailed;
-		connection->socketError = error;
-
-		return -1;
+			return -1;
+		}
 	}
 
 	//do not add CRLF as part of bytes posted - make sure waitPostContinue is false
@@ -470,8 +504,12 @@ GHITrySendResult ghiTrySendThenBuffer
 		// Try and send.
 		////////////////
 		rcode = ghiDoSend(connection, buffer, len);
-		if(gsiSocketIsError(rcode))
+		switch (rcode) {
+		case -1: // error
 			return GHITrySendError;
+		case -2: // try again
+			return GHITrySendBuffered;
+		}
 
 		// Was it all sent?
 		///////////////////

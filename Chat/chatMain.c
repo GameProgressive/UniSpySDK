@@ -105,7 +105,9 @@ static CHATBool ciCheckForID(CHAT chat, int ID)
 void ciHandleDisconnect(CHAT chat, const char * reason)
 {
 	CHATBool connecting;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	// Check if we've already handled this.
 	///////////////////////////////////////
@@ -145,7 +147,39 @@ void ciHandleDisconnect(CHAT chat, const char * reason)
 static void ciThink(CHAT chat, int ID)
 {
 	ciServerMessage * message;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
+	if (connection->chatSocket.connectState == ciConnecting)
+	{
+		CHATBool connected;
+		
+		connected = ciSocketCheckConnect(chat);
+		if (connected)
+		{
+			// Check for a secure connection.
+			/////////////////////////////////
+			if(connection->secretKey[0] && connection->gameName[0])
+			{
+				// Get the random keys.
+				///////////////////////
+				ciSocketSendf(&connection->chatSocket, "CRYPT des %d %s", ciVersionID, connection->gameName);
+			}
+			else if(connection->fillInUserCallback)
+			{
+				// Get the IP.
+				//////////////
+				ciSocketSend(&connection->chatSocket, "USRIP");
+			}
+			else
+			{
+				// Send the nick and user.
+				//////////////////////////
+				ciSendNickAndUser((CHAT)connection);
+			}
+		}
+	}
 
 	// Is the socket connected?
 	///////////////////////////
@@ -197,7 +231,10 @@ static void ciThink(CHAT chat, int ID)
 void ciSendNick(CHAT chat)
 {
 	const char * nick;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 
 	// Handle based on login type.
 	//////////////////////////////
@@ -251,8 +288,10 @@ void ciSendNick(CHAT chat)
 
 void ciSendUser(CHAT chat)
 {
-	CONNECTION;
-
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 	// Send the user.
 	/////////////////
 	ciSocketSendf(&connection->chatSocket, "USER %s %s %s :%s",
@@ -271,8 +310,10 @@ void ciSendNickAndUser(CHAT chat)
 void ciSendLogin(CHAT chat)
 {
 	char passwordHash[33];
-	CONNECTION;
-
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 	// If it's pre-auth, send it.
 	/////////////////////////////
 	if(connection->loginType == CIPreAuthLogin)
@@ -309,7 +350,7 @@ void ciSendLogin(CHAT chat)
 	{
 		// If we get here, the login type is invalid or isn't being handled properly.
 		/////////////////////////////////////////////////////////////////////////////
-		assert(0);
+		GS_FAIL();
 	}
 }
 
@@ -487,11 +528,6 @@ static CHAT chatConnectDoit(CILoginType loginType,
 		return NULL; //ERRCON
 	}
 
-	// Special stuff for MS Chat server.
-	////////////////////////////////////
-	//ciSocketSend(&connection->chatSocket, "MODE ISIRCX");
-	//ciSocketSend(&connection->chatSocket, "IRCX");
-
 	// Set the callback info.
 	/////////////////////////
 	connection->nickErrorCallback = nickErrorCallback;
@@ -506,22 +542,10 @@ static CHAT chatConnectDoit(CILoginType loginType,
 		// Save the game secret key.
 		////////////////////////////
 		strzcpy(connection->secretKey, secretKey, MAX_SECRETKEY);
-
+		strzcpy(connection->gameName, gamename, MAX_GAMENAME);
 		// Get the random keys.
 		///////////////////////
-		ciSocketSendf(&connection->chatSocket, "CRYPT des %d %s", ciVersionID, gamename);
-	}
-	else if(connection->fillInUserCallback)
-	{
-		// Get the IP.
-		//////////////
-		ciSocketSend(&connection->chatSocket, "USRIP");
-	}
-	else
-	{
-		// Send the nick and user.
-		//////////////////////////
-		ciSendNickAndUser((CHAT)connection);
+		//ciSocketSendf(&connection->chatSocket, "CRYPT des %d %s", ciVersionID, gamename);
 	}
 
 	// Do blocking.
@@ -893,7 +917,9 @@ void chatRetryWithNickA(CHAT chat,
 					   const char * nick)
 {
 	int validateNick;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	
 	// Are we already connected?
 	////////////////////////////
@@ -949,8 +975,10 @@ void chatRegisterUniqueNickA(CHAT chat,
 							const char * uniquenick,
 							const char * cdkey)
 {
-	CONNECTION;
-
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 	// Are we already connected?
 	////////////////////////////
 	if(connection->connected)
@@ -999,7 +1027,9 @@ void chatRegisterUniqueNickW(CHAT chat,
 
 void chatDisconnect(CHAT chat)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	// Cleanup all the filters first.
 	/////////////////////////////////
@@ -1009,7 +1039,7 @@ void chatDisconnect(CHAT chat)
 	////////////////////////////////////////////////////////
 	if(!connection->disconnected && connection->globalCallbacks.disconnected)
 #ifdef GSI_UNICODE
-		connection->globalCallbacks.disconnected(chat, L"", connection->globalCallbacks.param);
+		connection->globalCallbacks.disconnected(chat, (UCS2String)L"", connection->globalCallbacks.param);
 #else
 		connection->globalCallbacks.disconnected(chat, "", connection->globalCallbacks.param);
 #endif
@@ -1051,7 +1081,10 @@ void chatThink(CHAT chat)
 void chatSendRawA(CHAT chat,
 				 const char * command)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+
 	if(!connection || (!connection->connected && !connection->connecting))
 		return;
 
@@ -1076,7 +1109,10 @@ void chatChangeNickA(CHAT chat,
 	int ID;
 	CHATBool success = CHATTrue;
 	
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 	CONNECTED;
 
 	GS_ASSERT(newNick);
@@ -1150,7 +1186,9 @@ void chatChangeNickW(CHAT chat,
 
 const char * chatGetNickA(CHAT chat)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	if(!connection->connected) 
 		return "";
@@ -1160,10 +1198,13 @@ const char * chatGetNickA(CHAT chat)
 #ifdef GSI_UNICODE
 const unsigned short * chatGetNickW(CHAT chat)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+
 
 	if(!connection->connected) 
-		return L"";
+		return (UCS2String)L"";
 
 	return connection->nickW;
 }
@@ -1268,8 +1309,10 @@ int chatGetUserID(CHAT chat)
 
 int chatGetProfileID(CHAT chat)
 {
-	CONNECTION;
-
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	
 	return connection->profileID;
 }
 
@@ -1300,7 +1343,9 @@ static void ciSetQuietModeEnumJoinedChannelsW(CHAT chat,
 void chatSetQuietMode(CHAT chat,
 					  CHATBool quiet)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	// Check if its the current mode.
@@ -1345,8 +1390,9 @@ void chatAuthenticateCDKeyA(CHAT chat,
 {
 	int ID;
 	CHATBool success = CHATTrue;
-
-	CONNECTION;
+	ciConnection * connection;
+	connection = (ciConnection *)chat;
+	GS_ASSERT(chat != NULL);
 	CONNECTED;
 
 	GS_ASSERT(cdkey);
@@ -1406,7 +1452,7 @@ void chatAuthenticateCDKeyW(CHAT chat,
 /*************
 ** CHANNELS **
 *************/
-void chatEnumChannelsA(CHAT chat,
+CHATOperationResult chatEnumChannelsA(CHAT chat,
 					  const char * filter,
 					  chatEnumChannelsCallbackEach callbackEach,
 					  chatEnumChannelsCallbackAll callbackAll,
@@ -1414,10 +1460,28 @@ void chatEnumChannelsA(CHAT chat,
 					  CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
-	CONNECTED;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	if(!connection || !connection->connected) 
+	{
+		return CHATOperationResult_INVALID_PARAM;
+	}
 
 	GS_ASSERT((callbackAll != NULL) || (callbackEach != NULL));
+	if (callbackAll == NULL || callbackEach == NULL)
+	{
+		return CHATOperationResult_INVALID_PARAM;
+	}
+
+	GS_ASSERT(!connection->pendingListing);
+	if (connection->pendingListing)
+	{
+		return CHATOperationResult_ENUM_ALREADY_PENDING;
+	}
+
+	// stop two enumChannels[withLimit] from happening
+	connection->pendingListing = CHATTrue;
 
 	if(!filter)
 		filter = "";
@@ -1427,24 +1491,91 @@ void chatEnumChannelsA(CHAT chat,
 	ID = ciAddLISTFilter(chat, callbackEach, callbackAll, param);
 
 	CI_DO_BLOCKING;
+	return CHATOperationResult_SUCCESS;
 }
 #ifdef GSI_UNICODE
-void chatEnumChannelsW(CHAT chat,
+CHATOperationResult chatEnumChannelsW(CHAT chat,
 					  const unsigned short * filter,
 					  chatEnumChannelsCallbackEach callbackEach,
 					  chatEnumChannelsCallbackAll callbackAll,
 					  void * param,
 					  CHATBool blocking)
 {
+	CHATOperationResult result;
 	char* filter_A = (char*)UCS2ToUTF8StringAlloc(filter);
-	chatEnumChannelsA(chat, filter_A, callbackEach, callbackAll, param, blocking);
+	result = chatEnumChannelsA(chat, filter_A, callbackEach, callbackAll, param, blocking);
 	gsifree(filter_A);
+	return result;
 }
 #endif
 
 /*************
 ** CHANNELS **
 *************/
+CHATOperationResult chatEnumChannelsWithLimitA(CHAT chat,
+											   gsi_u32 maxNumberOfChannels,
+											   const char * filter,
+											   chatEnumChannelsCallbackEach callbackEach,
+											   chatEnumChannelsCallbackAll callbackAll,
+											   void * param,
+											   CHATBool blocking)
+{
+	int ID;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
+	if(!connection || !connection->connected) 
+	{
+		return CHATOperationResult_INVALID_PARAM;
+	}
+
+	GS_ASSERT((callbackAll != NULL) || (callbackEach != NULL));
+	
+	// why use this function if maxNumberOfChannels == 0?
+	GS_ASSERT(maxNumberOfChannels > 0);
+	if (maxNumberOfChannels <= 0)
+	{
+		return CHATOperationResult_INVALID_PARAM;
+	}
+
+	GS_ASSERT(!connection->pendingListing);
+	if (connection->pendingListing)
+	{
+		// YOUR NOT SUPPOSE TO CALL THIS IF THERE IS A PENDING LIST RETRIEVAL
+		return CHATOperationResult_ENUM_ALREADY_PENDING;
+	}
+	
+	// stop two enumChannels[withLimit] from happening
+	connection->pendingListing = CHATTrue;
+
+	if(!filter)
+		filter = "";
+
+	ciSocketSendf(&connection->chatSocket, "LISTLIMIT %d %s", maxNumberOfChannels, filter);
+
+	ID = ciAddLISTFilter(chat, callbackEach, callbackAll, param);
+
+	CI_DO_BLOCKING;
+	return CHATOperationResult_SUCCESS;
+}
+#ifdef GSI_UNICODE
+CHATOperationResult chatEnumChannelsWithLimitW(CHAT chat,
+								gsi_u32 maxNumberOfChannels,
+								const unsigned short * filter,
+								chatEnumChannelsCallbackEach callbackEach,
+								chatEnumChannelsCallbackAll callbackAll,
+								void * param,
+								CHATBool blocking)
+{	
+	CHATOperationResult result;
+	char* filter_A = (char*)UCS2ToUTF8StringAlloc(filter);
+	result = chatEnumChannelsWithLimitA(chat, maxNumberOfChannels, filter_A, callbackEach, callbackAll, param, blocking);
+	gsifree(filter_A);
+	return result;
+}
+#endif
+
+
 
 void chatEnterChannelA(CHAT chat,
 					  const char * channel,
@@ -1455,7 +1586,9 @@ void chatEnterChannelA(CHAT chat,
 					  CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1495,7 +1628,9 @@ void chatLeaveChannelA(CHAT chat,
 					  const char * channel,
 					  const char * reason)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1528,7 +1663,9 @@ void chatSendChannelMessageA(CHAT chat,
 							int type)
 {
 	chatChannelCallbacks * callbacks;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1580,7 +1717,9 @@ void chatSetChannelTopicA(CHAT chat,
 						 const char * channel,
 						 const char * topic)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1611,7 +1750,9 @@ void chatGetChannelTopicA(CHAT chat,
 {
 	int ID;
 	const char * topic;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1659,7 +1800,9 @@ void chatSetChannelModeA(CHAT chat,
 {
 	char buffer[64];
 
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1667,7 +1810,7 @@ void chatSetChannelModeA(CHAT chat,
 
 	// Build the mode string.
 	/////////////////////////
-	strcpy(buffer, "XiXpXsXmXnXtXlXe");
+	gsiSafeStrcpyA(buffer, "XiXpXsXmXnXtXlXe", sizeof(buffer));
 	if(mode->InviteOnly)
 		buffer[0] = '+';
 	else
@@ -1726,7 +1869,9 @@ void chatGetChannelModeA(CHAT chat,
 						CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1785,7 +1930,9 @@ void chatSetChannelPasswordA(CHAT chat,
 							CHATBool enable,
 							const char * password)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1819,7 +1966,9 @@ void chatGetChannelPasswordA(CHAT chat,
 	ciCallbackGetChannelPasswordParams params;
 	const char * password;
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1866,7 +2015,9 @@ void chatSetChannelLimitA(CHAT chat,
 						 const char * channel,
 						 int limit)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1895,7 +2046,9 @@ void chatEnumChannelBansA(CHAT chat,
 						 CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1924,7 +2077,9 @@ void chatAddChannelBanA(CHAT chat,
 					   const char * channel,
 					   const char * ban)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1949,7 +2104,9 @@ void chatRemoveChannelBanA(CHAT chat,
 						  const char * channel,
 						  const char * ban)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -1974,7 +2131,9 @@ void chatSetChannelGroupA(CHAT chat,
 						 const char * channel,
 						 const char * group)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2002,7 +2161,9 @@ void chatSetChannelGroupW(CHAT chat,
 int chatGetChannelNumUsersA(CHAT chat,
 						   const char * channel)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	if(!connection->connected)
 		return -1;
 
@@ -2032,7 +2193,9 @@ CHATBool chatInChannelA(CHAT chat,
 					   const char * channel)
 
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	if(!connection->connected)
 		return CHATFalse;
 
@@ -2062,7 +2225,9 @@ CHATBool chatInChannelW(CHAT chat,
 static void ciEnumUsersCallback(CHAT chat, const char * channel, int numUsers, const char ** users, int * modes, void * param)
 {
 	ciEnumUsersData * data;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	// Check the args.
 	//////////////////
@@ -2105,6 +2270,7 @@ static void ciEnumUsersCallback(CHAT chat, const char * channel, int numUsers, c
 #else
 	data->callback(chat, CHATTrue, channel, numUsers, users, modes, data->param);
 #endif
+	GSI_UNUSED(connection);
 }
 
 void chatEnumUsersA(CHAT chat,
@@ -2115,7 +2281,9 @@ void chatEnumUsersA(CHAT chat,
 {
 	int ID;
 	ciEnumUsersData data;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	//ASSERT_CHANNEL();
@@ -2181,7 +2349,9 @@ void chatSendUserMessageA(CHAT chat,
 						 const char * message,
 						 int type)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_USER(user);
@@ -2222,7 +2392,9 @@ void chatGetUserInfoA(CHAT chat,
 					 CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_USER(user);
@@ -2256,7 +2428,9 @@ void chatGetBasicUserInfoA(CHAT chat,
 	int ID;
 	const char * user;
 	const char * address;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_USER(nick);
@@ -2304,7 +2478,9 @@ CHATBool chatGetBasicUserInfoNoWaitA(CHAT chat,
 									const char ** user,
 									const char ** address)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	// 2002.Feb.28.JED - added additional check, was blowing up in GSA
 	if(!connection)
 		return CHATFalse;
@@ -2323,7 +2499,9 @@ CHATBool chatGetBasicUserInfoNoWaitW(CHAT chat,
 {
 	char nick_A[MAX_NICK];
 
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	// 2002.Feb.28.JED - added additional check, was blowing up in GSA
 	if(!connection)
 		return CHATFalse;
@@ -2344,7 +2522,9 @@ void chatGetChannelBasicUserInfoA(CHAT chat,
 								 CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2373,7 +2553,9 @@ void chatInviteUserA(CHAT chat,
 					const char * channel,
 					const char * user)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2399,7 +2581,9 @@ void chatKickUserA(CHAT chat,
 				  const char * user,
 				  const char * reason)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2430,7 +2614,9 @@ void chatBanUserA(CHAT chat,
 				 const char * channel,
 				 const char * user)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2460,7 +2646,9 @@ void chatSetUserModeA(CHAT chat,
 {
 	int sign;
 
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2496,7 +2684,9 @@ void chatGetUserModeA(CHAT chat,
 {
 	int ID;
 	int mode;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2547,7 +2737,9 @@ CHATBool chatGetUserModeNoWaitA(CHAT chat,
 							   const char * user,
 							   int * mode)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	if(!connection->connected)
 		return CHATFalse;
 
@@ -2584,7 +2776,9 @@ void chatGetUdpRelayA(CHAT chat,
 					 CHATBool blocking)
 {
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	ASSERT_CHANNEL();
@@ -2622,13 +2816,15 @@ void chatSetGlobalKeysA(CHAT chat,
 	const char * key;
 	const char * value;
 	int i;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	if(!keys || !values)
 		return;
 
-	strcpy(buffer, "SETKEY :");
+	gsiSafeStrcpyA(buffer, "SETKEY :", sizeof(buffer));
 	for(i = 0 ; i < num ; i++)
 	{
 		key = keys[i];
@@ -2685,7 +2881,9 @@ static void ciSendGetKey(CHAT chat,
 	int j;
 	int keyLen;
 
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	GS_ASSERT(target && target[0]);
 	GS_ASSERT(cookie && cookie[0]);
@@ -2739,7 +2937,9 @@ void chatGetGlobalKeysA(CHAT chat,
 	char * cookie;
 	const char * channel;
 	int ID;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	GS_ASSERT(num >= 0);
@@ -2805,7 +3005,9 @@ void chatSetChannelKeysA(CHAT chat,
 	char buffer[512];
 	const char * value;
 	int i;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	if(!user || !user[0])
@@ -2957,7 +3159,9 @@ void chatGetChannelKeysA(CHAT chat,
 	char * cookie;
 	int ID;
 	CHATBool getBroadcastKeys;
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 	CONNECTED;
 
 	GS_ASSERT(num >= 0);
@@ -3047,7 +3251,9 @@ int ciNickIsValid(const char* nick)
 ****************/
 void ciNickError(CHAT chat, int type, const char * nick, int numSuggestedNicks, char ** suggestedNicks)
 {
-	CONNECTION;
+	ciConnection * connection;
+	GS_ASSERT(chat != NULL);
+	connection = (ciConnection *)chat;
 
 	// Check if there's a nick-in-use callback.
 	///////////////////////////////////////////

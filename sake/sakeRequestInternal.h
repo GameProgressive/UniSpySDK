@@ -1,11 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sakeRequestInternal.h
+// SDK:		GameSpy Sake Persistent Storage SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __SAKEREQUESTINTERNAL_H__
 #define __SAKEREQUESTINTERNAL_H__
 
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 #include "sakeMain.h"
 #include "../common/gsSoap.h"
 
@@ -26,7 +30,7 @@ extern "C" {
 	memset(dest, 0, sizeof(type)*num); }       /*zero*/
 
 #define SAKEI_FUNC_NAME_STRINGS(func) func,\
-	"SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/sake/" func "\"",\
+	"SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake/" func "\"",\
 	func "Response",\
 	func "Result"
 

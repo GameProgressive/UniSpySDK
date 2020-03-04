@@ -98,9 +98,11 @@ typedef struct GHIConnection
 
 	GHIProtocol protocol;         // Protocol used for this connection.
 
+	char * recvHeaders;           // Headers from the response
 	char * sendHeaders;           // Optional headers to pass with the request.
 
 	FILE * saveFile;              // If saving to disk, the file being saved to.
+	char * saveFileName;
 
 	GHTTPBool blocking;           // Blocking flag.
 	
@@ -161,6 +163,7 @@ typedef struct GHIConnection
 #if !defined(GSI_NO_THREADS)
 	GSIResolveHostnameHandle handle; //handle used for asychronous DNS lookups
 #endif
+    gsi_time receiveFileIdleTime; // Used to prevent being stuck in receiveFile state.
 	
 } GHIConnection;
 
@@ -178,6 +181,21 @@ GHTTPBool ghiFreeConnection
 (
 	GHIConnection * connection
 );
+
+// Frees the connection object data.
+////////////////////////////////////
+GHTTPBool ghiFreeConnectionData
+( 
+    GHIConnection * connection
+);
+
+// Close connection
+///////////////////////////////
+GHTTPBool ghiCloseConnection
+( 
+    GHIConnection * connection
+);
+
 
 // Returns the connection object for a request index.
 // Returns NULL if the index is bad.
@@ -208,6 +226,11 @@ void ghiRedirectConnection
 void ghiCleanupConnections
 (
 	void
+);
+
+char* ghiGetServerAddressFromUrl
+(
+    char *serverUrl
 );
 
 #ifdef __cplusplus

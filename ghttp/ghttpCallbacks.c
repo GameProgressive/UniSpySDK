@@ -46,6 +46,10 @@ void ghiCallCompletedCallback
 	}
 	bufferLen = connection->fileBytesReceived;
 
+	// so we don't pass a null pointer to the callback
+	if (connection->recvHeaders == NULL)
+		connection->recvHeaders = goastrdup("");
+
 	// Call the callback.
 	/////////////////////
 	freeBuffer = connection->completedCallback(
@@ -53,6 +57,7 @@ void ghiCallCompletedCallback
 		connection->result,
 		buffer,
 		bufferLen,
+		connection->recvHeaders,
 		connection->callbackParam);
 
 	// Check for gsifree.

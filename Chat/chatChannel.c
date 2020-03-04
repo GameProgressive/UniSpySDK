@@ -384,7 +384,6 @@ void ciChannelLeft(CHAT chat, const char * channel)
 {
 	ciChatChannel chatChannel;
 	int index;
-	//int rcode;
 	CONNECTION;
 	
 	ASSERT_CHANNEL();
@@ -406,12 +405,8 @@ void ciChannelLeft(CHAT chat, const char * channel)
 	{
 		// Remove based on the name.
 		////////////////////////////
-		//rcode = TableRemove(connection->channelTable, &chatChannel);
 		TableRemove(connection->channelTable, &chatChannel);
 
-		// This will assert if we don't think we're in this channel.
-		////////////////////////////////////////////////////////////
-		//GS_ASSERT(rcode != 0);
 	}
 }
 

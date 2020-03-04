@@ -1,5 +1,13 @@
-// sbmfcsampleDlg.cpp : implementation file
+///////////////////////////////////////////////////////////////////////////////
+// File:	sbmfcsampleDlg.cpp
+// SDK:		GameSpy Server Browsing SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Server Browsing sample application implementation file.
 
 #include "stdafx.h"
 #include "sbmfcsample.h"

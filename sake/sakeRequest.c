@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sakeRequest.c
+// SDK:		GameSpy Sake Persistent Storage SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sakeRequest.h"
 
 
@@ -7,7 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT] =
 {
-	"ns1=\"" RS_HTTP_PROTOCOL_URL "gamespy.net/sake\""
+	"ns1=\"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake\""
 };
 
 
@@ -86,6 +93,8 @@ static SAKERequestResult SAKE_CALL sakeiCheckHttpResult(GHTTPResult httpResult)
 		return SAKERequestResult_SUCCESS;
 	case GHTTPOutOfMemory:
 		return SAKERequestResult_OUT_OF_MEMORY;
+	//case GHTTPRequestCancelled:
+	//    return SAKERequestResult_REQUEST_CANCELLED;
 	default:
 		return SAKERequestResult_CONNECTION_ERROR;
 	}

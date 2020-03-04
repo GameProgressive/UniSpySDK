@@ -443,11 +443,12 @@ void CMultiTrackDlg::UpdateRatingsDisplay()
 
 GHTTPBool PlayerRatingsPageCompleted
 (
-	GHTTPRequest request,
-	GHTTPResult result,
-	char * buffer,
-	__int64 bufferLen,
-	void * param
+	GHTTPRequest request,       // The request.
+	GHTTPResult result,         // The result (success or an error).
+	char* buffer,              // The file's bytes (only valid if ghttpGetFile[Ex] was used).
+	GHTTPByteCount bufferLen,   // The file's length.
+	char* headers,
+	void* param                // User-data.
 )
 {
 	if(result == GHTTPSuccess)

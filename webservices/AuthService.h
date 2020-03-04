@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// File:	AuthServiceOpen.h
+// File:	AuthService.h
 // SDK:		GameSpy Authentication Service SDK
 //
 // Copyright (c) IGN Entertainment, Inc.  All rights reserved.  

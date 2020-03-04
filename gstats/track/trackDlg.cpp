@@ -72,11 +72,12 @@ CTrackDlg * Dlg;
 
 GHTTPBool PlayerBestTimesPageCompleted
 (
-	GHTTPRequest request,
-	GHTTPResult result,
-	char * buffer,
-	GHTTPByteCount bufferLen,
-	void * param
+	GHTTPRequest request,       // The request.
+	GHTTPResult result,         // The result (success or an error).
+	char* buffer,              // The file's bytes (only valid if ghttpGetFile[Ex] was used).
+	GHTTPByteCount bufferLen,   // The file's length.
+	char* headers,
+	void* param                // User-data.
 )
 {
 	if(result == GHTTPSuccess)
@@ -102,11 +103,12 @@ GHTTPBool PlayerBestTimesPageCompleted
 
 GHTTPBool TopTimePageCompleted
 (
-	GHTTPRequest request,
-	GHTTPResult result,
-	char * buffer,
-	GHTTPByteCount bufferLen,
-	void * param
+	GHTTPRequest request,       // The request.
+	GHTTPResult result,         // The result (success or an error).
+	char* buffer,              // The file's bytes (only valid if ghttpGetFile[Ex] was used).
+	GHTTPByteCount bufferLen,   // The file's length.
+	char* headers,
+	void* param                // User-data.
 )
 {
 	if(result == GHTTPSuccess)

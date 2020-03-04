@@ -338,7 +338,7 @@ typedef unsigned int      gsi_u32;
 typedef unsigned int      gsi_time;  // must be 32 bits
 
 // Deprecated
-typedef gsi_i32           goa_int32;  // 2003.Oct.04.JED - typename deprecated
+typedef gsi_i32           goa_int32;  // 2003.Oct.04 - typename deprecated
 typedef gsi_u32           goa_uint32; //  these types will be removed once all SDK's are updated
 
 typedef int               gsi_bool;

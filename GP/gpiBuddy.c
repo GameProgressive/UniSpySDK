@@ -832,29 +832,29 @@ GPResult gpiBuddyHandleKeyReply(GPConnection *connection, GPIPeer *peer, char *b
 
 		if (numKeys == 0)
 		{
-			GPIPeerOp *anIterator;
+			GPIPeerOp *anIterator2;
 			
-			for (anIterator = peer->peerOpQueue.first; anIterator != NULL; anIterator = anIterator->next)
-				if (anIterator->type == GPI_BM_KEYS_REQUEST)
+			for (anIterator2 = peer->peerOpQueue.first; anIterator2 != NULL; anIterator2 = anIterator2->next)
+				if (anIterator2->type == GPI_BM_KEYS_REQUEST)
 					break;
 
-			if (!anIterator)
+			if (!anIterator2)
 			{
 				return GP_NO_ERROR;
 			}
-			else if (anIterator->type == GPI_BM_KEYS_REQUEST && anIterator->callback)
+			else if (anIterator2->type == GPI_BM_KEYS_REQUEST && anIterator2->callback)
 			{
 				GPGetBuddyStatusInfoKeysArg *arg = (GPGetBuddyStatusInfoKeysArg *)gsimalloc(sizeof(GPGetBuddyStatusInfoKeysArg));
 				GPICallback callback;
-				callback.callback = anIterator->callback;
-				callback.param = anIterator->userData;
+				callback.callback = anIterator2->callback;
+				callback.param = anIterator2->userData;
 
 				arg->keys = NULL;
 				arg->numKeys = 0;
 				arg->values = NULL;
 				arg->profile = peer->profile;
 				gpiAddCallback(connection, callback, arg, NULL, 0);
-				gpiPeerRemoveOp(peer, anIterator);
+				gpiPeerRemoveOp(peer, anIterator2);
 			}
 		}
 		else

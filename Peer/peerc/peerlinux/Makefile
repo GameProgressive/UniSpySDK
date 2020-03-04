@@ -1,77 +1,53 @@
 # Peer SDK Makefile
 # Copyright 2004 GameSpy Industries
 
-PROJECT=peersdk
+TARGET=peersdk
+THREADS=yes
+DEBUG=no
+CFLAGS=-W -Wno-missing-field-initializers
 
-CC=gcc
-BASE_CFLAGS=-D_LINUX
+SRC = \
+	../../../darray.c\
+	../../../md5c.c\
+	../../../hashtable.c\
+	../../../common/gsAvailable.c\
+	../../../common/gsPlatform.c\
+	../../../common/gsPlatformSocket.c\
+	../../../common/gsPlatformThread.c\
+	../../../common/gsPlatformUtil.c\
+	../../../common/gsStringUtil.c\
+	../../../common/gsDebug.c\
+	../../../common/gsMemory.c\
+	../../../common/linux/LinuxCommon.c\
+	../../../Chat/chatCallbacks.c\
+	../../../Chat/chatChannel.c\
+	../../../Chat/chatCrypt.c\
+	../../../Chat/chatHandlers.c\
+	../../../Chat/chatMain.c\
+	../../../Chat/chatSocket.c\
+	../../../pinger/pingerMain.c\
+	../../../serverbrowsing/sb_crypt.c\
+	../../../serverbrowsing/sb_queryengine.c\
+	../../../serverbrowsing/sb_server.c\
+	../../../serverbrowsing/sb_serverbrowsing.c\
+	../../../serverbrowsing/sb_serverlist.c\
+	../../../qr2/qr2.c\
+	../../../qr2/qr2regkeys.c\
+	../../../natneg/natneg.c\
+	../../../natneg/NATify.c\
+	../../peerAutoMatch.c\
+	../../peerCallbacks.c\
+	../../peerGlobalCallbacks.c\
+	../../peerHost.c\
+	../../peerKeys.c\
+	../../peerMain.c\
+	../../peerMangle.c\
+	../../peerOperations.c\
+	../../peerPing.c\
+	../../peerPlayers.c\
+	../../peerQR.c\
+	../../peerRooms.c\
+	../../peerSB.c\
+	../peerc.c
 
-#use these cflags to optimize it
-CFLAGS=$(BASE_CFLAGS) -m486 -O6 -ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations -falign-loops=2 \
-	-falign-jumps=2 -falign-functions=2 -lpthread
-#use these when debugging 
-#CFLAGS=$(BASE_CFLAGS) -g
-
-PROG_OBJS = \
-	../../../darray.o\
-	../../../md5c.o\
-	../../../hashtable.o\
-	../../../common/gsAvailable.o\
-	../../../common/gsPlatform.o\
-	../../../common/gsPlatformSocket.o\
-	../../../common/gsPlatformThread.o\
-	../../../common/gsPlatformUtil.o\
-	../../../common/gsStringUtil.o\
-	../../../common/gsDebug.o\
-	../../../common/gsMemory.o\
-	../../../common/linux/LinuxCommon.o\
-	../../../Chat/chatCallbacks.o\
-	../../../Chat/chatChannel.o\
-	../../../Chat/chatCrypt.o\
-	../../../Chat/chatHandlers.o\
-	../../../Chat/chatMain.o\
-	../../../Chat/chatSocket.o\
-	../../../pinger/pingerMain.o\
-	../../../serverbrowsing/sb_crypt.o\
-	../../../serverbrowsing/sb_queryengine.o\
-	../../../serverbrowsing/sb_server.o\
-	../../../serverbrowsing/sb_serverbrowsing.o\
-	../../../serverbrowsing/sb_serverlist.o\
-	../../../qr2/qr2.o\
-	../../../qr2/qr2regkeys.o\
-        ../../../natneg/natneg.o\
-        ../../../natneg/NATify.o\
-	../../peerAutoMatch.o\
-	../../peerCallbacks.o\
-	../../peerGlobalCallbacks.o\
-	../../peerHost.o\
-	../../peerKeys.o\
-	../../peerMain.o\
-	../../peerMangle.o\
-	../../peerOperations.o\
-	../../peerPing.o\
-	../../peerPlayers.o\
-	../../peerQR.o\
-	../../peerRooms.o\
-	../../peerSB.o\
-	../peerc.o
-
-
-#############################################################################
-# SETUP AND BUILD
-#############################################################################
-
-$(PROJECT): $(PROG_OBJS)        
-	$(CC) $(CFLAGS) -o $@ $(PROG_OBJS)
-
-#############################################################################
-# MISC
-#############################################################################
-
-clean:	
-	rm -f $(PROG_OBJS)
-
-depend:
-	gcc -MM $(PROG_OBJS:.o=.c)
-
+include ../../../common/linux/Makefile.common
