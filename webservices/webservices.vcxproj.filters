@@ -23,11 +23,5 @@
     <ClInclude Include="AuthService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AuthService2007.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AuthServiceOpen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

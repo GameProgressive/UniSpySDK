@@ -99,6 +99,13 @@ void gsCoreInitialize()
 		// Init http sdk (ghttp is ref counted)
 		ghttpStartup();
 
+		// initialize strings that correlate to response header entries
+		strcpy(aCore->authError, "");
+		aCore->authErrorCode = 0;
+		strcpy(aCore->sessionToken, "");
+		strcpy(aCore->gameId, "");
+		strcpy(aCore->profileId, "");
+
 		// release other threads that may have blocked during init
 		//     - this must be the last thing done at end of init
 		aCore->mIsInitialized = gsi_true;
@@ -225,6 +232,91 @@ GSTaskResult gsCoreTaskThink(GSTask* theTask)
 	return GSTaskResult_InProgress;
 }
 
+// set the profileid string so we can include it in request headers
+void gsiCoreSetProfileId(const char profileId[PROFILEID_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	strcpy(aCore->profileId, profileId);
+}
+
+// get the profileid string to be passed in request headers
+gsi_bool gsiCoreGetProfileId(char profileId[PROFILEID_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	if (!strcmp(aCore->profileId, ""))
+		return gsi_false;
+	else
+		strcpy(profileId, aCore->profileId);
+	return gsi_true;
+}
+
+// set the gameid string so we can include it in request headers
+void gsiCoreSetGameId(const char gameId[GAMEID_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	strcpy(aCore->gameId, gameId);
+}
+
+// get the gameid string to be passed in request headers
+gsi_bool gsiCoreGetGameId(char gameId[GAMEID_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	if (!strcmp(aCore->gameId, ""))
+		return gsi_false;
+	else
+		strcpy(gameId, aCore->gameId);
+	return gsi_true;
+}
+
+// set the "Error:" value from the response headers if there was one
+void gsiCoreSetAuthError(const char authError[AUTHERROR_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	strcpy(aCore->authError, authError);
+}
+
+// get the "Error:" value from the response headers if it has been set, otherwise return false
+gsi_bool gsiCoreGetAuthError(char authError[AUTHERROR_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	if (!strcmp(aCore->authError, ""))
+		return gsi_false;
+	else
+		strcpy(authError, aCore->authError);
+	return gsi_true;
+}
+
+// set the "ErrorCode:" value from the response headers if there was one
+void gsiCoreSetAuthErrorCode(GSAuthErrorCode authErrorCode)
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	aCore->authErrorCode = authErrorCode;
+}
+
+// get the "ErrorCode:" value from the response headers if it has been set, otherwise return false
+GSAuthErrorCode gsiCoreGetAuthErrorCode()
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	return aCore->authErrorCode;
+}
+
+// get the session token if it has been set, otherwise return false
+gsi_bool gsiCoreGetSessionToken(char sessionToken[SESSIONTOKEN_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	if (!strcmp(aCore->sessionToken, ""))
+		return gsi_false;
+	else
+		strcpy(sessionToken, aCore->sessionToken);
+	return gsi_true;
+}
+
+// set the session token internally so it can be passed (in header) to all subsequent http calls
+void gsiCoreSetSessionToken(const char sessionToken[SESSIONTOKEN_LENGTH])
+{
+	GSCoreMgr* aCore = gsiGetStaticCore();
+	strcpy(aCore->sessionToken, sessionToken);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,6 +384,7 @@ void gsCoreThink(gsi_time theMS)
 #endif
 
 		aCore->mIsShuttingDown = 0;
+        aCore->mIsInitialized  = gsi_false;
 	}
 
 	// leave queue critical section

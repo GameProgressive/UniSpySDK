@@ -4,27 +4,40 @@
 #include "../common/gsXML.h"
 #include "../common/gsAvailable.h"
 #include "../common/md5.h"
+#include "../common/gsSHA1.h"
 
 #pragma warning(disable: 4267)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfile"
+/////////// Old login system (no game id)
+/*#define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfile"
 #define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNick"
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuth"
 #define WS_AUTHSERVICE_LOGINPS3CERT		 "LoginPs3Cert"
-#define WS_AUTHSERVICE_PROTOVERSION      1
-
-#define WS_AUTHSERVICE_NAMESPACE         "ns1"
 #define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginProfile\""
 #define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginUniqueNick\""
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginRemoteAuth\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""*/
+
+#define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfileWithGameId"
+#define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNickWithGameId"
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuthWithGameId"
+#define WS_AUTHSERVICE_LOGINPS3CERT      "LoginPs3CertWithGameId"
+
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginProfileWithGameId\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginRemoteAuthWithGameId\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginPs3CertWithGameId\""
+
+#define WS_AUTHSERVICE_PROTOVERSION      1
+
+#define WS_AUTHSERVICE_NAMESPACE         "ns1"
 
 #define WS_AUTHSERVICE_NAMESPACE_COUNT  1
 const char * WS_AUTHSERVICE_NAMESPACES[WS_AUTHSERVICE_NAMESPACE_COUNT] =
 {
-	WS_AUTHSERVICE_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/\""
+	WS_AUTHSERVICE_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/\""
 };
 
 const char WS_AUTHSERVICE_SIGNATURE_KEY[] = 
@@ -53,16 +66,19 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 
 // This is declared as an extern so it can be overriden when testing
 
-#define WS_LOGIN_SERVICE_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+// Old API
+//#define WS_LOGIN_SERVICE_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+#define WS_LOGIN_SERVICE_URL_FORMAT RS_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
 
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
+char authCreds[54];
 
 typedef struct WSIRequestData
 {
 	union 
 	{
 		WSLoginCallback mLoginCallback;
-		WSLoginPs3CertCallback mLoginPs3CertCallback;
+		WSLoginSonyCertCallback mLoginSonyCertCallback;
 	} mUserCallback;
 	//void * mUserCallback;
 	void * mUserData;
@@ -72,25 +88,76 @@ typedef struct WSIRequestData
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 static void wsiLoginEncryptPassword(const gsi_char * password, gsi_u8 ciphertext[GS_CRYPT_RSA_BYTE_SIZE]);
-static gsi_bool wsiServiceAvailable();
+static gsi_bool wsiServiceAvailable(const char* serviceName);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Checks to make sure the availability check has been performed prior
 // to using any AuthService Login, and sets the service URL if it has
-static gsi_bool wsiServiceAvailable()
+static gsi_bool wsiServiceAvailable(const char* serviceName)
 {
 	if (__GSIACResult == GSIACAvailable)
 	{
 		if (wsAuthServiceURL[0] == '\0')
-			snprintf(wsAuthServiceURL, WS_LOGIN_MAX_URL_LEN, WS_LOGIN_SERVICE_URL_FORMAT, __GSIACGamename);
+			snprintf(wsAuthServiceURL, WS_LOGIN_MAX_URL_LEN, WS_LOGIN_SERVICE_URL_FORMAT, __GSIACGamename, serviceName);
 		return gsi_true;
 	}
 	else
 		return gsi_false;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Converts an authentication error to webservice error
+static void wsiAuthErrorToLoginResponse(GSAuthErrorCode authError, WSLoginResponse* response)
+{
+	if (authError == GSAuthErrorCode_InvalidGameID)
+	{
+		response->mLoginResult = WSLogin_InvalidGameCredentials;
+		response->mResponseCode = WSLogin_InvalidGameID;
+	}
+	else if (authError == GSAuthErrorCode_InvalidAccessKey)
+	{
+		response->mLoginResult = WSLogin_InvalidGameCredentials;
+		response->mResponseCode = WSLogin_InvalidAccessKey;
+	}
+	else
+	{
+		response->mLoginResult = WSLogin_InvalidGameCredentials;
+		response->mResponseCode = WSLogin_UnknownError;
+	}
+
+	gsiCoreSetAuthError("");
+	gsiCoreSetAuthErrorCode(GSAuthErrorCode_None);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Converts an authentication error to webservice error (for Sony)
+static void wsiAuthErrorToLoginSonyCertResponse(GSAuthErrorCode authError, WSLoginSonyCertResponse* theResponse)
+{
+	if (authError == GSAuthErrorCode_InvalidGameID)
+	{
+		theResponse->mLoginResult = WSLogin_InvalidGameCredentials;
+		theResponse->mResponseCode = WSLogin_InvalidGameID;
+	}
+	else if (authError == GSAuthErrorCode_InvalidAccessKey)
+	{
+		theResponse->mLoginResult = WSLogin_InvalidGameCredentials;
+		theResponse->mResponseCode = WSLogin_InvalidAccessKey;
+	}
+	else
+	{
+		theResponse->mLoginResult = WSLogin_InvalidGameCredentials;
+		theResponse->mResponseCode = WSLogin_UnknownError;
+	}
+
+	gsiCoreSetAuthError("");
+	gsiCoreSetAuthErrorCode(GSAuthErrorCode_None);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,11 +176,24 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 	cert->mIsValid = gsi_false;
 	memset(&response, 0, sizeof(response));
 	
+	if (theResult == GHTTPRequestCancelled)
+	{
+		response.mLoginResult = WSLogin_Cancelled;
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+		response.mLoginResult = WSLogin_HttpError;
+	}
+	else if (gsiCoreGetAuthErrorCode())
+	{
+		GSAuthErrorCode err = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginResponse(err, &response);
+	}
 	if (theResult == GHTTPSuccess)
 	{
 		// try to parse the soap
 		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginProfileResult")))
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginProfileWithGameIdResult")))
 		{
 			response.mLoginResult = WSLogin_ParseError;
 		}
@@ -142,9 +222,10 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 			else
 			{
 				MD5_CTX md5;
+				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
-				memcpy(&response.mPrivateData.mPeerPrivateKey.modulus, &cert->mPeerPublicKey.modulus, sizeof(cert->mPeerPublicKey.modulus));
+				memcpy(&response.mPrivateData.mPeerPrivateKey, &cert->mPeerPublicKey, sizeof(cert->mPeerPublicKey));
 
 				// hash the private key
 				MD5Init(&md5);
@@ -158,12 +239,11 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
+
+				sprintf(buffer, "%d", cert->mProfileId);
+				gsiCoreSetProfileId(buffer);
 			}
 		}
-	}
-	else
-	{
-		response.mLoginResult = WSLogin_HttpError;
 	}
 
 	// trigger the user callback
@@ -179,7 +259,8 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-gsi_u32 wsLoginProfile(int partnerCode,
+WSLoginValue wsLoginProfile(int gameId,
+					   int partnerCode,
 					   int namespaceId,
 					   const gsi_char * profileNick, 
 					   const gsi_char * email, 
@@ -192,9 +273,10 @@ gsi_u32 wsLoginProfile(int partnerCode,
 	WSIRequestData * requestData = NULL;
 	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable())
+	if (!wsiServiceAvailable("AuthService.asmx"))
 		return WSLogin_NoAvailabilityCheck;
 
+	GS_ASSERT(gameId >= 0);
 	GS_ASSERT(partnerCode >= 0);
 	GS_ASSERT(profileNick != NULL);
 	GS_ASSERT(email       != NULL);
@@ -223,9 +305,11 @@ gsi_u32 wsLoginProfile(int partnerCode,
 	if (writer != NULL)
 	{
 		GSSoapTask * aTask = NULL;
+		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINPROFILE)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "partnercode", (gsi_u32)partnerCode)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "namespaceid", (gsi_u32)namespaceId)) ||
 			gsi_is_false(gsXmlWriteAsciiStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "email", email)) ||
@@ -241,7 +325,11 @@ gsi_u32 wsLoginProfile(int partnerCode,
 			return WSLogin_OutOfMemory;
 		}
 		
-		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_LOGINPROFILE_SOAP,
+		strcpy(buffer, WS_AUTHSERVICE_LOGINPROFILE_SOAP);
+		strcat(buffer, "\r\nAccessKey: ");
+		strcat(buffer, authCreds);
+
+		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsiLoginProfileCallback, (void*)requestData);
 		if (aTask == NULL)
 		{
@@ -249,6 +337,10 @@ gsi_u32 wsLoginProfile(int partnerCode,
 			gsifree(requestData);
 			return WSLogin_OutOfMemory;
 		}
+	}
+	else
+	{
+		return WSLogin_OutOfMemory;
 	}
 	return 0;
 }
@@ -270,11 +362,24 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 
 	memset(&response, 0, sizeof(response));
 
-	if (theResult == GHTTPSuccess)
+	if (theResult == GHTTPRequestCancelled)
+	{
+	response.mLoginResult = WSLogin_Cancelled;
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+	response.mLoginResult = WSLogin_HttpError;
+	}
+	else if (gsiCoreGetAuthErrorCode())
+	{
+		int v5 = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginResponse(v5, &response);
+	}
+	else
 	{
 		// try to parse the soap
 		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginUniqueNickResult")))
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginUniqueNickWithGameIdResult")))
 		{
 			response.mLoginResult = WSLogin_ParseError;
 		}
@@ -303,6 +408,7 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 			else
 			{
 				MD5_CTX md5;
+				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
 				memcpy(&response.mPrivateData.mPeerPrivateKey.modulus, &cert->mPeerPublicKey.modulus, sizeof(cert->mPeerPublicKey.modulus));
@@ -320,16 +426,11 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
+
+				sprintf(buffer, "%d", cert->mProfileId);
+				gsiCoreSetProfileId(buffer);
 			}
 		}
-	}
-	else if (theResult == GHTTPRequestCancelled)
-	{
-		response.mLoginResult = WSLogin_Cancelled;
-	}
-	else
-	{
-		response.mLoginResult = WSLogin_HttpError;
 	}
 
 	// trigger the user callback
@@ -346,7 +447,8 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //gsi_u32 wsLoginUnique(WSLoginUniqueRequest * request, WSLoginCallback callback)
-gsi_u32 wsLoginUnique(int partnerCode,
+WSLoginValue wsLoginUnique(int gameId,
+					  int partnerCode,
 					  int namespaceId,
 					  const gsi_char * uniqueNick, 
 					  const gsi_char * password, 
@@ -358,12 +460,13 @@ gsi_u32 wsLoginUnique(int partnerCode,
 	WSIRequestData * requestData = NULL;
 	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable())
+	if (!wsiServiceAvailable("AuthService.asmx"))
 		return WSLogin_NoAvailabilityCheck;
 
 	GS_ASSERT(partnerCode >= 0);
 	GS_ASSERT(uniqueNick != NULL);
 	GS_ASSERT(password != NULL);
+	GS_ASSERT(gameId >= 0);
 
 	if (_tcslen(uniqueNick) >= WS_LOGIN_UNIQUENICK_LEN)
 		return WSLogin_InvalidParameters;
@@ -387,9 +490,11 @@ gsi_u32 wsLoginUnique(int partnerCode,
 	if (writer != NULL)
 	{
 		GSSoapTask * aTask = NULL;
+		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINUNIQUE)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "partnercode", (gsi_u32)partnerCode)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "namespaceid", (gsi_u32)namespaceId)) ||
 			gsi_is_false(gsXmlWriteAsciiStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "uniquenick", uniqueNick)) ||
@@ -404,7 +509,11 @@ gsi_u32 wsLoginUnique(int partnerCode,
 			return WSLogin_OutOfMemory;
 		}
 		
-		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_LOGINUNIQUE_SOAP,
+		strcpy(buffer, WS_AUTHSERVICE_LOGINUNIQUE_SOAP);
+		strcat(buffer, "\r\nAccessKey: ");
+		strcat(buffer, authCreds);
+
+		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsLoginUniqueCallback, (void*)requestData);
 		if (aTask == NULL)
 		{
@@ -413,6 +522,11 @@ gsi_u32 wsLoginUnique(int partnerCode,
 			return WSLogin_OutOfMemory;
 		}
 	}
+	else
+	{
+		return WSLogin_OutOfMemory;
+	}
+
 	return 0;
 }
 
@@ -434,11 +548,24 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 
 	memset(&response, 0, sizeof(response));
 
-	if (theResult == GHTTPSuccess)
+	if (theResult == GHTTPRequestCancelled)
+	{
+		response.mLoginResult = WSLogin_Cancelled;
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+		response.mLoginResult = WSLogin_HttpError;
+	}
+	else if (gsiCoreGetAuthErrorCode())
+	{
+		int v5 = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginResponse(v5, &response);
+	}
+	else
 	{
 		// try to parse the soap
 		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginRemoteAuthResult")))
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginRemoteAuthWithGameIdResult")))
 		{
 			response.mLoginResult = WSLogin_ParseError;
 		}
@@ -467,6 +594,7 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 			else
 			{
 				MD5_CTX md5;
+				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
 				memcpy(&response.mPrivateData.mPeerPrivateKey.modulus, &cert->mPeerPublicKey.modulus, sizeof(cert->mPeerPublicKey.modulus));
@@ -484,16 +612,10 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
+
+				sprintf(buffer, "%d", cert->mProfileId);
 			}
 		}
-	}
-	else if (theResult == GHTTPRequestCancelled)
-	{
-		response.mLoginResult = WSLogin_Cancelled;
-	}
-	else
-	{
-		response.mLoginResult = WSLogin_HttpError;
 	}
 
 	// trigger the user callback
@@ -509,7 +631,8 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-gsi_u32 wsLoginRemoteAuth(int partnerCode, 
+WSLoginValue wsLoginRemoteAuth(int gameId,
+						  int partnerCode, 
 						  int namespaceId, 
 						  const gsi_char authtoken[WS_LOGIN_AUTHTOKEN_LEN], 
 						  const gsi_char partnerChallenge[WS_LOGIN_PARTNERCHALLENGE_LEN], 
@@ -520,9 +643,10 @@ gsi_u32 wsLoginRemoteAuth(int partnerCode,
 	WSIRequestData * requestData = NULL;
 	//gsi_u8 encryptedChallenge[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable())
+	if (!wsiServiceAvailable("AuthService.asmx"))
 		return WSLogin_NoAvailabilityCheck;
 
+	GS_ASSERT(gameId >= 0);
 	GS_ASSERT(partnerCode >= 0);
 
 	// allocate the request values
@@ -540,9 +664,11 @@ gsi_u32 wsLoginRemoteAuth(int partnerCode,
 	if (writer != NULL)
 	{
 		GSSoapTask * aTask = NULL;
+		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINREMOTEAUTH)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "partnercode", (gsi_u32)partnerCode)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "namespaceid", (gsi_u32)namespaceId)) ||
 			gsi_is_false(gsXmlWriteTStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "authtoken", authtoken)) ||
@@ -558,7 +684,11 @@ gsi_u32 wsLoginRemoteAuth(int partnerCode,
 			return WSLogin_OutOfMemory;
 		}
 		
-		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP,
+		strcpy(buffer, WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP);
+		strcat(buffer, "\r\nAccessKey: ");
+		strcat(buffer, authCreds);
+
+		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsLoginRemoteAuthCallback, (void*)requestData);
 		if (aTask == NULL)
 		{
@@ -567,13 +697,17 @@ gsi_u32 wsLoginRemoteAuth(int partnerCode,
 			return WSLogin_OutOfMemory;
 		}
 	}
+	else
+	{
+		return WSLogin_OutOfMemory;
+	}
+
 	return 0;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-static void wsLoginPs3CertCallback(GHTTPResult theResult, 
+static void wsLoginSonyCertCallback(GHTTPResult theResult, 
 								  GSXmlStreamWriter theRequestXml,
 								  GSXmlStreamReader theResponseXml,
 								  void * theRequestData)
@@ -582,14 +716,27 @@ static void wsLoginPs3CertCallback(GHTTPResult theResult,
 	GHTTPResult translatedResult = theResult;
 	WSIRequestData * requestData = (WSIRequestData*)theRequestData;
 	
-	WSLoginPs3CertResponse response;
+	WSLoginSonyCertResponse response;
 	memset(&response, 0, sizeof(response));
 
-	if (theResult == GHTTPSuccess)
+	if (theResult == GHTTPRequestCancelled)
+	{
+	response.mLoginResult = WSLogin_Cancelled;
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+	response.mLoginResult = WSLogin_HttpError;
+	}
+	else if (gsiCoreGetAuthErrorCode())
+	{
+		GSAuthErrorCode err = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginSonyCertResponse(err, &response);
+	}
+	else
 	{
 		// try to parse the soap
 		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginPs3CertResult")))
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginPs3CertWithGameIdResult")))
 		{
 			response.mLoginResult = WSLogin_ParseError;
 		}
@@ -633,43 +780,43 @@ static void wsLoginPs3CertCallback(GHTTPResult theResult,
 			}
 		}
 	}
-	else if (theResult == GHTTPRequestCancelled)
-	{
-		response.mLoginResult = WSLogin_Cancelled;
-	}
-	else
-	{
-		response.mLoginResult = WSLogin_HttpError;
-	}
 
 	// trigger the user callback
-	if (requestData->mUserCallback.mLoginPs3CertCallback != NULL)
+	if (requestData->mUserCallback.mLoginSonyCertCallback != NULL)
 	{
-		WSLoginPs3CertCallback userCallback = (WSLoginPs3CertCallback)(requestData->mUserCallback.mLoginPs3CertCallback);
+		WSLoginSonyCertCallback userCallback = (WSLoginSonyCertCallback)(requestData->mUserCallback.mLoginSonyCertCallback);
 		(userCallback)(translatedResult, &response, requestData->mUserData);
 	}
 	gsifree(requestData);
 	GSI_UNUSED(theRequestXml);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Compatibility with old AuthService SDK
+WSLoginValue wsLoginPs3Cert(int gameId, int partnerCode, int namespaceId, const gsi_u8* ps3cert, int certLen, WSLoginPs3CertCallback callback, void* userData)
+{
+	return wsLoginSonyCert(gameId, partnerCode, namespaceId, ps3cert, certLen, (WSLoginSonyCertCallback)callback, userData);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //gsi_u32 wsLoginUnique(WSLoginUniqueRequest * request, WSLoginCallback callback)
-gsi_u32 wsLoginPs3Cert(int gameId,
+WSLoginValue wsLoginSonyCert(int gameId,
 					   int partnerCode,
 					   int namespaceId,
 					   const gsi_u8 * ps3cert,
 					   int certLen,
-					   WSLoginPs3CertCallback userCallback, 
+					   WSLoginSonyCertCallback userCallback, 
 					   void * userData)
 {
 	GSXmlStreamWriter writer;
 	WSIRequestData * requestData = NULL;
 
-	if (!wsiServiceAvailable())
+	if (!wsiServiceAvailable("AuthService.asmx"))
 		return WSLogin_NoAvailabilityCheck;
 
+	GS_ASSERT(gameId >= 0);
 	GS_ASSERT(partnerCode >= 0);
 	GS_ASSERT(ps3cert != NULL);
 	
@@ -683,7 +830,7 @@ gsi_u32 wsLoginPs3Cert(int gameId,
 	if (requestData == NULL)
 		return WSLogin_OutOfMemory;
 
-	requestData->mUserCallback.mLoginPs3CertCallback = userCallback;
+	requestData->mUserCallback.mLoginSonyCertCallback = userCallback;
 	requestData->mUserData     = userData;
 	
 	// create the xml request
@@ -691,6 +838,7 @@ gsi_u32 wsLoginPs3Cert(int gameId,
 	if (writer != NULL)
 	{
 		GSSoapTask * aTask = NULL;
+		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINPS3CERT)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
@@ -708,8 +856,12 @@ gsi_u32 wsLoginPs3Cert(int gameId,
 			return WSLogin_OutOfMemory;
 		}
 		
-		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_LOGINPS3CERT_SOAP,
-			        writer, wsLoginPs3CertCallback, (void*)requestData);
+		strcpy(buffer, WS_AUTHSERVICE_LOGINPS3CERT_SOAP);
+		strcat(buffer, "\r\nAccessKey: ");
+		strcat(buffer, authCreds);
+
+		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
+			        writer, wsLoginSonyCertCallback, (void*)requestData);
 		if (aTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
@@ -717,6 +869,11 @@ gsi_u32 wsLoginPs3Cert(int gameId,
 			return WSLogin_OutOfMemory;
 		}
 	}
+	else
+	{
+		return WSLogin_OutOfMemory;
+	}
+
 	return 0;
 }
 
@@ -811,7 +968,7 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 
 	MD5Update(&md5, (unsigned char*)&cert->mServerData, WS_LOGIN_SERVERDATA_LEN);
 	MD5Final(hash, &md5);
-				
+
 	gsLargeIntSetFromHexString(&sigkeypub.modulus, WS_AUTHSERVICE_SIGNATURE_KEY);
 	gsLargeIntSetFromHexString(&sigkeypub.exponent, WS_AUTHSERVICE_SIGNATURE_EXP);
 	cryptResult = gsCryptRSAVerifySignedHash(&sigkeypub, hash, 16, cert->mSignature, WS_LOGIN_SIGNATURE_LEN);
@@ -1090,6 +1247,90 @@ gsi_bool wsLoginCertReadXML(GSLoginCertificate * cert, GSXmlStreamReader reader)
 		return gsi_false;
 	}
 	return gsi_true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// New functions from GameSpy Open SDK
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+char* wsGetServiceUrl()
+{
+	if (__GSIACResult == 1)
+	{
+		if (!wsAuthServiceURL[0])
+			_snprintf(wsAuthServiceURL, sizeof(wsAuthServiceURL),
+				WS_LOGIN_SERVICE_URL_FORMAT,
+				__GSIACGamename, "AuthService.asmx");
+
+		return wsAuthServiceURL;
+	}
+
+	gsDebugFormat(GSIDebugCat_App, GSIDebugType_State, GSIDebugLevel_HotError, "No availability\r\n");
+	return NULL;
+}
+
+const char* wsLoginValueString(int loginValue)
+{
+	switch (loginValue)
+	{
+	case 0:
+		return "Login succeeded.";
+	case 1:
+		return "Server init failed.";
+	case 2:
+		return "User not found.";
+	case 3:
+		return "Invalid password.";
+	case 4:
+		return "Invalid profile.";
+	case 5:
+		return "Unique nick expired.";
+	case 6:
+		return "Database error.";
+	case 7:
+		return "Server error.";
+
+	case 100:
+		return "HTTP error.";
+	case 101:
+		return"Couldn't parse HTTP response.";
+	case 102:
+		return "Login succeeded, but an invalid certificate was returned.";
+	case 103:
+		return "Login failed.";
+	case 104:
+		return "Out of memory.";
+	case 105:
+		return "Invalid parameters.";
+	case 106:
+		return "Availability check not yet performed.";
+	case 107:
+		return "Login cancelled.";
+
+	default:
+		break;
+	}
+
+	return "An unknown error occurred.";
+}
+
+void wsSetGameCredentials(const char* accessKey, const int gameId, const char* secretKey)
+{
+	char buffer[20];
+	SHA1Context sha1;
+
+	strcpy(authCreds, accessKey);
+	SHA1Reset(&sha1);
+	SHA1Input(&sha1, (const uint8_t*)accessKey, strlen(accessKey));
+	SHA1Input(&sha1, (const uint8_t*)secretKey, strlen(secretKey));
+	SHA1Result(&sha1, (uint8_t*)&authCreds[33]);
+
+	for (int i = 0; i < 20; ++i)
+		sprintf(&authCreds[2 * i + 53], "%02x", (gsi_u8)authCreds[i + 33]);
+
+	sprintf(buffer, "%d", gameId);
+	gsiCoreSetGameId(buffer);
 }
 
 #pragma warning(default: 4267)

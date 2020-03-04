@@ -185,7 +185,7 @@ void CLoginDlg::OnOK()
 
 	// Login to the Authentication Service
 	//////////////////////////////////////
-	loginResult = wsLoginProfile(WSLogin_NAMESPACE_SHARED_NONUNIQUE, WSLogin_PARTNERCODE_GAMESPY, m_nick, m_email, m_password, "", LoginCallback, NULL);
+	loginResult = wsLoginProfile(SCRACE_GAMEID, WSLogin_NAMESPACE_SHARED_NONUNIQUE, WSLogin_PARTNERCODE_GAMESPY, m_nick, m_email, m_password, "", LoginCallback, NULL);
 	if (loginResult != WSLogin_Success)
 	{
 		if (loginResult == WSLogin_InvalidParameters)

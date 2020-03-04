@@ -52,6 +52,9 @@ GSIACResult GSIAvailableCheckThink(void);
 // for example, if the player leaves the game's multiplayer area before the check completes
 void GSICancelAvailableCheck(void);
 
+// Get the current availability
+GSIACResult GSIGetAvailable(void);
+
 // internal use only
 extern GSIACResult __GSIACResult;
 extern char __GSIACGamename[64];

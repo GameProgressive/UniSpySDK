@@ -60,6 +60,15 @@ typedef enum
 	GSTaskResult_Finished
 } GSTaskResult;
 
+typedef enum
+{
+	GSAuthErrorCode_None,
+	GSAuthErrorCode_InvalidGameID,
+	GSAuthErrorCode_InvalidAccessKey,
+	GSAuthErrorCode_InvalidSessionToken,
+	GSAuthErrorCode_SessionTokenExpired,
+	GSAuthErrorCode_Unknown
+} GSAuthErrorCode;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,6 +114,13 @@ typedef struct
 {
 	gsi_u32  mRefCount;
 
+	// these are retrieved from the response headers after apigee verfies the api key
+	char sessionToken[SESSIONTOKEN_LENGTH];
+	char authError[AUTHERROR_LENGTH];
+	GSAuthErrorCode authErrorCode;
+	char gameId[GAMEID_LENGTH];
+	char profileId[PROFILEID_LENGTH];
+
 	gsi_bool volatile mIsStaticInitComplete;  // once per application init
 	gsi_bool volatile mIsInitialized;  // gsi_true when ready to use
 	gsi_bool volatile mIsShuttingDown; // gsi_true when shutting down
@@ -122,6 +138,16 @@ typedef struct
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void gsCoreInitialize       (void);
+void gsiCoreSetProfileId(const char profileId[PROFILEID_LENGTH]);
+gsi_bool gsiCoreGetProfileId(char profileId[PROFILEID_LENGTH]);
+void gsiCoreSetGameId(const char gameId[GAMEID_LENGTH]);
+gsi_bool gsiCoreGetGameId(char gameId[GAMEID_LENGTH]);
+void gsiCoreSetAuthError(const char authError[AUTHERROR_LENGTH]);
+gsi_bool gsiCoreGetAuthError(char authError[AUTHERROR_LENGTH]);
+void gsiCoreSetAuthErrorCode(GSAuthErrorCode authErrorCode);
+GSAuthErrorCode gsiCoreGetAuthErrorCode();
+gsi_bool gsiCoreGetSessionToken(char sessionToken[SESSIONTOKEN_LENGTH]);
+void gsiCoreSetSessionToken (const char sessionToken[SESSIONTOKEN_LENGTH]);
 void gsCoreThink            (gsi_time theMS);
 void gsCoreShutdown         (void);
 GSCoreValue gsCoreIsShutdown(void);

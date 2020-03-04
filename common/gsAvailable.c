@@ -233,3 +233,8 @@ void GSICancelAvailableCheck(void)
 		__GSIACResult = GSIACWaiting;
 	}
 }
+
+GSIACResult GSIGetAvailable(void)
+{
+	return __GSIACResult;
+}

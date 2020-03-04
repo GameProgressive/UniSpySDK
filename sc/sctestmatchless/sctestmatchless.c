@@ -309,7 +309,7 @@ static void myPlayerLogin(gsi_u8 logintype, const gsi_char * nick, const gsi_cha
 
 	if (logintype == SCTEST_LOGIN_PROFILE)
 	{
-		if (0 != wsLoginProfile(SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, SCTEST_EMAIL, password, _T(""), myLoginCallback, (void*)localPlayerNumber))
+		if (0 != wsLoginProfile(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, SCTEST_EMAIL, password, _T(""), myLoginCallback, (void*)localPlayerNumber))
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 				"Failed on wsLoginProfile\r\n");
@@ -319,7 +319,7 @@ static void myPlayerLogin(gsi_u8 logintype, const gsi_char * nick, const gsi_cha
 	}
 	else if (logintype == SCTEST_LOGIN_UNIQUE)
 	{
-		result = wsLoginUnique(SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, password, _T(""), myLoginCallback, (void*)localPlayerNumber);
+		result = wsLoginUnique(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, password, _T(""), myLoginCallback, (void*)localPlayerNumber);
 		if (result != WSLogin_Success)
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
@@ -330,7 +330,7 @@ static void myPlayerLogin(gsi_u8 logintype, const gsi_char * nick, const gsi_cha
 	}
 	else if (logintype == SCTEST_LOGIN_REMOTEAUTH)
 	{
-		result = wsLoginRemoteAuth(SCTEST_REMOTE_PARTNERCODE, SCTEST_REMOTE_NAMESPACEID, nick, password, myLoginCallback, (void*)localPlayerNumber);
+		result = wsLoginRemoteAuth(SCTEST_GAME_ID, SCTEST_REMOTE_PARTNERCODE, SCTEST_REMOTE_NAMESPACEID, nick, password, myLoginCallback, (void*)localPlayerNumber);
 		if (result != WSLogin_Success)
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
