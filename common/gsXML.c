@@ -1951,7 +1951,7 @@ gsi_bool gsXmlReadChildAsStringNT(GSXmlStreamReader stream, const char * matchta
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Same as readChildAsStringNT, but converts Ascii/UTF-8 to USC2
-gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * matchtag, unsigned short valueOut[], int maxLen)
+gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * matchtag, gsi_char valueOut[], int maxLen)
 {
 	const char * utf8Value = NULL;
 	int unicodeLen = 0;
