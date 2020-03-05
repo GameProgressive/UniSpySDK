@@ -612,16 +612,17 @@ static void GetRecordLimitCallback(SAKE sake, SAKERequest request, SAKERequestRe
 
 static gsi_bool gUploadResult;
 static int gUploadedFileId;
-static GHTTPBool UploadCompletedCallback(GHTTPRequest request, GHTTPResult result, char * buffer, GHTTPByteCount bufferLen, void * param)
+static GHTTPBool UploadCompletedCallback(GHTTPRequest request, GHTTPResult result, char * buffer, GHTTPByteCount bufferLen, char* headers, void * param)
 {
 	SAKEFileResult fileResult;
-
-	gUploadResult = gsi_false;
-	NumOperations--;
 
 	GSI_UNUSED(param);
 	GSI_UNUSED(bufferLen);
 	GSI_UNUSED(buffer);
+	GSI_UNUSED(headers);
+
+	gUploadResult = gsi_false;
+	NumOperations--;
 
 	if(result != GHTTPSuccess)
 	{
@@ -653,14 +654,15 @@ static GHTTPBool UploadCompletedCallback(GHTTPRequest request, GHTTPResult resul
 	return GHTTPTrue;
 }
 
-static GHTTPBool DownloadCompletedCallback(GHTTPRequest request, GHTTPResult result, char * buffer, GHTTPByteCount bufferLen, void * param)
+static GHTTPBool DownloadCompletedCallback(GHTTPRequest request, GHTTPResult result, char * buffer, GHTTPByteCount bufferLen, char * headers, void * param)
 {
 	SAKEFileResult fileResult;
 
-	NumOperations--;
-
+	GSI_UNUSED(headers);
 	GSI_UNUSED(param);
 	GSI_UNUSED(buffer);
+
+	NumOperations--;
 
 	if(result != GHTTPSuccess)
 	{

@@ -95,9 +95,12 @@ static GHTTPBool NaminatorCallback
 	GHTTPResult result,
 	char * buffer,
 	GHTTPByteCount bufferLen,
+	char* headers,
 	void * param
 )
 {
+	GSI_UNUSED(headers);
+
 	if(result == GHTTPSuccess)
 	{
 		char * str;

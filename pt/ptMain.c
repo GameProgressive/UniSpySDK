@@ -217,6 +217,7 @@ static GHTTPBool ptaPatchCompletedCallback
 	GHTTPResult result,
 	char * buffer,
 	GHTTPByteCount bufferLen,
+	char* headers,
 	void * param
 )
 {
@@ -227,6 +228,7 @@ static GHTTPBool ptaPatchCompletedCallback
 	char versionName[PTA_MAX_STRING_SIZE];
 	char downloadURL[PTA_MAX_STRING_SIZE];
 
+	GSI_UNUSED(headers);
 	GSI_UNUSED(bufferLen);
 	GSI_UNUSED(request);
 
@@ -540,6 +542,7 @@ static GHTTPBool ptaFilePlanetCompletedCallback
 	GHTTPResult result,
 	char * buffer,
 	GHTTPByteCount bufferLen,
+	char* headers,
 	void * param
 )
 {
@@ -552,12 +555,13 @@ static GHTTPBool ptaFilePlanetCompletedCallback
 	int i;
 	char * str;
 
+	GSI_UNUSED(request);
+	GSI_UNUSED(bufferLen);
+	GSI_UNUSED(headers);
+
 	// check if the backend is available
 	if(__GSIACResult != GSIACAvailable)
 		return GHTTPFalse;
-
-	GSI_UNUSED(request);
-	GSI_UNUSED(bufferLen);
 
 	// Check for success.
 	/////////////////////

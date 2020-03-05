@@ -75,6 +75,18 @@ gsi_bool gsXmlWriteLargeIntElement(GSXmlStreamWriter stream, const char * namesp
 gsi_bool gsXmlWriteOpenTag      (GSXmlStreamWriter stream, const char * namespaceName, const char * tag);
 gsi_bool gsXmlWriteCloseTag     (GSXmlStreamWriter stream, const char * namespaceName, const char * tag);
 
+// Write utilities with No Namespace
+GSXmlStreamWriter gsXmlCreateStreamWriterNoNamespace();
+gsi_bool gsXmlWriteOpenTagNoNamespace (GSXmlStreamWriter stream, const char * tag);
+gsi_bool gsXmlWriteCloseTagNoNamespace(GSXmlStreamWriter stream, const char * tag);
+gsi_bool gsXmlWriteIntElementNoNamespace   (GSXmlStreamWriter stream, const char * tag, gsi_u32 value);
+gsi_bool gsXmlWriteFloatElementNoNamespace (GSXmlStreamWriter stream, const char * tag, float value);
+gsi_bool gsXmlWriteAsciiStringElementNoNamespace(GSXmlStreamWriter stream, const char * tag, const gsi_char * value);
+gsi_bool gsXmlWriteLargeIntElementNoNamespace(GSXmlStreamWriter stream, const char * tag, const struct gsLargeInt_s * lint);
+gsi_bool gsXmlWriteHexBinaryElementNoNamespace(GSXmlStreamWriter stream, const char * tag, const gsi_u8 * data, int len);
+gsi_bool gsXmlCloseWriterNoNamespace (GSXmlStreamWriter stream);
+gsi_bool gsXmlWriteBase64BinaryElementNoNamespace(GSXmlStreamWriter stream, const char * tag, const gsi_u8 * data, int len);
+
 // Read utilities
 gsi_bool gsXmlParseBuffer       (GSXmlStreamReader stream, char * buffer, int len);
 //    Move:
@@ -87,12 +99,39 @@ gsi_bool gsXmlMoveToChild       (GSXmlStreamReader stream, const char * matchtag
 gsi_bool gsXmlReadChildAsString   (GSXmlStreamReader stream, const char * matchtag, const char ** valueOut, int * lenOut);
 gsi_bool gsXmlReadChildAsStringNT (GSXmlStreamReader stream, const char * matchtag, char valueOut[], int maxLen);
 //gsi_bool gsXmlReadChildAsUnicodeString   (GSXmlStreamReader stream, const char * matchtag, gsi_char ** valueOut, int * lenOut);
-gsi_bool gsXmlReadChildAsUnicodeStringNT (GSXmlStreamReader stream, const char * matchtag, gsi_char valueOut[], int maxLen);
+gsi_bool gsXmlReadChildAsUnicodeStringNT (GSXmlStreamReader stream, const char * matchtag, unsigned short valueOut[], int maxLen);
 gsi_bool gsXmlReadChildAsInt      (GSXmlStreamReader stream, const char * matchtag, int * valueOut);
 gsi_bool gsXmlReadChildAsInt64    (GSXmlStreamReader stream, const char * matchtag, gsi_i64 * valueOut);
 gsi_bool gsXmlReadChildAsFloat    (GSXmlStreamReader stream, const char * matchtag, float * valueOut);
 gsi_bool gsXmlReadChildAsDateTimeElement(GSXmlStreamReader stream, const char * matchtag, time_t * valueOut);
 gsi_bool gsXmlResetChildReadPosition(GSXmlStreamReader stream); // reset child read position to first child of current element
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// ATTRIBUTE READING 
+////////////////////
+gsi_bool gsXmlReadAttributeAsInt(GSXmlStreamReader stream, const char * matchtag, int * valueOut);
+gsi_bool gsXmlReadAttributeAsInt64(GSXmlStreamReader stream, const char * matchtag, gsi_i64 * valueOut);
+gsi_bool gsXmlReadAttributeAsFloat(GSXmlStreamReader stream, const char * matchtag, float * valueOut);
+gsi_bool gsXmlReadAttributeAsString(GSXmlStreamReader stream, const char * matchtag, const char ** valueOut, int * sizeOut);
+gsi_bool gsXmlReadAttributeAsBool(GSXmlStreamReader stream, const char * matchtag, gsi_bool * valueOut);
+gsi_bool gsXmlReadAttribute(GSXmlStreamReader stream, const char * matchtag, const char ** valueOut, int * sizeOut);
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// VALUE READING 
+////////////////////
+gsi_bool gsXmlReadValueAsInt(GSXmlStreamReader stream, const char * matchtag, int * valueOut);
+gsi_bool gsXmlReadValueAsInt64(GSXmlStreamReader stream, const char * matchtag, gsi_i64 * valueOut);
+gsi_bool gsXmlReadValueAsFloat(GSXmlStreamReader stream, const char * matchtag, float * valueOut);
+gsi_bool gsXmlReadValueAsString(GSXmlStreamReader stream, const char * matchtag, const char ** valueOut, int * lenOut);
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
 
 // NOTE:  HexStrings are BIG-endian, the valueout will also be BIG-endian.
 // NOTE:  Call with NULL valueOut to get the lenOut.  Doing this will not move read position.
