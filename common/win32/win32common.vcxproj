@@ -52,7 +52,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>GSI_MEM_MANAGED;_CRT_SECURE_NO_WARNINGS;GSI_COMMON_DEBUG;HTTP_LOG;GHTTP_EXTENDEDERROR;%(PreprocessorDefinitions);GSI_WINSOCK2</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GSI_MEM_MANAGED;_CRT_SECURE_NO_WARNINGS;GSI_COMMON_DEBUG;HTTP_LOG;GHTTP_EXTENDEDERROR;%(PreprocessorDefinitions);GSI_WINSOCK2;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -64,7 +64,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>GSI_MEM_MANAGED;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);GSI_WINSOCK2</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GSI_MEM_MANAGED;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);GSI_WINSOCK2;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level4</WarningLevel>
