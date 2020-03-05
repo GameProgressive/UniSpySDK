@@ -804,7 +804,14 @@ void displayPendingAction( GSBBrigadePendingActions *action)
 {
     wprintf(L"\tBrigade Id          : %d\n", action->mBrigadeId);
     wprintf(L"\tRole Name           : %s\n", action->mBrigadeName);
-    wprintf(L"\tRole Id             : %d \n",action->mDateAdded);
+
+#ifdef _USE_32BIT_TIME_T // Todo: does this work on non windows platforms?
+    wprintf(L"\tRole Id             : %d \n", action->mDateAdded);
+#else
+    wprintf(L"\tRole Id             : %lldd \n",action->mDateAdded);
+#endif
+
+
     printf("\tDate joined           : %s", gsiSecondsToString(&action->mDateAdded));
     wprintf(L"\tMembership Status   : ");
     switch (action->mStatus)

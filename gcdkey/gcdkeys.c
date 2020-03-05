@@ -236,9 +236,9 @@ void gcd_authenticate_user(int gameid, int localid, unsigned int userip, const c
 		/* make sure the localid isn't being reused 
 	Change this code if you want to allow multiple users with the same CD Key on the
 	same server */
-		gsclient_t* client = (gsclient_t*)node->object;
-		gassert(client->localid != localid); 
-		if (strcmp(hkey, client->hkey) == 0) 
+		gsclient_t* client2 = (gsclient_t*)node->object;
+		gassert(client2->localid != localid);
+		if (strcmp(hkey, client2->hkey) == 0) 
 		{ /* they appear to be on already!! */
 			errmsg = goastrdup(keyinuse_t);
 			break;
