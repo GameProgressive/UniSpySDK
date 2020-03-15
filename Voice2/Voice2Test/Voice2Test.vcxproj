@@ -234,15 +234,15 @@
     <ClCompile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\speex-1.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_CONSOLE;GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN;GSI_UNICODE;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_CONSOLE;GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN;GSI_UNICODE;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Voice2Test___Win32_Debug_Unicode0\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Voice2Test___Win32_Debug_Unicode0\Voice2Test.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Voice2Test___Win32_Debug_Unicode0\</ObjectFileName>
