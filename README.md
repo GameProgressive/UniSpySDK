@@ -3,9 +3,11 @@ RetroSpy is a project that aim to create a working Server and SDK that will emul
 
 See the [Wiki](https://github.com/GameProgressive/RetroSpySDK/wiki) for any information about compiling and using the SDK.
 
-The Updated SDK (or modification of the original SDK) are licensed under BSD3. (See [LICENSE](https://github.com/GameProgressive/RetroSpySDK/blob/master/LICENSE) for more information)
+### Connect with us
+If you have any issue or simply want to contribute to the project, you can connect with us on [Discord](https://discord.gg/Tv85Am4)
 
-If you fall into any problem building or compiling, or simply want to contribute to the project, feel free to join the IRC channel #retrospy@freenode.org or under the discord channel https://discord.gg/Tv85Am4.
+### License information
+The Updated SDK (or modification of the original SDK) are licensed under BSD3. (See [LICENSE](https://github.com/GameProgressive/RetroSpySDK/blob/master/LICENSE) for more information)
 
 The Original SDK was licensed under BSD3. A copy of the license:
 
