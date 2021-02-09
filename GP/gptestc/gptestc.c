@@ -28,7 +28,7 @@ int test_main(int argc, char **argv);
 #define GPTC_NICK1      _T("gptestc1")
 #define GPTC_NICK2      _T("gptestc2")
 #define GPTC_NICK3      _T("gptestc3")
-#define GPTC_EMAIL1     _T("gptestc@gptestc.com")
+#define GPTC_EMAIL1     _T("gptestc1@gptestc.com")
 #define GPTC_EMAIL2     _T("gptestc2@gptestc.com")
 #define GPTC_EMAIL3     _T("gptestc3@gptestc.com")
 #define GPTC_PASSWORD   _T("gptestc")
