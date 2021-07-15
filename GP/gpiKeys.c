@@ -181,7 +181,7 @@ GPResult gpiSaveKeysToBuffer(GPConnection *connection, char **buffer)
 		gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Memory, GSIDebugLevel_HotError, "gpiSaveKeysToBuffer: buffer Out of memory.");
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 	}
-	bytesWritten = sprintf(*buffer, keysHeader);
+	bytesWritten = sprintf(*buffer, "%s", keysHeader);
 	tempPoint = *buffer + bytesWritten;
 	for (i = 0; i < aLength; i++)
 	{
