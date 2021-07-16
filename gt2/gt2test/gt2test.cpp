@@ -1,5 +1,11 @@
-// gt2test.cpp : Defines the class behaviors for the application.
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2test.cpp
+// SDK:		GameSpy Transport 2 SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "stdafx.h"
 #include "gt2test.h"

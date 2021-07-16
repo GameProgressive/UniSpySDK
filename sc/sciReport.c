@@ -1,10 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sciReport.c
+// SDK:		GameSpy ATLAS Competition SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sciReport.h"
 #include "sciSerialize.h"
 #include "../common/md5.h"
 
-#pragma warning(disable: 4267)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,7 +31,6 @@ SCResult SC_CALL sciCreateReport(gsi_u8 theSessionGuid[SC_SESSION_GUID_SIZE],
 	GS_ASSERT(theReportOut != NULL);
 
 	// allocate the report
-	//GS_ASSERT(0); // todo: memalignment
 	theNewReport = (SCIReport*)gsimalloc(sizeof(SCIReport));
 	if (theNewReport == NULL)
 		return SCResult_OUT_OF_MEMORY;
@@ -150,7 +155,7 @@ SCResult SC_CALL sciReportSetPlayerGameResult(SCIReport * theReport, gsi_u32 the
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult SC_CALL sciReportSetPlayerAuthInfo(SCIReport * theReport, gsi_u32 thePlayerIndex, const GSLoginCertificate * theCertificate, const gsi_u8 theAuthHash[16])
+SCResult SC_CALL sciReportSetPlayerAuthInfo(SCIReport * theReport, gsi_u32 thePlayerIndex, const GSLoginCertificate * certificate, const gsi_u8 theAuthHash[16])
 {
 	SCIReportHeader * aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 	gsi_u32 authDataOffset = 0;
@@ -162,7 +167,7 @@ SCResult SC_CALL sciReportSetPlayerAuthInfo(SCIReport * theReport, gsi_u32 thePl
 	// copy auth data into the buffer
 	// &theReport->mBuffer.mData[authDataOffset]
 	GSI_UNUSED(theAuthHash);
-	GSI_UNUSED(theCertificate);
+	GSI_UNUSED(certificate);
 	return SCResult_NO_ERROR;
 }
 
@@ -514,7 +519,7 @@ SCResult SC_CALL sciReportAddIntValue(SCIReport * theReport,
 {
 	SCIReportHeader * aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 	int writtenLen = 0;
-	gsi_i16 theKeyType = SCIKeyType_INT32;
+	gsi_i16 theKeyType = (gsi_i16)SCIKeyType_INT32;
 	
 	// calculate length of data to be written
 	writtenLen += sizeof(gsi_u16) + sizeof(gsi_u16); // 2 byte key ID, 2 byte key type;
@@ -870,5 +875,3 @@ SCResult SC_CALL sciReportAddStringValue(SCIReport *      theReport,
 
 	return SCResult_NO_ERROR;
 }
-
-#pragma warning(default: 4267)

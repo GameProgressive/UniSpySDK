@@ -1,9 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Encode.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include <stdarg.h>
 #include <string.h>
 #include "gt2Encode.h"
 #include "gt2Main.h"
-
-
 
 // This handles alignment issues and endianess
 void gt2MemCopy16(char *out, char const *in)
@@ -80,7 +87,7 @@ void gt2MemCopy(char *out, char const *in, int size)
 #define GT_ENCODE_ELEM(TYPE,b,l,args) \
 { \
 	TYPE v; \
-	if (l < sizeof(TYPE)) \
+	if (l < (int)sizeof(TYPE)) \
 		return -1; \
 	v = (TYPE)va_arg(*args, int); \
 	gt2MemCopy(b, (const char *)&v, sizeof(TYPE)); \
@@ -90,7 +97,7 @@ void gt2MemCopy(char *out, char const *in, int size)
 #define GT_DECODE_ELEM(TYPE,b,l,args) \
 { \
 	TYPE* v; \
-	if (l < sizeof(TYPE)) \
+	if (l < (int)sizeof(TYPE)) \
 		return -1; \
 	v = va_arg(*args, TYPE*); \
 	gt2MemCopy((char *)v, b, sizeof(TYPE)); \
@@ -100,7 +107,7 @@ void gt2MemCopy(char *out, char const *in, int size)
 #define GT_ENCODE_ELEM_NC(TYPE,b,l,args) \
 { \
 	TYPE v; \
-	if (l < sizeof(TYPE)) \
+	if (l < (int)sizeof(TYPE)) \
 		return -1; \
 	v = (TYPE)va_arg(*args, int); \
 	memcpy(b, &v, sizeof(TYPE)); \
@@ -110,7 +117,7 @@ void gt2MemCopy(char *out, char const *in, int size)
 #define GT_DECODE_ELEM_NC(TYPE,b,l,args) \
 { \
 	TYPE* v; \
-	if (l < sizeof(TYPE)) \
+	if (l < (int)sizeof(TYPE)) \
 		return -1; \
 	v = va_arg(*args, TYPE*); \
 	memcpy(v, b, sizeof(TYPE)); \
@@ -301,7 +308,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 		{
 			int len;
 			GT_CSTR_TYPE s = va_arg(*args, GT_CSTR_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			len = gtiCheckStringLen(inBuffer, inLength);
 			if(len == -1)
 				return -1;
@@ -317,7 +324,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 		{	
 			int len;
 			GT_DBSTR_TYPE s = va_arg(*args, GT_DBSTR_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			len = gtiCheckDoubleStringLen(inBuffer, inLength);
 			if (len == -1)
 				return -1;
@@ -333,7 +340,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 		{
 			int len;
 			GT_CSTR_ARRAY_TYPE s = va_arg(*args, GT_CSTR_ARRAY_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			len = gtiCheckStringArrayLen(inBuffer, inLength);
 			if(len == -1)
 				return -1;
@@ -350,7 +357,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 			int *len, holdlen;
 			GT_RAW_TYPE data = va_arg(*args, GT_RAW_TYPE);
 			len = va_arg(*args, int *);
-			if (inLength < sizeof(*len))
+			if (inLength < (int)sizeof(*len))
 				return -1;
 			holdlen = *len;
 			memcpy(len, inBuffer, sizeof(*len));
@@ -366,7 +373,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 			int *len;
 			*va_arg(*args, GT_RAW_PTR_TYPE) = (GT_RAW_TYPE)(inBuffer + sizeof(*len));
 			len = va_arg(*args, int *);
-			if (inLength < sizeof(*len))
+			if (inLength < (int)sizeof(*len))
 				return -1;
 			memcpy(len, inBuffer, sizeof(*len));
 			return *len + (int)sizeof(*len);
@@ -406,7 +413,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
    			double v = va_arg(*args,double);
 			memcpy(&temp,&v,sizeof(double));
 			f = (float)temp;
-			if (outLength < sizeof(float))
+			if (outLength < (int)sizeof(float))
 				return -1;
 			memcpy(outBuffer, &f, sizeof(float));
 			return sizeof(float);			
@@ -415,7 +422,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 	case GT_DOUBLE:
 		{
 			double v;
-			if(outLength < sizeof(double))
+			if(outLength < (int)sizeof(double))
 				return -1;
 			v = va_arg(*args, double);
 			memcpy(outBuffer, &v, sizeof(double));
@@ -430,7 +437,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 		{
 			int len;
 			GT_CSTR_TYPE s = va_arg(*args, GT_CSTR_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			len = (int)strlen(s) + 1;
 			if (outLength < len )
 				return -1;
@@ -443,7 +450,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 		{	
 			int len;
 			GT_DBSTR_TYPE s = va_arg(*args, GT_DBSTR_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			len = dbstrlen(s) + 1;
 			if (outLength < len * 2)
 				return -1;
@@ -457,7 +464,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 			int len = 0;
 			int strLen;
 			GT_CSTR_ARRAY_TYPE s = va_arg(*args, GT_CSTR_ARRAY_TYPE);
-			assert(s != NULL);
+			GS_ASSERT(s != NULL);
 			do
 			{
 				strLen = (int)strlen(s + len) + 1;
@@ -592,7 +599,7 @@ static int gtDecodeInternalV(int usetype, const char *fmtString, char *inBuffer,
 	//If it's not 0, then the encoding and decoding strings probably did not match
 	//which would generally indicate a bug
 	//PANTS - commented out because we could be decoding the rest with a gtDecodeNoType
-//	assert(inLength == 0);
+//	GS_ASSERT(inLength == 0);
 	return totSize - inLength;
 }
 

@@ -33,7 +33,6 @@
 //     implementation only works with messages with a length that is
 //     a multiple of the size of an 8-bit character.
 
-//#include "sha1.h"
 #include "gsSHA1.h"
 
 /*
@@ -43,14 +42,14 @@
                 (((word) << (bits)) | ((word) >> (32-(bits))))
 
 /* Local Function Prototyptes */
-void SHA1PadMessage(SHA1Context *);
-void SHA1ProcessMessageBlock(SHA1Context *);
+void SHA1PadMessage(GSSHA1Context *);
+void SHA1ProcessMessageBlock(GSSHA1Context *);
 
 /*
- *  SHA1Reset
+ *  GSSHA1Reset
  *
  *  Description:
- *      This function will initialize the SHA1Context in preparation
+ *      This function will initialize the GSSHA1Context in preparation
  *      for computing a new SHA1 message digest.
  *
  *  Parameters:
@@ -59,9 +58,8 @@ void SHA1ProcessMessageBlock(SHA1Context *);
  *
  *  Returns:
  *      sha Error Code.
- *
  */
-int SHA1Reset(SHA1Context *context)
+int GSSHA1Reset(GSSHA1Context *context)
 {
     if (!context)
     {
@@ -85,7 +83,7 @@ int SHA1Reset(SHA1Context *context)
 }
 
 /*
- *  SHA1Result
+ *  GSSHA1Result
  *
  *  Description:
  *      This function will return the 160-bit message digest into the
@@ -101,10 +99,9 @@ int SHA1Reset(SHA1Context *context)
  *
  *  Returns:
  *      sha Error Code.
- *
  */
-int SHA1Result( SHA1Context *context,
-                uint8_t Message_Digest[SHA1HashSize])
+int GSSHA1Result( GSSHA1Context *context,
+                uint8_t Message_Digest[GSSHA1HashSize])
 {
     int i;
 
@@ -132,7 +129,7 @@ int SHA1Result( SHA1Context *context,
 
     }
 
-    for(i = 0; i < SHA1HashSize; ++i)
+    for(i = 0; i < GSSHA1HashSize; ++i)
     {
         Message_Digest[i] = (uint8_t)(context->Intermediate_Hash[i>>2]
                             >> 8 * ( 3 - ( i & 0x03 ) ));
@@ -142,7 +139,7 @@ int SHA1Result( SHA1Context *context,
 }
 
 /*
- *  SHA1Input
+ *  GSSHA1Input
  *
  *  Description:
  *      This function accepts an array of octets as the next portion
@@ -159,9 +156,8 @@ int SHA1Result( SHA1Context *context,
  *
  *  Returns:
  *      sha Error Code.
- *
  */
-int SHA1Input(    SHA1Context    *context,
+int GSSHA1Input(    GSSHA1Context    *context,
                   const uint8_t  *message_array,
                   unsigned       length)
 {
@@ -231,10 +227,8 @@ int SHA1Input(    SHA1Context    *context,
  *      Many of the variable names in this code, especially the
  *      single character names, were used because those were the
  *      names used in the publication.
- *
- *
  */
-void SHA1ProcessMessageBlock(SHA1Context *context)
+void SHA1ProcessMessageBlock(GSSHA1Context *context)
 {
     const uint32_t K[] =    {       /* Constants defined in SHA-1   */
                             0x5A827999,
@@ -342,10 +336,8 @@ void SHA1ProcessMessageBlock(SHA1Context *context)
  *          The appropriate SHA*ProcessMessageBlock function
  *  Returns:
  *      Nothing.
- *
  */
-
-void SHA1PadMessage(SHA1Context *context)
+void SHA1PadMessage(GSSHA1Context *context)
 {
     /*
      *  Check to see if the current message block is too small to hold

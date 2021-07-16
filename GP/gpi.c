@@ -436,8 +436,6 @@ gpiProcessConnectionManager(
 		{
 			// We've been disconnected.
 			///////////////////////////
-			// Let gpiDisconnect change the state to GPI_DISCONNECTED
-			//iconnection->connectState = GPI_DISCONNECTED;
 			gpiSetError(connection, GP_CONNECTION_CLOSED, "The server has closed the connection.");
 			gpiCallErrorCallback(connection, GP_NETWORK_ERROR, GP_FATAL);
 			return GP_NO_ERROR;

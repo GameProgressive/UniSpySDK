@@ -1,4 +1,11 @@
-
+///////////////////////////////////////////////////////////////////////////////
+// File:	simpletest.c
+// SDK:		GameSpy NAT Negotiation SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "../natneg.h"
 #include "../../common/gsAvailable.h"
@@ -40,7 +47,7 @@ static void tryread(SOCKET s)
 	char buf[256];
 	int len;
 	struct sockaddr_in saddr;
-	int saddrlen = sizeof(saddr);
+	socklen_t saddrlen = sizeof(saddr);
 	while (CanReceiveOnSocket(s))
 	{
 		len = recvfrom(s, buf, sizeof(buf) - 1, 0, (struct sockaddr *)&saddr, &saddrlen);
@@ -91,7 +98,7 @@ static void pc(NegotiateState state, void *userdata)
 static void cc(NegotiateResult result, SOCKET gamesocket, struct sockaddr_in *remoteaddr, void *userdata)
 {
 	struct sockaddr_in saddr;
-	int namelen = sizeof(saddr);
+	socklen_t namelen = sizeof(saddr);
 	if (gamesocket != INVALID_SOCKET)
 	{
 		getsockname(gamesocket, (struct sockaddr *)&saddr, &namelen);
@@ -202,23 +209,26 @@ static void nr(gsi_bool success, NAT nat)
 }
 
 #ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
-	int main(int argc, char **argp);
+	int test_main(int argc, char **argp);
 #endif
-int main(int argc, char **argp)
+int test_main(int argc, char **argp)
 {
 	unsigned long lastsendtime = 0;
 	GSIACResult result;
 	gsi_time startTime;
 	NegotiateError error;
 	
-#ifdef GSI_COMMON_DEBUG
-	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
-	// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
-	//gsSetDebugFile(stdout); // output to console
-	gsSetDebugCallback(DebugCallback);
+	// for debug output on these platforms
+#if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO) || defined(_LINUX) || defined(_MACOSX)
+	#ifdef GSI_COMMON_DEBUG
+		// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
+		// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
+		//gsSetDebugFile(stdout); // output to console
+		gsSetDebugCallback(DebugCallback);
 
-	// Set debug levels
-	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Verbose);
+		// Set debug levels
+		gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Verbose);
+	#endif
 #endif
 	
 #ifdef GSI_MEM_MANAGED	// use gsi mem managed
@@ -232,7 +242,7 @@ int main(int argc, char **argp)
 
 	aString = (char *)gsimalloc(ESTRING_SIZE);
 	// check that the game's backend is available
-	GSIStartAvailableCheck("gmtest");
+	GSIStartAvailableCheck(_T("gmtest"));
 	while((result = GSIAvailableCheckThink()) == GSIACWaiting)
 		msleep(5);
 	if(result != GSIACAvailable)

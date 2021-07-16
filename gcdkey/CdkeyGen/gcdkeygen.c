@@ -77,8 +77,7 @@ void DoGenerateKeys()
 
 	Util_RandSeed(time(NULL) ^ GetTickCount());
 	printf("How many keys would you like? ");
-	//gets(resp);
-	fgets(resp, 128, stdin);
+	gets(resp);
 
 	keyct = atoi(resp);
 
@@ -147,11 +146,9 @@ void DoValidateKeys()
 {
 	char resp[128] = "";
 
-	do
-	{	
+	for (;;) {
 		printf("Enter a CD Key to validate, or [ENTER] to quit: ");
-		fgets(resp, 128, stdin);
-		//gets(resp);
+		gets(resp);
 		if (!resp[0])
 			return;
 		if (ValidateKey(resp))
@@ -159,9 +156,7 @@ void DoValidateKeys()
 		else
 			printf("Invalid Key\n");
 
-	} while (1);
-
-
+	}
 }
 
 int main(void)
@@ -169,8 +164,7 @@ int main(void)
 	char resp[10];
 	//display a menu
 	printf("What would you like to do?\n\t1. Generate CD Keys\n\t2. Validate a CD Key\n:");
-	//gets(resp);
-	fgets(resp, 10, stdin);
+	gets(resp);
 	if (resp[0] == '1')
 		DoGenerateKeys();
 	else

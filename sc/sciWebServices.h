@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sciWebServices.h
+// SDK:		GameSpy ATLAS Competition SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef __SCWEBSERVICES_H__
 #define __SCWEBSERVICES_H__
 

@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerKeys.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -100,7 +99,7 @@ static int WatchKeysHash
 	const char * str;
 	unsigned int hash;
 
-	assert(key->key && key->key[0]);
+	GS_ASSERT(key->key && key->key[0]);
 
 	// Get the hash.
 	////////////////
@@ -122,7 +121,7 @@ static int GS_STATIC_CALLBACK WatchKeysCompare
 	piWatchKey * key1 = (piWatchKey *)elem1;
 	piWatchKey * key2 = (piWatchKey *)elem2;
 
-	assert(key1->key && key1->key[0] && key2->key && key2->key[0]);
+	GS_ASSERT(key1->key && key1->key[0] && key2->key && key2->key[0]);
 
 	return strcasecmp(key1->key, key2->key);
 }
@@ -148,8 +147,8 @@ static int WatchCacheHash
 	const char * str;
 	unsigned int hash;
 
-	assert(key);
-	assert(key->nick[0]);
+	GS_ASSERT(key);
+	GS_ASSERT(key->nick[0]);
 
 	// Get the hash.
 	////////////////
@@ -526,8 +525,10 @@ static void piGetRoomKeysCallbackA
 		if(!piRoomToType(peer, channel, &roomType))
 			return;
 
-		for(i = 0 ; i < num ; i++)
+		for(i = 0 ; i < num ; i++) 
+		{
 			piRoomKeyChanged(peer, roomType, szEndName, keys[i], NULL);
+		}
 		return;
 	}
 
@@ -609,7 +610,7 @@ void piSetGlobalWatchKeys
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(num >= 0);
+	GS_ASSERT(num >= 0);
 
 	// If no keys.
 	//////////////
@@ -628,7 +629,7 @@ void piSetGlobalWatchKeys
 		return;
 	}
 
-	assert(keys);
+	GS_ASSERT(keys);
 
 	if(!addKeys)
 	{
@@ -666,7 +667,7 @@ void piSetRoomWatchKeys
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(num >= 0);
+	GS_ASSERT(num >= 0);
 
 	// If no keys.
 	//////////////
@@ -685,7 +686,7 @@ void piSetRoomWatchKeys
 		return;
 	}
 
-	assert(keys);
+	GS_ASSERT(keys);
 
 	if(!addKeys)
 	{
@@ -723,7 +724,7 @@ static PEERBool piKeyChanged
 	piWatchKey watchKeyTemp;
 	piCacheKey cacheKey;
 
-	assert(key && key[0]);
+	GS_ASSERT(key && key[0]);
 
 	// We don't track anything for rooms.
 	/////////////////////////////////////
@@ -748,7 +749,7 @@ static PEERBool piKeyChanged
 			// a GETCKEYS list. Call straight into the PlayerInfo
 			// callback with zeroed arguments (09mar01/bgw).
 			//
-			assert(inRoom);
+			GS_ASSERT(inRoom);
 			piAddPlayerInfoCallback(peer, roomType, NULL, 0, 0);
 			return PEERFalse;
 		}
@@ -909,7 +910,7 @@ static void piKeyCacheRefresh
 
 	PEER_CONNECTION;
 
-	assert(IN_ROOM || ENTERING_ROOM);
+	GS_ASSERT(IN_ROOM || ENTERING_ROOM);
 	if(!IN_ROOM && !ENTERING_ROOM)
 		return;
 
@@ -949,7 +950,7 @@ static void piKeyCacheRefresh
 		if(!data.keys)
 			return;
 		TableMap(connection->globalWatchKeys[roomType], piSetupKeysMap, &data);
-		assert(data.next == num);
+		GS_ASSERT(data.next == num);
 		chatGetGlobalKeysA(connection->chat, nick?nick:ROOM, num, (const char **)data.keys, piGetGlobalKeysCallback, peer, CHATFalse);
 		gsifree(data.keys);
 	}
@@ -972,7 +973,7 @@ static void piKeyCacheRefresh
 				data.keys[data.next++] = "username";
 			if(getFlags)
 				data.keys[data.next++] = "b_flags";
-			assert(data.next == num);
+			GS_ASSERT(data.next == num);
 			chatGetChannelKeysA(connection->chat, ROOM, nick?nick:"*", num, (const char **)data.keys, piGetRoomKeysCallback, peer, CHATFalse);
 			gsifree(data.keys);
 		}

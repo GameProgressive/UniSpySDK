@@ -327,7 +327,7 @@ void ciSendLogin(CHAT chat)
 
 	// For uniquenick or profile logins, we need to MD5 the password.
 	/////////////////////////////////////////////////////////////////
-	MD5Digest((unsigned char *)connection->password, strlen(connection->password), passwordHash);
+	GSMD5Digest((unsigned char *)connection->password, strlen(connection->password), passwordHash);
 
 	// Send the login message based on type.
 	////////////////////////////////////////

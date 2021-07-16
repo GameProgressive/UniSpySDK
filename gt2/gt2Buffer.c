@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Buffer.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Buffer.h"
 #include <stdlib.h>
@@ -28,7 +27,7 @@ int gti2GetBufferFreeSpace(const GTI2Buffer * buffer)
 
 void gti2BufferWriteByte(GTI2Buffer * buffer, GT2Byte b)
 {
-	assert(buffer->len < buffer->size);
+	GS_ASSERT(buffer->len < buffer->size);
 #if 0
 	if(buffer->len >= buffer->size)
 		return;
@@ -39,7 +38,7 @@ void gti2BufferWriteByte(GTI2Buffer * buffer, GT2Byte b)
 
 void gti2BufferWriteUShort(GTI2Buffer * buffer, unsigned short s)
 {
-	assert((buffer->len + 2) <= buffer->size);
+	GS_ASSERT((buffer->len + 2) <= buffer->size);
 #if 0
 	if((buffer->len + 2) > buffer->size)
 		return;
@@ -57,7 +56,7 @@ void gti2BufferWriteData(GTI2Buffer * buffer, const GT2Byte * data, int len)
 	if(len == -1)
 		len = (int)strlen((const char *)data);
 
-	assert((buffer->len + len) <= buffer->size);
+	GS_ASSERT((buffer->len + len) <= buffer->size);
 #if 0
 	if(buffer->len >= buffer->size)
 		return;
@@ -72,8 +71,8 @@ void gti2BufferShorten(GTI2Buffer * buffer, int start, int shortenBy)
 	if(start == -1)
 		start = (buffer->len - shortenBy);
 
-	assert(start <= buffer->len);
-	assert(shortenBy <= (buffer->len - start));
+	GS_ASSERT(start <= buffer->len);
+	GS_ASSERT(shortenBy <= (buffer->len - start));
 
 	memmove(buffer->buffer + start, buffer->buffer + start + shortenBy, (unsigned int)(buffer->len - start - shortenBy));
 	buffer->len -= shortenBy;

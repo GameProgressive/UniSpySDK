@@ -1,5 +1,11 @@
-// gt2test.h : main header file for the GT2TEST application
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2test.h
+// SDK:		GameSpy Transport 2 SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #if !defined(AFX_GT2TEST_H__BDC522B0_AA93_4D1B_8271_A3CFD716E950__INCLUDED_)
 #define AFX_GT2TEST_H__BDC522B0_AA93_4D1B_8271_A3CFD716E950__INCLUDED_

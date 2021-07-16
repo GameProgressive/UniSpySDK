@@ -17,11 +17,6 @@
 
 	{
 		GSI_UNUSED(theLevel);
-		{
-			static char    string[256];
-			vsprintf(string, theTokenStr, theParamList); 			
-			printf(string);
-		}
 		printf("[%s][%s] ", 
 				gGSIDebugCatStrings[theCat], 
 				gGSIDebugTypeStrings[theType]);

@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerOperations.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -37,7 +36,7 @@ devsupport@gamespy.com
 #define PEER_CONNECTION_OP        piOperation * operation = (piOperation *)param;\
                                   piConnection * connection = NULL;\
                                   PEER peer = NULL;\
-                                  assert(operation && operation->peer);\
+                                  GS_ASSERT(operation && operation->peer);\
                                   if(operation && operation->peer)\
                                       peer = operation->peer;\
                                   connection = (piConnection *)peer;\
@@ -60,29 +59,29 @@ typedef struct piOperationContainer
 ** FUNCTIONS **
 **************/
 #ifndef GSI_UNICODE
-#define piGetGlobalKeysCallback		piGetGlobalKeysCallbackA
-#define piGetChannelKeysCallback	piGetChannelKeysCallbackA
-#define piGetPlayerInfoCallback		piGetPlayerInfoCallbackA
-#define piConnectNickErrorCallback	piConnectNickErrorCallbackA
-#define piConnectFillInUserCallback	piConnectFillInUserCallbackA
-#define piCreateStagingRoomEnumUsersCallback piCreateStagingRoomEnumUsersCallbackA
+#define piGetGlobalKeysCallback					piGetGlobalKeysCallbackA
+#define piGetChannelKeysCallback				piGetChannelKeysCallbackA
+#define piGetPlayerInfoCallback					piGetPlayerInfoCallbackA
+#define piConnectNickErrorCallback				piConnectNickErrorCallbackA
+#define piConnectFillInUserCallback				piConnectFillInUserCallbackA
+#define piCreateStagingRoomEnumUsersCallback	piCreateStagingRoomEnumUsersCallbackA
 #define piCreateStagingRoomEnterChannelCallback piCreateStagingRoomEnterChannelCallbackA
-#define piJoinRoomEnumUsersCallback piJoinRoomEnumUsersCallbackA
-#define piJoinRoomEnterChannelCallback piJoinRoomEnterChannelCallbackA
-#define piChangeNickCallback		piChangeNickCallbackA
-#define piAuthenticateCDKeyCallback piAuthenticateCDKeyCallbackA
+#define piJoinRoomEnumUsersCallback				piJoinRoomEnumUsersCallbackA
+#define piJoinRoomEnterChannelCallback			piJoinRoomEnterChannelCallbackA
+#define piChangeNickCallback					piChangeNickCallbackA
+#define piAuthenticateCDKeyCallback				piAuthenticateCDKeyCallbackA
 #else
-#define piGetGlobalKeysCallback		piGetGlobalKeysCallbackW
-#define piGetChannelKeysCallback	piGetChannelKeysCallbackW
-#define piGetPlayerInfoCallback		piGetPlayerInfoCallbackW
-#define piConnectNickErrorCallback	piConnectNickErrorCallbackW
-#define piConnectFillInUserCallback	piConnectFillInUserCallbackW
-#define piCreateStagingRoomEnumUsersCallback piCreateStagingRoomEnumUsersCallbackW
+#define piGetGlobalKeysCallback					piGetGlobalKeysCallbackW
+#define piGetChannelKeysCallback				piGetChannelKeysCallbackW
+#define piGetPlayerInfoCallback					piGetPlayerInfoCallbackW
+#define piConnectNickErrorCallback				piConnectNickErrorCallbackW
+#define piConnectFillInUserCallback				piConnectFillInUserCallbackW
+#define piCreateStagingRoomEnumUsersCallback	piCreateStagingRoomEnumUsersCallbackW
 #define piCreateStagingRoomEnterChannelCallback piCreateStagingRoomEnterChannelCallbackW
-#define piJoinRoomEnumUsersCallback piJoinRoomEnumUsersCallbackW
-#define piJoinRoomEnterChannelCallback piJoinRoomEnterChannelCallbackW
-#define piChangeNickCallback		piChangeNickCallbackW
-#define piAuthenticateCDKeyCallback piAuthenticateCDKeyCallbackW
+#define piJoinRoomEnumUsersCallback				piJoinRoomEnumUsersCallbackW
+#define piJoinRoomEnterChannelCallback			piJoinRoomEnterChannelCallbackW
+#define piChangeNickCallback					piChangeNickCallbackW
+#define piAuthenticateCDKeyCallback				piAuthenticateCDKeyCallbackW
 #endif
 
 static void piOperationsListFree(void *elem1)
@@ -90,8 +89,8 @@ static void piOperationsListFree(void *elem1)
 	piOperationContainer * container = (piOperationContainer *)elem1;
 	piOperation * operation;
 
-	assert(container);
-	assert(container->operation);
+	GS_ASSERT(container);
+	GS_ASSERT(container->operation);
 
 	operation = container->operation;
 
@@ -124,7 +123,7 @@ PEERBool piOperationsInit(PEER peer)
 {
 	PEER_CONNECTION;
 
-	assert(!connection->operationList);
+	GS_ASSERT(!connection->operationList);
 
 	// Init data.
 	/////////////
@@ -315,8 +314,8 @@ static piOperation * piAddOperation
 
 	PEER_CONNECTION;
 
-	//assert(type >= 0);
-	assert(type < PI_NUM_OPERATION_TYPES);
+	//GS_ASSERT(type >= 0);
+	GS_ASSERT(type < PI_NUM_OPERATION_TYPES);
 
 	// Make sure there is a list.
 	/////////////////////////////
@@ -398,7 +397,7 @@ static void piConnectConnectCallback
 		nick = chatGetNickA(chat);
 		if(strcasecmp(connection->nick, nick) != 0)
 		{
-			strcpy(connection->nick, nick);
+			gsiSafeStrcpyA(connection->nick, nick, sizeof(connection->nick));
 
 #ifdef GSI_UNICODE
 			UTF8ToUCS2String(connection->nick, connection->nick_W);
@@ -538,30 +537,30 @@ PEERBool piNewConnectOperation
 
 	PEER_CONNECTION;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 #ifdef _DEBUG
 	if(connectType == PI_CONNECT)
 	{
-		assert(nick && nick[0]);
+		GS_ASSERT(nick && nick[0]);
 	}
 	else if(connectType == PI_CONNECT_UNIQUENICK_LOGIN)
 	{
-		assert(namespaceID > 0);
-		assert(uniquenick && uniquenick[0]);
-		assert(password && password[0]);
+		GS_ASSERT(namespaceID > 0);
+		GS_ASSERT(uniquenick && uniquenick[0]);
+		GS_ASSERT(password && password[0]);
 	}
 	else if(connectType == PI_CONNECT_PROFILENICK_LOGIN)
 	{
-		assert(namespaceID >= 0);
-		assert(email && email[0]);
-		assert(profilenick && profilenick[0]);
-		assert(password && password[0]);
+		GS_ASSERT(namespaceID >= 0);
+		GS_ASSERT(email && email[0]);
+		GS_ASSERT(profilenick && profilenick[0]);
+		GS_ASSERT(password && password[0]);
 	}
 	else if(connectType == PI_CONNECT_PREAUTH)
 	{
-		assert(authtoken && authtoken[0]);
-		assert(partnerchallenge && partnerchallenge[0]);
+		GS_ASSERT(authtoken && authtoken[0]);
+		GS_ASSERT(partnerchallenge && partnerchallenge[0]);
 	}
 #endif
 
@@ -581,7 +580,7 @@ PEERBool piNewConnectOperation
 	// Encode the unique ID.
 	////////////////////////
 	uniqueID = GOAGetUniqueID();
-	MD5Digest((unsigned char *)uniqueID, strlen(uniqueID), encodedUniqueID);
+	GSMD5Digest((unsigned char *)uniqueID, strlen(uniqueID), encodedUniqueID);
 
 	// Connect to chat.
 	///////////////////
@@ -825,8 +824,8 @@ static void piCreateStagingRoomEnterChannelCallbackA
 {	
 	PEER_CONNECTION_OP;
 
-	assert(channel);
-	assert(channel[0]);
+	GS_ASSERT(channel);
+	GS_ASSERT(channel[0]);
 
 	// Check if this was cancelled.
 	///////////////////////////////
@@ -916,11 +915,11 @@ PEERBool piNewCreateStagingRoomOperation
 
 	PEER_CONNECTION;
 
-	assert(name);
+	GS_ASSERT(name);
 	if(!name)
 		name = "";
 
-	assert(callback);
+	GS_ASSERT(callback);
 	if(!callback)
 		return PEERFalse;
 
@@ -953,7 +952,7 @@ PEERBool piNewCreateStagingRoomOperation
 	// Get the room name.
 	/////////////////////
 	piMangleStagingRoom(room, connection->title, connection->publicIP, connection->privateIP, port);
-	assert(room[0]);
+	GS_ASSERT(room[0]);
 
 	// Add the operation.
 	/////////////////////
@@ -1080,8 +1079,8 @@ static void piJoinRoomEnterChannelCallbackA
 {	
 	PEER_CONNECTION_OP;
 
-	assert(channel);
-	assert(channel[0]);
+	GS_ASSERT(channel);
+	GS_ASSERT(channel[0]);
 
 	// Check if this was cancelled.
 	///////////////////////////////
@@ -1155,12 +1154,12 @@ PEERBool piNewJoinRoomOperation
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check the name.
 	//////////////////
-	assert(channel);
-	assert(channel[0]);
+	GS_ASSERT(channel);
+	GS_ASSERT(channel[0]);
 	if(!channel || !channel[0])
 		return PEERFalse;
 
@@ -1171,7 +1170,7 @@ PEERBool piNewJoinRoomOperation
 
 	// Check that the name isn't too long.
 	//////////////////////////////////////
-	assert(strlen(channel) < PI_ROOM_MAX_LEN);
+	GS_ASSERT(strlen(channel) < PI_ROOM_MAX_LEN);
 	if(strlen(channel) >= PI_ROOM_MAX_LEN)
 		return PEERFalse;
 
@@ -1209,7 +1208,7 @@ PEERBool piNewListGroupRoomsOperation
 
 	PEER_CONNECTION;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Add the operation.
 	/////////////////////
@@ -1239,15 +1238,15 @@ static void piGetPlayerInfoCallbackA
 
 	PEER_CONNECTION_OP;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Check for success.
 	/////////////////////
 	if(success)
 	{
-		assert(user);
-		assert(user[0]);
+		GS_ASSERT(user);
+		GS_ASSERT(user[0]);
 
 		// Get the info.
 		////////////////
@@ -1320,8 +1319,8 @@ PEERBool piNewGetPlayerInfoOperation
 
 	PEER_CONNECTION;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Add the operation.
 	/////////////////////
@@ -1413,7 +1412,7 @@ static void piChangeNickCallbackA
 	{
 		// Update the nick locally.
 		///////////////////////////
-		strcpy(connection->nick, newNick);
+		gsiSafeStrcpyA(connection->nick, newNick, sizeof(connection->nick));
 
 #ifdef GSI_UNICODE
 		UTF8ToUCS2String(connection->nick, connection->nick_W);
@@ -1462,8 +1461,8 @@ PEERBool piNewChangeNickOperation
 
 	PEER_CONNECTION;
 
-	assert(newNick);
-	assert(newNick[0]);
+	GS_ASSERT(newNick);
+	GS_ASSERT(newNick[0]);
 
 	// Add the operation.
 	/////////////////////
@@ -1559,9 +1558,9 @@ PEERBool piNewGetGlobalKeysOperation
 
 	PEER_CONNECTION;
 
-	assert(target);
-	assert(num > 0);
-	assert(keys);
+	GS_ASSERT(target);
+	GS_ASSERT(num > 0);
+	GS_ASSERT(keys);
 
 	if(!target || !target[0])
 		return PEERFalse;
@@ -1607,8 +1606,10 @@ static void piGetChannelKeysCallbackA
 	/////////////////////////
 	if(success && user)
 	{
-		for(i = 0 ; i < num ; i++)
+		for(i = 0 ; i < num ; i++) 
+		{
 			piRoomKeyChanged(peer, operation->roomType, user, keys[i], values[i]);
+		}
 	}
 
 	// Add the callback.
@@ -1674,8 +1675,8 @@ PEERBool piNewGetRoomKeysOperation
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(num >= 0);
-	assert(!num || keys);
+	GS_ASSERT(num >= 0);
+	GS_ASSERT(!num || keys);
 
 	if(num < 0)
 		return PEERFalse;
@@ -1758,8 +1759,8 @@ PEERBool piNewAuthenticateCDKeyOperation
 
 	PEER_CONNECTION;
 
-	assert(cdkey);
-	assert(cdkey[0]);
+	GS_ASSERT(cdkey);
+	GS_ASSERT(cdkey[0]);
 
 	// Add the operation.
 	/////////////////////

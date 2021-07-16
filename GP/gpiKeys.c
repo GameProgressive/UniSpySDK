@@ -37,7 +37,7 @@ void gpiStatusInfoKeysDestroy(GPConnection * connection)
 	}
 }
 
-int gpiStatusInfoKeyCompFunc(const void *elem1, const void *elem2)
+int GS_STATIC_CALLBACK gpiStatusInfoKeyCompFunc(const void *elem1, const void *elem2)
 {
 	GPIKey *key1 = (GPIKey *)elem1, 
 		   *key2 = (GPIKey *)elem2;

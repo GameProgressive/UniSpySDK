@@ -82,6 +82,7 @@ CGptestDlg::CGptestDlg(CWnd* pParent /*=NULL*/)
 	, m_HostIp(_T(""))
 	, m_HostPrivateIp(_T(""))
 	, m_cdkey(_T(""))
+	, m_gameId(0)
 {
 	//{{AFX_DATA_INIT(CGptestDlg)
 	m_partnerid = 0;
@@ -120,6 +121,7 @@ CGptestDlg::CGptestDlg(CWnd* pParent /*=NULL*/)
 	m_ipmhomepage = FALSE;
 	m_ipmsex = FALSE;
 	m_ipmzipcode = FALSE;
+	m_ipmbuddylist = FALSE;
 	m_newnick = _T("");
 	m_replace = FALSE;
 	m_izipcode = _T("");
@@ -210,6 +212,7 @@ void CGptestDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_IPMHOMEPAGE, m_ipmhomepage);
 	DDX_Check(pDX, IDC_IPMSEX, m_ipmsex);
 	DDX_Check(pDX, IDC_IPMZIPCODE, m_ipmzipcode);
+	DDX_Check(pDX, IDC_IPMBUDDYLIST, m_ipmbuddylist);
 	DDX_Text(pDX, IDC_NEWNICK, m_newnick);
 	DDX_Check(pDX, IDC_REPLACE, m_replace);
 	DDX_Text(pDX, IDC_IZIPCODE, m_izipcode);
@@ -249,10 +252,12 @@ void CGptestDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_HOST_IP, m_HostIp);
 	DDX_Text(pDX, IDC_HOST_PRIVATE_IP, m_HostPrivateIp);
 	DDX_Text(pDX, IDC_CDKEY, m_cdkey);
-    DDX_Control(pDX, IDC_BLOCKLIST, m_blocklist);
-    DDX_Control(pDX, IDC_GET_BLOCKEDLIST, m_getblockedlist);
-    DDX_Control(pDX, IDC_ADD_BLOCK, m_addblock);
-    DDX_Control(pDX, IDC_REMOVE_BLOCK, m_removeblock);
+	DDX_Control(pDX, IDC_BLOCKLIST, m_blocklist);
+	DDX_Control(pDX, IDC_GET_BLOCKEDLIST, m_getblockedlist);
+	DDX_Control(pDX, IDC_ADD_BLOCK, m_addblock);
+	DDX_Control(pDX, IDC_REMOVE_BLOCK, m_removeblock);
+	DDX_Text(pDX, IDC_GAMEID, m_gameId);
+	DDV_MinMaxInt(pDX, m_gameId, 0, 65536);
 }
 
 BEGIN_MESSAGE_MAP(CGptestDlg, CDialog)
@@ -305,6 +310,7 @@ BEGIN_MESSAGE_MAP(CGptestDlg, CDialog)
     ON_LBN_SELCHANGE(IDC_BLOCKLIST, OnSelchangeBlocklist)
     ON_BN_CLICKED(IDC_ADD_BLOCK, OnAddBlock)
     ON_BN_CLICKED(IDC_REMOVE_BLOCK, OnRemoveBlock)
+	ON_BN_CLICKED(IDC_BUDDYLIST, &CGptestDlg::OnBuddyList)
 END_MESSAGE_MAP()
 
 // The system calls this to obtain the cursor to display while the user drags
@@ -510,6 +516,7 @@ void GetInfoResponse(GPConnection * connection, void * arg_, void * param)
 		dlg->m_ipmbirthday = (arg->publicmask & GP_MASK_BIRTHDAY)?TRUE:FALSE;
 		dlg->m_ipmsex = (arg->publicmask & GP_MASK_SEX)?TRUE:FALSE;
 		dlg->m_ipmemail = (arg->publicmask & GP_MASK_EMAIL)?TRUE:FALSE;
+		dlg->m_ipmbuddylist = (arg->publicmask & GP_MASK_BUDDYLIST) ?TRUE:FALSE;
 		if(index != -1)
 		{
 			dlg->m_iaddress = inet_ntoa(addr);
@@ -868,6 +875,43 @@ void SuggestUniqueNickResponse(GPConnection * connection, void * arg_, void * pa
 	else
 	{
 		dlg->MessageBox("GetUserNicksResponse failed");
+	}
+	GSI_UNUSED(connection);
+	GSI_UNUSED(param);
+}
+
+void GetProfileBuddyListTestResponse(GPConnection * connection, void * arg_, void * param)
+{
+	GPGetProfileBuddyListArg * arg = (GPGetProfileBuddyListArg *)arg_;
+
+	if(arg->result == GP_NO_ERROR)
+	{
+		int i;
+		CString str;
+
+		if (arg->hidden == GP_HIDDEN)
+		{
+			dlg->MessageBox("Buddy list is hidden.");
+			return;
+		}
+
+		if (arg->numProfiles == 0)
+		{
+			dlg->MessageBox("No buddies for this profile.");
+			return;
+		}
+
+		for(i = 0 ; i < arg->numProfiles ; i++)
+		{
+			CString profileStr;
+			profileStr.Format("%d", arg->profiles[i]);
+			dlg->m_results.InsertString(i, profileStr);
+			dlg->m_results.SetItemData(i, (DWORD)arg->profiles[i]);
+		}
+	}
+	else
+	{
+		dlg->MessageBox("GetProfileBuddyListTestResponse failed");
 	}
 	GSI_UNUSED(connection);
 	GSI_UNUSED(param);
@@ -1675,6 +1719,8 @@ void CGptestDlg::OnSetinfo()
 		mask |= GP_MASK_SEX;
 	if(m_ipmemail)
 		mask |= GP_MASK_EMAIL;
+	if(m_ipmbuddylist)
+		mask |= GP_MASK_BUDDYLIST;
 	gpSetInfoMask(&m_connection, (GPEnum)mask);
 }
 
@@ -1818,6 +1864,7 @@ void CGptestDlg::OnPublicmaskAll()
 	m_ipmbirthday = TRUE;
 	m_ipmsex = TRUE;
 	m_ipmemail = TRUE;
+	m_ipmbuddylist = TRUE;
 
 	UpdateData(FALSE);
 }
@@ -1835,6 +1882,7 @@ void CGptestDlg::OnPublicmaskNone()
 	m_ipmbirthday = FALSE;
 	m_ipmsex = FALSE;
 	m_ipmemail = FALSE;
+	m_ipmbuddylist = FALSE;
 
 	UpdateData(FALSE);
 }
@@ -1973,7 +2021,7 @@ void CGptestDlg::OnRegisterCdKey()
 		return;
 
 	// Register CDkey
-	CHECK(gpRegisterCdKey(&m_connection, (LPCSTR)m_cdkey, GP_BLOCKING, RegisterCdKeyCallback, NULL));
+	CHECK(gpRegisterCdKey(&m_connection, (LPCSTR)m_cdkey, m_gameId, GP_BLOCKING, RegisterCdKeyCallback, NULL));
 }
 
 void CGptestDlg::OnGetBlocked()
@@ -2064,4 +2112,22 @@ void CGptestDlg::OnRemoveBlock()
 
         m_blocklist.DeleteString(index);
     }
+}
+
+void CGptestDlg::OnBuddyList()
+{
+    if(!m_connection)
+        return;
+
+	// Get the profile selected.
+	////////////////////////////
+    int index = m_results.GetCurSel();
+    if(index != LB_ERR)
+    {
+        UpdateData();
+        GPProfile profile = (GPProfile)m_results.GetItemData(index);
+
+		dlg->m_results.ResetContent();
+		CHECK(gpGetProfileBuddyList(&m_connection, profile, 0, (GPEnum)m_blocking, GetProfileBuddyListTestResponse, NULL));
+	}
 }

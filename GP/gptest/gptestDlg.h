@@ -76,6 +76,7 @@ public:
 	BOOL	m_ipmhomepage;
 	BOOL	m_ipmsex;
 	BOOL	m_ipmzipcode;
+	BOOL	m_ipmbuddylist;
 	CString	m_newnick;
 	BOOL	m_replace;
 	CString	m_izipcode;
@@ -187,6 +188,8 @@ public:
     afx_msg void OnAddBlock();
     afx_msg void OnRemoveBlock();
 	afx_msg void OnSelchangeBlocklist();
+	afx_msg void OnBuddyList();
+	int m_gameId;
 };
 
 //{{AFX_INSERT_LOCATION}}

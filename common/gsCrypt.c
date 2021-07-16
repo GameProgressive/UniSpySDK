@@ -91,12 +91,12 @@
 			#elif (GS_CRYPT_HASHSIZE==GS_CRYPT_SHA1_HASHSIZE)
 			{
 				gsi_u8 counter[4] = { 0x00,0x00,0x00,0x00 };
-				SHA1Context sha;
+				GSSHA1Context sha;
 				counter[3] = (gsi_u8)(i/GS_CRYPT_HASHSIZE); // ensure little endian int
-				SHA1Reset(&sha);
-				SHA1Input(&sha, (const unsigned char*)seed, seedLen);
-				SHA1Input(&sha, counter, 4);
-				SHA1Result(&sha, hashValue);
+				GSSHA1Reset(&sha);
+				GSSHA1Input(&sha, (const unsigned char*)seed, seedLen);
+				GSSHA1Input(&sha, counter, 4);
+				GSSHA1Result(&sha, hashValue);
 			}
 			#endif
 

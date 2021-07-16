@@ -1,5 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// File:	sciInterface.c
+// SDK:		GameSpy ATLAS Competition SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include "sciInterface.h"
 
 
@@ -37,6 +44,7 @@ gsi_u16 sciGetPlatformId(void)
 		return(SCPlatform_DS);
 	#endif	
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,6 +134,7 @@ void sciInterfaceSetSessionId(SCInterface * theInterface, const char * theSessio
 		theInterface->mSessionId[0] = '\0';
 	else
 	{
+		memset(theInterface->mSessionId, 0, sizeof(theInterface->mSessionId));
 		GS_ASSERT(strlen(theSessionId) < sizeof(theInterface->mSessionId));
 		strcpy((char *)theInterface->mSessionId, theSessionId);
 	}
@@ -138,10 +147,9 @@ void sciInterfaceSetConnectionId(SCInterface * theInterface, const char * theCon
 {
 	GS_ASSERT(theInterface != NULL);
 
-	if (theConnectionId == NULL)
-		theInterface->mConnectionId[0] = '\0';
-	else
+	if (theConnectionId)
 	{
+		memset(theInterface->mConnectionId, 0, sizeof(theInterface->mConnectionId));
 		GS_ASSERT(strlen(theConnectionId) < sizeof(theInterface->mConnectionId));
 		strcpy((char *)theInterface->mConnectionId, theConnectionId);
 	}

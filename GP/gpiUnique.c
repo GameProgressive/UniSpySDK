@@ -119,6 +119,7 @@ static GPResult
 gpiSendRegisterCdKey(
   GPConnection * connection,
   const char cdkey[GP_CDKEY_LEN],
+  int gameId,
   int operationid
 )
 {
@@ -159,6 +160,7 @@ gpiSendRegisterCdKey(
 GPResult gpiRegisterCdKey(
   GPConnection * connection,
   const char cdkey[GP_CDKEY_LEN],
+  int gameId,
   GPEnum blocking,
   GPCallback callback,
   void * param
@@ -173,7 +175,7 @@ GPResult gpiRegisterCdKey(
 
 	// Send a request for info.
 	///////////////////////////
-	result = gpiSendRegisterCdKey(connection, cdkey, operation->id);
+	result = gpiSendRegisterCdKey(connection, cdkey, gameId, operation->id);
 	CHECK_RESULT(result);
 
 	// Process it if blocking.

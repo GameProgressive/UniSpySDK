@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerGlobalCallbacks.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -57,7 +56,7 @@ static PEERBool piIsOldUTM
 {
 	// Check for no message.
 	////////////////////////
-	assert(message);
+	GS_ASSERT(message);
 	if(!message)
 		return PEERFalse;
 
@@ -90,7 +89,7 @@ static PEERBool piParseUTM
 
 	// Check for no message.
 	////////////////////////
-	assert(message);
+	GS_ASSERT(message);
 	if(!message)
 		return PEERFalse;
 
@@ -110,7 +109,7 @@ static PEERBool piParseUTM
 		message++;
 		if(strlen(message) >= PI_UTM_PARAMATERS_LEN)
 			return PEERFalse;
-		strcpy(piUTMParameters, message);
+		gsiSafeStrcpyA(piUTMParameters, message, sizeof(piUTMParameters));
 	}
 	else
 	{
@@ -132,33 +131,34 @@ static void piProcessUTM
 
 	PEER_CONNECTION;
 
-	assert(piUTMCommand[0]);
-	assert(player);
+	GS_ASSERT(piUTMCommand[0]);
+	GS_ASSERT(player);
 
 	if(PI_UTM_MATCH(PI_UTM_LAUNCH))
 	{
 #ifdef _DEBUG
-		assert(connection->inRoom[StagingRoom]);
-		if(inRoom)
-			assert(roomType == StagingRoom);
-		else
-			assert(player->inRoom[StagingRoom]);
+		GS_ASSERT(connection->inRoom[StagingRoom]);
+		if (inRoom) {
+			GS_ASSERT(roomType == StagingRoom);
+		} else {
+			GS_ASSERT(player->inRoom[StagingRoom]);
+		}
 #endif
-		if(!connection->inRoom[StagingRoom])
+		if (!connection->inRoom[StagingRoom])
 			return;
-		if(inRoom && (roomType != StagingRoom))
+		if (inRoom && (roomType != StagingRoom))
 			return;
-		if(!inRoom && !player->inRoom[StagingRoom])
+		if (!inRoom && !player->inRoom[StagingRoom])
 			return;
 
 		// Ignore if we're hosting.
 		///////////////////////////
-		if(connection->hosting)
+		if (connection->hosting)
 			return;
 
 		// Only accept launch from ops.
 		///////////////////////////////
-		if(!piIsPlayerOp(player))
+		if (!piIsPlayerOp(player))
 			return;
 
 		// We're playing.
@@ -184,10 +184,9 @@ static void piProcessUTM
 		int ping;
 		unsigned int IP;
 
-#ifdef _DEBUG
-//		if(inRoom)
-//			assert(connection->xpingRoom[roomType]);
-#endif
+		if(inRoom) {
+			GS_ASSERT(connection->xpingRoom[roomType]);
+		}
 		if(inRoom && !connection->xpingRoom[roomType])
 			return;
 
@@ -322,7 +321,7 @@ void piChatPrivateMessageA
 	PEER peer
 )
 {
-	assert(message);
+	GS_ASSERT(message);
 
 	if(!user || !user[0])
 		return;
@@ -410,7 +409,7 @@ static void piChannelMessageA
 
 	//PEER_CONNECTION;
 
-	assert(message);
+	GS_ASSERT(message);
 
 	// Check the room type.
 	///////////////////////
@@ -532,8 +531,10 @@ static void piChannelKickedA
 	
 	// If we were kicked from an AutoMatch room, start searching.
 	/////////////////////////////////////////////////////////////
-	if((roomType == StagingRoom) && peerIsAutoMatching(peer))
+	if((roomType == StagingRoom) && peerIsAutoMatching(peer)) 
+	{
 		piSetAutoMatchStatus(peer, PEERSearching);
+	}
 		
 	GSI_UNUSED(chat);
 }
@@ -680,7 +681,7 @@ static void piChannelUserPartedA
 		///////////////////
 		player = piGetPlayer(peer, user);
 
-		// Check if he was the last op.
+		// Check if he was the host.
 		///////////////////////////////
 		if(!connection->hosting && piIsPlayerHost(player))
 		{
@@ -1078,4 +1079,3 @@ void piSetChannelCallbacks
 	channelCallbacks->channelModeChanged = piChannelModeChangedW;
 #endif
 }
-

@@ -34,7 +34,7 @@ void gcd_compute_response(char *cdkey, char *challenge, char response[RESPONSE_S
 	/* check to make sure we weren't passed a huge cd key/challenge */
 	if (strlen(cdkey) * 2 + strlen(challenge) + 8 >= RAWSIZE)
 	{
-		strcpy(response,"CD Key or challenge too long");
+		gsiSafeStrcpyA(response, "CD Key or challenge too long", RESPONSE_SIZE);
 		return;
 	}
 
@@ -52,11 +52,11 @@ void gcd_compute_response(char *cdkey, char *challenge, char response[RESPONSE_S
 		sprintf(rawout, "%s%d%s",challenge, anyrandom % 0xFFFF, cdkey);
 
 	/* do the cd key md5 */
-	MD5Digest((unsigned char *)cdkey, strlen(cdkey), response);
+	GSMD5Digest((unsigned char *)cdkey, strlen(cdkey), response);
 	/* add the random value */
-	strcpy(&response[32], randstr);
+	gsiSafeStrcpyA(&response[32], randstr, RESPONSE_SIZE - 32);
 	/* do the response md5 */
-	MD5Digest((unsigned char *)rawout, strlen(rawout), &response[40]);	
+	GSMD5Digest((unsigned char *)rawout, strlen(rawout), &response[40]);	
 }
 
 

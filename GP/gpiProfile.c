@@ -30,11 +30,8 @@ gpiProfilesTableHash(const void *arg,
 	return (profile->profileId % numBuckets);
 }
 
-static int
-gpiProfilesTableCompare(
-  const void * arg1,
-  const void * arg2
-)
+
+static int GS_STATIC_CALLBACK gpiProfilesTableCompare(const void * arg1, const void * arg2)
 {
   const GPIProfile * profile1 = (const GPIProfile *)arg1;
   const GPIProfile * profile2 = (const GPIProfile *)arg2;
@@ -666,8 +663,8 @@ GPIProfile * gpiProfileListAdd(GPConnection *connection,
 
 	GS_ASSERT(id > 0);
 
-	// Check the parameters. 2000.02.14.JED was not checked in release build.
-	/////////////////////////////////////////////////////////////////////////
+	// Check the parameters 
+	///////////////////////
 	if(id <= 0)
 		return NULL;
 
@@ -685,6 +682,7 @@ GPIProfile * gpiProfileListAdd(GPConnection *connection,
 	profile.authSig = NULL;
 	profile.peerSig = NULL;
 	profile.requestCount = 0;
+	profile.deletedLocally = gsi_false;
 
 	// Add it to the table.
 	///////////////////////
@@ -761,13 +759,7 @@ GPResult gpiNewProfile(GPConnection * connection,
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\id\\");
 	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, operation->id);
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
-/*
-	if(string.result != GP_NO_ERROR)
-	{
-		gpiRemoveOperation(connection, operation);
-		return string.result;
-	}
-*/
+
 	// Process it if blocking.
 	//////////////////////////
 	if(operation->blocking)
@@ -847,8 +839,7 @@ GPResult gpiDeleteProfile(GPConnection * connection,
 	/////////////////////////////
 	gpiRemoveProfileByID(connection, iconnection->profileid);
 
-	// Disconnect the connection.
-	// PANTS|05.16.00
+	// Disconnect the connection. 05.16.00
 	/////////////////////////////
 	iconnection->connectState = GPI_PROFILE_DELETING;	
 	result = gpiProcess(connection, operation->id);
@@ -1036,8 +1027,6 @@ void gpiSetInfoCacheFilename(const char filename[FILENAME_MAX + 1])
 	strzcpy(GPIInfoCacheFilename, filename, sizeof(GPIInfoCacheFilename));
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Blocked List functionality
 GPResult gpiAddToBlockedList(GPConnection * connection,
@@ -1217,11 +1206,12 @@ GPIProfile *gpiFindBlockedProfile(GPConnection * connection,
 GPResult gpiProcessRecvBlockedList(GPConnection * connection,
 								   const char * input)
 {
-    int i=0, j=0;
+    int i=0;
+    unsigned int j=0;
     int num = 0;
     int index = 0;
     char c;
-    char *str = NULL;
+    const char *str = NULL;
     char buffer[512];
     GPIProfile * profile;
     GPProfile profileid;

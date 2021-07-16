@@ -119,8 +119,8 @@ typedef struct gsSSL
 
 	// these are unused once the handshake is complete
 	//   todo: dynamically allocate or remove to free space
-	MD5_CTX finishHashMD5;
-	SHA1Context finishHashSHA1;
+	GSMD5_CTX finishHashMD5;
+	GSSHA1Context finishHashSHA1;
 	unsigned char serverRandom[32]; // server random for key generation, sent plain text
 	unsigned char clientRandom[32]; // client random for key generation, sent plain text
 	unsigned char premastersecret[GS_SSL_MASTERSECRET_LEN]; // client random for key generation, sent encrypted with serverpub

@@ -26,7 +26,6 @@
 /////////
 
 char GPSearchManagerHostname[64] = GPI_SEARCH_MANAGER_NAME;
-//char GPSearchManagerHostname[64] = "localhost";
 
 //FUNCTIONS
 ///////////
@@ -890,10 +889,6 @@ gpiProcessSearch(
 							//////////////////////
 							match->profile = atoi(value);
 
-							// PANTS|05.16.00
-							// Changed to be order independent, and ignore unrecognized keys.
-							/////////////////////////////////////////////////////////////////
-
 							// Read key/value pairs.
 							////////////////////////
 							doneParsingMatch = GPIFalse;
@@ -1055,11 +1050,11 @@ gpiProcessSearch(
 								strzcpy(arg->nicks[arg->numNicks], value, GP_NICK_LEN);
 								arg->numNicks++;
 #else
-								tempPtr = gsirealloc(arg->nicks, sizeof(unsigned short *) * (arg->numNicks + 1));
+								tempPtr = gsirealloc(arg->nicks, sizeof(gsi_char *) * (arg->numNicks + 1));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-								arg->nicks = (unsigned short **)tempPtr;
-								tempPtr = gsimalloc(GP_NICK_LEN * sizeof(unsigned short));
+								arg->nicks = (gsi_char **)tempPtr;
+								tempPtr = gsimalloc(GP_NICK_LEN * sizeof(gsi_char));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								arg->nicks[arg->numNicks] = (gsi_char*)tempPtr;
@@ -1085,11 +1080,11 @@ gpiProcessSearch(
 								arg->uniquenicks[arg->numNicks - 1] = (gsi_char*)tempPtr;
 								strzcpy(arg->uniquenicks[arg->numNicks - 1], value, GP_UNIQUENICK_LEN);
 #else
-								tempPtr = gsirealloc(arg->uniquenicks, sizeof(unsigned short *) * arg->numNicks);
+								tempPtr = gsirealloc(arg->uniquenicks, sizeof(gsi_char *) * arg->numNicks);
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-								arg->uniquenicks = (unsigned short **)tempPtr;
-								tempPtr = gsimalloc(GP_UNIQUENICK_LEN * sizeof(unsigned short));
+								arg->uniquenicks = (gsi_char **)tempPtr;
+								tempPtr = gsimalloc(GP_UNIQUENICK_LEN * sizeof(gsi_char));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								arg->uniquenicks[arg->numNicks - 1] = (gsi_char*)tempPtr;
@@ -1165,7 +1160,7 @@ gpiProcessSearch(
 								//////////////////////
 								match2->profile = atoi(value);
 
-								// PANTS|05.16.00
+								// 05.16.00
 								// Changed to be order independent, and ignore unrecognized keys.
 								/////////////////////////////////////////////////////////////////
 
@@ -1423,7 +1418,7 @@ gpiProcessSearch(
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 						arg->result = GP_NO_ERROR;
-						arg->numOfUniqueMatchs = 0;
+						arg->numOfUniqueMatches = 0;
 						arg->matches = NULL;
 
 						CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
@@ -1451,13 +1446,13 @@ gpiProcessSearch(
 							{
 								// Add it.
 								//////////
-								tempPtr = gsirealloc(arg->matches, sizeof(GPUniqueMatch) * (arg->numOfUniqueMatchs + 1));
+								tempPtr = gsirealloc(arg->matches, sizeof(GPUniqueMatch) * (arg->numOfUniqueMatches + 1));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								arg->matches = (GPUniqueMatch *)tempPtr;
-								uniqueNickMatch = &arg->matches[arg->numOfUniqueMatchs];
+								uniqueNickMatch = &arg->matches[arg->numOfUniqueMatches];
 								memset(uniqueNickMatch, 0, sizeof(GPUniqueMatch));
-								arg->numOfUniqueMatchs++;
+								arg->numOfUniqueMatches++;
 
 								// Get the profile id.
 								//////////////////////
@@ -1549,12 +1544,12 @@ gpiProcessSearch(
 								// Add it.
 								//////////
 #ifndef GSI_UNICODE
-								arg->suggestedNicks[count] = gsimalloc(GP_UNIQUENICK_LEN);
+								arg->suggestedNicks[count] = (gsi_char *)gsimalloc(GP_UNIQUENICK_LEN);
 								if(arg->suggestedNicks[count] == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								strzcpy(arg->suggestedNicks[count], value, GP_UNIQUENICK_LEN);
 #else
-								arg->suggestedNicks[count] = (unsigned short*)gsimalloc(GP_UNIQUENICK_LEN * sizeof(unsigned short));
+								arg->suggestedNicks[count] = (gsi_char*)gsimalloc(GP_UNIQUENICK_LEN * sizeof(gsi_char));
 								if(arg->suggestedNicks[count] == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								UTF8ToUCS2StringLen(value, arg->suggestedNicks[count], GP_UNIQUENICK_LEN);
@@ -1565,7 +1560,7 @@ gpiProcessSearch(
 							{
 								// Check that the header matches the actual number of nicks.
 								////////////////////////////////////////////////////////////
-								assert(count == arg->numSuggestedNicks);
+								GS_ASSERT(count == arg->numSuggestedNicks);
 								arg->numSuggestedNicks = count;
 
 								// Done.
@@ -1598,9 +1593,9 @@ gpiProcessSearch(
 				loop = GPIFalse;
 			}
 		}
-		//PANTS|05.23.00 - removed sleep
-		//crt - added it back 6/13/00
-		//PANTS|07.10.00 - only sleep if looping
+		//05.23.00 - removed sleep
+		//06/13/00 - added it back 
+		//07.10.00 - only sleep if looping
 		if(loop)
 			msleep(10);
 	} while(loop);

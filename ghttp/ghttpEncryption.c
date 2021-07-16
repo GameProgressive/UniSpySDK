@@ -1762,96 +1762,96 @@ static void ghiEncryptorGenerateEncryptionKeys(gsSSL* sslInterface)
 	//		MD5(master_secret + SHA1("BB"+master_secret+server_random+client_random)) +
 	//		MD5(master_secret + SHA1("CCC"+master_secret+server_random+client_random))
 
-	SHA1Context sha1;
-	MD5_CTX md5;
-	unsigned char temp[SHA1HashSize];
+	GSSHA1Context sha1;
+	GSMD5_CTX md5;
+	unsigned char temp[GSSHA1HashSize];
 
 	unsigned int randomSize = 32;
 	unsigned char keyblock[64]; // todo: support different key sizes
-	
+
 	// master_secret "A"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"A", 1);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final((unsigned char*)&sslInterface->mastersecret[0*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"A", 1);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final((unsigned char*)&sslInterface->mastersecret[0*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// master_secret "BB"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"BB", 2);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final((unsigned char*)&sslInterface->mastersecret[1*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"BB", 2);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final((unsigned char*)&sslInterface->mastersecret[1*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// master_secret "CCC"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"CCC", 3);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final((unsigned char*)&sslInterface->mastersecret[2*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"CCC", 3);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->premastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final((unsigned char*)&sslInterface->mastersecret[2*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// key_block "A"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"A", 1);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final(&keyblock[0*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"A", 1);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final(&keyblock[0*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// key_block "BB"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"BB", 2);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final(&keyblock[1*GS_CRYPT_MD5_HASHSIZE], &md5);
-	
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"BB", 2);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final(&keyblock[1*GS_CRYPT_MD5_HASHSIZE], &md5);
+
 	// key_block "CCC"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"CCC", 3);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final(&keyblock[2*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"CCC", 3);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final(&keyblock[2*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// key_block "DDDD"
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const unsigned char*)"DDDD", 4);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
-	SHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
-	SHA1Result(&sha1, temp);
-	MD5Init(&md5);
-	MD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-	MD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
-	MD5Final(&keyblock[3*GS_CRYPT_MD5_HASHSIZE], &md5);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const unsigned char*)"DDDD", 4);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->serverRandom, randomSize);
+	GSSHA1Input(&sha1, (const unsigned char*)sslInterface->clientRandom, randomSize);
+	GSSHA1Result(&sha1, temp);
+	GSMD5Init(&md5);
+	GSMD5Update(&md5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+	GSMD5Update(&md5, temp, GS_CRYPT_SHA1_HASHSIZE);
+	GSMD5Final(&keyblock[3*GS_CRYPT_MD5_HASHSIZE], &md5);
 
 	// key_block "EEEEE"
 	// key_block "FFFFFF"
@@ -1918,8 +1918,8 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
 	theEncryptor->mEncryptOnBuffer = GHTTPTrue;
 	theEncryptor->mEncryptOnSend = GHTTPFalse;
 	theEncryptor->mLibSendsHandshakeMessages = GHTTPFalse;
-	MD5Init(&sslInterface->finishHashMD5);
-	SHA1Reset(&sslInterface->finishHashSHA1);
+	GSMD5Init(&sslInterface->finishHashMD5);
+	GSSHA1Reset(&sslInterface->finishHashSHA1);
 
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
 		"GameSpy SSL engine initialized\r\n");
@@ -2011,8 +2011,8 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection * connection,
 
 	// We need to compute a hash of all the handshake messages
 	//    Add this message to the hash (both MD5 hash and SHA1 hash)
-	MD5Update(&sslInterface->finishHashMD5, (unsigned char*)&helloMsg+sizeof(gsSSLRecordHeaderMsg), sizeof(gsSSLClientHelloMsg)-sizeof(gsSSLRecordHeaderMsg));
-	SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&helloMsg+sizeof(gsSSLRecordHeaderMsg), sizeof(gsSSLClientHelloMsg)-sizeof(gsSSLRecordHeaderMsg));
+	GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)&helloMsg+sizeof(gsSSLRecordHeaderMsg), sizeof(gsSSLClientHelloMsg)-sizeof(gsSSLRecordHeaderMsg));
+	GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&helloMsg+sizeof(gsSSLRecordHeaderMsg), sizeof(gsSSLClientHelloMsg)-sizeof(gsSSLRecordHeaderMsg));
 
 	// Now send it (we already verified the length, so this should not fail)
 	if (GHTTPFalse == ghiAppendDataToBuffer(&connection->sendBuffer, (const char*)&helloMsg, sizeof(gsSSLClientHelloMsg)))
@@ -2020,7 +2020,7 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection * connection,
 		// assert or just return?
 		return GHIEncryptionResult_BufferTooSmall;
 	}
-	
+
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
 		"GameSpy SSL engine handshake started\r\n");
 
@@ -2059,7 +2059,7 @@ GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection
 
 			gsSSL* sslInterface2 = (gsSSL*)theEncryptor->mInterface;
 			gsSSLRecordHeaderMsg* header = NULL;
-			MD5_CTX md5;
+			GSMD5_CTX md5;
 			int pos = 0;
 			unsigned short lengthNBO = htons((unsigned short)thePlainTextLength);
 			unsigned char MAC[GS_CRYPT_MD5_HASHSIZE];
@@ -2079,20 +2079,20 @@ GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection
 			pos += sizeof(gsSSLRecordHeaderMsg);
 
 			// calculate the MAC
-			MD5Init(&md5);
-			MD5Update(&md5, sslInterface2->clientWriteMACSecret, (unsigned int)sslInterface2->clientWriteMACLen);
-			MD5Update(&md5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
-			MD5Update(&md5, sslInterface2->sendSeqNBO, sizeof(sslInterface2->sendSeqNBO));
-			MD5Update(&md5, (unsigned char*)"\x17", 1); // content type application data
-			MD5Update(&md5,(unsigned char*)&lengthNBO, sizeof(lengthNBO));
-			MD5Update(&md5, (unsigned char*)thePlainTextBuffer, (unsigned int)thePlainTextLength); // **cast-away const**
-			MD5Final(MAC, &md5); // first half of MAC
+			GSMD5Init(&md5);
+			GSMD5Update(&md5, sslInterface2->clientWriteMACSecret, (unsigned int)sslInterface2->clientWriteMACLen);
+			GSMD5Update(&md5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
+			GSMD5Update(&md5, sslInterface2->sendSeqNBO, sizeof(sslInterface2->sendSeqNBO));
+			GSMD5Update(&md5, (unsigned char*)"\x17", 1); // content type application data
+			GSMD5Update(&md5,(unsigned char*)&lengthNBO, sizeof(lengthNBO));
+			GSMD5Update(&md5, (unsigned char*)thePlainTextBuffer, (unsigned int)thePlainTextLength); // **cast-away const**
+			GSMD5Final(MAC, &md5); // first half of MAC
 
-			MD5Init(&md5);
-			MD5Update(&md5, sslInterface2->clientWriteMACSecret, (unsigned int)sslInterface2->clientWriteMACLen);
-			MD5Update(&md5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
-			MD5Update(&md5, MAC, GS_CRYPT_MD5_HASHSIZE);
-			MD5Final(MAC, &md5); // complete MAC
+			GSMD5Init(&md5);
+			GSMD5Update(&md5, sslInterface2->clientWriteMACSecret, (unsigned int)sslInterface2->clientWriteMACLen);
+			GSMD5Update(&md5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
+			GSMD5Update(&md5, MAC, GS_CRYPT_MD5_HASHSIZE);
+			GSMD5Final(MAC, &md5); // complete MAC
 
 			// apply stream cipher to data + MAC
 			RC4Encrypt(&sslInterface2->sendRC4, (const unsigned char*)thePlainTextBuffer, (unsigned char*)&theEncryptedBuffer[pos], thePlainTextLength);
@@ -2353,8 +2353,8 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 
 			// add it to the running handshake hash
 			totalMsgLen = data->pos - messageStart;
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
 		}
 		else if (messageType == GS_SSL_HANDSHAKE_CERTIFICATE)
 		{
@@ -2551,8 +2551,8 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 
 			// add it to the running handshake hash
 			totalMsgLen = data->pos - messageStart;
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)totalMsgLen);
 		}
 		else if (messageType == GS_SSL_HANDSHAKE_SERVERHELLODONE)
 		{
@@ -2577,8 +2577,8 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 			if (tempInt != 0x00) return GHIEncryptionResult_Error;
 
 			// add it to the running handshake hash
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)(data->pos - messageStart));
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)(data->pos - messageStart));
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)&data->data[messageStart], (unsigned int)(data->pos - messageStart));
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)&data->data[messageStart], (unsigned int)(data->pos - messageStart));
 
 			// Make sure there is room in the send buffer for the response messages
             tempInt = (int)(sizeof(gsSSLClientKeyExchangeMsg)
@@ -2629,10 +2629,10 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 			connection->sendBuffer.len += sslInterface->serverpub.modulus.mLength*GS_LARGEINT_DIGIT_SIZE_BYTES;
 
 			// add it to the running handshake hash
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)clientKeyExchange+sizeof(gsSSLRecordHeaderMsg), 
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)clientKeyExchange+sizeof(gsSSLRecordHeaderMsg), 
 				sizeof(gsSSLClientKeyExchangeMsg) - sizeof(gsSSLRecordHeaderMsg) + 
 				sslInterface->serverpub.modulus.mLength*GS_LARGEINT_DIGIT_SIZE_BYTES);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)clientKeyExchange+sizeof(gsSSLRecordHeaderMsg), 
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)clientKeyExchange+sizeof(gsSSLRecordHeaderMsg), 
 				sizeof(gsSSLClientKeyExchangeMsg) - sizeof(gsSSLRecordHeaderMsg) +
 				sslInterface->serverpub.modulus.mLength*GS_LARGEINT_DIGIT_SIZE_BYTES);
 
@@ -2667,41 +2667,41 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 			// MD5(master_secret + pad2 + MD5(handshake_messages+"CLNT"+master_secret+pad1))
 			// SHA1(master_secret + pad2 + SHA1(handshake_messages+"CLNT"+master_secret+pad1))
 			// prepare the final hashes (inner hashes)
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_CLIENT_FINISH_VALUE, 4);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
-			MD5Final(hashTempMD5, &sslInterface->finishHashMD5);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_CLIENT_FINISH_VALUE, 4);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
+			GSMD5Final(hashTempMD5, &sslInterface->finishHashMD5);
 
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_CLIENT_FINISH_VALUE, 4);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_SHA1_PAD_LEN);
-			SHA1Result(&sslInterface->finishHashSHA1, hashTempSHA1);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_CLIENT_FINISH_VALUE, 4);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_SHA1_PAD_LEN);
+			GSSHA1Result(&sslInterface->finishHashSHA1, hashTempSHA1);
 
 			// prepare the final hashes (outer hashes)
-			MD5Init(&sslInterface->finishHashMD5);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
-			MD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
-			MD5Final(hashTempMD5, &sslInterface->finishHashMD5);
+			GSMD5Init(&sslInterface->finishHashMD5);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
+			GSMD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
+			GSMD5Final(hashTempMD5, &sslInterface->finishHashMD5);
 
-			SHA1Reset(&sslInterface->finishHashSHA1);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
-			SHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_SHA1_PAD_LEN);
-			SHA1Input(&sslInterface->finishHashSHA1, hashTempSHA1, GS_CRYPT_SHA1_HASHSIZE);
-			SHA1Result(&sslInterface->finishHashSHA1, hashTempSHA1);
+			GSSHA1Reset(&sslInterface->finishHashSHA1);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)sslInterface->mastersecret, GS_SSL_MASTERSECRET_LEN);
+			GSSHA1Input(&sslInterface->finishHashSHA1, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_SHA1_PAD_LEN);
+			GSSHA1Input(&sslInterface->finishHashSHA1, hashTempSHA1, GS_CRYPT_SHA1_HASHSIZE);
+			GSSHA1Result(&sslInterface->finishHashSHA1, hashTempSHA1);
 
 			// copy results into the sendbuffer
 			memcpy(&connection->sendBuffer.data[connection->sendBuffer.len], hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
 			connection->sendBuffer.len += GS_CRYPT_MD5_HASHSIZE;
 			memcpy(&connection->sendBuffer.data[connection->sendBuffer.len], hashTempSHA1, GS_CRYPT_SHA1_HASHSIZE);
 			connection->sendBuffer.len += GS_CRYPT_SHA1_HASHSIZE;
-			
+
 			// output the message MAC  (hash(MAC_write_secret+pad_2+ hash(MAC_write_secret+pad_1+seq_num+length+content)));
 			// Re-using the finishHashMD5 since it has already been allocated
-			MD5Init(&sslInterface->finishHashMD5);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->clientWriteMACSecret, GS_CRYPT_MD5_HASHSIZE);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->sendSeqNBO, 8);
+			GSMD5Init(&sslInterface->finishHashMD5);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->clientWriteMACSecret, GS_CRYPT_MD5_HASHSIZE);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_ONE, GS_SSL_MD5_PAD_LEN);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->sendSeqNBO, 8);
 			temp[0] = 0x16;
 			temp[1] = (unsigned char)((GS_CRYPT_MD5_HASHSIZE+GS_CRYPT_SHA1_HASHSIZE+4)>>8);
 			temp[2] = (unsigned char)((GS_CRYPT_MD5_HASHSIZE+GS_CRYPT_SHA1_HASHSIZE+4));
@@ -2711,16 +2711,16 @@ GHIEncryptionResult ghiEncryptorProcessSSLHandshake(struct GHIConnection * conne
 			temp[4] = 0x00; // 3-byte length NBO
 			temp[5] = 0x00; // ..
 			temp[6] = 0x24; // ..
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)&temp, 7);
-			MD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);   // content part 1
-			MD5Update(&sslInterface->finishHashMD5, hashTempSHA1, GS_CRYPT_SHA1_HASHSIZE); // content part 2
-			MD5Final(hashTempMD5, &sslInterface->finishHashMD5);
-			MD5Init(&sslInterface->finishHashMD5); // reset for outer hash
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->clientWriteMACSecret, GS_CRYPT_MD5_HASHSIZE);
-			MD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
-			MD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
-			MD5Final(hashTempMD5, &sslInterface->finishHashMD5);
-			
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)&temp, 7);
+			GSMD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);   // content part 1
+			GSMD5Update(&sslInterface->finishHashMD5, hashTempSHA1, GS_CRYPT_SHA1_HASHSIZE); // content part 2
+			GSMD5Final(hashTempMD5, &sslInterface->finishHashMD5);
+			GSMD5Init(&sslInterface->finishHashMD5); // reset for outer hash
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)sslInterface->clientWriteMACSecret, GS_CRYPT_MD5_HASHSIZE);
+			GSMD5Update(&sslInterface->finishHashMD5, (unsigned char*)GS_SSL_PAD_TWO, GS_SSL_MD5_PAD_LEN);
+			GSMD5Update(&sslInterface->finishHashMD5, hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
+			GSMD5Final(hashTempMD5, &sslInterface->finishHashMD5);
+
 			memcpy(&connection->sendBuffer.data[connection->sendBuffer.len], hashTempMD5, GS_CRYPT_MD5_HASHSIZE);
 			connection->sendBuffer.len += GS_CRYPT_MD5_HASHSIZE;
 

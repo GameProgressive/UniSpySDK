@@ -69,38 +69,45 @@ typedef enum _GPIBool
 // For PS3 NP Sync functionality
 #ifdef _PS3
 #include "gpiPS3.h"
+
+typedef struct GpiNpBasicCallback
+{
+	GPNpBasicEventCallback callback;
+	void *userData;
+} GPINpBasicEventCallback;
+
 #endif
 
 // Connection data.
 ///////////////////
 typedef struct
 {
-  char errorString[GP_ERROR_STRING_LEN];
-  GPIBool infoCaching;
-  GPIBool infoCachingBuddyAndBlockOnly;
-  GPIBool simulation;
-  GPIBool firewall;
-  char nick[GP_NICK_LEN];
-  char uniquenick[GP_UNIQUENICK_LEN];
-  char email[GP_EMAIL_LEN];
-  char password[GP_PASSWORD_LEN];
-  int sessKey;
-  int userid;
-  int profileid;
-  int partnerID;
-  GPICallback callbacks[GPI_NUM_CALLBACKS];
-  SOCKET cmSocket;
-  int connectState;
-  GPIBuffer socketBuffer;
-  char * inputBuffer;
-  int inputBufferSize;
-  GPIBuffer outputBuffer;
-  // Replaced by UDP Layer
-  //SOCKET peerSocket;
-  char mHeader[GS_UDP_MSG_HEADER_LEN];
-  unsigned short peerPort;
-  int nextOperationID;
-  int numSearches;
+	char errorString[GP_ERROR_STRING_LEN];
+	GPIBool infoCaching;
+	GPIBool infoCachingBuddyAndBlockOnly;
+	GPIBool simulation;
+	GPIBool firewall;
+	char nick[GP_NICK_LEN];
+	char uniquenick[GP_UNIQUENICK_LEN];
+	char email[GP_EMAIL_LEN];
+	char password[GP_PASSWORD_LEN];
+	int sessKey;
+	int userid;
+	int profileid;
+	int partnerID;
+	GPICallback callbacks[GPI_NUM_CALLBACKS];
+	SOCKET cmSocket;
+	int connectState;
+	GPIBuffer socketBuffer;
+	char * inputBuffer;
+	int inputBufferSize;
+	GPIBuffer outputBuffer;
+	// Replaced by UDP Layer
+	//SOCKET peerSocket;
+	char mHeader[GS_UDP_MSG_HEADER_LEN];
+	unsigned short peerPort;
+	int nextOperationID;
+	int numSearches;
   
 	// new style status info 
 	GPEnum lastStatusState;
@@ -118,57 +125,65 @@ typedef struct
 	// New Status Info extended info Keys
 	DArray extendedInfoKeys;
 
-  // Deprecated
-  char lastStatusString[GP_STATUS_STRING_LEN];
-  char lastLocationString[GP_LOCATION_STRING_LEN];
-  
-  GPErrorCode errorCode;
-  GPIBool fatalError;
-  FILE * diskCache;
-  GPIOperation * operationList;
-  GPIProfileList profileList;
-  GPIPeer * peerList;
-  GPICallbackData * callbackList;
-  GPICallbackData * lastCallback;
-  GPIBuffer updateproBuffer;
-  GPIBuffer updateuiBuffer;
-  DArray transfers;
-  unsigned int nextTransferID;
-  int productID;
-  int namespaceID;
-  char loginTicket[GP_LOGIN_TICKET_LEN];
-  GPEnum quietModeFlags;
-  gsi_time kaTransmit;
+	// Deprecated
+	char lastStatusString[GP_STATUS_STRING_LEN];
+	char lastLocationString[GP_LOCATION_STRING_LEN];
+
+	GPErrorCode errorCode;
+	GPIBool fatalError;
+	FILE * diskCache;
+	GPIOperation * operationList;
+	GPIProfileList profileList;
+	GPIPeer * peerList;
+	GPICallbackData * callbackList;
+	GPICallbackData * lastCallback;
+	GPIBuffer updateproBuffer;
+	GPIBuffer updateuiBuffer;
+	DArray transfers;
+	unsigned int nextTransferID;
+	int productID;
+	int namespaceID;
+	char loginTicket[GP_LOGIN_TICKET_LEN];
+	GPEnum quietModeFlags;
+	gsi_time kaTransmit;
   
 #ifdef GSI_UNICODE
-  unsigned short errorString_W[GP_ERROR_STRING_LEN];
-  unsigned short nick_W[GP_NICK_LEN];
-  unsigned short uniquenick_W[GP_UNIQUENICK_LEN];
-  unsigned short email_W[GP_EMAIL_LEN];
-  unsigned short password_W[GP_PASSWORD_LEN];
-  
-  // Deprecated
-  unsigned short lastStatusString_W[GP_STATUS_STRING_LEN];
-  unsigned short lastLocationString_W[GP_LOCATION_STRING_LEN];
+	gsi_char errorString_W[GP_ERROR_STRING_LEN];
+	gsi_char nick_W[GP_NICK_LEN];
+	gsi_char uniquenick_W[GP_UNIQUENICK_LEN];
+	gsi_char email_W[GP_EMAIL_LEN];
+	gsi_char password_W[GP_PASSWORD_LEN];
 
-  unsigned short richStatus_W[GP_RICH_STATUS_LEN];
-  unsigned short gameType_W[GP_STATUS_BASIC_STR_LEN];
-  unsigned short gameVariant_W[GP_STATUS_BASIC_STR_LEN];
-  unsigned short gameMapName_W[GP_STATUS_BASIC_STR_LEN];
+	// Deprecated
+	gsi_char lastStatusString_W[GP_STATUS_STRING_LEN];
+	gsi_char lastLocationString_W[GP_LOCATION_STRING_LEN];
+
+	gsi_char richStatus_W[GP_RICH_STATUS_LEN];
+	gsi_char gameType_W[GP_STATUS_BASIC_STR_LEN];
+	gsi_char gameVariant_W[GP_STATUS_BASIC_STR_LEN];
+	gsi_char gameMapName_W[GP_STATUS_BASIC_STR_LEN];
 #endif
 
 #ifdef _PS3
-  // NP sync info
-  gsi_bool  npInitialized;
-  gsi_bool  npStatusRetrieved;
-  gsi_bool  npBasicGameInitialized;
-  gsi_bool  npLookupGameInitialized;
-  gsi_bool  npPerformBuddySync;
-  gsi_bool  npPerformBlockSync;
-  gsi_bool  npSyncLock;
-  int       npLookupTitleCtxId;
-  DArray    npTransactionList;
-  gsi_time  loginTime;
+	// NP sync info
+	gsi_bool  npInitialized;
+	gsi_bool  npStatusRetrieved;
+	gsi_bool  npBasicGameInitialized;
+	gsi_bool  npLookupGameInitialized;
+	gsi_bool  npPerformBuddySync;
+	gsi_bool  npPerformBlockSync;
+	gsi_bool  npSyncLock;
+	gsi_bool  npDisconnected;
+	gsi_bool  npFriendListRetrieved;
+	gsi_bool  npBlockListRetrieved;
+	int       npLookupTitleCtxId;
+	DArray    npTransactionList;
+	gsi_time  loginTime;
+	GPINpBasicEventCallback npEventCallback;
+	int npBasicEventsToGet;
+	int npSyncEnabled;
+	SceNpCommunicationId npCommunicationId;
+	int npCellSysUtilSlotNum;
 #endif
 
 } GPIConnection;

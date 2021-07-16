@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerCallbacks.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -21,9 +20,9 @@ devsupport@gamespy.com
 /************
 ** DEFINES **
 ************/
-#define ASSERT_DATA(data)      assert(data->type >= 0);\
-                               assert(data->callback);\
-							   assert(data->params);
+#define ASSERT_DATA(data)      GS_ASSERT(data->type >= 0);\
+                               GS_ASSERT(data->callback);\
+							   GS_ASSERT(data->params);
 
 /**********
 ** TYPES **
@@ -84,8 +83,8 @@ static PEERBool piConnectCopy(void * paramsOut_, void * paramsIn_)
 	piConnectParams * paramsOut = (piConnectParams *)paramsOut_;
 	piConnectParams * paramsIn = (piConnectParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->failureReason = paramsIn->failureReason;
 	
@@ -95,17 +94,17 @@ static void piConnectFree(void * params_)
 {
 	piConnectParams * params = (piConnectParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piConnectCall(PEER peer, piCallbackData * data)
 {
 	piConnectParams * params;
 
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_CONNECT_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_CONNECT_CALLBACK);
 	
 	params = data->params;
 	((peerConnectCallback)data->callback)(peer, data->success, params->failureReason, data->callbackParam);
@@ -139,8 +138,8 @@ static PEERBool piJoinRoomCopy(void * paramsOut_, void * paramsIn_)
 	piJoinRoomParams * paramsOut = (piJoinRoomParams *)paramsOut_;
 	piJoinRoomParams * paramsIn = (piJoinRoomParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->result = paramsIn->result;
 	paramsOut->roomType = paramsIn->roomType;
@@ -151,17 +150,17 @@ static void piJoinRoomFree(void * params_)
 {
 	piJoinRoomParams * params = (piJoinRoomParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piJoinRoomCall(PEER peer, piCallbackData * data)
 {
 	piJoinRoomParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_JOIN_ROOM_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_JOIN_ROOM_CALLBACK);
 	
 	params = data->params;
 	((peerJoinRoomCallback)(PEERCBType)data->callback)(peer, data->success, params->result, params->roomType, data->callbackParam);
@@ -210,8 +209,8 @@ static PEERBool piListGroupRoomsCopy(void * paramsOut_, void * paramsIn_)
 	piListGroupRoomsParams * paramsOut = (piListGroupRoomsParams *)paramsOut_;
 	piListGroupRoomsParams * paramsIn = (piListGroupRoomsParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->groupID = paramsIn->groupID;
 	paramsOut->server = paramsIn->server;
@@ -234,7 +233,7 @@ static void piListGroupRoomsFree(void * params_)
 {
 	piListGroupRoomsParams * params = (piListGroupRoomsParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->name);
 }
@@ -242,10 +241,10 @@ static void piListGroupRoomsCall(PEER peer, piCallbackData * data)
 {
 	piListGroupRoomsParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_LIST_GROUP_ROOMS_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_LIST_GROUP_ROOMS_CALLBACK);
 	
 	params = data->params;
 	
@@ -304,8 +303,8 @@ static PEERBool piListingGamesCopy(void * paramsOut_, void * paramsIn_)
 	piListingGamesParams * paramsOut = (piListingGamesParams *)paramsOut_;
 	piListingGamesParams * paramsIn = (piListingGamesParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	if(paramsIn->name)
 	{
@@ -326,7 +325,7 @@ static void piListingGamesFree(void * params_)
 {
 	piListingGamesParams * params = (piListingGamesParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->name);
 }
@@ -338,10 +337,10 @@ static void piListingGamesCall(PEER peer, piCallbackData * data)
 
 	PEER_CONNECTION;
 		
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_LISTING_GAMES_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_LISTING_GAMES_CALLBACK);
 
 	params = data->params;
 
@@ -459,8 +458,8 @@ static PEERBool piNickErrorCopy(void * paramsOut_, void * paramsIn_)
 	piNickErrorParams * paramsOut = (piNickErrorParams *)paramsOut_;
 	piNickErrorParams * paramsIn = (piNickErrorParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	memset(paramsOut, 0, sizeof(piNickErrorParams));
 	num = paramsOut->numSuggestedNicks = paramsIn->numSuggestedNicks;
@@ -509,7 +508,7 @@ static void piNickErrorFree(void * params_)
 	int i;
 	piNickErrorParams * params = (piNickErrorParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	for(i = 0 ; i < params->numSuggestedNicks ; i++)
@@ -525,10 +524,10 @@ static void piNickErrorCall(PEER peer, piCallbackData * data)
 
 	//PEER_CONNECTION;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_NICK_ERROR_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_NICK_ERROR_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -585,8 +584,8 @@ static PEERBool piEnumPlayersCopy(void * paramsOut_, void * paramsIn_)
 	piEnumPlayersParams * paramsOut = (piEnumPlayersParams *)paramsOut_;
 	piEnumPlayersParams * paramsIn = (piEnumPlayersParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	paramsOut->index = paramsIn->index;
@@ -606,7 +605,7 @@ static void piEnumPlayersFree(void * params_)
 {
 	piEnumPlayersParams * params = (piEnumPlayersParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -614,10 +613,10 @@ static void piEnumPlayersCall(PEER peer, piCallbackData * data)
 {
 	piEnumPlayersParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ENUM_PLAYERS_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ENUM_PLAYERS_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -665,8 +664,8 @@ static PEERBool piGetPlayerInfoCopy(void * paramsOut_, void * paramsIn_)
 	piGetPlayerInfoParams * paramsOut = (piGetPlayerInfoParams *)paramsOut_;
 	piGetPlayerInfoParams * paramsIn = (piGetPlayerInfoParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	if(paramsIn->nick)
 	{
@@ -685,7 +684,7 @@ static void piGetPlayerInfoFree(void * params_)
 {
 	piGetPlayerInfoParams * params = (piGetPlayerInfoParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -693,10 +692,10 @@ static void piGetPlayerInfoCall(PEER peer, piCallbackData * data)
 {
 	piGetPlayerInfoParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_GET_PLAYER_INFO_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_GET_PLAYER_INFO_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -889,8 +888,8 @@ static PEERBool piRoomMessageCopy(void * paramsOut_, void * paramsIn_)
 	piRoomMessageParams * paramsOut = (piRoomMessageParams *)paramsOut_;
 	piRoomMessageParams * paramsIn = (piRoomMessageParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	paramsOut->messageType = paramsIn->messageType;
@@ -920,7 +919,7 @@ static void piRoomMessageFree(void * params_)
 {
 	piRoomMessageParams * params = (piRoomMessageParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->message);
@@ -929,10 +928,10 @@ static void piRoomMessageCall(PEER peer, piCallbackData * data)
 {
 	piRoomMessageParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ROOM_MESSAGE_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ROOM_MESSAGE_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -989,8 +988,8 @@ static PEERBool piRoomUTMCopy(void * paramsOut_, void * paramsIn_)
 	piRoomUTMParams * paramsOut = (piRoomUTMParams *)paramsOut_;
 	piRoomUTMParams * paramsIn = (piRoomUTMParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->authenticated = paramsIn->authenticated;
 	paramsOut->roomType = paramsIn->roomType;
@@ -1032,7 +1031,7 @@ static void piRoomUTMFree(void * params_)
 {
 	piRoomUTMParams * params = (piRoomUTMParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->command);
@@ -1042,10 +1041,10 @@ static void piRoomUTMCall(PEER peer, piCallbackData * data)
 {
 	piRoomUTMParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ROOM_UTM_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ROOM_UTM_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1101,8 +1100,8 @@ static PEERBool piRoomNameChangedCopy(void * paramsOut_, void * paramsIn_)
 	piRoomNameChangedParams * paramsOut = (piRoomNameChangedParams *)paramsOut_;
 	piRoomNameChangedParams * paramsIn = (piRoomNameChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	
@@ -1112,17 +1111,17 @@ static void piRoomNameChangedFree(void * params_)
 {
 	piRoomNameChangedParams * params = (piRoomNameChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piRoomNameChangedCall(PEER peer, piCallbackData * data)
 {
 	piRoomNameChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ROOM_NAME_CHANGED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ROOM_NAME_CHANGED_CALLBACK);
 	
 	params = data->params;
 	((peerRoomNameChangedCallback)data->callback)(peer, params->roomType, data->callbackParam);
@@ -1159,8 +1158,8 @@ static PEERBool piRoomModeChangedCopy(void * paramsOut_, void * paramsIn_)
 	piRoomModeChangedParams * paramsOut = (piRoomModeChangedParams *)paramsOut_;
 	piRoomModeChangedParams * paramsIn = (piRoomModeChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	paramsOut->mode = paramsIn->mode;
@@ -1171,17 +1170,17 @@ static void piRoomModeChangedFree(void * params_)
 {
 	piRoomModeChangedParams * params = (piRoomModeChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piRoomModeChangedCall(PEER peer, piCallbackData * data)
 {
 	piRoomModeChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ROOM_MODE_CHANGED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ROOM_MODE_CHANGED_CALLBACK);
 	
 	params = data->params;
 	((peerRoomModeChangedCallback)data->callback)(peer, params->roomType, &params->mode, data->callbackParam);
@@ -1221,8 +1220,8 @@ static PEERBool piPlayerMessageCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerMessageParams * paramsOut = (piPlayerMessageParams *)paramsOut_;
 	piPlayerMessageParams * paramsIn = (piPlayerMessageParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->messageType = paramsIn->messageType;
 	if(paramsIn->nick)
@@ -1251,7 +1250,7 @@ static void piPlayerMessageFree(void * params_)
 {
 	piPlayerMessageParams * params = (piPlayerMessageParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->message);
@@ -1260,10 +1259,10 @@ static void piPlayerMessageCall(PEER peer, piCallbackData * data)
 {
 	piPlayerMessageParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_MESSAGE_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_MESSAGE_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1316,8 +1315,8 @@ static PEERBool piPlayerUTMCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerUTMParams * paramsOut = (piPlayerUTMParams *)paramsOut_;
 	piPlayerUTMParams * paramsIn = (piPlayerUTMParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->authenticated = paramsIn->authenticated;
 	if(paramsIn->nick)
@@ -1358,7 +1357,7 @@ static void piPlayerUTMFree(void * params_)
 {
 	piPlayerUTMParams * params = (piPlayerUTMParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->command);
@@ -1368,10 +1367,10 @@ static void piPlayerUTMCall(PEER peer, piCallbackData * data)
 {
 	piPlayerUTMParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_UTM_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_UTM_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1426,8 +1425,8 @@ static PEERBool piReadyChangedCopy(void * paramsOut_, void * paramsIn_)
 	piReadyChangedParams * paramsOut = (piReadyChangedParams *)paramsOut_;
 	piReadyChangedParams * paramsIn = (piReadyChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	if(paramsIn->nick)
 	{
@@ -1445,7 +1444,7 @@ static void piReadyChangedFree(void * params_)
 {
 	piReadyChangedParams * params = (piReadyChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -1453,10 +1452,10 @@ static void piReadyChangedCall(PEER peer, piCallbackData * data)
 {
 	piReadyChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_READY_CHANGED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_READY_CHANGED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1503,8 +1502,8 @@ static PEERBool piGameStartedCopy(void * paramsOut_, void * paramsIn_)
 	piGameStartedParams * paramsOut = (piGameStartedParams *)paramsOut_;
 	piGameStartedParams * paramsIn = (piGameStartedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->server = paramsIn->server;
 	if(paramsIn->message)
@@ -1522,7 +1521,7 @@ static void piGameStartedFree(void * params_)
 {
 	piGameStartedParams * params = (piGameStartedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->message);
 }
@@ -1530,10 +1529,10 @@ static void piGameStartedCall(PEER peer, piCallbackData * data)
 {
 	piGameStartedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_GAME_STARTED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_GAME_STARTED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1580,8 +1579,8 @@ static PEERBool piPlayerJoinedCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerJoinedParams * paramsOut = (piPlayerJoinedParams *)paramsOut_;
 	piPlayerJoinedParams * paramsIn = (piPlayerJoinedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -1599,7 +1598,7 @@ static void piPlayerJoinedFree(void * params_)
 {
 	piPlayerJoinedParams * params = (piPlayerJoinedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -1607,10 +1606,10 @@ static void piPlayerJoinedCall(PEER peer, piCallbackData * data)
 {
 	piPlayerJoinedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_JOINED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_JOINED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1658,8 +1657,8 @@ static PEERBool piPlayerLeftCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerLeftParams * paramsOut = (piPlayerLeftParams *)paramsOut_;
 	piPlayerLeftParams * paramsIn = (piPlayerLeftParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -1688,7 +1687,7 @@ static void piPlayerLeftFree(void * params_)
 {
 	piPlayerLeftParams * params = (piPlayerLeftParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->reason);
@@ -1697,10 +1696,10 @@ static void piPlayerLeftCall(PEER peer, piCallbackData * data)
 {
 	piPlayerLeftParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_LEFT_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_LEFT_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1752,8 +1751,8 @@ static PEERBool piKickedCopy(void * paramsOut_, void * paramsIn_)
 	piKickedParams * paramsOut = (piKickedParams *)paramsOut_;
 	piKickedParams * paramsIn = (piKickedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -1782,7 +1781,7 @@ static void piKickedFree(void * params_)
 {
 	piKickedParams * params = (piKickedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->reason);
@@ -1791,10 +1790,10 @@ static void piKickedCall(PEER peer, piCallbackData * data)
 {
 	piKickedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_KICKED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_KICKED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1844,8 +1843,8 @@ static PEERBool piNewPlayerListCopy(void * paramsOut_, void * paramsIn_)
 	piNewPlayerListParams * paramsOut = (piNewPlayerListParams *)paramsOut_;
 	piNewPlayerListParams * paramsIn = (piNewPlayerListParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 
@@ -1855,17 +1854,17 @@ static void piNewPlayerListFree(void * params_)
 {
 	piNewPlayerListParams * params = (piNewPlayerListParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piNewPlayerListCall(PEER peer, piCallbackData * data)
 {
 	piNewPlayerListParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_NEW_PLAYER_LIST_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_NEW_PLAYER_LIST_CALLBACK);
 
 	params = data->params;
 	((peerNewPlayerListCallback)data->callback)(peer, params->roomType, data->callbackParam);
@@ -1903,8 +1902,8 @@ static PEERBool piPlayerChangedNickCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerChangedNickParams * paramsOut = (piPlayerChangedNickParams *)paramsOut_;
 	piPlayerChangedNickParams * paramsIn = (piPlayerChangedNickParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->oldNick)
@@ -1933,7 +1932,7 @@ static void piPlayerChangedNickFree(void * params_)
 {
 	piPlayerChangedNickParams * params = (piPlayerChangedNickParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->oldNick);
 	gsifree(params->newNick);
@@ -1942,10 +1941,10 @@ static void piPlayerChangedNickCall(PEER peer, piCallbackData * data)
 {
 	piPlayerChangedNickParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_CHANGED_NICK_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_CHANGED_NICK_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -1998,8 +1997,8 @@ static PEERBool piPlayerInfoCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerInfoParams * paramsOut = (piPlayerInfoParams *)paramsOut_;
 	piPlayerInfoParams * paramsIn = (piPlayerInfoParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -2019,7 +2018,7 @@ static void piPlayerInfoFree(void * params_)
 {
 	piPlayerInfoParams * params = (piPlayerInfoParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -2028,10 +2027,10 @@ static void piPlayerInfoCall(PEER peer, piCallbackData * data)
 	piPlayerInfoParams * params;
 	PEER_CONNECTION;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_INFO_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_INFO_CALLBACK);
 
 	params = data->params;
 
@@ -2087,8 +2086,8 @@ static PEERBool piDisconnectedCopy(void * paramsOut_, void * paramsIn_)
 	piDisconnectedParams * paramsOut = (piDisconnectedParams *)paramsOut_;
 	piDisconnectedParams * paramsIn = (piDisconnectedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	if(paramsIn->reason)
 	{
@@ -2105,7 +2104,7 @@ static void piDisconnectedFree(void * params_)
 {
 	piDisconnectedParams * params = (piDisconnectedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->reason);
 }
@@ -2113,10 +2112,10 @@ static void piDisconnectedCall(PEER peer, piCallbackData * data)
 {
 	piDisconnectedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_DISCONNECTED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_DISCONNECTED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2161,8 +2160,8 @@ static PEERBool piPingCopy(void * paramsOut_, void * paramsIn_)
 	piPingParams * paramsOut = (piPingParams *)paramsOut_;
 	piPingParams * paramsIn = (piPingParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->ping = paramsIn->ping;
 	if(paramsIn->nick)
@@ -2180,7 +2179,7 @@ static void piPingFree(void * params_)
 {
 	piPingParams * params = (piPingParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -2188,10 +2187,10 @@ static void piPingCall(PEER peer, piCallbackData * data)
 {
 	piPingParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PING_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PING_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2239,8 +2238,8 @@ static PEERBool piCrossPingCopy(void * paramsOut_, void * paramsIn_)
 	piCrossPingParams * paramsOut = (piCrossPingParams *)paramsOut_;
 	piCrossPingParams * paramsIn = (piCrossPingParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->crossPing = paramsIn->crossPing;
 	if(paramsIn->nick1)
@@ -2269,7 +2268,7 @@ static void piCrossPingFree(void * params_)
 {
 	piCrossPingParams * params = (piCrossPingParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick1);
 	gsifree(params->nick2);
@@ -2278,10 +2277,10 @@ static void piCrossPingCall(PEER peer, piCallbackData * data)
 {
 	piCrossPingParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_CROSS_PING_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_CROSS_PING_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2332,8 +2331,8 @@ static PEERBool piChangeNickCopy(void * paramsOut_, void * paramsIn_)
 	piChangeNickParams * paramsOut = (piChangeNickParams *)paramsOut_;
 	piChangeNickParams * paramsIn = (piChangeNickParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	if(paramsIn->newNick)
 	{
@@ -2361,7 +2360,7 @@ static void piChangeNickFree(void * params_)
 {
 	piChangeNickParams * params = (piChangeNickParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->newNick);
 	gsifree(params->oldNick);
@@ -2370,10 +2369,10 @@ static void piChangeNickCall(PEER peer, piCallbackData * data)
 {
 	piChangeNickParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_CHANGE_NICK_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_CHANGE_NICK_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2420,8 +2419,8 @@ static PEERBool piGlobalKeyChangedCopy(void * paramsOut_, void * paramsIn_)
 	piGlobalKeyChangedParams * paramsOut = (piGlobalKeyChangedParams *)paramsOut_;
 	piGlobalKeyChangedParams * paramsIn = (piGlobalKeyChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -2462,7 +2461,7 @@ static void piGlobalKeyChangedFree(void * params_)
 {
 	piGlobalKeyChangedParams * params = (piGlobalKeyChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->key);
@@ -2472,10 +2471,10 @@ static void piGlobalKeyChangedCall(PEER peer, piCallbackData * data)
 {
 	piGlobalKeyChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_GLOBAL_KEY_CHANGED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_GLOBAL_KEY_CHANGED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2530,8 +2529,8 @@ static PEERBool piRoomKeyChangedCopy(void * paramsOut_, void * paramsIn_)
 	piRoomKeyChangedParams * paramsOut = (piRoomKeyChangedParams *)paramsOut_;
 	piRoomKeyChangedParams * paramsIn = (piRoomKeyChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	if(paramsIn->nick)
@@ -2572,7 +2571,7 @@ static void piRoomKeyChangedFree(void * params_)
 {
 	piRoomKeyChangedParams * params = (piRoomKeyChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	gsifree(params->key);
@@ -2582,11 +2581,11 @@ static void piRoomKeyChangedCall(PEER peer, piCallbackData * data)
 {
 	piRoomKeyChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_ROOM_KEY_CHANGED_CALLBACK);
-
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_ROOM_KEY_CHANGED_CALLBACK);
+		
 	params = data->params;
 #ifndef GSI_UNICODE
 	((peerRoomKeyChangedCallback)data->callback)(peer, params->roomType, params->nick, params->key, params->value, data->callbackParam);
@@ -2645,8 +2644,8 @@ static PEERBool piGetGlobalKeysCopy(void * paramsOut_, void * paramsIn_)
 	piGetGlobalKeysParams * paramsOut = (piGetGlobalKeysParams *)paramsOut_;
 	piGetGlobalKeysParams * paramsIn = (piGetGlobalKeysParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	memset(paramsOut, 0, sizeof(piGetGlobalKeysParams));
 	num = paramsOut->num = paramsIn->num;
@@ -2715,7 +2714,7 @@ static void piGetGlobalKeysFree(void * params_)
 	int i;
 	piGetGlobalKeysParams * params = (piGetGlobalKeysParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	for(i = 0 ; i < params->num ; i++)
@@ -2731,10 +2730,10 @@ static void piGetGlobalKeysCall(PEER peer, piCallbackData * data)
 {
 	piGetGlobalKeysParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_GET_GLOBAL_KEYS_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_GET_GLOBAL_KEYS_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2798,8 +2797,8 @@ static PEERBool piGetRoomKeysCopy(void * paramsOut_, void * paramsIn_)
 	piGetRoomKeysParams * paramsOut = (piGetRoomKeysParams *)paramsOut_;
 	piGetRoomKeysParams * paramsIn = (piGetRoomKeysParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	memset(paramsOut, 0, sizeof(piGetRoomKeysParams));
 	num = paramsOut->num = paramsIn->num;
@@ -2870,7 +2869,7 @@ static void piGetRoomKeysFree(void * params_)
 	int i;
 	piGetRoomKeysParams * params = (piGetRoomKeysParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 	for(i = 0 ; i < params->num ; i++)
@@ -2886,10 +2885,10 @@ static void piGetRoomKeysCall(PEER peer, piCallbackData * data)
 {
 	piGetRoomKeysParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_GET_ROOM_KEYS_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_GET_ROOM_KEYS_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -2951,8 +2950,8 @@ static PEERBool piPlayerFlagsChangedCopy(void * paramsOut_, void * paramsIn_)
 	piPlayerFlagsChangedParams * paramsOut = (piPlayerFlagsChangedParams *)paramsOut_;
 	piPlayerFlagsChangedParams * paramsIn = (piPlayerFlagsChangedParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->roomType = paramsIn->roomType;
 	paramsOut->newFlags = paramsIn->newFlags;
@@ -2972,7 +2971,7 @@ static void piPlayerFlagsChangedFree(void * params_)
 {
 	piPlayerFlagsChangedParams * params = (piPlayerFlagsChangedParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->nick);
 }
@@ -2980,10 +2979,10 @@ static void piPlayerFlagsChangedCall(PEER peer, piCallbackData * data)
 {
 	piPlayerFlagsChangedParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_PLAYER_FLAGS_CHANGED_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_PLAYER_FLAGS_CHANGED_CALLBACK);
 
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -3034,8 +3033,8 @@ static PEERBool piAuthenticateCDKeyCopy(void * paramsOut_, void * paramsIn_)
 	piAuthenticateCDKeyParams * paramsOut = (piAuthenticateCDKeyParams *)paramsOut_;
 	piAuthenticateCDKeyParams * paramsIn = (piAuthenticateCDKeyParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->result = paramsIn->result;
 	if(paramsIn->message)
@@ -3053,7 +3052,7 @@ static void piAuthenticateCDKeyFree(void * params_)
 {
 	piAuthenticateCDKeyParams * params = (piAuthenticateCDKeyParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 
 	gsifree(params->message);
 }
@@ -3061,10 +3060,10 @@ static void piAuthenticateCDKeyCall(PEER peer, piCallbackData * data)
 {
 	piAuthenticateCDKeyParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_AUTHENTICATE_CDKEY_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_AUTHENTICATE_CDKEY_CALLBACK);
 	
 	params = data->params;
 #ifndef GSI_UNICODE
@@ -3105,8 +3104,8 @@ static PEERBool piAutoMatchStatusCopy(void * paramsOut_, void * paramsIn_)
 	piAutoMatchStatusParams * paramsOut = (piAutoMatchStatusParams *)paramsOut_;
 	piAutoMatchStatusParams * paramsIn = (piAutoMatchStatusParams *)paramsIn_;
 
-	assert(paramsOut);
-	assert(paramsIn);
+	GS_ASSERT(paramsOut);
+	GS_ASSERT(paramsIn);
 
 	paramsOut->status = paramsIn->status;
 
@@ -3116,17 +3115,17 @@ static void piAutoMatchStatusFree(void * params_)
 {
 	piAutoMatchStatusParams * params = (piAutoMatchStatusParams *)params_;
 
-	assert(params);
+	GS_ASSERT(params);
 	GSI_UNUSED(params);
 }
 static void piAutoMatchStatusCall(PEER peer, piCallbackData * data)
 {
 	piAutoMatchStatusParams * params;
 	
-	assert(data);
-	assert(data->callback);
-	assert(data->params);
-	assert(data->type == PI_AUTO_MATCH_STATUS_CALLBACK);
+	GS_ASSERT(data);
+	GS_ASSERT(data->callback);
+	GS_ASSERT(data->params);
+	GS_ASSERT(data->type == PI_AUTO_MATCH_STATUS_CALLBACK);
 
 	params = data->params;
 	((peerAutoMatchStatusCallback)data->callback)(peer, params->status, data->callbackParam);
@@ -3419,9 +3418,9 @@ PEERBool piCallbacksInit
 {
 	// Consistency check.
 	/////////////////////
-	int i;
+	unsigned int i;
 	for(i = 0 ; i <= PI_NUM_CALLBACK_TYPES ; i++)
-		assert(callbackFuncs[i].type == i);
+		GS_ASSERT((unsigned int)callbackFuncs[i].type == i);
 }
 #endif
 
@@ -3495,7 +3494,7 @@ void piCallbacksThink
 
 	PEER_CONNECTION;
 
-	assert(blockingID >= -1);
+	GS_ASSERT(blockingID >= -1);
 
 	// Blocking call?
 	/////////////////
@@ -3504,7 +3503,7 @@ void piCallbacksThink
 		// How many?
 		////////////
 		len = ArrayLength(connection->callbackList);
-		assert(len >= 0);
+		GS_ASSERT(len >= 0);
 
 		// Check if this callback is finished.
 		//////////////////////////////////////
@@ -3513,7 +3512,7 @@ void piCallbacksThink
 			// Get the nth element.
 			///////////////////////
 			data = (piCallbackData *)ArrayNth(connection->callbackList, index);
-			assert(data);
+			GS_ASSERT(data);
 
 			// Check the ID and specifically for disconnect.
 			////////////////////////////////////////////////
@@ -3535,7 +3534,7 @@ void piCallbacksThink
 			// Get the callback data.
 			/////////////////////////
 			data = (piCallbackData *)ArrayNth(connection->callbackList, numInCalls);
-			assert(data);
+			GS_ASSERT(data);
 
 			// Are we already in this call? (how philosophical)
 			///////////////////////////////////////////////////
@@ -3570,11 +3569,11 @@ static int piAddCallback
 
 	PEER_CONNECTION;
 
-	assert(callback);
-	//assert(type >= 0);
-	assert(type < PI_NUM_CALLBACK_TYPES);
-	assert(paramsIn);
-	assert(paramsSize > 0);
+	GS_ASSERT(callback);
+	//GS_ASSERT(type >= 0);
+	GS_ASSERT(type < PI_NUM_CALLBACK_TYPES);
+	GS_ASSERT(paramsIn);
+	GS_ASSERT(paramsSize > 0);
 
 	// If no callback, nothing to do.
 	/////////////////////////////////
@@ -3595,7 +3594,7 @@ static int piAddCallback
 	////////////////////////////////
 	if(!callbackFuncs[type].copy(paramsOut, paramsIn))
 	{
-		assert(0);
+		GS_FAIL();
 		gsifree(paramsOut);
 		return -1;
 	}
@@ -3626,8 +3625,8 @@ static int GS_STATIC_CALLBACK piIsCallbackFinishedCompareCallback
 {
 	piCallbackData * data1 = (piCallbackData *)elem1;
 	piCallbackData * data2 = (piCallbackData *)elem2;
-	assert(data1);
-	assert(data2);
+	GS_ASSERT(data1);
+	GS_ASSERT(data2);
 
 	return (data1->ID - data2->ID);
 }

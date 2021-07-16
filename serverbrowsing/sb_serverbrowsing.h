@@ -10,7 +10,6 @@
 // Please see the GameSpy Server Browsing SDK documentation for more 
 // information.
 
-
 #ifndef _SB_SERVERBROWSING_H
 #define _SB_SERVERBROWSING_H
 
@@ -19,8 +18,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
-	
 
 /*******************
 ServerBrowser Typedefs

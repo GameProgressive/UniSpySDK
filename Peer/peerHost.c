@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerHost.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -33,7 +32,7 @@ PEERBool piStartHosting
 
 	// Check that we're not hosting.
 	////////////////////////////////
-	assert(!connection->hosting);
+	GS_ASSERT(!connection->hosting);
 	if(connection->hosting)
 		return PEERFalse;
 

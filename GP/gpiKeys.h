@@ -22,7 +22,7 @@ typedef struct
 void gpiStatusInfoKeyFree(void *element);
 GPResult gpiStatusInfoKeysInit(GPConnection * connection);
 void gpiStatusInfoKeysDestroy(GPConnection * connection);
-int gpiStatusInfoKeyCompFunc(const void *elem1, const void *elem2);
+int GS_STATIC_CALLBACK gpiStatusInfoKeyCompFunc(const void *elem1, const void *elem2);
 GPResult gpiStatusInfoAddKey(GPConnection *connection, DArray keys, const char *theKeyName, const char *theKeyValue);
 GPResult gpiStatusInfoDelKey(GPConnection *connection, DArray keys, const char *keyName);
 GPResult gpiStatusInfoSetKey(GPConnection *connection, DArray keys, const char *keyName, const char *newKeyValue);

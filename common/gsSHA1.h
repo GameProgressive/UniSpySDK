@@ -50,15 +50,15 @@ enum
     shaStateError       /* called Input after Result */
 };
 #endif
-#define SHA1HashSize 20
+#define GSSHA1HashSize 20
 
 /*
  *  This structure will hold context information for the SHA-1
  *  hashing operation
  */
-typedef struct SHA1Context
+typedef struct GSSHA1Context
 {
-    uint32_t Intermediate_Hash[SHA1HashSize/4]; /* Message Digest  */
+    uint32_t Intermediate_Hash[GSSHA1HashSize/4]; /* Message Digest  */
 
     uint32_t Length_Low;            /* Message length in bits      */
     uint32_t Length_High;           /* Message length in bits      */
@@ -69,7 +69,7 @@ typedef struct SHA1Context
 
     int Computed;               /* Is the digest computed?         */
     int Corrupted;             /* Is the message digest corrupted? */
-} SHA1Context;
+} GSSHA1Context;
 
 /*
  *  Function Prototypes
@@ -81,12 +81,12 @@ extern "C"
 #endif
 
 
-int SHA1Reset(  SHA1Context *);
-int SHA1Input(  SHA1Context *,
+int GSSHA1Reset(  GSSHA1Context *);
+int GSSHA1Input(  GSSHA1Context *,
                 const uint8_t *,
                 unsigned int);
-int SHA1Result( SHA1Context *,
-                uint8_t Message_Digest[SHA1HashSize]);
+int GSSHA1Result( GSSHA1Context *,
+                uint8_t Message_Digest[GSSHA1HashSize]);
 
 
 #if defined(__cplusplus)

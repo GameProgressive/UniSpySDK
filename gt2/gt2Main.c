@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Main.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Main.h"
 #include "gt2Socket.h"
@@ -252,7 +251,7 @@ GT2Result gt2Send
 	if (reliable && connection->socket->protocolType == GTI2VdpProtocol)
 	{
 		memcpy(&vdpDataLength, message, sizeof(unsigned short));
-		assert(vdpDataLength + connection->socket->protocolOffset == len);
+		GS_ASSERT(vdpDataLength + connection->socket->protocolOffset == len);
 		if (vdpDataLength + connection->socket->protocolOffset != len)
 			return GT2InvalidMessage;
 	}
@@ -436,28 +435,28 @@ void gt2SetUnrecognizedMessageCallback(GT2Socket socket, gt2UnrecognizedMessageC
 
 void gt2SetSocketData(GT2Socket socket, void * data)
 {
-	assert(socket);
+	GS_ASSERT(socket);
 
 	socket->data = data;
 }
 
 void * gt2GetSocketData(GT2Socket socket)
 {
-	assert(socket);
+	GS_ASSERT(socket);
 
 	return socket->data;
 }
 
 void gt2SetConnectionData(GT2Connection connection, void * data)
 {
-	assert(connection);
+	GS_ASSERT(connection);
 
 	connection->data = data;
 }
 
 void * gt2GetConnectionData(GT2Connection connection)
 {
-	assert(connection);
+	GS_ASSERT(connection);
 
 	return connection->data;
 }

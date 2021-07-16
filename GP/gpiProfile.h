@@ -72,6 +72,7 @@ typedef struct GPIProfile
     gsi_bool blocked;
     int blockIndex;
     gsi_bool buddyOrBlockCache;
+	gsi_bool deletedLocally;
 } GPIProfile;
 
 // A list of profiles.

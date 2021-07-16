@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Main.h
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _GT2_MAIN_H_
 #define _GT2_MAIN_H_
@@ -53,6 +52,8 @@ devsupport@gamespy.com
 	#define GTI2_STACK_RECV_BUFFER_SIZE  1500
 #elif defined (_XBOX)									// Xbox packets are 1304,  
 	#define GTI2_STACK_RECV_BUFFER_SIZE  4096			// when using VDP sockets, 2 bytes are used for data length
+#elif defined(_REVOLUTION)
+	#define GTI2_STACK_RECV_BUFFER_SIZE  4096           // Must be multiples of 32bytes  
 #else													
 	#define GTI2_STACK_RECV_BUFFER_SIZE  65535
 #endif

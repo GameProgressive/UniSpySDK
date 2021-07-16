@@ -28,6 +28,8 @@
 #define HOST_ID         100                     //set to 100 so that client id's don't overlap
 #define DEFAULT_PORT    5000
 
+int errorOccured = 1; //Error by default, will set to zero if host authenticates.
+
 void serverkey_callback(int keyid, qr2_buffer_t outbuf, void *userdata)
 {
 	switch (keyid)
@@ -174,10 +176,13 @@ static void ClientRefreshAuthorize(int gameid, int localid, int hint, char *chal
 // host SELF authorization
 static void HostAuthorize(int gameid, int localid, int authenticated, char *errmsg, void *instance)
 {
-    if (!authenticated) //doh.. bad!
-        printf("HOST was NOT authenticated (%s)\n",errmsg);
-    else
-        printf("HOST was authenticated (%s)\n",errmsg);
+	if (!authenticated)
+		printf("HOST was NOT authenticated (%s)\n",errmsg);
+	else
+	{
+		printf("HOST was authenticated (%s)\n",errmsg);
+		errorOccured = 0;
+	}
 
 	GSI_UNUSED(instance);
 	GSI_UNUSED(localid);
@@ -234,6 +239,7 @@ int test_main(int argc, char **argv)
 	struct timeval timeout = {0,0};
 	int error;
 	int i,len;
+	int totalTime = 0;
 	int quit = 0;
 	char buf[512];
 	gsi_char secret_key[9];
@@ -295,9 +301,11 @@ int test_main(int argc, char **argv)
 		clients[i].sock = INVALID_SOCKET;
 
 	printf("Running server on port %d... press any key to quit\n", DEFAULT_PORT);
-	while (!quit)
+	while (!quit && totalTime < 60000)
 	{ //main loop
 		msleep(10);
+		totalTime += 10; //Unscientific method of tracking general amount of time passed
+
 		/* We process both QR Queries and any CDKey related activity. The QR SDK
 		automatically passes any network traffic for the CDKey SDK to the SDK directly */
 		qr2_think(NULL);
@@ -382,8 +390,8 @@ int test_main(int argc, char **argv)
 
 	SocketShutDown();
 	printf("All done!\n");
-	return 0;
-	
+	return errorOccured;
+
 	GSI_UNUSED(argv);
 	GSI_UNUSED(argc);
 }

@@ -1,5 +1,13 @@
-// PeerTest.h : main header file for the PEERTEST application
+///////////////////////////////////////////////////////////////////////////////
+// File:	PeerTest.h
+// SDK:		GameSpy Peer SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// main header file for the PEERTEST application
 
 #if !defined(AFX_PEERTEST_H__2F625A3C_93C3_4689_9749_3B9FCBE53594__INCLUDED_)
 #define AFX_PEERTEST_H__2F625A3C_93C3_4689_9749_3B9FCBE53594__INCLUDED_

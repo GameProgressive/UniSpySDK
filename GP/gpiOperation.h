@@ -59,6 +59,7 @@ typedef struct
   char passwordHash[33];
   char authtoken[GP_AUTHTOKEN_LEN];
   char partnerchallenge[GP_PARTNERCHALLENGE_LEN];
+  char loginticket[GP_LOGIN_TICKET_LEN];
   char cdkey[GP_CDKEY_LEN];
   GPIBool newuser;
 } GPIConnectData;

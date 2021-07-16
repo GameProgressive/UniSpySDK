@@ -44,7 +44,7 @@ static void gpiTransferFree(void * elem)
 	}
 }
 
-static int gpiTransferCompare(const void * elem1, const void * elem2)
+static int GS_STATIC_CALLBACK gpiTransferCompare(const void * elem1, const void * elem2)
 {
 	GPITransfer * transfer1 = (GPITransfer *)elem1;
 	GPITransfer * transfer2 = (GPITransfer *)elem2;
@@ -721,7 +721,7 @@ static GPIBool gpiHandleBegin
 
 	// Set file stuff.
 	//////////////////
-	MD5Init(&file->md5);
+	GSMD5Init(&file->md5);
 	file->modTime = mtime;
 	file->size = size;
 
@@ -868,8 +868,8 @@ static GPIBool gpiHandleEnd
 
 		// Get the local md5.
 		/////////////////////
-		MD5Final(rawMD5, &file->md5);
-		MD5Print(rawMD5, localMD5);
+		GSMD5Final(rawMD5, &file->md5);
+		GSMD5Print(rawMD5, localMD5);
 
 		// Check the md5.
 		/////////////////
@@ -1039,7 +1039,7 @@ static GPIBool gpiHandleData
 	{
 		// Update the  MD5.
 		///////////////////
-		MD5Update(&file->md5, (unsigned char *)buffer, bufferLen);
+		GSMD5Update(&file->md5, (unsigned char *)buffer, bufferLen);
 
 		// Update the progress.
 		///////////////////////
@@ -1242,9 +1242,6 @@ static GPIBool gpiHandleTransferCancel
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPTransferCallbackArg * arg;
 
-//	if(transfer->sender)
-//		return GPIFalse;
-
 	// Mark the transfer cancelled.
 	///////////////////////////////
 	transfer->state = GPITransferCancelled;
@@ -1300,8 +1297,8 @@ static GPResult gpiSendFileEnd
 
 		// Get the MD5.
 		///////////////
-		MD5Final(md5Raw, &file->md5);
-		MD5Print(md5Raw, md5);
+		GSMD5Final(md5Raw, &file->md5);
+		GSMD5Print(md5Raw, md5);
 
 		// Add it.
 		//////////
@@ -1448,7 +1445,7 @@ GPResult gpiProcessCurrentFile
 
 					// Init the md5.
 					////////////////
-					MD5Init(&file->md5);
+					GSMD5Init(&file->md5);
 
 					// Call the callback.
 					/////////////////////
@@ -1508,7 +1505,7 @@ GPResult gpiProcessCurrentFile
 				{
 					// Update the md5.
 					//////////////////
-					MD5Update(&file->md5, (unsigned char*)buffer, num);
+					GSMD5Update(&file->md5, (unsigned char*)buffer, num);
 
 					// Send the data.
 					/////////////////

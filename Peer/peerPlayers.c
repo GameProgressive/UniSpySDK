@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerPlayers.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -38,8 +37,8 @@ static int piPlayersTableHashFn
 	const char * str;
 	unsigned int hash;
 
-	assert(player);
-	assert(player->nick[0]);
+	GS_ASSERT(player);
+	GS_ASSERT(player->nick[0]);
 
 	// Get the hash.
 	////////////////
@@ -60,10 +59,10 @@ static int GS_STATIC_CALLBACK piPlayersTableCompareFn
 {
 	piPlayer * player1 = (piPlayer *)elem1;
 	piPlayer * player2 = (piPlayer *)elem2;
-	assert(player1);
-	assert(player1->nick[0]);
-	assert(player2);
-	assert(player2->nick[0]);
+	GS_ASSERT(player1);
+	GS_ASSERT(player1->nick[0]);
+	GS_ASSERT(player2);
+	GS_ASSERT(player2->nick[0]);
 
 	return strcasecmp(player1->nick, player2->nick);
 }
@@ -74,8 +73,8 @@ static void piPlayersTableElementFreeFn
 )
 {
 	piPlayer * player = (piPlayer *)elem;
-	assert(player);
-	assert(player->nick);
+	GS_ASSERT(player);
+	GS_ASSERT(player->nick);
 	GSI_UNUSED(player);
 }
 
@@ -138,7 +137,7 @@ static piPlayer * piAddPlayer
 
 	PEER_CONNECTION;
 
-	assert(!piGetPlayer(peer, nick));
+	GS_ASSERT(!piGetPlayer(peer, nick));
 
 	// Setup the player.
 	////////////////////
@@ -170,7 +169,7 @@ static piPlayer * piAddPlayer
 	TableEnter(connection->players, player);
 
 	player = piGetPlayer(peer, nick);
-	assert(player);
+	GS_ASSERT(player);
 
 	return player;
 }
@@ -183,7 +182,7 @@ static void piRemovePlayer
 {
 	PEER_CONNECTION;
 
-	assert(player);
+	GS_ASSERT(player);
 
 	// Remove it.
 	/////////////
@@ -202,10 +201,10 @@ piPlayer * piPlayerJoinedRoom
 
 	PEER_CONNECTION;
 	
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM || ENTERING_ROOM);
+	GS_ASSERT(IN_ROOM || ENTERING_ROOM);
 
 	// Check that we're in/entering this room.
 	//////////////////////////////////////////
@@ -227,7 +226,7 @@ piPlayer * piPlayerJoinedRoom
 
 	// In this room.
 	////////////////
-	assert(!player->inRoom[roomType]);
+	GS_ASSERT(!player->inRoom[roomType]);
 	player->inRoom[roomType] = PEERTrue;
 	connection->numPlayers[roomType]++;
 	player->flags[roomType] = 0;
@@ -254,20 +253,23 @@ void piPlayerLeftRoom
 
 	PEER_CONNECTION;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 	ASSERT_ROOMTYPE(roomType);
 
 	// Find the player.
 	///////////////////
 	player = piGetPlayer(peer, nick);
-	assert(player);
+	
+	// this assert was causing problems in a rare case in which piPlayerLeftRoom gets called more than once for a player
+	//GS_ASSERT(player); 
+
 	if(!player)
 		return;
 
 	// Leave the room.
 	//////////////////
-	assert(player->inRoom[roomType]);
+	GS_ASSERT(player->inRoom[roomType]);
 	player->inRoom[roomType] = PEERFalse;
 	connection->numPlayers[roomType]--;
 	player->flags[roomType] = 0;
@@ -300,10 +302,10 @@ void piPlayerChangedNick
 	char playerInfoBuffer[PI_PLAYER_INFO_SIZE];
 	piPlayer * player;
 
-	assert(oldNick);
-	assert(oldNick[0]);
-	assert(newNick);
-	assert(newNick[0]);
+	GS_ASSERT(oldNick);
+	GS_ASSERT(oldNick[0]);
+	GS_ASSERT(newNick);
+	GS_ASSERT(newNick[0]);
 
 	// Find the player.
 	///////////////////
@@ -327,7 +329,7 @@ void piPlayerChangedNick
 	// Add the new one.
 	///////////////////
 	player = piAddPlayer(peer, newNick, PEERFalse);
-	assert(player);
+	GS_ASSERT(player);
 	if(!player)
 		return;
 
@@ -354,9 +356,9 @@ static void piLeftRoomMapFn
 {
 	piPlayer * player = (piPlayer *)elem;
 	piLeftRoomData * data = (piLeftRoomData *)clientdata;
-	assert(player);
-	assert(player->nick);
-	assert(data);
+	GS_ASSERT(player);
+	GS_ASSERT(player->nick);
+	GS_ASSERT(data);
 
 	// Is the player in this room?
 	//////////////////////////////
@@ -398,8 +400,8 @@ piPlayer * piGetPlayer
 
 	PEER_CONNECTION;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Check for no table.
 	//////////////////////
@@ -458,7 +460,7 @@ void piEnumRoomPlayers
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Init the data.
 	/////////////////
@@ -517,8 +519,8 @@ void piSetPlayerIPAndProfileID
 {
 	piPlayer * player;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	if(!nick)
 		return;
@@ -559,8 +561,8 @@ static void piSetNewPlayerFlags
 	piPlayer * player;
 	int oldFlags;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	if(!nick)
 		return;
@@ -626,8 +628,8 @@ void piSetPlayerRoomFlags
 	piPlayer * player;
 	int nFlags;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	if(!nick)
 		return;
@@ -662,8 +664,8 @@ void piSetPlayerModeFlags
 	piPlayer * player;
 	int nFlags;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	if(!nick)
 		return;

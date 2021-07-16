@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerMain.h
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #ifndef _PEERMAIN_H_
 #define _PEERMAIN_H_
@@ -49,12 +48,12 @@ piConnection * connection;  // This is to fool Visual Assist.
 #endif
 
 #define PEER_CONNECTION           piConnection * connection;\
-                                  assert(peer);\
+                                  GS_ASSERT(peer);\
                                   connection = (piConnection *)peer;\
 								  GSI_UNUSED(connection);
 
-#define ASSERT_ROOMTYPE(type)     assert((type == TitleRoom) || (type == GroupRoom) || (type == StagingRoom))
-#define ASSERT_MESSAGETYPE(type)  assert((type == NormalMessage) || (type == ActionMessage) || (type == NoticeMessage))
+#define ASSERT_ROOMTYPE(type)     GS_ASSERT((type == TitleRoom) || (type == GroupRoom) || (type == StagingRoom))
+#define ASSERT_MESSAGETYPE(type)  GS_ASSERT((type == NormalMessage) || (type == ActionMessage) || (type == NoticeMessage))
 
 #define ROOM                      (connection->rooms[roomType])
 #define ROOM_W					  (connection->rooms_W[roomType])

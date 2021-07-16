@@ -404,6 +404,8 @@ static void ListGroupRoomsCallback
 		_tprintf(_T("    Max players in room: %d\n"), maxWaiting);
 		_tprintf(_T("    Games: %d\n"), numGames);
 		_tprintf(_T("    Players in games: %d\n"), numPlaying);
+		_tprintf(_T("    Test Value: %d\n"), SBServerGetIntValue( server, _T("test"), -1));
+		_tprintf(_T("    Ranked Value: %d\n"), SBServerGetIntValue( server, _T("ranked"), -1));
 	}
 	else
 		groupRoomCallbackDone = PEERTrue;  // if groupID is set to 0 it means all group rooms have been listed
@@ -466,23 +468,7 @@ static void NickErrorCallback
 	GSI_UNUSED(numSuggestedNicks);
 	GSI_UNUSED(param);
 }
-/*
-static void AutoMatchStatusCallback(PEER thePeer, PEERAutoMatchStatus theStatus, void* theParam)
-{
-	_tprintf(_T("Automatch status: %d\r\n"), theStatus);
-	GSI_UNUSED(thePeer);
-	GSI_UNUSED(theStatus);
-	GSI_UNUSED(theParam);
-}
 
-static int AutoMatchRateCallback(PEER thePeer, SBServer theServer, void* theParam)
-{
-	GSI_UNUSED(thePeer);
-	GSI_UNUSED(theServer);
-	GSI_UNUSED(theParam);
-	return 0;
-}
-*/
 static void RoomKeyChangedCallback(PEER thePeer, RoomType theType, const gsi_char* theNick, const gsi_char* theKey, const gsi_char* theValue, void* theParam)
 {
 	GSI_UNUSED(thePeer);
@@ -716,7 +702,7 @@ int test_main(int argc, char **argv)
 
 	// list the group rooms
 	printf("Listing group rooms:\n");
-	peerListGroupRooms(peer, _T(""), ListGroupRoomsCallback, userData, non_blocking);
+	peerListGroupRooms(peer, _T("\\test\\ranked\\"), ListGroupRoomsCallback, userData, non_blocking);
 
 	while (!groupRoomCallbackDone)
 	{

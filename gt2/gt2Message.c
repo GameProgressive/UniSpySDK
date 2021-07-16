@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Message.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Message.h"
 #include "gt2Buffer.h"
@@ -991,15 +990,6 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 
 	// get the message type
 	type = (GTI2MessageType)actualMessage[GTI2_MAGIC_STRING_LEN];
-	// check for a bad type
-	/*if(type < 0)
-	{
-		if(!gti2ConnectionCommunicationError(connection))
-			return GT2False;
-
-		return GT2True;
-	}*/
-
 
 	// check if it's reliable
 	if(type < GTI2NumReliableMessages)
@@ -1331,7 +1321,7 @@ static GT2Bool gti2EndReliableMessage(GT2Connection connection)
 
 	// the message we're sending is the last one
 	len = ArrayLength(connection->outgoingBufferMessages);
-	assert(len > 0);
+	GS_ASSERT(len > 0);
 	message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, len - 1);
 
 	// send it

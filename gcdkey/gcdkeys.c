@@ -32,8 +32,6 @@ extern "C" {
 DEFINES
 ********/
 #define VAL_PORT 29910
-/* #define VAL_ADDR "key.gamespy.com" */
-/*#define VAL_ADDR "204.182.161.103"*/
 #define VAL_TIMEOUT 2000
 #define VAL_RETRIES 2
 #define INBUF_LEN 1024
@@ -153,7 +151,7 @@ int gcd_init(int gameid)
 			return ret;
 
 		if (gcd_hostname[0] == 0)
-			strcpy(gcd_hostname, defaulthost);
+			gsiSafeStrcpyA(gcd_hostname, defaulthost, sizeof(gcd_hostname));
 		get_sockaddrin(gcd_hostname,VAL_PORT,&valaddr,NULL);
 	}
 
@@ -830,7 +828,7 @@ static void send_keep_alive()
 		lastKeepAliveSent = current_time();
 	if (current_time() > lastKeepAliveSent + MAX_KEEP_ALIVE_INTERVAL)
 	{	
-		strcpy(buf, keepAlive);
+		gsiSafeStrcpyA(buf, keepAlive, sizeof(buf));
 		xcode_buf(buf, strlen(keepAlive));
 		sendto(sock, buf, strlen(keepAlive), 0, (struct sockaddr *)&valaddr, sizeof(struct sockaddr_in));
 		lastKeepAliveSent = current_time();
@@ -843,14 +841,11 @@ static char *value_for_key(const char *s, const char *key)
 {
 	static int valueindex;
 	char *pos,*pos2;
-	char slash_t[] = {'\\','\0'}; 
 	char keyspec[256];
 	static char value[2][256];
 
 	valueindex ^= 1;
-	strcpy(keyspec, slash_t);
-	strcat(keyspec,key);
-	strcat(keyspec,slash_t);
+	sprintf(keyspec, "\\%s\\", key);
 	pos = strstr(s,keyspec);
 	if (!pos)
 		return "";

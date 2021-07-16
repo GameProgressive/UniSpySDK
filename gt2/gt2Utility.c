@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Utility.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Main.h"
 #include "gt2Utility.h"
@@ -18,7 +17,6 @@ devsupport@gamespy.com
 #endif
 
 #define GTI2_STACK_HOSTLEN_MAX       256
-
 
 /*************************
 ** BYTE ORDER FUNCTIONS **
@@ -122,8 +120,8 @@ GT2Bool gt2StringToAddress(const char * string, unsigned int * ip, unsigned shor
 			else
 			{
 				// Copy the host portion into the array on the stack.
-				len = (colon - string);
-				assert(len < GTI2_STACK_HOSTLEN_MAX);
+				len = (int)(colon - string);
+				GS_ASSERT(len < GTI2_STACK_HOSTLEN_MAX);
 				memcpy(stackHost, string, (unsigned int)len);
 				stackHost[len] = '\0';
 				host = stackHost;
@@ -389,7 +387,7 @@ void gti2LogMessage
 	struct tm * now;
 #endif
 
-	file = fopen("recv.log", "at");
+	file = gsifopen("recv.log", "at");
 	if(!file)
 		return;
 

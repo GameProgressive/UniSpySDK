@@ -1,12 +1,11 @@
-/*
-GameSpy Ping SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	pingerMain.c
+// SDK:		GameSpy Pinger
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /****************
 ** DEFINITIONS **
@@ -118,9 +117,9 @@ static uint16 piGetNextID(void)
 
 static PINGERBool piBytesToPing(unsigned char * buffer, piUDPPing * udpPing, char * data)
 {
-	assert(buffer != NULL);
-	assert(udpPing != NULL);
-	assert(data != NULL);
+	GS_ASSERT(buffer != NULL);
+	GS_ASSERT(udpPing != NULL);
+	GS_ASSERT(data != NULL);
 
 	// Magic.
 	udpPing->magic = *buffer++;
@@ -153,19 +152,19 @@ static PINGERBool piBytesToPing(unsigned char * buffer, piUDPPing * udpPing, cha
 	// 2001.Mar.26.JED - 24.159.107.0 (@7:30pm)
 	// PANTS|04.20.00 - commented out per JED's request.
 	////////////////////////////////////////////////////
-	//assert(udpPing->magic == PI_MAGIC);
+	//GS_ASSERT(udpPing->magic == PI_MAGIC);
 	if(udpPing->magic != PI_MAGIC)
 		return PINGERFalse;
 
 	// Check the version.
 	/////////////////////
-	assert(udpPing->version == PI_VERSION);
+	GS_ASSERT(udpPing->version == PI_VERSION);
 	if(udpPing->version != PI_VERSION)
 		return PINGERFalse;
 
 	// Check the trip.
 	//////////////////
-	assert((udpPing->trip >= 1) && (udpPing->trip <= 3));
+	GS_ASSERT((udpPing->trip >= 1) && (udpPing->trip <= 3));
 	if((udpPing->trip < 1) || (udpPing->trip > 3))
 		return PINGERFalse;
 
@@ -178,8 +177,8 @@ static PINGERBool piBytesToPing(unsigned char * buffer, piUDPPing * udpPing, cha
 
 static void piPingToBytes(piUDPPing * udpPing, unsigned char * buffer)
 {
-	assert(udpPing != NULL);
-	assert(buffer != NULL);
+	GS_ASSERT(udpPing != NULL);
+	GS_ASSERT(buffer != NULL);
 
 	// Magic.
 	*buffer++ = udpPing->magic;
@@ -206,9 +205,9 @@ static PINGERBool piSendPing(SOCKADDR_IN * to, uint16 trip, uint16 ID_A, uint16 
 	piUDPPing udpPing;
 	int rcode;
 
-	assert(to != NULL);
-	assert((trip >= 1) && (trip <= 3));
-	assert(!((trip == 2) && (ID_A == 0)));
+	GS_ASSERT(to != NULL);
+	GS_ASSERT((trip >= 1) && (trip <= 3));
+	GS_ASSERT(!((trip == 2) && (ID_A == 0)));
 
 	// Construct the outgoing ping.
 	///////////////////////////////
@@ -242,7 +241,7 @@ static PINGERBool piSocketInit(const char * localAddress,
 	int bFlag;
 	//int iLastError;
 
-	assert(localPort != 0);
+	GS_ASSERT(localPort != 0);
 
 	// Setup sockets.
 	/////////////////
@@ -270,13 +269,13 @@ static PINGERBool piSocketInit(const char * localAddress,
 			if(hostent == NULL)
 			{
 //				iLastError = WSAGetLastError();
-				assert(0);
+				GS_FAIL();
 				return PINGERFalse;
 			}
 
 			// Grab the IP.
 			///////////////
-			assert(IP != 0);
+			GS_ASSERT(IP != 0);
 			IP = *(unsigned int *)hostent->h_addr_list[0];
 		}
 
@@ -297,7 +296,7 @@ static PINGERBool piSocketInit(const char * localAddress,
 	if(piSocket == INVALID_SOCKET)
 	{
 //		iLastError = GOAGetLastError(piSocket);
-		assert(0);
+		GS_FAIL();
 		return PINGERFalse;
 	}
 
@@ -310,7 +309,7 @@ static PINGERBool piSocketInit(const char * localAddress,
 	/*if(gsiSocketIsError(rcode))
 	{
 		iLastError = WSAGetLastError();
-		assert(0);
+		GS_ASSERT(0);
 		return PINGERFalse;
 	}*/
 
@@ -320,7 +319,7 @@ static PINGERBool piSocketInit(const char * localAddress,
 	if (gsiSocketIsError(rcode))
 	{
 //		iLastError = GOAGetLastError(piSocket);
-		assert(0);
+		GS_FAIL();
 		return PINGERFalse;
 	}
 
@@ -340,7 +339,7 @@ static void piQueueCallback
 {
 	piQueuedCallback callback;
 
-	assert(callbackFunc);
+	GS_ASSERT(callbackFunc);
 	if(!callbackFunc)
 		return;
 
@@ -382,7 +381,7 @@ static void piCallCallbacks(void)
 		// Get the info.
 		////////////////
 		callback = (piQueuedCallback *)ArrayNth(piCallbacks, 0);
-		assert(callback);
+		GS_ASSERT(callback);
 		if(!callback)
 			return;
 
@@ -414,12 +413,12 @@ PINGERBool pingerInit(const char * localAddress,
 {
 	// Check if we're already initialized.
 	//////////////////////////////////////
-	assert(!piInitialized);
+	GS_ASSERT(!piInitialized);
 
 	// Make sure the UDP ping size is at least as large as the protocol struct.
 	///////////////////////////////////////////////////////////////////////////
 #if !defined(_NITRO)
-	assert(PINGER_UDP_PING_SIZE >= sizeof(piUDPPing));
+	GS_ASSERT(PINGER_UDP_PING_SIZE >= sizeof(piUDPPing));
 #endif
 
 	// Check if we're already intialized.
@@ -464,9 +463,9 @@ PINGERBool pingerInit(const char * localAddress,
 	{
 		if(!piSocketInit(localAddress, localPort))
 		{
-			assert(0);
+			GS_FAIL();
 
-			// Check for partial intialization.
+			// Check for partial initialization.
 			///////////////////////////////////
 			if(piSocket != INVALID_SOCKET)
 			{
@@ -533,10 +532,10 @@ static int GS_STATIC_CALLBACK piFindActivePingCompareFn(const void *elem1, const
 {
 	piActivePing * activePing1 = (piActivePing *)elem1;
 	piActivePing * activePing2 = (piActivePing *)elem2;
-	assert(activePing1 != NULL);
-	assert(activePing2 != NULL);
-	assert(activePing1->ID != 0);
-	assert(activePing2->ID != 0);
+	GS_ASSERT(activePing1 != NULL);
+	GS_ASSERT(activePing2 != NULL);
+	GS_ASSERT(activePing1->ID != 0);
+	GS_ASSERT(activePing2->ID != 0);
 
 	return (activePing1->ID - activePing2->ID);
 }
@@ -595,11 +594,11 @@ static void piProcessTrip1(piUDPPing * udpPing, const char * data, SOCKADDR_IN *
 	// udpPing->ID_A != 0 was triggered by a ping
 	// from 213.105.94.117 sometime during 7/3-7/02
 	///////////////////////////////////////////////
-	assert(udpPing->trip == 1);
-	//assert(udpPing->ID_A != 0);
+	GS_ASSERT(udpPing->trip == 1);
+	//GS_ASSERT(udpPing->ID_A != 0);
 	if(udpPing->ID_A == 0)
 		return;
-	assert(udpPing->ID_B == 0);
+	GS_ASSERT(udpPing->ID_B == 0);
 	if(udpPing->ID_B != 0)
 		return;
 
@@ -670,8 +669,8 @@ static void piProcessTrip2(piUDPPing * udpPing, const char * data, SOCKADDR_IN *
 	// 12/4/00 at approx. 5pm
 	// This is the same IP as the shifted ping assert above.
 	//////////////////////////////////////////////////////////
-	assert(udpPing->trip == 2);
-	assert(udpPing->ID_A != 0);
+	GS_ASSERT(udpPing->trip == 2);
+	GS_ASSERT(udpPing->ID_A != 0);
 	if(udpPing->ID_A == 0)
 		return;
 	
@@ -725,11 +724,11 @@ static void piProcessTrip3(piUDPPing * udpPing, const char * data, SOCKADDR_IN *
 	
 	// Validity check.
 	//////////////////
-	assert(udpPing->trip == 3);
-	assert(udpPing->ID_A == 0);
+	GS_ASSERT(udpPing->trip == 3);
+	GS_ASSERT(udpPing->ID_A == 0);
 	if(udpPing->ID_A != 0)
 		return;
-	assert(udpPing->ID_B != 0);
+	GS_ASSERT(udpPing->ID_B != 0);
 	if(udpPing->ID_B == 0)
 		return;
 
@@ -741,7 +740,7 @@ static void piProcessTrip3(piUDPPing * udpPing, const char * data, SOCKADDR_IN *
 
 	// Call the callback.
 	/////////////////////
-	assert(piPingerPinged != NULL);
+	GS_ASSERT(piPingerPinged != NULL);
 	if(piPingerPinged != NULL)
 	{
 		// Calculate the ping.
@@ -760,9 +759,9 @@ static void piProcessTrip3(piUDPPing * udpPing, const char * data, SOCKADDR_IN *
 
 static void piProcessPing(piUDPPing * udpPing, const char * data, SOCKADDR_IN * from, gsi_time recvTime)
 {
-	assert(udpPing != NULL);
-	assert(data != NULL);
-	assert(from != NULL);
+	GS_ASSERT(udpPing != NULL);
+	GS_ASSERT(data != NULL);
+	GS_ASSERT(from != NULL);
 
 	// Process based on trip num.
 	/////////////////////////////
@@ -864,7 +863,7 @@ static void piCheckTimeouts(void)
 		// Get the nth element of the list.
 		///////////////////////////////////
 		activePing = (piActivePing *)ArrayNth(piActivePingList, n);
-		assert(activePing != NULL);
+		GS_ASSERT(activePing != NULL);
 		if(activePing != NULL)
 		{
 			// Does it have a timeout?
@@ -928,14 +927,14 @@ void pingerPing(unsigned int IP,
 	SOCKADDR_IN to;
 	uint16 ID;
 
-	assert(piInitialized);
-	assert(IP != 0);
+	GS_ASSERT(piInitialized);
+	GS_ASSERT(IP != 0);
 
 	// ICMP not supported yet!
 	//////////////////////////
-	assert(port != 0);
-	assert(piUDPEnabled);
-	assert(piSocket != INVALID_SOCKET);
+	GS_ASSERT(port != 0);
+	GS_ASSERT(piUDPEnabled);
+	GS_ASSERT(piSocket != INVALID_SOCKET);
 
 	// Check for setting data.
 	//////////////////////////

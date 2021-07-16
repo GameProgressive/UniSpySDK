@@ -35,6 +35,7 @@ GPResult gpiProcessRegisterUniqueNick(
 GPResult gpiRegisterCdKey(
   GPConnection * connection,
   const char cdkey[GP_CDKEY_LEN],
+  int gameId,
   GPEnum blocking,
   GPCallback callback,
   void * param

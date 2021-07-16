@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	Resource.h
+// SDK:		GameSpy Peer SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2009 GameSpy Industries, Inc.
+
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
 // Used by PeerLobby.rc

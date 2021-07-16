@@ -1786,7 +1786,7 @@ gsi_bool gsLargeIntReverseBytes(gsLargeInt_t *lint)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // hashing is made complicated by differing byte orders 
-void gsLargeIntAddToMD5(const gsLargeInt_t * _lint, MD5_CTX * md5)
+void gsLargeIntAddToMD5(const gsLargeInt_t * _lint, GSMD5_CTX * md5)
 {
 	int byteLength = 0;
 	gsi_u8 * dataStart = NULL;
@@ -1806,7 +1806,7 @@ void gsLargeIntAddToMD5(const gsLargeInt_t * _lint, MD5_CTX * md5)
 
 	// reverse to big-endian (MS) then hash
 	gsLargeIntReverseBytes(&lint);
-	MD5Update(md5, dataStart, (unsigned int)byteLength);
+	GSMD5Update(md5, dataStart, (unsigned int)byteLength);
 	gsLargeIntReverseBytes(&lint);
 } 
 

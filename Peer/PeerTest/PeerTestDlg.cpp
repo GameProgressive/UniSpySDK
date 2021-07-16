@@ -1,5 +1,11 @@
-// PeerTestDlg.cpp : implementation file
+///////////////////////////////////////////////////////////////////////////////
+// File:	PeerTestDlg.cpp
+// SDK:		GameSpy Peer SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "stdafx.h"
 #include "PeerTest.h"
@@ -2859,5 +2865,9 @@ void CPeerTestDlg::OnStopAutoMatch()
 		UpdateData();
 		m_autoMatchStatus = _T("");
 		UpdateData(FALSE);
+
+		if (m_Socket != INVALID_SOCKET)
+			closesocket(m_Socket);
+		m_Socket = INVALID_SOCKET;
 	}
 }

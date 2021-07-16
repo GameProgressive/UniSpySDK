@@ -74,8 +74,8 @@ typedef struct
 	char * name;
 	
 #ifdef GSI_UNICODE
-	unsigned short* name_W; // must have this since developers are given pointers to internal memory
-	unsigned short* path_W;
+	gsi_char * name_W; // must have this since developers are given pointers to internal memory
+	gsi_char * path_W;
 #endif
 
 	int progress;
@@ -84,7 +84,7 @@ typedef struct
 	FILE * file;
 	int flags;
 	gsi_time modTime;
-	MD5_CTX md5;
+	GSMD5_CTX md5;
 	int reason;
 } GPIFile;
 

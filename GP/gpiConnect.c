@@ -27,8 +27,6 @@
 // Random String stuff.
 ///////////////////////
 #define RANDSTRING      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-//this is off by one
-//#define RANDOMCHAR()    (RANDSTRING[(rand() * sizeof(RANDSTRING)) / (RAND_MAX + 1)])
 #define RANDOMCHAR()    (RANDSTRING[rand() % (sizeof(RANDSTRING) - 1)])
 
 //GLOBALS
@@ -145,21 +143,6 @@ gpiStartConnect(
 			
 		iconnection->peerPort = 0;
 	}
-	/*
-	else
-	{
-		// Deprecated TCP code; Replaced by UDP Layer
-		// No local port.
-		/////////////////
-		//iconnection->peerSocket = INVALID_SOCKET;
-		
-		// Set to nothing because NN will determine this
-		//////////////////////////
-		//iconnection->peerPort = 0;
-	}
-	*/
-	
-
 	
 	// Create the cm socket.
 	////////////////////////
@@ -367,7 +350,7 @@ gpiSendLogin(GPConnection * connection,
 		passphrase = data->partnerchallenge;
 	else
 		passphrase = iconnection->password;
-	MD5Digest((unsigned char*)passphrase, strlen(passphrase), data->passwordHash);
+	GSMD5Digest((unsigned char*)passphrase, strlen(passphrase), data->passwordHash);
 
 	// Construct the user.
 	//////////////////////
@@ -403,7 +386,7 @@ gpiSendLogin(GPConnection * connection,
 		data->userChallenge,
 		data->serverChallenge,
 		data->passwordHash);
-	MD5Digest((unsigned char *)buffer, strlen(buffer), response);
+	GSMD5Digest((unsigned char *)buffer, strlen(buffer), response);
 
 	// Check for an existing profile.
 	/////////////////////////////////
@@ -929,14 +912,12 @@ gpiDisconnect(
 	GPIPeer * delPeer;
 	GPIBool connClosed;
 
-	// Check if we're already disconnected.
-	// PANTS|05.15.00
+	// Check if we're already disconnected. 05.15.00
 	///////////////////////////////////////
 	if(iconnection->connectState == GPI_DISCONNECTED)
 		return;
 
-	// Skip most of this stuff if we never actually connected.
-	// PANTS|05.16.00
+	// Skip most of this stuff if we never actually connected. 05.16.00
 	//////////////////////////////////////////////////////////
 	if(iconnection->connectState != GPI_NOT_CONNECTED)
 	{
@@ -951,8 +932,7 @@ gpiDisconnect(
 			gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
 		}
 
-		// Always flush remaining messages.
-		// PANTS|05.16.00
+		// Always flush remaining messages. 05.16.00
 		///////////////////////////////////
 		gpiSendFromBuffer(connection, iconnection->cmSocket, &iconnection->outputBuffer, &connClosed, GPITrue, "CM");
 
@@ -963,16 +943,6 @@ gpiDisconnect(
 			shutdown(iconnection->cmSocket, 2);
 			closesocket(iconnection->cmSocket);
 			iconnection->cmSocket = INVALID_SOCKET;
-		}
-		
-		if(/*iconnection->peerSocket != INVALID_SOCKET*/ gsUdpEngineIsInitialized())
-		{
-			//shutdown(iconnection->peerSocket, 2);
-			//closesocket(iconnection->peerSocket);
-			//iconnection->peerSocket = INVALID_SOCKET;
-			gsUdpEngineRemoveMsgHandler(iconnection->mHeader);
-			if (gsUdpEngineNoMoreMsgHandlers() && gsUdpEngineNoApp())
-				gsUdpEngineShutdown();
 		}
 
 		// We're disconnected.
@@ -985,6 +955,14 @@ gpiDisconnect(
 		iconnection->profileid = 0;
 	}
 	
+	// should be shutdown regardless of gp connection to server
+	if(gsUdpEngineIsInitialized())
+	{
+		gsUdpEngineRemoveMsgHandler(iconnection->mHeader);
+		if (gsUdpEngineNoMoreMsgHandlers() && gsUdpEngineNoApp())
+			gsUdpEngineShutdown();
+	}
+
 	// freeclear all the memory.
 	///////////////////////
 	freeclear(iconnection->socketBuffer.buffer);

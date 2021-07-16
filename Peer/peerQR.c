@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerQR.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -210,6 +209,7 @@ static void piQRAddErrorCallbackA
 			status = PEERFailed;
 		else
 			status = PEERSearching;
+		
 		piSetAutoMatchStatus(peer, status);
 
 		return;
@@ -284,7 +284,7 @@ PEERBool piStartReporting
 
 	// Check that we're not reporting.
 	//////////////////////////////////
-	assert(!connection->queryReporting);
+	GS_ASSERT(!connection->queryReporting);
 	if(connection->queryReporting)
 		piStopReporting(peer);
 
@@ -398,14 +398,14 @@ PEERBool piStartAutoMatchReporting
 
 	// Check that we're not reporting.
 	//////////////////////////////////
-	assert(!connection->autoMatchReporting);
+	GS_ASSERT(!connection->autoMatchReporting);
 	if(connection->autoMatchReporting)
 		piStopAutoMatchReporting(peer);
 
 	// Get the operation.
 	/////////////////////
 	operation = connection->autoMatchOperation;
-	assert(operation);
+	GS_ASSERT(operation);
 
 	// Setup the AutoMatch gamename.
 	////////////////////////////////

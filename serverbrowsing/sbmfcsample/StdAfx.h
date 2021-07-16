@@ -2,6 +2,13 @@
 // File:	StdAfx.h
 // SDK:		GameSpy Server Browsing SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Include file for standard system include files, or project specific 
+// include files that are used frequently, but are changed infrequently.
 
 #if !defined(AFX_STDAFX_H__BFD40F2B_3C12_4712_8A50_65B3BCFA0A5F__INCLUDED_)
 #define AFX_STDAFX_H__BFD40F2B_3C12_4712_8A50_65B3BCFA0A5F__INCLUDED_

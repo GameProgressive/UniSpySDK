@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerMain.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -32,7 +31,7 @@ devsupport@gamespy.com
 /************
 ** DEFINES **
 ************/
-#define PEER_CONNECTED         assert(connection->connected);
+#define PEER_CONNECTED         GS_ASSERT(connection->connected);
 
 #define PI_CHECK_SHUTDOWN      if(connection->shutdown && (connection->callbackDepth == 0))\
                                {\
@@ -110,7 +109,7 @@ PEER peerInitialize
 	PEER peer;
 	piConnection * connection;
 
-	assert(callbacks);
+	GS_ASSERT(callbacks);
 
 	// Check if the backend is available.
 	/////////////////////////////////////
@@ -189,11 +188,11 @@ void peerConnectA
 	PI_OP_ID;
 	PEER_CONNECTION;
 
-	assert(nick);
-	assert(nick[0]);
-	assert(profileID >= 0);
-	assert(connectCallback);
-	assert(strlen(nick) < PI_NICK_MAX_LEN);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
+	GS_ASSERT(profileID >= 0);
+	GS_ASSERT(connectCallback);
+	GS_ASSERT(strlen(nick) < PI_NICK_MAX_LEN);
 
 	// Are we already connecting or connected?
 	//////////////////////////////////////////
@@ -274,7 +273,7 @@ void peerConnectLoginA
 	PI_OP_ID;
 	PEER_CONNECTION;
 
-	assert(connectCallback);
+	GS_ASSERT(connectCallback);
 
 	// Are we already connecting or connected?
 	//////////////////////////////////////////
@@ -361,9 +360,9 @@ void peerConnectPreAuthA
 	PI_OP_ID;
 	PEER_CONNECTION;
 
-	assert(authtoken && authtoken[0]);
-	assert(partnerchallenge && partnerchallenge[0]);
-	assert(connectCallback);
+	GS_ASSERT(authtoken && authtoken[0]);
+	GS_ASSERT(partnerchallenge && partnerchallenge[0]);
+	GS_ASSERT(connectCallback);
 
 	// Are we already connecting or connected?
 	//////////////////////////////////////////
@@ -437,7 +436,7 @@ void peerRetryWithNickA
 
 	// Check that we're connecting.
 	///////////////////////////////
-	assert(connection->connecting);
+	GS_ASSERT(connection->connecting);
 	if(!connection->connecting)
 		return;
 
@@ -480,7 +479,7 @@ void peerRegisterUniqueNickA
 
 	// Check that we're connecting.
 	///////////////////////////////
-	assert(connection->connecting);
+	GS_ASSERT(connection->connecting);
 	if(!connection->connecting)
 		return;
 
@@ -571,13 +570,13 @@ PEERBool peerSetTitleA
 
 	PEER_CONNECTION;
 
-	assert(title);
-	assert(title[0]);
-	assert(strlen(title) < PI_TITLE_MAX_LEN);
-	assert(qrSecretKey);
-	assert(sbName);
-	assert(sbName[0]);
-	assert(sbSecretKey);
+	GS_ASSERT(title);
+	GS_ASSERT(title[0]);
+	GS_ASSERT(strlen(title) < PI_TITLE_MAX_LEN);
+	GS_ASSERT(qrSecretKey);
+	GS_ASSERT(sbName);
+	GS_ASSERT(sbName[0]);
+	GS_ASSERT(sbSecretKey);
 
 	// Check if a title is set.
 	///////////////////////////
@@ -586,7 +585,7 @@ PEERBool peerSetTitleA
 
 	// Game.
 	////////
-	strcpy(connection->title, title);
+	gsiSafeStrcpyA(connection->title, title, sizeof(connection->title));
 
 #ifdef GSI_UNICODE
 	AsciiToUCS2String(title, connection->title_W);
@@ -645,7 +644,7 @@ PEERBool peerSetTitleA
 
 	// Hosting.
 	///////////
-	strcpy(connection->qrSecretKey, qrSecretKey);
+	gsiSafeStrcpyA(connection->qrSecretKey, qrSecretKey, sizeof(connection->qrSecretKey));
 	piStopHosting(peer, PEERTrue);
 	connection->hosting = PEERFalse;
 	connection->playing = PEERFalse;
@@ -889,8 +888,8 @@ static void piNumPlayersConsistencyCheckMap
 {
 	int i;
 
-	assert(player);
-	assert(count);
+	GS_ASSERT(player);
+	GS_ASSERT(count);
 
 	for(i = 0 ; i < NumRooms ; i++)
 	{
@@ -930,7 +929,7 @@ static void piThink
 			// Check the counts.
 			////////////////////
 			for(i = 0 ; i < NumRooms ; i++)
-				assert(count[i] == connection->numPlayers[i]);
+				GS_ASSERT(count[i] == connection->numPlayers[i]);
 		}
 	}
 #endif
@@ -1166,7 +1165,7 @@ void peerChangeNickA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 	
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Start the operation.
 	///////////////////////
@@ -1205,7 +1204,7 @@ void peerStayInRoom
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(roomType == TitleRoom);
+	GS_ASSERT(roomType == TitleRoom);
 	if(roomType != TitleRoom)
 		return;
 
@@ -1277,8 +1276,8 @@ void peerParseQueryA
 {
 	PEER_CONNECTION;
 
-	assert(query);
-	assert(sender);
+	GS_ASSERT(query);
+	GS_ASSERT(sender);
 
 	// Handle the query based on what type of reporting we're doing.
 	////////////////////////////////////////////////////////////////
@@ -1318,7 +1317,7 @@ void peerAuthenticateCDKeyA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 	
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Start the operation.
 	///////////////////////
@@ -1402,7 +1401,7 @@ void peerJoinTitleRoomA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 	
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// NULL password is the same as empty password.
 	///////////////////////////////////////////////
@@ -1427,7 +1426,7 @@ void peerJoinTitleRoomA
 
 	// Check if we're in the title room.
 	////////////////////////////////////
-	assert(!connection->enteringRoom[TitleRoom] && !connection->inRoom[TitleRoom]);
+	GS_ASSERT(!connection->enteringRoom[TitleRoom] && !connection->inRoom[TitleRoom]);
 	if((success && connection->enteringRoom[TitleRoom]) || connection->inRoom[TitleRoom])
 	{
 		success = PEERFalse;
@@ -1436,7 +1435,7 @@ void peerJoinTitleRoomA
 
 	// Check if we're AutoMatching.
 	///////////////////////////////
-	assert(!peerIsAutoMatching(peer));
+	GS_ASSERT(!peerIsAutoMatching(peer));
 	if(success && peerIsAutoMatching(peer))
 	{
 		success = PEERFalse;
@@ -1448,7 +1447,7 @@ void peerJoinTitleRoomA
 	if(success)
 	{
 		if(connection->titleRoomChannel[0])
-			strcpy(buffer, connection->titleRoomChannel);
+			gsiSafeStrcpyA(buffer, connection->titleRoomChannel, sizeof(buffer));
 		else
 			piMangleTitleRoom(buffer, connection->title);
 	}
@@ -1500,7 +1499,7 @@ void peerJoinGroupRoom
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check for a title.
 	/////////////////////
@@ -1520,7 +1519,7 @@ void peerJoinGroupRoom
 
 	// Check if we're AutoMatching.
 	///////////////////////////////
-	assert(!peerIsAutoMatching(peer));
+	GS_ASSERT(!peerIsAutoMatching(peer));
 	if(success && peerIsAutoMatching(peer))
 	{
 		success = PEERFalse;
@@ -1529,7 +1528,7 @@ void peerJoinGroupRoom
 
 	// Check the ID.
 	////////////////
-	assert(groupID);
+	GS_ASSERT(groupID);
 	if(success && !groupID)
 		success = PEERFalse;
 
@@ -1631,7 +1630,7 @@ static void piJoinStagingRoom
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// NULL password is the same as empty password.
 	///////////////////////////////////////////////
@@ -1664,7 +1663,7 @@ static void piJoinStagingRoom
 
 	// Check if we're AutoMatching.
 	///////////////////////////////
-	assert(!peerIsAutoMatching(peer));
+	GS_ASSERT(!peerIsAutoMatching(peer));
 	if(success && peerIsAutoMatching(peer))
 	{
 		success = PEERFalse;
@@ -1690,8 +1689,8 @@ static void piJoinStagingRoom
 	//////////////////////////////////
 	if(success && !server)
 	{
-		assert(channel);
-		assert(channel[0]);
+		GS_ASSERT(channel);
+		GS_ASSERT(channel[0]);
 		if(!channel || !channel[0])
 			success = PEERFalse;
 	}
@@ -1836,10 +1835,10 @@ void peerCreateStagingRoomWithSocketA
 
 	PEER_CONNECTION;
 
-	assert(name);
-	assert(connection->title[0]);
-	assert(callback);
-	assert(maxPlayers >= 0);
+	GS_ASSERT(name);
+	GS_ASSERT(connection->title[0]);
+	GS_ASSERT(callback);
+	GS_ASSERT(maxPlayers >= 0);
 
 	// NULL password is the same as empty password.
 	///////////////////////////////////////////////
@@ -1872,7 +1871,7 @@ void peerCreateStagingRoomWithSocketA
 
 	// Check if we're AutoMatching.
 	///////////////////////////////
-	assert(!peerIsAutoMatching(peer));
+	GS_ASSERT(!peerIsAutoMatching(peer));
 	if(success && peerIsAutoMatching(peer))
 	{
 		success = PEERFalse;
@@ -1932,7 +1931,7 @@ qr2_t peerGetReportingRecord(PEER peer)
 	if (!connection->connected)
 		return NULL;
 	
-	assert(connection->queryReporting || connection->autoMatchReporting);
+	GS_ASSERT(connection->queryReporting || connection->autoMatchReporting);
 	// When we are reporting normal games, the normal qr2 record
 	// is returned.
 	if (connection->queryReporting)
@@ -2024,7 +2023,7 @@ void peerListGroupRoomsA
 	PI_OP_ID;
 	PEER_CONNECTION;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check for a title.
 	/////////////////////
@@ -2078,7 +2077,7 @@ void peerStartListingGamesA
 
 	PEER_CONNECTION;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check for a title.
 	/////////////////////
@@ -2152,7 +2151,7 @@ void peerUpdateGame
 {
 	PEER_CONNECTION;
 
-	assert(server);
+	GS_ASSERT(server);
 
 	// Check for a title.
 	/////////////////////
@@ -2178,7 +2177,7 @@ void peerUpdateGameByMaster(PEER peer, SBServer server, PEERBool fullUpdate)
 	PEER_CONNECTION;
 
 	// validate server for sanity check
-	assert(server);
+	GS_ASSERT(server);
 
 	// Check that we have set a title
 	if(!connection->title[0])
@@ -2194,7 +2193,7 @@ void peerUpdateGamePing(PEER peer, SBServer server)
 	PEER_CONNECTION;
 
 	// validate server for sanity check
-	assert(server);
+	GS_ASSERT(server);
 
 	// Check that we have set a title
 	if(!connection->title[0])
@@ -2225,7 +2224,7 @@ void peerMessageRoomA
 
 	// Check that we're in this room.
 	/////////////////////////////////
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return;
 
@@ -2264,7 +2263,7 @@ void peerUTMRoomA
 
 	// Check that we're in this room.
 	/////////////////////////////////
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return;
 
@@ -2304,7 +2303,7 @@ void peerSetPasswordA
 
 	// Check room type.
 	////////////////////
-	assert(roomType == StagingRoom);
+	GS_ASSERT(roomType == StagingRoom);
 	if(roomType != StagingRoom)
 		return;
 
@@ -2330,7 +2329,7 @@ void peerSetPasswordA
 
 	// Make sure we're hosting.
 	///////////////////////////
-	assert(connection->hosting);
+	GS_ASSERT(connection->hosting);
 	if(!connection->hosting)
 		return;
 
@@ -2375,7 +2374,7 @@ void peerSetRoomNameA
 
 	ASSERT_ROOMTYPE(roomType);
 
-	assert(roomType == StagingRoom);
+	GS_ASSERT(roomType == StagingRoom);
 
 	// NULL name is the same as empty name.
 	///////////////////////////////////////
@@ -2399,7 +2398,7 @@ void peerSetRoomNameA
 
 	// Make sure we're hosting.
 	///////////////////////////
-	assert(connection->hosting);
+	GS_ASSERT(connection->hosting);
 	if(!connection->hosting)
 		return;
 
@@ -2431,7 +2430,7 @@ const char * peerGetRoomNameA
 	PEER_CONNECTED;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return NULL;
 
@@ -2448,7 +2447,7 @@ const unsigned short * peerGetRoomNameW
 	PEER_CONNECTED;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return NULL;
 
@@ -2466,7 +2465,7 @@ const char * peerGetRoomChannelA
 	PEER_CONNECTED;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM || ENTERING_ROOM);
+	GS_ASSERT(IN_ROOM || ENTERING_ROOM);
 	if(!IN_ROOM && ! ENTERING_ROOM)
 		return NULL;
 
@@ -2483,7 +2482,7 @@ const unsigned short * peerGetRoomChannelW
 	PEER_CONNECTED;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM || ENTERING_ROOM);
+	GS_ASSERT(IN_ROOM || ENTERING_ROOM);
 	if(!IN_ROOM && ! ENTERING_ROOM)
 		return NULL;
 
@@ -2549,6 +2548,7 @@ void peerSetTitleRoomChannelW
 SBServer peerGetHostServer(PEER peer)
 {
 	PEER_CONNECTION;
+	GS_ASSERT(peer);
 	PEER_CONNECTED;
 
 	return connection->hostServer;
@@ -2618,12 +2618,12 @@ void peerEnumPlayers
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 	
-	assert(callback);
+	GS_ASSERT(callback);
 	ASSERT_ROOMTYPE(roomType);
 
 	// Check that we're in this room.
 	/////////////////////////////////
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(success && !IN_ROOM)
 		success = PEERFalse;
 
@@ -2656,8 +2656,8 @@ void peerMessagePlayerA
 	PEER_CONNECTED;
 
 	ASSERT_MESSAGETYPE(messageType);
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Check for connection succeeded.
 	//////////////////////////////////
@@ -2735,9 +2735,9 @@ void peerKickPlayerA
 	PEER_CONNECTED;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(IN_ROOM || ENTERING_ROOM);
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(IN_ROOM || ENTERING_ROOM);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Check for connection succeeded.
 	//////////////////////////////////
@@ -2777,9 +2777,9 @@ PEERBool peerGetPlayerPingA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick);
-	assert(nick[0]);
-	assert(ping);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
+	GS_ASSERT(ping);
 
 	// Get the player.
 	//////////////////
@@ -2831,11 +2831,11 @@ PEERBool peerGetPlayersCrossPingA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick1);
-	assert(nick1[0]);
-	assert(nick2);
-	assert(nick2[0]);
-	assert(crossPing);
+	GS_ASSERT(nick1);
+	GS_ASSERT(nick1[0]);
+	GS_ASSERT(nick2);
+	GS_ASSERT(nick2[0]);
+	GS_ASSERT(crossPing);
 
 	// Do it.
 	/////////
@@ -2870,8 +2870,8 @@ PEERBool peerPingPlayerA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick);
-	assert(nick[0]);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
 
 	// Get the player.
 	//////////////////
@@ -2932,7 +2932,7 @@ PEERBool peerGetPlayerInfoNoWaitA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick);
+	GS_ASSERT(nick);
 
 	player = piGetPlayer(peer, nick);
 	if(!player || !player->gotIPAndProfileID)
@@ -2997,10 +2997,10 @@ void peerGetPlayerInfoA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(callback);
-	assert(nick);
-	assert(nick[0]);
-	assert(callback);
+	GS_ASSERT(callback);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
+	GS_ASSERT(callback);
 
 	// Find the player.
 	///////////////////
@@ -3028,7 +3028,12 @@ void peerGetPlayerInfoA
 	}
 	else
 	{
-		// Start an op to get it.
+        // Make sure we are connected before starting operation
+        ////////////////////////////////////////////////////////
+        if(!connection->connected)
+            return;
+		        
+        // Start an op to get it.
 		/////////////////////////
 		if(!piNewGetPlayerInfoOperation(peer, nick, callback, param, opID))
 			success = PEERFalse;
@@ -3223,7 +3228,7 @@ PEERBool peerIsPlayerHostA
 
 	// Are we in this type of room?
 	///////////////////////////////
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return PEERFalse;
 
@@ -3270,13 +3275,13 @@ PEERBool peerGetPlayerFlagsA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(flags);
+	GS_ASSERT(flags);
 	if(!flags)
 		return PEERFalse;
 
 	// Are we in this type of room?
 	///////////////////////////////
-	assert(IN_ROOM);
+	GS_ASSERT(IN_ROOM);
 	if(!IN_ROOM)
 		return PEERFalse;
 
@@ -3337,7 +3342,7 @@ void peerSetReady
 
 	// Are we in a staging room?
 	////////////////////////////
-	assert(connection->inRoom[StagingRoom]);
+	GS_ASSERT(connection->inRoom[StagingRoom]);
 	if(!connection->inRoom[StagingRoom])
 		return;
 
@@ -3383,9 +3388,9 @@ PEERBool peerGetReadyA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick);
-	assert(nick[0]);
-	assert(ready);
+	GS_ASSERT(nick);
+	GS_ASSERT(nick[0]);
+	GS_ASSERT(ready);
 
 	// Check for a title.
 	/////////////////////
@@ -3399,7 +3404,7 @@ PEERBool peerGetReadyA
 
 	// Are we in a staging room?
 	////////////////////////////
-	assert(connection->inRoom[StagingRoom]);
+	GS_ASSERT(connection->inRoom[StagingRoom]);
 	if(!connection->inRoom[StagingRoom])
 		return PEERFalse;
 
@@ -3474,7 +3479,7 @@ PEERBool peerAreAllReady
 
 	// Are we in a staging room?
 	////////////////////////////
-	assert(connection->inRoom[StagingRoom]);
+	GS_ASSERT(connection->inRoom[StagingRoom]);
 	if(!connection->inRoom[StagingRoom])
 		return PEERFalse;
 
@@ -3508,13 +3513,13 @@ void peerStartGameA
 
 	// Check that we're in a staging room.
 	//////////////////////////////////////
-	assert(connection->inRoom[StagingRoom]);
+	GS_ASSERT(connection->inRoom[StagingRoom]);
 	if(!connection->inRoom[StagingRoom])
 		return;
 
 	// Make sure we're the host.
 	////////////////////////////
-	assert(connection->hosting);
+	GS_ASSERT(connection->hosting);
 	if(!connection->hosting)
 		return;
 
@@ -3699,7 +3704,7 @@ void peerStateChanged
 
 	// We should be reporting.
 	//////////////////////////
-	assert(connection->queryReporting);
+	GS_ASSERT(connection->queryReporting);
 
 	// Send a state-changed.
 	////////////////////////
@@ -3720,9 +3725,9 @@ void piSendChannelUTM
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(channel && channel[0]);
-	assert(command && command[0]);
-	assert(parameters);
+	GS_ASSERT(channel && channel[0]);
+	GS_ASSERT(command && command[0]);
+	GS_ASSERT(parameters);
 
 	// Check for connection succeeded.
 	//////////////////////////////////
@@ -3772,9 +3777,9 @@ void piSendPlayerUTM
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(nick && nick[0]);
-	assert(command && command[0]);
-	assert(parameters);
+	GS_ASSERT(nick && nick[0]);
+	GS_ASSERT(command && command[0]);
+	GS_ASSERT(parameters);
 
 	// Check for connection succeeded.
 	//////////////////////////////////
@@ -3824,9 +3829,9 @@ void peerSetGlobalKeysA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(keys);
-	assert(values);
-	assert(num > 0);
+	GS_ASSERT(keys);
+	GS_ASSERT(values);
+	GS_ASSERT(num > 0);
 
 	// Check for connection succeeded.
 	//////////////////////////////////
@@ -3885,7 +3890,7 @@ void peerGetPlayerGlobalKeysA
 	if(!nick || !nick[0])
 		nick = connection->nick;
 
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Start the operation.
 	///////////////////////
@@ -3945,7 +3950,7 @@ void peerGetRoomGlobalKeysA
 		return;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check that we're in or entering this room.
 	/////////////////////////////////////////////
@@ -3998,9 +4003,9 @@ void peerSetRoomKeysA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(keys);
-	assert(values);
-	assert(num > 0);
+	GS_ASSERT(keys);
+	GS_ASSERT(values);
+	GS_ASSERT(num > 0);
 	ASSERT_ROOMTYPE(roomType);
 
 	// Check for connection succeeded.
@@ -4068,7 +4073,7 @@ void peerGetRoomKeysA
 		return;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(callback);
+	GS_ASSERT(callback);
 
 	// Check that we're in or entering this room.
 	/////////////////////////////////////////////
@@ -4263,7 +4268,7 @@ void peerStartAutoMatchWithSocketA
 	PEER_CONNECTION;
 	PEER_CONNECTED;
 
-	assert(maxPlayers >= 2);
+	GS_ASSERT(maxPlayers >= 2);
 
 	// Check the params.
 	////////////////////
@@ -4282,7 +4287,7 @@ void peerStartAutoMatchWithSocketA
 
 	// Check for an AutoMatch in progress.
 	//////////////////////////////////////
-	assert(!peerIsAutoMatching(peer));
+	GS_ASSERT(!peerIsAutoMatching(peer));
 	if(peerIsAutoMatching(peer))
 		goto failed;
 

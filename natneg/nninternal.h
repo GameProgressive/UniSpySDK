@@ -61,8 +61,8 @@
 #endif
 
 
-#define INITPACKET_SIZE BASEPACKET_SIZE + 9
-#define INITPACKET_ADDRESS_OFFSET BASEPACKET_SIZE + 3
+#define INITPACKET_SIZE				(BASEPACKET_SIZE + 9)
+#define INITPACKET_ADDRESS_OFFSET	(BASEPACKET_SIZE + 3)
 typedef struct _InitPacket
 {
 	unsigned char porttype;
@@ -72,7 +72,7 @@ typedef struct _InitPacket
 	unsigned short localport;
 } InitPacket;
 
-#define REPORTPACKET_SIZE BASEPACKET_SIZE + 61
+#define REPORTPACKET_SIZE			(BASEPACKET_SIZE + 61)
 typedef struct _ReportPacket
 {
 	unsigned char porttype;
@@ -83,7 +83,7 @@ typedef struct _ReportPacket
 	char gamename[50];
 } ReportPacket;
 
-#define CONNECTPACKET_SIZE BASEPACKET_SIZE + 8
+#define CONNECTPACKET_SIZE			(BASEPACKET_SIZE + 8)
 typedef struct _ConnectPacket
 {
 	unsigned int remoteIP;

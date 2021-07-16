@@ -1,3 +1,13 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gptestc.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
+#include <wchar.h>
 #include "../gp.h"
 #include "../../common/gsAvailable.h"
 
@@ -32,12 +42,12 @@ int test_main(int argc, char **argv);
 #define GPTC_EMAIL2     _T("gptestc2@gptestc.com")
 #define GPTC_EMAIL3     _T("gptestc3@gptestc.com")
 #define GPTC_PASSWORD   _T("gptestc")
-#define GPTC_PID1       2957553
+#define GPTC_PID1       2957553 
 #define GPTC_PID2       3052160
 #define GPTC_PID3       118305038
 #define GPTC_FIREWALL_OPTION   GP_FIREWALL
 
-#define CHECK_GP_RESULT(func, errString) if(func != GP_NO_ERROR) { printf("%s\n", errString); /*return 1;*/ }
+#define CHECK_GP_RESULT(func, errString) if(func != GP_NO_ERROR) { printf("%s\n", errString); totalErrors++; /*return 1;*/ }
 
 GPConnection * pconn;
 GPProfile other;
@@ -49,6 +59,7 @@ gsi_bool gotStoodUp = gsi_false;
 gsi_bool blockTesting = gsi_false;
 int noComLineArgs;
 int namespaceIds[GP_MAX_NAMESPACEIDS] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+int totalErrors = 0;
 
 
 #ifdef GSI_COMMON_DEBUG
@@ -71,7 +82,7 @@ static void Error(GPConnection * pconnection, GPErrorArg * arg, void * param)
 	gsi_char * errorCodeString;
 	gsi_char * resultString;
 
-#define RESULT(x) case x: resultString = _T(#x); break;
+#define RESULT(x) case x: resultString = (gsi_char *) _T(#x); break;
 	switch(arg->result)
 	{
 	RESULT(GP_NO_ERROR)
@@ -80,10 +91,10 @@ static void Error(GPConnection * pconnection, GPErrorArg * arg, void * param)
 	RESULT(GP_NETWORK_ERROR)
 	RESULT(GP_SERVER_ERROR)
 	default:
-		resultString = _T("Unknown result!\n");
+		resultString = (gsi_char *) _T("Unknown result!\n");
 	}
 
-#define ERRORCODE(x) case x: errorCodeString = _T(#x); break;
+#define ERRORCODE(x) case x: errorCodeString = (gsi_char *) _T(#x); break;
 	switch(arg->errorCode)
 	{
 	ERRORCODE(GP_GENERAL)
@@ -132,7 +143,7 @@ static void Error(GPConnection * pconnection, GPErrorArg * arg, void * param)
 	ERRORCODE(GP_SEARCH)
 	ERRORCODE(GP_SEARCH_CONNECTION_FAILED)
 	default:
-		errorCodeString = _T("Unknown error code!\n");
+		errorCodeString = (gsi_char *) _T("Unknown error code!\n");
 	}
 
 	if(arg->fatal)
@@ -147,10 +158,11 @@ static void Error(GPConnection * pconnection, GPErrorArg * arg, void * param)
 		printf( "ERROR\n");
 		printf( "-----\n");
 	}
+
 	_tprintf( _T("RESULT: %s (%d)\n"), resultString, arg->result);
 	_tprintf( _T("ERROR CODE: %s (0x%X)\n"), errorCodeString, arg->errorCode);
 	_tprintf( _T("ERROR STRING: %s\n"), arg->errorString);
-	
+
 	GSI_UNUSED(pconnection);
 	GSI_UNUSED(param);
 }
@@ -160,11 +172,7 @@ static void Whois(GPConnection * pconnection, GPGetInfoResponseArg * arg, void *
 {
 	if(arg->result == GP_NO_ERROR)
 	{
-		_tcscpy(whois, arg->nick);
-		/*if (_tcscmp(arg->email, "")) {
-			_tcscat(whois, _T("@"));
-			_tcscat(whois, arg->email);
-		}*/
+		_tcscpy( GSI_WCHAR whois, GSI_WCHAR arg->nick );
 	}
 	else
 		printf( "WHOIS FAILED\n");
@@ -180,7 +188,7 @@ static void ConnectResponse(GPConnection * pconnection, GPConnectResponseArg * a
 	else
 		printf( "CONNECT FAILED\n");
 
-	gpSetStatus(pconnection, (GPEnum)GP_ONLINE, _T("Not Ready"), _T("gptestc"));
+	gpSetStatus(pconnection, (GPEnum)GP_ONLINE, (gsi_char *) _T("Not Ready"), (gsi_char *) _T("gptestc"));
 
 	GSI_UNUSED(pconnection);
 	GSI_UNUSED(param);
@@ -194,13 +202,15 @@ static void ProfileSearchResponse(GPConnection * pconnection, GPProfileSearchRes
 	{
 		if(arg->numMatches > 0)
 		{
+			printf( "found %d match(es)\n", arg->numMatches );
 			for(i = 0 ; i < arg->numMatches ; i++)
 			{
 				result = gpGetInfo(pconn, arg->matches[i].profile, GP_DONT_CHECK_CACHE, GP_BLOCKING, (GPCallback)Whois, NULL);
 				if(result != GP_NO_ERROR)
 					printf("  gpGetInfo failed\n");
 				else
-					_tprintf(_T("  Found: %s\n"), whois);
+					_tprintf(_T("  Found: %s\n"), GSI_WCHAR whois);
+
 			}
 		}
 		else
@@ -225,9 +235,9 @@ static void RecvBuddyMessage(GPConnection * pconnection, void * theArg, void * p
 	if(result != GP_NO_ERROR)
 		printf(" gpGetInfo failed\n");
 	else 
-		_tprintf(_T(" Received buddy message: %s: %s\n"), whois, arg->message);
+		_tprintf( _T(" Received buddy message: %s : [%s]\n"), GSI_WCHAR whois, GSI_WCHAR arg->message);
 
-	if (!(_tcscmp(arg->message, "5_Hello!"))) {
+	if (!(_tcscmp(arg->message, _T("5_Hello!")))) {
 		receivedLastMessage = gsi_true;
 	}
 		
@@ -238,14 +248,14 @@ static void RecvBuddyMessage(GPConnection * pconnection, void * theArg, void * p
 
 static void GetInfoResponse(GPConnection * pconnection, GPGetInfoResponseArg * arg, void * param)
 {
-	//_tprintf(_T(" First Name: %s Last Name: %s (%s@%s)\n"), arg->firstname, arg->lastname, arg->nick, arg->email);
-	_tprintf(_T(" First Name: %s Last Name: %s (%s)\n"), arg->firstname, arg->lastname, arg->nick);
+	_tprintf(_T("First Name: %s \nLast Name: %s \nEmail: (%s)\n"), 
+				arg->firstname, arg->lastname, arg->email);
 	
 	GSI_UNUSED(pconnection);
 	GSI_UNUSED(param);
 }
 
-void RecvBuddyStatus(GPConnection * connection, void * arg_, void * param)
+static void RecvBuddyStatus(GPConnection * connection, void * arg_, void * param)
 {
 	GPRecvBuddyStatusArg * arg = (GPRecvBuddyStatusArg *)arg_;
 	GPBuddyStatus status;
@@ -267,11 +277,11 @@ void RecvBuddyStatus(GPConnection * connection, void * arg_, void * param)
 			appState = 0;
 		otherIndex = arg->index;
 		gpGetBuddyStatus(connection, arg->index, &status);
-		if (status.status == 1 && _tcscmp(status.statusString, "Ready") && _tcscmp(status.statusString, "BlockTime")) {
+		if (status.status == 1 && _tcscmp(status.statusString, _T("Ready")) && _tcscmp(status.statusString, _T("BlockTime"))) {
 			if (appState < 1) {
 				appState = 1;
 				//printf("Buddy is online!\n");
-				CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, _T("Ready"), _T("gptestc")), "gpSetStatus failed");
+				CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, (gsi_char *)_T("Ready"), (gsi_char *)_T("gptestc")), "gpSetStatus failed");
 				//printf("Now wait until buddy is ready to message...\n");
 			}
 		}
@@ -279,7 +289,7 @@ void RecvBuddyStatus(GPConnection * connection, void * arg_, void * param)
 			if (appState < 2) {
 				appState = 2;
 				//printf("Buddy is ready to message!\n");
-				CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, _T("Ready"), _T("gptestc")), "gpSetStatus failed");
+				CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, (gsi_char *)_T("Ready"), (gsi_char *)_T("gptestc")), "gpSetStatus failed");
 			}
 		}
 		else if (status.status == 1 && !(_tcscmp(status.statusString, "BlockTime"))) {
@@ -293,12 +303,13 @@ void RecvBuddyStatus(GPConnection * connection, void * arg_, void * param)
 
 	gpGetBuddyStatus(connection, arg->index, &status);
 
-	printf("  Status: %s, Status String: %s, Location String: %s, IP: %d, Port: %d\n", statusToString[status.status], status.statusString, status.locationString, status.ip, status.port);
+	_tprintf(_T("  Status: ") GS_STR _T(", Status String: %s, Location String: %s, IP: %d, Port: %d\n"), 
+			statusToString[status.status], status.statusString, status.locationString, status.ip, status.port);
 
 	GSI_UNUSED(param);
 }
 
-void RecvBuddyRequest(GPConnection * connection, void * arg_, void * param)
+static void RecvBuddyRequest(GPConnection * connection, void * arg_, void * param)
 {
 	GPRecvBuddyRequestArg * arg = (GPRecvBuddyRequestArg *)arg_;
 	
@@ -306,13 +317,15 @@ void RecvBuddyRequest(GPConnection * connection, void * arg_, void * param)
 	gsi_char buddy2[50];
 
 	gpGetInfo(connection, arg->profile, GP_CHECK_CACHE, GP_BLOCKING, (GPCallback)Whois, NULL);
-	printf("\nBuddy Request from %s\n", whois);
+	
+	_tprintf(_T("\nBuddy Request from %s\n"), whois);
 #ifdef GSI_UNICODE
-	_stprintf(buddy1, sizeof(buddy1), _T("%s"), GPTC_NICK1);
-	_stprintf(buddy2, sizeof(buddy2), _T("%s"), GPTC_NICK2);
+	_stprintf((wchar_t *)buddy1, sizeof(buddy1), _T("%s"), GPTC_NICK1);
+	_stprintf((wchar_t *)buddy2, sizeof(buddy2), _T("%s"), GPTC_NICK2);
 #else
-	_stprintf(buddy1, _T("%s"), GPTC_NICK1);
-	_stprintf(buddy2, _T("%s"), GPTC_NICK2);
+	_stprintf(buddy1, "%s", GPTC_NICK1);
+	_stprintf(buddy2, "%s", GPTC_NICK2);
+
 #endif
 	
 	if (!_tcscmp(whois, buddy1) || !_tcscmp(whois, buddy2))
@@ -323,7 +336,7 @@ void RecvBuddyRequest(GPConnection * connection, void * arg_, void * param)
 		if (blockTesting) {
 			appState = 4;
 			if (!noComLineArgs) {
-				gpSendBuddyRequest(pconn, other, _T("testing"));
+				gpSendBuddyRequest(pconn, other, (gsi_char *) _T("testing"));
 				CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 			}
 		}
@@ -337,7 +350,7 @@ void RecvBuddyRequest(GPConnection * connection, void * arg_, void * param)
 	GSI_UNUSED(param);
 }
 
-void RecvBuddyRevoke(GPConnection * connection, void * arg_, void * param)
+static void RecvBuddyRevoke(GPConnection * connection, void * arg_, void * param)
 {
 	printf("Buddy Revoke received...\n");
 
@@ -350,6 +363,7 @@ void RecvBuddyRevoke(GPConnection * connection, void * arg_, void * param)
 	GSI_UNUSED(arg_);
 }
 
+#ifndef _PS3
 static void printBlockedList()
 {    
 	int i=0;
@@ -366,13 +380,14 @@ static void printBlockedList()
 		gpGetInfo(pconn, pid, GP_CHECK_CACHE, GP_BLOCKING, (GPCallback)Whois, NULL);
 	}
 }
+#endif
 
 int test_main(int argc, char **argv)
 {
 	gsi_char * nick;
 	gsi_char * email;
 	gsi_char * password;
-	gsi_char messageToSend[10];
+	gsi_char messageToSend[90];
 	GPConnection connection;
 	GSIACResult acResult = GSIACWaiting;
 	int totalTime;
@@ -393,7 +408,7 @@ int test_main(int argc, char **argv)
 	GSI_UNUSED(argv);
 
 	// check that the game's backend is available
-	GSIStartAvailableCheck(GPTC_GAMENAME);
+	GSIStartAvailableCheck( (gsi_char *) GPTC_GAMENAME);
 	while((acResult = GSIAvailableCheckThink()) == GSIACWaiting)
 		msleep(5);
 	if(acResult != GSIACAvailable)
@@ -409,18 +424,18 @@ int test_main(int argc, char **argv)
 	if(argc == 1)
 	{
 		noComLineArgs = 1;
-		nick = GPTC_NICK1;
-		email = GPTC_EMAIL1;
+		nick = (gsi_char *) GPTC_NICK1;
+		email = (gsi_char *) GPTC_EMAIL1;
 	}
 	else
 	{
 		noComLineArgs = 0;
-		nick = GPTC_NICK2;
-		email = GPTC_EMAIL2;
+		nick = (gsi_char *) GPTC_NICK2;
+		email = (gsi_char *) GPTC_EMAIL2;
 	}
-	_tprintf(_T("Using email= %s, nick= %s\r\n"), email, nick);
+	_tprintf(_T("Using email=%s, nick= %s\n"), email, nick);
 
-	password = GPTC_PASSWORD;
+	password = (gsi_char *) GPTC_PASSWORD;
 
 	//INITIALIZE
 	////////////
@@ -437,10 +452,11 @@ int test_main(int argc, char **argv)
 	/////////
 	printf("\nConnecting...\n");
 	CHECK_GP_RESULT(gpConnect(pconn, nick, email, password, GPTC_FIREWALL_OPTION, GP_BLOCKING, (GPCallback)ConnectResponse, NULL), "gpConnect failed");
-
+	
 	//SEARCH (blocking)
 	///////////////////
 	printf("\nSearching (blocking)\n");
+
 	printf(" Search on email (dan@gamespy.com)\n");
 	CHECK_GP_RESULT(gpProfileSearch(pconn, _T(""), _T(""), _T("dan@gamespy.com"), _T(""), _T(""), 0, GP_BLOCKING, (GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
 	printf(" Search on nick ('crt')\n");
@@ -466,6 +482,7 @@ int test_main(int argc, char **argv)
 	CHECK_GP_RESULT(gpGetInfo(pconn, GPTC_PID1, GP_DONT_CHECK_CACHE, GP_BLOCKING, (GPCallback)GetInfoResponse, NULL), "gpGetInfo failed");
 
 //-----------------------------
+#ifndef _PS3 // since buddy/block requests are not useable on PS3
 	//BUDDY STUFF
 	/////////
 
@@ -481,25 +498,27 @@ int test_main(int argc, char **argv)
 			if (appState == -1) // buddy is not actually on our buddy list 
 			{ 
 				if (noComLineArgs) 
-					printf(" %s is not on our buddy list! Sending him a buddy request and waiting for a response...\n", GPTC_NICK2);
+					_tprintf( _T("%s"), GPTC_NICK2);
 				else 
-					printf("%s is not on our buddy list! Sending him a buddy request and waiting for a response...\n", GPTC_NICK1);
+					_tprintf( _T("%s"), GPTC_NICK1);
 
-				gpSendBuddyRequest(pconn, other, _T("testing"));
-				
+				printf(" is not on our buddy list! Sending him a buddy request and waiting for a response...\n");
+
+				gpSendBuddyRequest(pconn, other, (gsi_char *) _T("testing"));
+
 				totalTime = 0;
 				while (totalTime < 10000 && appState != 2) {
 					CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 					msleep(50);
 					totalTime += 50;
 				}
-				totalTime = 12001;
 				if (appState != 2)
 				{
 					if (noComLineArgs) 
-						printf("\n%s never showed up =(\n", GPTC_NICK2);
+						_tprintf(_T("\n%s never showed up =(\n"), (gsi_char *)GPTC_NICK2);
 					else 
-						printf("\n%s never showed up =(\n", GPTC_NICK1);
+						_tprintf(_T("\n%s never showed up =(\n"), (gsi_char *)GPTC_NICK1);
+
 					gotStoodUp = gsi_true;
 					break;
 				}
@@ -507,9 +526,10 @@ int test_main(int argc, char **argv)
 			else // buddy is on our buddy list but did not come online and set status to "Ready"
 			{
 				if (noComLineArgs) 
-					printf("\n%s never showed up =(\n", GPTC_NICK2);
+					_tprintf(_T("\n%s never showed up =(\n"), (gsi_char *)GPTC_NICK2);
 				else 
-					printf("\n%s never showed up =(\n", GPTC_NICK1);
+					_tprintf(_T("\n%s never showed up =(\n"), (gsi_char *)GPTC_NICK1);
+
 				gotStoodUp = gsi_true;
 				break;
 			}
@@ -533,7 +553,7 @@ int test_main(int argc, char **argv)
 #else
 				_stprintf(messageToSend, _T("%d_Hello!"), (int)(totalTime/1000));
 #endif
-				CHECK_GP_RESULT(gpSendBuddyMessage(pconn, other, messageToSend), "gpSendBuddyMessage failed");
+				CHECK_GP_RESULT(gpSendBuddyMessage(pconn, other, (gsi_char *)messageToSend), "gpSendBuddyMessage failed");
 				messagesSent++;
 			}
 		}
@@ -544,7 +564,7 @@ int test_main(int argc, char **argv)
 			msleep(50);
 		}
 
-		CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, _T("BlockTime"), _T("gptestc")), "gpSetStatus failed");
+		CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, (gsi_char *)_T("BlockTime"), (gsi_char *)_T("gptestc")), "gpSetStatus failed");
 	
 		while(appState != 3)
 		{
@@ -560,23 +580,25 @@ int test_main(int argc, char **argv)
 		// block buddy 
 		if (gotStoodUp) {
 			CHECK_GP_RESULT(gpProfileFromID(pconn, &other, GPTC_PID3), "gpProfileFromID failed");
-			printf("\nBlocking %s\n", GPTC_NICK3);
+			_tprintf(_T("\nBlocking %s\n"), (gsi_char *)GPTC_NICK3);
 		}
 		else
-			printf("\nBlocking %s\n", GPTC_NICK2);
+			_tprintf(_T("\nBlocking %s\n"), (gsi_char *)GPTC_NICK2);
 
 		CHECK_GP_RESULT(gpAddToBlockedList(pconn, other), "gpAddToBlockedList failed");
 		CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 		printBlockedList();
 
 		if (!gotStoodUp) {
-			printf("Checking if %s is on our buddy list...\n", GPTC_NICK2);
+			_tprintf(_T("Checking if %s is on our buddy list...\n"), (gsi_char *)GPTC_NICK2);
+
 			if (gpIsBuddy(pconn, other))
 				printf("Yup.\n");
 			else
 				printf("Nope.\n");
 
-			printf("Wait while %s tries to message us...\n", GPTC_NICK2);
+			_tprintf(_T("Wait while %s tries to message us...\n"), (gsi_char *)GPTC_NICK2);
+
 			totalTime = 0;
 			while (totalTime < 5000) {
 				CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
@@ -584,19 +606,18 @@ int test_main(int argc, char **argv)
 				totalTime += 50;
 			}
 		}
-		if (!gotStoodUp)
-			printf("\nUnblocking %s\n", GPTC_NICK2);
-		else 
-			printf("\nUnblocking %s\n", GPTC_NICK3);
+
+		_tprintf(_T("\nUnblocking %s\n"), (!gotStoodUp ? (gsi_char *)GPTC_NICK2 : (gsi_char *)GPTC_NICK3 ) );
+
 		CHECK_GP_RESULT(gpRemoveFromBlockedList(pconn, other), "gpRemoveFromBlockedList");
 		CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 		printBlockedList();
 
-		CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, _T("DoneBlockTesting"), _T("gptestc")), "gpSetStatus failed");
+		CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, (gsi_char *)_T("DoneBlockTesting"), (gsi_char *)_T("gptestc")), "gpSetStatus failed");
 
 		if (!gotStoodUp) {
-			printf("Sending a buddy request to %s\n", GPTC_NICK2);
-			gpSendBuddyRequest(pconn, other, _T("testing"));
+			_tprintf(_T("Sending a buddy request to %s\n"), (gsi_char *)GPTC_NICK2);
+			gpSendBuddyRequest(pconn, other, (gsi_char *)_T("testing"));
 
 			printf("Waiting to get buddy requested back...\n");
 			while (appState != 4) {
@@ -607,26 +628,40 @@ int test_main(int argc, char **argv)
 	}
 	else {
 		if (!gotStoodUp) {
-			printf("Waiting for %s to block us...\n", GPTC_NICK1);
+			_tprintf(_T("Waiting for %s to block us...\n"), (gsi_char *)GPTC_NICK1);
+
 			while (gpIsBuddy(pconn, other)) {
 				CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 				msleep(50);
 			}
-			printf("We have been blocked. Trying to send buddy message to %s\n", GPTC_NICK1);
-			CHECK_GP_RESULT(gpSendBuddyMessage(pconn, other, _T("Why did you block me?")), "gpSendBuddyMessage failed");
+
+			_tprintf(_T("We have been blocked. Trying to send buddy message to %s\n"), (gsi_char *)GPTC_NICK1);
+			CHECK_GP_RESULT(gpSendBuddyMessage(pconn, other, (gsi_char *)_T("Why did you block me?")), "gpSendBuddyMessage failed");
 			
 			printf("Waiting to get unblocked and buddy requested...\n");
 			while (appState != 4) {
 				CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 				msleep(50);
 			}
-			CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, _T("DoneBlockTesting"), _T("gptestc")), "gpSetStatus failed");
+			CHECK_GP_RESULT(gpSetStatus(pconn, (GPEnum) GP_ONLINE, (gsi_char *)_T("DoneBlockTesting"), (gsi_char *)_T("gptestc")), "gpSetStatus failed");
 		}
-	}
-
-	printf("\nDONE - Press any key to exit.\n\n"); 
+	} 
+#else
+// think a little while to make sure PS3 buddy sync finishes
+_tprintf(_T("Buddy syncing...\n"));
+while (totalTime < 5000 && appState != 2) {
+	CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
+	msleep(50);
+	totalTime += 50;
+}
+_tprintf(_T("Done\n"));
+GSI_UNUSED(messagesSent);
+GSI_UNUSED(messageToSend);
+GSI_UNUSED(ucMsg);
+#endif
 
 #if defined(_WIN32) && !defined(UNDER_CE)
+	/*printf("\nDONE - Press any key to exit.\n\n");
 	while (1)
 	{
 		CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
@@ -635,9 +670,13 @@ int test_main(int argc, char **argv)
 			break;
 		}
 	}
+	*/
+	msleep(2500); // Make sure everything finishes.
+	CHECK_GP_RESULT(gpProcess(pconn), "gpProcess failed");
 #endif
 
-//#if defined(_WIN32) && !defined(UNDER_CE)
+	printf("\nTotal Errors: %d\n\n", totalErrors);
+	
 	//DISCONNECT
 	////////////
 	gpDisconnect(pconn);
@@ -647,8 +686,6 @@ int test_main(int argc, char **argv)
 	/////////
 	gpDestroy(pconn);
 	printf("Destroyed\n");
-	return 0;
+	return totalErrors;
 //#endif
 }
-
-

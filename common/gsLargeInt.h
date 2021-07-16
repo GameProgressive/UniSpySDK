@@ -58,7 +58,7 @@ typedef struct gsLargeInt_s
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Commonly used functions
-void     gsLargeIntAddToMD5(const gsLargeInt_t * lint, MD5_CTX * md5);
+void     gsLargeIntAddToMD5(const gsLargeInt_t * lint, GSMD5_CTX * md5);
 gsi_bool gsLargeIntSetFromHexString(gsLargeInt_t *lint, const char* hexstring);
 gsi_bool gsLargeIntPrint (FILE* logFile, const gsLargeInt_t *lint);
 gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint);

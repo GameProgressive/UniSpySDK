@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	LobbyWizard.h
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_LOBBYWIZARD_H__683E0CE1_CBA4_46D1_948A_6047481CDBF6__INCLUDED_)
 #define AFX_LOBBYWIZARD_H__683E0CE1_CBA4_46D1_948A_6047481CDBF6__INCLUDED_
 
@@ -6,8 +15,6 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// LobbyWizard.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CLobbyWizard

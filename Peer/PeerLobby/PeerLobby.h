@@ -1,5 +1,13 @@
-// PeerLobby.h : main header file for the PEERLOBBY application
+///////////////////////////////////////////////////////////////////////////////
+// File:	PeerLobby.h
+// SDK:		GameSpy Peer SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Main header file for the PEERLOBBY application
 
 #if !defined(AFX_PEERLOBBY_H__A167413C_51DD_4C60_BA40_97CCA3876DDB__INCLUDED_)
 #define AFX_PEERLOBBY_H__A167413C_51DD_4C60_BA40_97CCA3876DDB__INCLUDED_

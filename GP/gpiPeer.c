@@ -60,14 +60,6 @@ gpiProcessPeerInitiatingConnection(
 		{	
 			// Check if the connect finished.
 			/////////////////////////////////
-			/*
-			CHECK_RESULT(gpiCheckSocketConnect(connection, peer->sock, &state));
-			if(state == GPI_DISCONNECTED)
-			{
-				Error(connection, GP_NETWORK_ERROR, "Error connecting to a peer.");
-			}
-			*/
-
 			gsUdpEngineGetPeerState(peer->ip, peer->port, &aPeerState);
 
 			if(aPeerState == GS_UDP_PEER_CONNECTED)
@@ -116,10 +108,6 @@ gpiProcessPeerInitiatingConnection(
 		}
 		case GPI_PEER_WAITING:
 		{
-			// Check for a response.
-			////////////////////////
-			//CHECK_RESULT(gpiRecvToBuffer(connection, peer->sock, &peer->inputBuffer, &len, &connClosed, "PR"));
-
 			// Check for a final.
 			/////////////////////
 			if (peer->inputBuffer.buffer)
@@ -265,7 +253,7 @@ gpiProcessPeerAcceptingConnection(
 				iconnection->password,
 				iconnection->profileid,
 				pid);
-			MD5Digest((unsigned char *)buffer, strlen(buffer), sigCheck);
+			GSMD5Digest((unsigned char *)buffer, strlen(buffer), sigCheck);
 
 			// Check the sig.
 			/////////////////
@@ -397,14 +385,6 @@ gpiProcessPeerConnected(
 
 	// Read messages.
 	/////////////////
-	/*
-	result = gpiRecvToBuffer(connection, peer->sock, &peer->inputBuffer, &len, &connClosed, "PR");
-	if(result != GP_NO_ERROR)
-	{
-		peer->state = GPI_PEER_DISCONNECTED;
-		return GP_NO_ERROR;
-	}
-	*/
 	if(peer->inputBuffer.len > 0)
 	{
 		peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
@@ -723,7 +703,8 @@ GPResult gpiProcessPeers(GPConnection *connection)
 	}
 	*/
 	gsUdpEngineThink();
-	// Got through the list of peers.
+
+	// Go through the list of peers.
 	/////////////////////////////////
 	for(peer = iconnection->peerList ; peer != NULL ; peer = nextPeer)
 	{

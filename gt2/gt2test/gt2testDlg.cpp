@@ -1,5 +1,11 @@
-// gt2testDlg.cpp : implementation file
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2testDlg.cpp
+// SDK:		GameSpy Transport 2 SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "stdafx.h"
 #include "gt2test.h"
@@ -892,7 +898,7 @@ void CGt2testDlg::OnConnect()
 {
 	UpdateData();
 
-	// check the timout, and show what value we're actually using
+	// check the timeout, and show what value we're actually using
 	int timeout = atoi(m_timeout);
 	if(timeout < 0)
 		timeout = 0;

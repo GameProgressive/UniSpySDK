@@ -89,9 +89,8 @@ gpiIsValidDate(
 		return GPIFalse;
 	}
 
-	// Check that the date is in the valid range.
+	// Check that the date is in the valid range:
 	// 01.01.1900 - 06.06.2079
-	// PANTS|02.14.2000
 	/////////////////////////////////////////////
 	if(year < 1900)
 		return GPIFalse;
@@ -953,7 +952,7 @@ gpiSetInfos(
 		break;
 
 	case GP_ICQUIN:
-		strzcpy(buffer, value, sizeof(buffer));
+		gsiSafeStrcpyA(buffer, value, sizeof(buffer));
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\icquin\\", buffer));
 		break;
 

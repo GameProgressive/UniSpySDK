@@ -1,11 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	ConnectPage.h
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #if !defined(AFX_CONNECTPAGE_H__70C3619F_ED14_49F8_9155_9F96147FF4C2__INCLUDED_)
 #define AFX_CONNECTPAGE_H__70C3619F_ED14_49F8_9155_9F96147FF4C2__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// ConnectPage.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CConnectPage dialog

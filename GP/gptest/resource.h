@@ -151,6 +151,9 @@
 #define IDC_BUTTON5                     1133
 #define IDC_REMOVE_BLOCK                1134
 #define IDC_ADD_BLOCK                   1135
+#define IDC_IPMBUDDYLIST                1136
+#define IDC_BUDDYLIST                   1137
+#define IDC_GAMEID                      1138
 
 // Next default values for new objects
 // 
@@ -158,7 +161,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        132
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1136
+#define _APS_NEXT_CONTROL_VALUE         1139
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -57,6 +57,8 @@ typedef struct
 	gsi_time searchStartTime;
 	int *revBuddyProfileIds;
 	int numOfRevBuddyProfiles;
+	GPProfile profile;
+	int maxResults;
 } GPISearchData;
 
 //FUNCTIONS

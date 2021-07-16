@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2testc.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -503,7 +512,16 @@ int test_main(int argc, char **argv)
 			
 		}
 		if(Connection)
-			gt2CloseConnection(Connection);
+		{
+			gt2CloseConnection(Connection);			
+			// Because the sample app reconnects to another client 
+			// running this sample, we need to process any incoming 
+			// messages in order to catch the ack for the close 
+			// connection we sent using above function.  This prevents
+			// any dangling messages from causing a reconnect to fail.
+			while (Connection && gt2GetConnectionState(Connection))
+				gt2Think(socket);
+		}
 	}
 	while(!server && (++count < 3)); //if client do the sequence 3 times
 

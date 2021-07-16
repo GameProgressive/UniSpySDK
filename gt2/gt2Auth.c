@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Auth.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Main.h"
 #include "gt2Auth.h"
@@ -36,7 +35,7 @@ GT2Byte * gti2GetChallenge
 {
 	int i;
 	int oddmode;
-	assert(buffer);
+	GS_ASSERT(buffer);
 
 	srand((unsigned int)current_time());
 	buffer[0] = (GT2Byte)(33 + rand() % 93); //use chars in the range 33 - 125
@@ -65,7 +64,6 @@ GT2Byte * gti2GetResponse
 	int keylen = (int)strlen(GT2ChallengeKey);
 	int chalrand;
 	valid = gti2VerifyChallenge(challenge); //it's an invalid challenge, give them a bogus response
-	//assert(GTI2_RESPONSE_LEN <= GTI2_CHALLENGE_LEN);
 	for (i = 0 ; i < GTI2_RESPONSE_LEN ; i++)
 	{
 		//use random vals for spots 0 and 13

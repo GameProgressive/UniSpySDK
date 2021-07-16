@@ -1,7 +1,12 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by PeerTest.rc
+///////////////////////////////////////////////////////////////////////////////
+// File:	Resource.h
+// SDK:		GameSpy Peer SDK
 //
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101

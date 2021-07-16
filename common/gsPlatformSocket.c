@@ -232,7 +232,7 @@ int DisableNagle(SOCKET sock)
 		fd_set * aWriteFds  = NULL;
 		fd_set * aExceptFds = NULL;
 		int aResult;
-// 04-13-2005, Saad Nader
+// 04-13-2005:
 // Added case for SN Systems that would 
 // handle errors after performing selects.
 #ifdef SN_SYSTEMS
@@ -274,7 +274,7 @@ int DisableNagle(SOCKET sock)
 	if(gsiSocketIsError(aResult))
 		return -1;
 
-// 04-13-2005, Saad Nader
+// 04-13-2005:
 // Added case for SN Systems that would 
 // handle errors after performing selects.
 #ifdef SN_SYSTEMS

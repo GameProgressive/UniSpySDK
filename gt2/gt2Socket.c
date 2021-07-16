@@ -1,12 +1,11 @@
-/*
-GameSpy GT2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2002 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Socket.c
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 #include "gt2Socket.h"
 #include "gt2Buffer.h"
@@ -91,7 +90,6 @@ GT2Result gti2CreateSocket
 	int rcode;
 	unsigned int ip;
 	unsigned short port;
-	socklen_t len;
 
 	// startup the sockets engine if needed
 	SocketStartUp();
@@ -208,7 +206,7 @@ GT2Result gti2CreateSocket
 	else
 	#endif
 	{
-		len = sizeof(SOCKADDR_IN);
+		socklen_t len = sizeof(SOCKADDR_IN);
 		getsockname(socketTemp->socket, (SOCKADDR *)&address, &len);
 		socketTemp->ip = address.sin_addr.s_addr;
 		socketTemp->port = ntohs(address.sin_port);

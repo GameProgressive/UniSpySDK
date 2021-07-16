@@ -1,6 +1,13 @@
-// GameSpy Presence and Messaging SDK Stress Test
-// Dan "Mr. Pants" Schoenblum
-// Copyright 2000 GameSpy Industries, Inc
+///////////////////////////////////////////////////////////////////////////////
+// File:	gpstress.c
+// SDK:		GameSpy Presence and Messaging SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// Stress Test
 
 /*************
 ** INCLUDES **

@@ -1,4 +1,12 @@
-//TODO: Address Byte order & Byte alignment issues
+///////////////////////////////////////////////////////////////////////////////
+// File:	gt2Encode.h
+// SDK:		GameSpy Transport 2 SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+
 #ifndef _GT_ENCODE_H
 #define _GT_ENCODE_H
 
@@ -10,10 +18,7 @@ extern "C" {
 
 #if defined(UNDER_CE) || defined(__mips64) || defined(_PSP)
 #define ALIGNED_COPY
-//the aligned copy code all needs to be optimized
 #endif
-
-
 
 
 // Used to identify the type of message so you can look up the correct format string

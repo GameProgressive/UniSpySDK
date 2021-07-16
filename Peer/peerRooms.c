@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerRooms.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -101,21 +100,21 @@ void piStartedEnteringRoom
 	PEER_CONNECTION;
 
 	ASSERT_ROOMTYPE(roomType);
-	assert(room);
-	assert(room[0]);
-	assert(strlen(room) < PI_ROOM_MAX_LEN);
+	GS_ASSERT(room);
+	GS_ASSERT(room[0]);
+	GS_ASSERT(strlen(room) < PI_ROOM_MAX_LEN);
 	if(strlen(room) >= PI_ROOM_MAX_LEN)
 		return;
 
 	// Check that we're not entering, or in, this room.
 	///////////////////////////////////////////////////
-	assert(!ROOM[0]);
-	assert(!ENTERING_ROOM);
-	assert(!IN_ROOM);
+	GS_ASSERT(!ROOM[0]);
+	GS_ASSERT(!ENTERING_ROOM);
+	GS_ASSERT(!IN_ROOM);
 
 	// Start entering.
 	//////////////////
-	strcpy(ROOM, room);
+	gsiSafeStrcpyA(ROOM, room, sizeof(ROOM));
 	ENTERING_ROOM = PEERTrue;
 	connection->oldFlags[roomType] = 0;
 
@@ -141,10 +140,10 @@ void piFinishedEnteringRoom
 
 	// Check that we're entering.
 	/////////////////////////////
-	assert(ROOM[0]);
-	assert(ENTERING_ROOM);
-	assert(!IN_ROOM);
-	assert(strlen(name) < PI_ROOM_MAX_LEN);
+	GS_ASSERT(ROOM[0]);
+	GS_ASSERT(ENTERING_ROOM);
+	GS_ASSERT(!IN_ROOM);
+	GS_ASSERT(strlen(name) < PI_ROOM_MAX_LEN);
 
 	// We're in.
 	////////////
@@ -181,7 +180,7 @@ void piLeaveRoom
 	if(!ENTERING_ROOM && !IN_ROOM)
 		return;
 
-	assert(ROOM[0]);
+	GS_ASSERT(ROOM[0]);
 
 	// Are we entering?
 	///////////////////
@@ -205,12 +204,12 @@ void piLeaveRoom
 	////////////////////////////
 	if(IN_ROOM)
 	{
-		assert(!ENTERING_ROOM);
+		GS_ASSERT(!ENTERING_ROOM);
 		IN_ROOM = PEERFalse;
 	}
 	else
 	{
-		assert(ENTERING_ROOM);
+		GS_ASSERT(ENTERING_ROOM);
 		ENTERING_ROOM = PEERFalse;
 	}
 

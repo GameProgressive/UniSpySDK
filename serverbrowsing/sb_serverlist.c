@@ -1165,7 +1165,6 @@ Byte Values
 	Short values?
 	2 bytes - value
 */		  
-
 static SBError ProcessMainListData(SBServerList *slist)
 {
 	int bytesRead;

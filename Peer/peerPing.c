@@ -1,12 +1,11 @@
-/*
-GameSpy Peer SDK 
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	peerPing.c
+// SDK:		GameSpy Peer SDK
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 /*************
 ** INCLUDES **
@@ -34,8 +33,8 @@ devsupport@gamespy.com
 #define PI_MAX_XPING_NUM_PLAYERS   32
 
 #define PEER_CONNECTION_DATA       piConnection * connection;\
-	                               assert(data);\
-                                   assert(data->peer);\
+	                               GS_ASSERT(data);\
+                                   GS_ASSERT(data->peer);\
                                    connection = (piConnection *)data->peer;\
 								   GSI_UNUSED(connection);
 
@@ -65,9 +64,9 @@ static int piXpingTableHashFn
 	unsigned int hash = 0;
 	const char * nicks[2];
 
-	assert(xping);
-	assert(xping->nicks[0][0]);
-	assert(xping->nicks[1][0]);
+	GS_ASSERT(xping);
+	GS_ASSERT(xping->nicks[0][0]);
+	GS_ASSERT(xping->nicks[1][0]);
 
 	nicks[0] = xping->nicks[0];
 	nicks[1] = xping->nicks[1];
@@ -107,12 +106,12 @@ static int GS_STATIC_CALLBACK piXpingTableCompareFn
 	int rcode;
 	const char * nicks[2][2];
 
-	assert(xping1);
-	assert(xping1->nicks[0][0]);
-	assert(xping1->nicks[1][0]);
-	assert(xping2);
-	assert(xping2->nicks[0][0]);
-	assert(xping2->nicks[1][0]);
+	GS_ASSERT(xping1);
+	GS_ASSERT(xping1->nicks[0][0]);
+	GS_ASSERT(xping1->nicks[1][0]);
+	GS_ASSERT(xping2);
+	GS_ASSERT(xping2->nicks[0][0]);
+	GS_ASSERT(xping2->nicks[1][0]);
 
 	nicks[0][0] = xping1->nicks[0];
 	nicks[0][1] = xping1->nicks[1];
@@ -147,9 +146,9 @@ static void piXpingTableElementFreeFn
 )
 {
 	piXping * xping = (piXping *)param;
-	assert(xping);
-	assert(xping->nicks[0][0]);
-	assert(xping->nicks[1][0]);
+	GS_ASSERT(xping);
+	GS_ASSERT(xping->nicks[0][0]);
+	GS_ASSERT(xping->nicks[1][0]);
 	GSI_UNUSED(xping);
 }
 
@@ -330,7 +329,7 @@ static void piPingerReplyMapFn
 
 	PEER_CONNECTION_DATA;
 
-	assert(player);
+	GS_ASSERT(player);
 
 	// Check if waiting for a ping.
 	///////////////////////////////
@@ -403,11 +402,11 @@ static void piPingPlayer
 	piPlayer * player
 )
 {
-	assert(player->gotIPAndProfileID);
+	GS_ASSERT(player->gotIPAndProfileID);
 
 	// Make sure we're not already waiting.
 	///////////////////////////////////////
-	assert(!player->waitingForPing);
+	GS_ASSERT(!player->waitingForPing);
 	if(player->waitingForPing)
 		return;
 
@@ -558,7 +557,7 @@ static void piPickPingPlayersMap
 // Returns an array of pointers to players to ping,
 // or NULL if there's noone to ping.
 // The number of players in the array will be no
-// larger than GS_MIN(PI_MAX_PING_PLAYERS, numPings).
+// larger than min(PI_MAX_PING_PLAYERS, numPings).
 ///////////////////////////////////////////////////
 static piPlayer ** piPickPingPlayers
 (
@@ -611,7 +610,7 @@ static void piXpingPlayer
 
 	PEER_CONNECTION;
 
-	assert(player->inXpingRoom);
+	GS_ASSERT(player->inXpingRoom);
 	if(!player->inXpingRoom)
 		return;
 
@@ -628,7 +627,7 @@ static void piXpingPlayer
 		{
 			if(connection->numPlayers[roomType] <= PI_MAX_XPING_NUM_PLAYERS)
 			{
-				assert(IN_ROOM || ENTERING_ROOM);
+				GS_ASSERT(IN_ROOM || ENTERING_ROOM);
 				if(IN_ROOM || ENTERING_ROOM)
 					piSendChannelUTM(peer, ROOM, PI_UTM_XPING, message, PEERFalse);
 			}
@@ -801,7 +800,7 @@ PEERBool piPingInitPlayer
 
 	PEER_CONNECTION;
 
-	assert(player);
+	GS_ASSERT(player);
 
 	// Check if we're not doing pings.
 	//////////////////////////////////
@@ -837,7 +836,7 @@ void piPingPlayerJoinedRoom
 {
 	PEER_CONNECTION;
 
-	assert(player);
+	GS_ASSERT(player);
 	ASSERT_ROOMTYPE(roomType);
 
 	// Check if we're not doing pings.
@@ -869,7 +868,7 @@ static void piRemoveXping
 {
 	PEER_CONNECTION;
 	
-	assert(xping);
+	GS_ASSERT(xping);
 
 	TableRemove(connection->xpings, xping);
 }
@@ -888,8 +887,8 @@ static void piPingPlayerLeftRoomTableMapFn
 {
 	piXping * xping = (piXping *)elem;
 	piPingPlayerLeftRoomData * data = (piPingPlayerLeftRoomData *)clientdata;
-	assert(xping);
-	assert(data);
+	GS_ASSERT(xping);
+	GS_ASSERT(data);
 
 	// Check if this player is part of this xping.
 	//////////////////////////////////////////////
@@ -905,7 +904,7 @@ void piPingPlayerLeftRoom
 {
 	PEER_CONNECTION;
 
-	assert(player);
+	GS_ASSERT(player);
 
 	// Check if we're not doing pings.
 	//////////////////////////////////
@@ -969,12 +968,12 @@ static piXping * piFindXping
 
 	PEER_CONNECTION;
 
-	assert(nick1);
-	assert(nick1[0]);
-	assert(piGetPlayer(peer, nick1));
-	assert(nick2);
-	assert(nick2[0]);
-	assert(piGetPlayer(peer, nick2));
+	GS_ASSERT(nick1);
+	GS_ASSERT(nick1[0]);
+	GS_ASSERT(piGetPlayer(peer, nick1));
+	GS_ASSERT(nick2);
+	GS_ASSERT(nick2[0]);
+	GS_ASSERT(piGetPlayer(peer, nick2));
 
 	// Setup the xping match.
 	/////////////////////////
@@ -1000,12 +999,12 @@ static piXping * piAddXping
 
 	PEER_CONNECTION;
 
-	assert(nick1);
-	assert(nick1[0]);
-	assert(piGetPlayer(peer, nick1));
-	assert(nick2);
-	assert(nick2[0]);
-	assert(piGetPlayer(peer, nick2));
+	GS_ASSERT(nick1);
+	GS_ASSERT(nick1[0]);
+	GS_ASSERT(piGetPlayer(peer, nick1));
+	GS_ASSERT(nick2);
+	GS_ASSERT(nick2[0]);
+	GS_ASSERT(piGetPlayer(peer, nick2));
 
 	// Setup the one to add.
 	////////////////////////
@@ -1042,13 +1041,13 @@ void piUpdateXping
 
 	PEER_CONNECTION;
 
-	assert(nick1);
-	assert(nick1[0]);
-	assert(piGetPlayer(peer, nick1));
-	assert(nick2);
-	assert(nick2[0]);
-	assert(piGetPlayer(peer, nick2));
-	assert(ping >= 0);
+	GS_ASSERT(nick1);
+	GS_ASSERT(nick1[0]);
+	GS_ASSERT(piGetPlayer(peer, nick1));
+	GS_ASSERT(nick2);
+	GS_ASSERT(nick2[0]);
+	GS_ASSERT(piGetPlayer(peer, nick2));
+	GS_ASSERT(ping >= 0);
 
 	// Check if we're not doing pings.
 	//////////////////////////////////
@@ -1069,7 +1068,7 @@ void piUpdateXping
 	// Add it.
 	//////////
 	xping = piAddXping(peer, nick1, nick2);
-	assert(xping);
+	GS_ASSERT(xping);
 	if(!xping)
 		return;
 
@@ -1090,13 +1089,13 @@ PEERBool piGetXping
 
 	PEER_CONNECTION;
 
-	assert(nick1);
-	assert(nick1[0]);
-	assert(piGetPlayer(peer, nick1));
-	assert(nick2);
-	assert(nick2[0]);
-	assert(piGetPlayer(peer, nick2));
-	assert(ping);
+	GS_ASSERT(nick1);
+	GS_ASSERT(nick1[0]);
+	GS_ASSERT(piGetPlayer(peer, nick1));
+	GS_ASSERT(nick2);
+	GS_ASSERT(nick2[0]);
+	GS_ASSERT(piGetPlayer(peer, nick2));
+	GS_ASSERT(ping);
 
 	// Check if we're not doing pings.
 	//////////////////////////////////
@@ -1106,7 +1105,7 @@ PEERBool piGetXping
 	// Get the xping.
 	/////////////////
 	xping = piFindXping(peer, nick1, nick2);
-	assert(xping);
+	GS_ASSERT(xping);
 	if(!xping)
 		return PEERFalse;
 
