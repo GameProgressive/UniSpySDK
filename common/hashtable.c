@@ -1,19 +1,21 @@
-/* 
- *
- * File: hashtable.c
- * ---------------
- *	David Wright
- *	10/8/98
- *
- * See hashtable.h for function comments
- * Implmentation is straight-forward, using a fixed dynamically allocated
- * array for the buckets, and a DArray for each individual bucket
- */
+///////////////////////////////////////////////////////////////////////////////
+// File:	hashtable.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ------------------------------------
+// See hashtable.h for function comments.
+// Implementation is straight-forward, using a fixed dynamically allocated
+// array for the buckets, and a DArray for each individual bucket.
 
 #include <stdlib.h>
 #include <string.h>
 #include "darray.h"
 #include "hashtable.h"
+#include "gsAssert.h"
 
 #ifdef _MFC_MEM_DEBUG
 #define _CRTDBG_MAP_ALLOC 1
@@ -53,16 +55,16 @@ HashTable TableNew2(int elemSize, int nBuckets, int nChains,
 	HashTable table;
 	int i;
 
-	assert(hashFn);
-	assert(compFn);
-	assert(elemSize);
-	assert(nBuckets);
+	GS_ASSERT(hashFn != NULL);
+	GS_ASSERT(compFn != NULL);
+	GS_ASSERT(elemSize != 0);
+	GS_ASSERT(nBuckets != 0);
 
 	table = (HashTable)gsimalloc(sizeof(struct HashImplementation));
-	assert(table);
+	GS_ASSERT(table != NULL);
 	
 	table->buckets = (DArray *)gsimalloc(nBuckets * sizeof(DArray));
-	assert(table->buckets);
+	GS_ASSERT(table->buckets != 0);
 	for (i = 0; i < nBuckets; i++) //ArrayNew will assert if allocation fails
 		table->buckets[i] = ArrayNew(elemSize, nChains, freeFn);
 	table->nbuckets = nBuckets;
@@ -78,7 +80,7 @@ void TableFree(HashTable table)
 {
 	int i;
 	
-	assert(table);
+	GS_ASSERT(table != NULL);
 
 	if (NULL == table )
 		return;
@@ -94,7 +96,7 @@ int TableCount(HashTable table)
 {
 	int i, count = 0;
 	
-	assert(table);
+	GS_ASSERT(table != NULL);
 
 	if (NULL == table )
 		return count;
@@ -110,7 +112,7 @@ void TableEnter(HashTable table, const void *newElem)
 {
 	int hash, itempos;
 	
-	assert(table);
+	GS_ASSERT(table != NULL);
 
 	if (NULL == table )
 		return;
@@ -127,7 +129,7 @@ int TableRemove(HashTable table, const void *delElem)
 {
 	int hash, itempos;
 	
-	assert(table);
+	GS_ASSERT(table != NULL);
 
 	if (NULL == table )
 		return 0;
@@ -145,7 +147,7 @@ void *TableLookup(HashTable table, const void *elemKey)
 {
 	int hash, itempos;
 	
-	assert(table);
+	GS_ASSERT(table != NULL);
 
 	if (NULL == table )
 		return NULL;
@@ -164,8 +166,8 @@ void TableMap(HashTable table, TableMapFn fn, void *clientData)
 {
 	int i;
 	
-	assert(table);
-	assert(fn);
+	GS_ASSERT(table != NULL);
+	GS_ASSERT(fn != NULL);
 
 	if (NULL == table || NULL == fn)
 		return;
@@ -179,7 +181,7 @@ void TableMapSafe(HashTable table, TableMapFn fn, void *clientData)
 {
 	int i;
 	
-	assert(fn);
+	GS_ASSERT(fn != NULL);
 	
 	for (i = 0 ; i < table->nbuckets ; i++)
 		ArrayMapBackwards(table->buckets[i], fn, clientData);
@@ -191,7 +193,7 @@ void * TableMap2(HashTable table, TableMapFn2 fn, void *clientData)
 	int i;
 	void * pcurr;
 	
-	assert(fn);
+	GS_ASSERT(fn != NULL);
 	
 	for (i = 0 ; i < table->nbuckets ; i++)
 	{
@@ -208,7 +210,7 @@ void * TableMapSafe2(HashTable table, TableMapFn2 fn, void *clientData)
 	int i;
 	void * pcurr;
 	
-	assert(fn);
+	GS_ASSERT(fn != NULL);
 	
 	for (i = 0 ; i < table->nbuckets ; i++)
 	{

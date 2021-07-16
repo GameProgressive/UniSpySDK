@@ -1,12 +1,14 @@
-/* 
- *
- * File: darray.c
- * ---------------
- *	David Wright
- *	10/8/98
- * 
- *  See darray.h for function descriptions
- */
+///////////////////////////////////////////////////////////////////////////////
+// File:	darray.c
+// SDK:		GameSpy Common
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+// ---------------
+// See darray.h for function descriptions
+
 #include <stdlib.h>
 #include <string.h>
 #include "darray.h" 
@@ -60,10 +62,10 @@ static void FreeElement(DArray array, int n)
  */
 static void ArrayGrow(DArray array)
 {
-	GS_ASSERT(array->elemsize);	// sanity check -mj Oct 31st
+	GS_ASSERT(array->elemsize != 0);	// sanity check -mj Oct 31st
 	array->capacity +=  array->growby;
 	array->list = gsirealloc(array->list, (size_t) array->capacity * array->elemsize);
-	GS_ASSERT(array->list);
+	GS_ASSERT(array->list != NULL);
 }
 
 /* SetElement
@@ -71,9 +73,9 @@ static void ArrayGrow(DArray array)
  */
 static void SetElement(DArray array, const void *elem, int pos)
 {
-	GS_ASSERT(array);			// safety check -mj Oct 31st
-	GS_ASSERT(elem);	
-	GS_ASSERT(array->elemsize);	
+	GS_ASSERT(array != NULL);			// safety check -mj Oct 31st
+	GS_ASSERT(elem != NULL);	
+	GS_ASSERT(array->elemsize != 0);	
 
 	memcpy(ArrayNth(array,pos), elem, (size_t)array->elemsize);
 }
@@ -84,8 +86,8 @@ DArray ArrayNew(int elemSize, int numElemsToAllocate,
 	DArray array;
 
 	array = (DArray) gsimalloc(sizeof(struct DArrayImplementation));
-	GS_ASSERT(array);
-	GS_ASSERT(elemSize);
+	GS_ASSERT(array != NULL);
+	GS_ASSERT(elemSize != 0);
 	if (numElemsToAllocate == 0)
 		numElemsToAllocate = DEF_GROWBY;
 	array->count	= 0;
@@ -96,7 +98,7 @@ DArray ArrayNew(int elemSize, int numElemsToAllocate,
 	if (array->capacity != 0)
 	{
 		array->list = gsimalloc((size_t)array->capacity * array->elemsize);
-		GS_ASSERT(array->list);
+		GS_ASSERT(array->list != NULL);
 	} else
 		array->list = NULL;
 
@@ -107,21 +109,20 @@ void ArrayFree(DArray array)
 {
 	int i;
 	
-	GS_ASSERT(array);
+	GS_ASSERT(array != NULL);
 	for (i = 0; i < array->count; i++)
 	{
 		FreeElement(array, i);
 	}
 	// mj to do: move these asserts into gsi_free.  maybe, depends on whether user overloads them
-	GS_ASSERT(array->list);
-	GS_ASSERT(array);
+	GS_ASSERT(array->list != NULL);
 	gsifree(array->list);
 	gsifree(array);
 }
 
 void *ArrayGetDataPtr(DArray array)
 {
-	GS_ASSERT(array);
+	GS_ASSERT(array != NULL);
 	return array->list;
 }
 
@@ -129,7 +130,7 @@ void ArraySetDataPtr(DArray array, void *ptr, int count, int capacity)
 {
 	int i;
 	
-	GS_ASSERT(array);
+	GS_ASSERT(array != NULL);
 	if (array->list != NULL)
 	{
 		for (i = 0; i < array->count; i++)
@@ -147,7 +148,7 @@ void ArraySetDataPtr(DArray array, void *ptr, int count, int capacity)
 
 int ArrayLength(const DArray array)
 {
-	GS_ASSERT(array);
+	GS_ASSERT(array != NULL);
 	return array->count;
 }
 
@@ -166,15 +167,15 @@ void *ArrayNth(DArray array, int n)
  */
 void ArrayAppend(DArray array, const void *newElem)
 {
-	GS_ASSERT(array);
+	GS_ASSERT(array != NULL);
 	if(array)
 		ArrayInsertAt(array, newElem, array->count);
 }
 
 void ArrayInsertAt(DArray array, const void *newElem, int n)
 {
-	GS_ASSERT (array);
-	GS_ASSERT ( (n >= 0) && (n <= array->count));
+	GS_ASSERT(array != NULL);
+	GS_ASSERT( (n >= 0) && (n <= array->count));
 
 	if (array->count == array->capacity)
 		ArrayGrow(array);
@@ -191,8 +192,8 @@ void ArrayInsertSorted(DArray array, const void *newElem, ArrayCompareFn compara
 	void *res;
 	int found;
 
-	GS_ASSERT (array);
-	GS_ASSERT (comparator);
+	GS_ASSERT(array != NULL);
+	GS_ASSERT(comparator != NULL);
 
 	res=mybsearch(newElem, array->list,	array->count, array->elemsize, comparator, &found);
 	n = (((char *)res - (char *)array->list) / array->elemsize);
@@ -202,8 +203,8 @@ void ArrayInsertSorted(DArray array, const void *newElem, ArrayCompareFn compara
 
 void ArrayRemoveAt(DArray array, int n)
 {
- 	GS_ASSERT (array);
-  	GS_ASSERT( (n >= 0) && (n < array->count));
+ 	GS_ASSERT(array != NULL);
+  	GS_ASSERT((n >= 0) && (n < array->count));
 
 	if (n < array->count - 1) //if not last element
 		memmove(ArrayNth(array,n),ArrayNth(array,n+1),
@@ -213,8 +214,8 @@ void ArrayRemoveAt(DArray array, int n)
 
 void ArrayDeleteAt(DArray array, int n)
 {
- 	GS_ASSERT (array);
-   	GS_ASSERT ( (n >= 0) && (n < array->count));
+ 	GS_ASSERT(array != NULL);
+   	GS_ASSERT((n >= 0) && (n < array->count));
 
 	FreeElement(array,n);
 	ArrayRemoveAt(array, n);
@@ -223,8 +224,8 @@ void ArrayDeleteAt(DArray array, int n)
 
 void ArrayReplaceAt(DArray array, const void *newElem, int n)
 {
- 	GS_ASSERT (array);
-	GS_ASSERT ( (n >= 0) && (n < array->count));
+ 	GS_ASSERT(array != NULL);
+	GS_ASSERT((n >= 0) && (n < array->count));
 
 	FreeElement(array, n);
 	SetElement(array, newElem,n);
@@ -233,7 +234,7 @@ void ArrayReplaceAt(DArray array, const void *newElem, int n)
 
 void ArraySort(DArray array, ArrayCompareFn comparator)
 {
- 	GS_ASSERT (array);
+ 	GS_ASSERT(array != NULL);
 	qsort(array->list, (size_t)array->count, (size_t)array->elemsize, comparator);
 }
 
@@ -263,8 +264,8 @@ void ArrayMap(DArray array, ArrayMapFn fn, void *clientData)
 {
 	int i;
 
- 	GS_ASSERT (array);
-	GS_ASSERT(fn);
+ 	GS_ASSERT(array != NULL);
+	GS_ASSERT(fn != NULL);
 
 	for (i = 0; i < array->count; i++)
 		fn(ArrayNth(array,i), clientData);
@@ -275,7 +276,7 @@ void ArrayMapBackwards(DArray array, ArrayMapFn fn, void *clientData)
 {
 	int i;
 
-	GS_ASSERT(fn);
+	GS_ASSERT(fn != NULL);
 
 	for (i = (array->count - 1) ; i >= 0 ; i--)
 		fn(ArrayNth(array,i), clientData);
@@ -287,8 +288,8 @@ void * ArrayMap2(DArray array, ArrayMapFn2 fn, void *clientData)
 	int i;
 	void * pcurr;
 
-	GS_ASSERT(fn);
-	GS_ASSERT(clientData);
+	GS_ASSERT(fn != NULL);
+	GS_ASSERT(clientData != NULL);
 
 	for (i = 0; i < array->count; i++)
 	{
@@ -305,8 +306,8 @@ void * ArrayMapBackwards2(DArray array, ArrayMapFn2 fn, void *clientData)
 	int i;
 	void * pcurr;
 
-	GS_ASSERT(fn);
-	GS_ASSERT(clientData);
+	GS_ASSERT(fn != NULL);
+	GS_ASSERT(clientData != NULL);
 
 	for (i = (array->count - 1) ; i >= 0 ; i--)
 	{
@@ -322,8 +323,8 @@ void ArrayClear(DArray array)
 {
 	int i;
 
-	// This could be more optimal!
-	//////////////////////////////
+	GS_ASSERT(array != NULL);
+
 	for(i = (ArrayLength(array) - 1) ; i >= 0 ; i--)
 		ArrayDeleteAt(array, i);
 }
@@ -336,8 +337,8 @@ static void *mylsearch(const void *key, void *base, int count, int size,
 					 ArrayCompareFn comparator)
 {
 	int i;
-	GS_ASSERT(key);
-	GS_ASSERT(base);
+	GS_ASSERT(key != NULL);
+	GS_ASSERT(base != NULL);
 	for (i = 0; i < count; i++)
 	{
 		if (comparator(key, (char *)base + size*i) == 0)
@@ -353,9 +354,9 @@ static void *mybsearch(const void *elem, void *base, int num, int elemsize, Arra
 {
 	int L, H, I, C;
 	
-	GS_ASSERT(elem);
-	GS_ASSERT(base);
-	GS_ASSERT(found);
+	GS_ASSERT(elem != NULL);
+	GS_ASSERT(base != NULL);
+	GS_ASSERT(found != NULL);
 
 	L = 0;
 	H = num - 1;
