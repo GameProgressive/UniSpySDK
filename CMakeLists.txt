@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-project(retrospy VERSION 2.06 LANGUAGES C CXX)
+project(UniSpySDK VERSION 2.06 LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
@@ -15,7 +15,7 @@ endif()
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
 option(RS_OPENSSL "Enable OpenSSL support" ON)
 option(RS_HTTPLOG "Enable HTTP logging" OFF)
-option(RS_SECURESECONNECT "Enable connecting to RetroSpy services with a secure protocol (HTTPS)" ON)
+option(RS_SECURESECONNECT "Enable connecting to UniSpy services with a secure protocol (HTTPS)" ON)
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
 #option(RS_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
@@ -32,9 +32,9 @@ endif()
 # Do we optionally want to build the test executables?
 option(RS_BUILD_TESTS "Builds test executables." OFF)
 
-if(RETROSPY_SERVER_NAME)
-    add_definitions(-DGSI_DOMAIN_NAME="${RETROSPY_SERVER_NAME}")
-    message(STATUS "RETROSPY server name is set to ${RETROSPY_SERVER_NAME}")
+if(RS_SERVER_NAME)
+    add_definitions(-DGSI_DOMAIN_NAME="${RS_SERVER_NAME}")
+    message(STATUS "UniSpy server name is set to ${RS_SERVER_NAME}")
 endif()
 
 add_definitions(-DGS_PEER)
