@@ -2816,6 +2816,7 @@ void chatSetGlobalKeysA(CHAT chat,
 	const char * key;
 	const char * value;
 	int i;
+	size_t bufferLen = 0;
 	ciConnection * connection;
 	GS_ASSERT(chat != NULL);
 	connection = (ciConnection *)chat;
@@ -2833,7 +2834,13 @@ void chatSetGlobalKeysA(CHAT chat,
 		value = values[i];
 		if(!value)
 			value = "";
-		sprintf(buffer + strlen(buffer), "\\%s\\%s", key, value);
+		bufferLen = strlen(buffer);
+		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
+		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(key) + strlen(value)) {
+			GS_ASSERT(0);
+			break;
+		}
+		sprintf(buffer + bufferLen, "\\%s\\%s", key, value);
 	}
 
 	ciSocketSend(&connection->chatSocket, buffer);
@@ -3005,6 +3012,7 @@ void chatSetChannelKeysA(CHAT chat,
 	char buffer[512];
 	const char * value;
 	int i;
+	size_t bufferLen = 0;
 	ciConnection * connection;
 	GS_ASSERT(chat != NULL);
 	connection = (ciConnection *)chat;
@@ -3019,6 +3027,12 @@ void chatSetChannelKeysA(CHAT chat,
 		value = values[i];
 		if(!value)
 			value = "";
+		bufferLen = strlen(buffer);
+		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
+		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(keys[i]) + strlen(value)) {
+			GS_ASSERT(0);
+			break;
+		}
 		sprintf(buffer + strlen(buffer), "\\%s\\%s", keys[i], value);
 	}
 
