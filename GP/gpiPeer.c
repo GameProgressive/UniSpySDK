@@ -506,10 +506,10 @@ gpiProcessPeerConnected(
 // makes no assumption of the operation queue
 void gpiCheckTimedOutPeerOperations(GPConnection * connection, GPIPeer *peer)
 {
-	GPIPeerOp *anIterator = peer->peerOpQueue.first;
 	GS_ASSERT(peer);
 	if (!peer)
 		return;
+	GPIPeerOp *anIterator = peer->peerOpQueue.first;
 	
 	while (anIterator && anIterator != peer->peerOpQueue.last)
 	{
@@ -1016,13 +1016,15 @@ gpiPeerStartTransferMessage(
 {
 	char buffer[64];
 	GPITransferID tid;
-	tid.count = transferID->count;
-	tid.profileid = transferID->profileid;
-	tid.time = transferID->time;
 
 	GS_ASSERT(transferID);
 	if (!transferID)
 		return GP_NETWORK_ERROR;
+
+	tid.count = transferID->count;
+	tid.profileid = transferID->profileid;
+	tid.time = transferID->time;
+
 	// Start the message.
 	/////////////////////
 	sprintf(buffer, "\\m\\%d\\xfer\\%d %u %u", type, tid.profileid, tid.count, tid.time);
