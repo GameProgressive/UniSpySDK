@@ -50,14 +50,6 @@
 	#define IF_MEM_PROFILE_ISON(a)
 #endif
 
-// Disable compiler warnings for issues that are unavoidable.
-/////////////////////////////////////////////////////////////
-#if defined(_MSC_VER) // DevStudio
-	// Level4, "conditional expression is constant". 
-	// Occurs with use of the MS provided macro FD_SET
-	#pragma warning ( disable: 4127 )
-#endif // _MSC_VER
-
 #ifdef _WIN32
 	#define MEM_MANAGER_CALL _cdecl
 #else

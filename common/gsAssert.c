@@ -50,7 +50,6 @@ void gsDebugAssert(const char *szError,
 
 #elif defined _WIN32
 	#include <windows.h>
-	#pragma warning(disable: 4127) // disable warnings from "conditional expression is constant"
 
 	// ErrorMessage: Displays message and goes into an infinite loop
 	// continues rendering
