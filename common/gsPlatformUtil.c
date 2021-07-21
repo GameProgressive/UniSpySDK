@@ -1886,7 +1886,7 @@ const char * GOAGetUniqueID_Internal(void)
 		{
 			ret = RegCreateKeyExA(HKEY_CURRENT_USER, REG_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &thekey, &disp);
 		}
-		RegSetValueExA(thekey, (LPCSTR)"Crypt", 0, REG_SZ, (const LPBYTE)keyval, strlen(keyval)+1);
+		RegSetValueExA(thekey, (LPCSTR)"Crypt", 0, REG_SZ, (const LPBYTE)keyval, (DWORD)strlen(keyval)+1);
 #else
 		f = gsifopen("id.bin","w");
 		if (f)
