@@ -801,7 +801,10 @@ SCResult SC_CALL sciReportAddStringValue(SCIReport *      theReport,
 {
 	SCIReportHeader * aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 	int writtenLen = 0, numLenBytes = 0, asciiLen = 0;
-	gsi_i16 theKeyType = SCIKeyType_STRING;	
+	gsi_i16 theKeyType = SCIKeyType_STRING;
+#if !defined(GSI_UNICODE)
+	size_t theValueLen;
+#endif
 
 	// for unicode we need to store the ascii-converted string first in the buffer so as
 	// not to dynamically allocate space for it. Then once we have the length of it, we can
@@ -820,9 +823,12 @@ SCResult SC_CALL sciReportAddStringValue(SCIReport *      theReport,
 	numLenBytes = (asciiLen/127)+1; 
 
 #else
+	theValueLen = strlen(theValue);
 
-	numLenBytes = (gsi_i32)(strlen(theValue)/127)+1; //finds out number of bytes necessary to represent len
-	asciiLen = (int)strlen(theValue);
+	GS_ASSERT(theValueLen <= UINT_MAX);
+
+	numLenBytes = (gsi_i32)(theValueLen/127)+1; //finds out number of bytes necessary to represent len
+	asciiLen = (int)theValueLen;
 #endif
 
 
@@ -875,8 +881,8 @@ SCResult SC_CALL sciReportAddStringValue(SCIReport *      theReport,
 	// Now strip to Ascii and write the length - subtract 1 to get rid of appended null character
 	theReport->mBuffer.mPos += UCS2ToAsciiString(theValue, &theReport->mBuffer.mData[theReport->mBuffer.mPos])-1;
 #else
-	strncpy(&theReport->mBuffer.mData[theReport->mBuffer.mPos], theValue, strlen(theValue));
-	theReport->mBuffer.mPos += strlen(theValue);
+	strncpy(&theReport->mBuffer.mData[theReport->mBuffer.mPos], theValue, (unsigned int)theValueLen);
+	theReport->mBuffer.mPos += (unsigned int)theValueLen;
 #endif
 
 	return SCResult_NO_ERROR;

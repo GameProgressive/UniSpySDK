@@ -124,7 +124,7 @@ DEFINES
 	r = f(g->buckets, n, v); \
 	if (!r) \
 	r = BucketNew(g->buckets, n, t, v); }
-#define DOXCODE(b, l, e) enc = e; xcode_buf(b,l);
+#define DOXCODE(b, l, e) enc = e; xcode_buf(b,(int)(l));
 
 
 /********
@@ -198,7 +198,7 @@ char *GenerateAuthA(const char *challenge, const char *password, char response[3
 	sprintf(rawout, "%s%s",password, challenge );
 
 	/* do the response md5 */
-	GSMD5Digest((unsigned char *)rawout, strlen(rawout), response);
+	GSMD5Digest((unsigned char *)rawout, (unsigned int)strlen(rawout), response);
 	return response;
 }
 #ifdef GSI_UNICODE
@@ -1528,8 +1528,8 @@ static int ProcessInBuffer(char *buff, int len)
 	while ((len > 0) && (pos != NULL))
 	{
 		DOXCODE(buff,pos - buff, enc1);
-		ProcessStatement(buff, pos - buff);
-		len -= (pos - buff) + 7;
+		ProcessStatement(buff, (int)(pos - buff));
+		len -= (int)(pos - buff) + 7;
 		buff = pos + 7; //skip the final
 		if (len>0)
 			pos = FindFinal(buff, len);
