@@ -182,9 +182,9 @@ gsi_bool gsiLargeIntSizePower2(const gsLargeInt_t *src1, const gsLargeInt_t *src
 static gsi_i32 gsiLargeIntCompare(const l_word *data1, l_word len1, const l_word *data2, l_word len2)
 {
 	// skip leading whitespace, if any
-	while(data1[len1-1] == 0 && len1>0)
+	while(len1>0 && data1[len1-1] == 0)
 		len1--;
-	while(data2[len2-1] == 0 && len2>0)
+	while(len2>0 && data2[len2-1] == 0)
 		len2--;
 	if (len1<len2)
 		return -1;
