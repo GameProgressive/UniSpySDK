@@ -534,6 +534,7 @@ PEERBool piNewConnectOperation
 	const char * uniqueID;
 	char encodedUniqueID[33];
 	peerNickErrorCallback nickErrorCallback;
+	size_t uniqueIDLen;
 
 	PEER_CONNECTION;
 
@@ -580,7 +581,11 @@ PEERBool piNewConnectOperation
 	// Encode the unique ID.
 	////////////////////////
 	uniqueID = GOAGetUniqueID();
-	GSMD5Digest((unsigned char *)uniqueID, strlen(uniqueID), encodedUniqueID);
+	uniqueIDLen = strlen(uniqueID);
+
+	GS_ASSERT(uniqueIDLen <= UINT_MAX);
+
+	GSMD5Digest((unsigned char *)uniqueID, (unsigned int)uniqueIDLen, encodedUniqueID);
 
 	// Connect to chat.
 	///////////////////
