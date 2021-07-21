@@ -1071,12 +1071,12 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
             freeclear(profile->buddyStatusInfo->gameType);
             freeclear(profile->buddyStatusInfo->gameVariant);
             freeclear(profile->buddyStatusInfo->gameMapName);
-            freeclear(profile->buddyStatusInfo);
             if (profile->buddyStatusInfo->extendedInfoKeys)
             {
                 ArrayFree(profile->buddyStatusInfo->extendedInfoKeys);
                 profile->buddyStatusInfo->extendedInfoKeys = NULL;
             }
+            freeclear(profile->buddyStatusInfo);
 
             iconnection->profileList.numBuddies--;
             GS_ASSERT(iconnection->profileList.numBuddies >= 0);
