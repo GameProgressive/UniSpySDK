@@ -1559,7 +1559,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	// Convert result from 32-bit words to a byte stream
 	
 	
-	oStr = (char *)gsimalloc((4 * (size_t)nIn + 1));
+	oStr = (char *)gsimalloc(4 * (size_t)nIn + 1);
 	pStr = oStr;
 	*nOut = 4 *nIn;
 	for ( i = -1; ++i < nIn; ) 

@@ -206,7 +206,7 @@ gpiSendData(
 		#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 		{
 			static int sendCount;
-			char *buf = (char *)gsimalloc((size_t)(rcode + 1));
+			char *buf = (char *)gsimalloc((size_t)rcode + 1);
 			memcpy(buf, buffer, (size_t)rcode);
 			buf[rcode] = '\0';
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump, "SENT%04d(%s): %s\n", sendCount++, id, buf);
@@ -403,7 +403,7 @@ gpiRecvToBuffer(
 			#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 			{
 				static int recvCount;
-				char *buf = (char *)gsimalloc((size_t)(rcode + 1));
+				char *buf = (char *)gsimalloc((size_t)rcode + 1);
 				memcpy(buf, &buffer[len], (size_t)rcode);
 				buf[rcode] = '\0';
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump,
