@@ -1648,7 +1648,8 @@ GPResult gpGetBuddyStatus(
 	/////////////////////////////
 	if(iconnection->simulation)
 	{
-		memset(status, 0, sizeof(GPBuddyStatus));
+		if(status != NULL)
+			memset(status, 0, sizeof(GPBuddyStatus));
 		return GP_NO_ERROR;
 	}
 
