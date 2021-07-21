@@ -97,10 +97,10 @@ static GHTTPBool ghiParseURL
 	if(!*URL)
 		URL = "/";
 	connection->requestPath = goastrdup(URL);
+	if (!connection->requestPath)
+		return GHTTPFalse;
 	while((str = strchr(connection->requestPath, ' ')) != NULL)
 		*str = '+';
-	if(!connection->requestPath)
-		return GHTTPFalse;
 
 	return GHTTPTrue;
 }
@@ -1725,7 +1725,10 @@ void ghiDoReceivingHeaders
                         connection->completed = GHTTPTrue;
                         connection->result = GHTTPOutOfMemory;
                     }
-                    sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
+                    else
+                    {
+                        sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
+                    }
                 }
                 else
                 {
