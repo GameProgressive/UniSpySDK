@@ -19,11 +19,6 @@
 #include "chatSocket.h"
 
 
-#if defined(_WIN32)
-// Silence the "conditional expression is constant" on the FD_SET macros
-#pragma warning(disable:4127)
-#endif
-
 /************
 ** DEFINES **
 ************/
@@ -380,7 +375,14 @@ static void ciSocketThinkRecv(ciSocket * sock)
 	ASSERT_SOCK(sock);
 	ASSERT_CONNECTED(sock);
 
+#ifdef _WIN32
+#pragma warning ( push )
+#pragma warning ( disable: 4127 )  // conditional expression is constant
+#endif
 	while(CHATTrue)
+#ifdef _WIN32
+#pragma warning ( pop )
+#endif
 	{
 		// Check the read flag.
 		///////////////////////
@@ -926,6 +928,7 @@ static CHATBool ciParseInput(ciSocket * sock)
 	char *p, *q, *r;
 	char   temp;
 	int i;
+	ptrdiff_t messageLen = 0;
 	
 	p = sock->inputQueue.buffer;  // start
 	
@@ -982,9 +985,13 @@ static CHATBool ciParseInput(ciSocket * sock)
 				//////////////////////////////
 				*r = temp;
 
+				messageLen = q - sock->inputQueue.buffer;
+
+				GS_ASSERT(messageLen <= INT_MAX);
+
 				// Take the message out of the buffer.
 				//////////////////////////////////////
-				ciBufferClipFront(&sock->inputQueue, (q - sock->inputQueue.buffer));
+				ciBufferClipFront(&sock->inputQueue, (int)messageLen);
 
 				return CHATTrue;
 			}

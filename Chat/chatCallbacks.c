@@ -14,11 +14,6 @@
 #include "chatCallbacks.h"
 #include "chatChannel.h"
 
-#if defined(_WIN32)
-// warning about casting void* to function*
-#pragma warning(disable:4055)
-#endif
-
 /************
 ** DEFINES **
 ************/

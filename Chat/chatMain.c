@@ -19,11 +19,6 @@
 #include "chatCallbacks.h"
 
 
-#if defined(_WIN32)
-// Silence the warning about explicitly casting a function* to a void*
-#pragma warning(disable:4054)
-#endif
-
 /************
 ** GLOBALS **
 ************/
@@ -325,9 +320,11 @@ void ciSendLogin(CHAT chat)
 		return;
 	}
 
+	GS_ASSERT(sizeof(connection->password) / sizeof(connection->password[0]) <= UINT_MAX);
+
 	// For uniquenick or profile logins, we need to MD5 the password.
 	/////////////////////////////////////////////////////////////////
-	GSMD5Digest((unsigned char *)connection->password, strlen(connection->password), passwordHash);
+	GSMD5Digest((unsigned char *)connection->password, (unsigned int)strlen(connection->password), passwordHash);
 
 	// Send the login message based on type.
 	////////////////////////////////////////

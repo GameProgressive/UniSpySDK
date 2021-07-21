@@ -21,15 +21,6 @@
 #include "chatCallbacks.h"
 #include "chatCrypt.h"
 
-#if defined(_WIN32)
-// Silence the cast function* to void* warning.  
-// Since we are explicitly casting it, I'm not sure why the compiler warns
-#pragma warning(disable:4054)  
-
-// Silence the "conditional expression is constant" on our "while(1)" statements
-#pragma warning(disable:4127)
-#endif
-
 /************
 ** DEFINES **
 ************/
