@@ -210,7 +210,7 @@ void *BucketConcat(bucketset_t set, char *name, void *value)
 	return DoGet(pbucket);
 }
 
-#define AVG(cur, new, num) (((cur * num) + new) / (++num))
+#define AVG(cur, new, num) ((((cur) * (num)) + (new)) / (++num))
 void *BucketAvg(bucketset_t set, char *name, void *value)
 {
 	bucket_t *pbucket = DoFind(set, name);	
