@@ -1117,7 +1117,7 @@ void ghiDoReceivingStatus
 
 		// Get the status length.
 		/////////////////////////
-		statusLength = (endOfStatus - connection->recvBuffer.data);
+		statusLength = (int)(endOfStatus - connection->recvBuffer.data);
 
 		// Log it.
 		//////////
@@ -1208,7 +1208,7 @@ static GHTTPBool ghiDeliverIncomingFileData
 	{
 		int bytesWritten = 0;
 #ifndef NOFILE
-		bytesWritten = fwrite(data, 1, len, connection->saveFile);
+		bytesWritten = (int)fwrite(data, 1, len, connection->saveFile);
 #endif
 		if(bytesWritten != len)
 		{
@@ -1339,12 +1339,12 @@ static GHTTPBool ghiProcessIncomingFileData
 				{
 					// Append what we have to the buffer.
 					/////////////////////////////////////
-					ghiAppendToChunkHeaderBuffer(connection, data, endOfHeader - data);
+					ghiAppendToChunkHeaderBuffer(connection, data, (int)(endOfHeader - data));
 
 					// Adjust data and len.
 					///////////////////////
 					endOfHeader++;
-					len -= (endOfHeader - data);
+					len -= (int)(endOfHeader - data);
 					data = endOfHeader;
 
 					// Read the chunk size.
@@ -1435,7 +1435,7 @@ static GHTTPBool ghiProcessIncomingFileData
 				// Adjust data and len.
 				///////////////////////
 				endOfFooter++;
-				len -= (endOfFooter - data);
+				len -= (int)(endOfFooter - data);
 				data = endOfFooter;
 
 				// Set up for reading the next header.
@@ -1625,11 +1625,11 @@ void ghiDoReceivingHeaders
 		connection->recvHeaders = goastrdup(headers);
 
         fileStart = (endOfHeaders + 2);
-        fileLength = (connection->recvBuffer.len - (fileStart - connection->recvBuffer.data));
+        fileLength = (connection->recvBuffer.len - (int)(fileStart - connection->recvBuffer.data));
 
         // Set the headers buffer's new length.
         ///////////////////////////////////////
-        connection->recvBuffer.len = (endOfHeaders - connection->recvBuffer.data + 1);
+        connection->recvBuffer.len = (int)(endOfHeaders - connection->recvBuffer.data + 1);
         connection->recvBuffer.pos = connection->recvBuffer.len;
 
         // Log it.
