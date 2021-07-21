@@ -591,9 +591,9 @@ static gsi_bool gsiLargeIntDiv(const l_word *src, l_word len, const gsLargeInt_t
 			if (quotient.mLength < (l_word)(readIndex+readLength))
 				quotient.mLength = (l_word)(readIndex+readLength);
 			// remove new leading zeroes
-			while(scopy[readIndex+readLength-1] == 0 && readLength>1)
+			while(readLength>1 && scopy[readIndex+readLength-1] == 0)
 				readLength--;
-			while(scopy[readIndex+readLength-1] == 0 && readIndex>1)
+			while(readIndex>1 && scopy[readIndex+readLength-1] == 0)
 				readIndex--;
 		}
 	}
