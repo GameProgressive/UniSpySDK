@@ -1143,7 +1143,7 @@ gsi_bool wsLoginCertReadBinary(GSLoginCertificate * certOut, char * bufin, unsig
 
 	READ_NTS(certOut->mProfileNick, WS_LOGIN_NICK_LEN);
 	READ_NTS(certOut->mUniqueNick, WS_LOGIN_UNIQUENICK_LEN);
-	READ_NTS(certOut->mCdKeyHash, WS_LOGIN_CDKEY_LEN);
+	READ_NTS(certOut->mCdKeyHash, WS_LOGIN_KEYHASH_LEN);
 #else
 
 	// parses ascii to unicode before writing into the buffer
