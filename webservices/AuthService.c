@@ -6,8 +6,6 @@
 #include "../common/md5.h"
 #include "../common/gsSHA1.h"
 
-#pragma warning(disable: 4267)
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /////////// Old login system (no game id)
@@ -883,6 +881,7 @@ WSLoginValue wsLoginSonyCert(int gameId,
 static void wsiLoginEncryptPassword(const gsi_char * password, gsi_u8 ciphertext[GS_CRYPT_RSA_BYTE_SIZE])
 {
 	gsCryptRSAKey sigkeypub;
+	size_t passwordLen;
 
 
 #ifdef GSI_UNICODE
@@ -895,9 +894,17 @@ static void wsiLoginEncryptPassword(const gsi_char * password, gsi_u8 ciphertext
 	gsLargeIntSetFromHexString(&sigkeypub.exponent, WS_AUTHSERVICE_SIGNATURE_EXP);
 
 #ifdef GSI_UNICODE
-	gsCryptRSAEncryptBuffer(&sigkeypub, (const gsi_u8*)password_A, _tcslen(password), ciphertext);
+	passwordLen = _tcslen(password);
+
+	GS_ASSERT(passwordLen <= UINT_MAX);
+
+	gsCryptRSAEncryptBuffer(&sigkeypub, (const gsi_u8*)password_A, (unsigned int)passwordLen, ciphertext);
 #else
-	gsCryptRSAEncryptBuffer(&sigkeypub, (const gsi_u8*)password, strlen(password), ciphertext);
+	passwordLen = strlen(password);
+
+	GS_ASSERT(passwordLen <= UINT_MAX);
+
+	gsCryptRSAEncryptBuffer(&sigkeypub, (const gsi_u8*)password, (unsigned int)passwordLen, ciphertext);
 #endif
 }
 
@@ -956,9 +963,9 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 		GSMD5Update(&md5, (unsigned char*)keyhash_A, strlen(keyhash_A));        //FIX for unicode
 	}
 #else
-	GSMD5Update(&md5, (unsigned char*)&cert->mProfileNick, strlen(cert->mProfileNick)); 
-	GSMD5Update(&md5, (unsigned char*)&cert->mUniqueNick, strlen(cert->mUniqueNick));   
-	GSMD5Update(&md5, (unsigned char*)&cert->mCdKeyHash, strlen(cert->mCdKeyHash));     
+	GSMD5Update(&md5, (unsigned char*)&cert->mProfileNick, (unsigned int)strlen(cert->mProfileNick)); 
+	GSMD5Update(&md5, (unsigned char*)&cert->mUniqueNick, (unsigned int)strlen(cert->mUniqueNick));
+	GSMD5Update(&md5, (unsigned char*)&cert->mCdKeyHash, (unsigned int)strlen(cert->mCdKeyHash));
 #endif
 
 	// must be hashed in big endian byte order
@@ -992,7 +999,7 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
                                   if(lenoutSoFar + _tcslen(a) > maxlen) \
                                       return gsi_false; \
 								  strcpy(bufout+lenoutSoFar, a); \
-								  lenoutSoFar += _tcslen(a) + 1; }
+								  lenoutSoFar += (unsigned int)_tcslen(a) + 1; }
 
 #define WRITE_BINARY(a,l)  { \
                                   if(lenoutSoFar + l > maxlen) \
@@ -1080,7 +1087,7 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 								  if(lenoutSoFar + _tcslen(a)+1 > maxlen) \
                                       return gsi_false; \
 								  bufin += _tcslen(a)+1; \
-								  lenoutSoFar += _tcslen(a)+1; }
+								  lenoutSoFar += (unsigned int)_tcslen(a)+1; }
 
 #define READ_ASCII(a,l)  { \
 								  char temp[l]; \
@@ -1319,11 +1326,15 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 {
 	char buffer[20];
 	GSSHA1Context sha1;
+	const size_t accessKeyLen = strlen(accessKey), secretKeyLen = strlen(secretKey);
+
+	GS_ASSERT(accessKeyLen <= UINT_MAX);
+	GS_ASSERT(secretKeyLen <= UINT_MAX);
 
 	strcpy(authCreds, accessKey);
 	GSSHA1Reset(&sha1);
-	GSSHA1Input(&sha1, (const uint8_t*)accessKey, strlen(accessKey));
-	GSSHA1Input(&sha1, (const uint8_t*)secretKey, strlen(secretKey));
+	GSSHA1Input(&sha1, (const uint8_t*)accessKey, (unsigned int)accessKeyLen);
+	GSSHA1Input(&sha1, (const uint8_t*)secretKey, (unsigned int)secretKeyLen);
 	GSSHA1Result(&sha1, (uint8_t*)&authCreds[33]);
 
 	for (int i = 0; i < 20; ++i)
@@ -1332,5 +1343,3 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 	sprintf(buffer, "%d", gameId);
 	gsiCoreSetGameId(buffer);
 }
-
-#pragma warning(default: 4267)
