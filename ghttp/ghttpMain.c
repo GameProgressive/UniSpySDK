@@ -1525,7 +1525,7 @@ GHTTPBool ghttpPostAddFileFromMemoryA
 		return GHTTPFalse;
 	if (!bufferLen && !buffer)
 		return GHTTPFalse;
-	if (!reportFilename && !reportFilename[0])
+	if (!reportFilename || !reportFilename[0])
 		return GHTTPFalse;
 	if(!contentType)
 		contentType = "application/octet-stream";
