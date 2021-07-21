@@ -1507,7 +1507,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	k = (unsigned int *)key;
 
 	// Load and zero-pad entire input stream as 32-bit words
-	sIn2 = (char *)gsimalloc((size_t)(4 * nIn));
+	sIn2 = (char *)gsimalloc((4 * (size_t)nIn));
 	strcpy(sIn2, sIn);
 	gsiPadRight( sIn2, '\0', 4*nIn);
 	v = (unsigned int *)sIn2;
@@ -1559,7 +1559,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	// Convert result from 32-bit words to a byte stream
 	
 	
-	oStr = (char *)gsimalloc((size_t)(4 * nIn + 1));
+	oStr = (char *)gsimalloc((4 * (size_t)nIn + 1));
 	pStr = oStr;
 	*nOut = 4 *nIn;
 	for ( i = -1; ++i < nIn; ) 
