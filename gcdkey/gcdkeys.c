@@ -822,15 +822,16 @@ static void resend_auth_req(gsclient_t *client)
 static void send_keep_alive()
 {
 	static gsi_time lastKeepAliveSent = 0;
-	static const char *keepAlive = "\\ka\\\0";
+	static const char keepAlive[] = "\\ka\\\0";
 	char buf[BUFSIZE];
+	const int keepAliveLen = sizeof(keepAlive) / sizeof(keepAlive[0]) - 1;
 	if (lastKeepAliveSent == 0)
 		lastKeepAliveSent = current_time();
 	if (current_time() > lastKeepAliveSent + MAX_KEEP_ALIVE_INTERVAL)
 	{	
 		gsiSafeStrcpyA(buf, keepAlive, sizeof(buf));
-		xcode_buf(buf, strlen(keepAlive));
-		sendto(sock, buf, strlen(keepAlive), 0, (struct sockaddr *)&valaddr, sizeof(struct sockaddr_in));
+		xcode_buf(buf, keepAliveLen);
+		sendto(sock, buf, keepAliveLen, 0, (struct sockaddr *)&valaddr, sizeof(struct sockaddr_in));
 		lastKeepAliveSent = current_time();
 	}
 }
