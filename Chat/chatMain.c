@@ -3217,12 +3217,12 @@ void chatGetChannelKeysW(CHAT chat,
 // [in] nick		-  The nickname to validate
 int ciNickIsValid(const char* nick)
 {
-	if (strlen(nick) >= MAX_CHAT_NICK)
-		return CHAT_NICK_TOO_LONG;
-
 	// Empty nick is invalid
 	if ((NULL == nick) || ('\0' == *nick))
 		return CHAT_INVALID;
+
+	if (strlen(nick) >= MAX_CHAT_NICK)
+		return CHAT_NICK_TOO_LONG;
 
 
 	// 10-14-2004 Changed by Saad Nader
