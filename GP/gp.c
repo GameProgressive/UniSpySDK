@@ -171,7 +171,7 @@ GPResult gpConnectA(
 
 	// Do it.
 	/////////
-	return gpiConnect(connection, nick, "", email, password, "", "", "", NULL, firewall, GPIFalse, blocking, callback, param);
+	return gpiConnect(connection, nick, "", email, password, "", "", "", firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectW(
@@ -266,7 +266,7 @@ GPResult gpConnectNewUserA(
 
 	// Do it.
 	/////////
-	return gpiConnect(connection, nick, uniquenick, email, password, "", "", "", cdkey, firewall, GPITrue, blocking, callback, param);
+	return gpiConnect(connection, nick, uniquenick, email, password, "", "", cdkey, firewall, GPITrue, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectNewUserW(
@@ -337,7 +337,7 @@ GPResult gpConnectUniqueNickA(
 
 	// Do it.
 	/////////
-	return gpiConnect(connection, "", uniquenick, "", password, "", "", "", NULL, firewall, GPIFalse, blocking, callback, param);
+	return gpiConnect(connection, "", uniquenick, "", password, "", "", "", firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectUniqueNickW(
@@ -400,7 +400,7 @@ GPResult gpConnectPreAuthenticatedA
 
 	// Do it.
 	/////////
-	return gpiConnect(connection, "", "", "", "", authtoken, partnerchallenge, "", NULL, firewall, GPIFalse, blocking, callback, param);
+	return gpiConnect(connection, "", "", "", "", authtoken, partnerchallenge, "", firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectPreAuthenticatedW

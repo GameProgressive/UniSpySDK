@@ -221,17 +221,17 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 			}
 			else
 			{
-				MD5_CTX md5;
+				GSMD5_CTX md5;
 				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
 				memcpy(&response.mPrivateData.mPeerPrivateKey, &cert->mPeerPublicKey, sizeof(cert->mPeerPublicKey));
 
 				// hash the private key
-				MD5Init(&md5);
+				GSMD5Init(&md5);
 				//gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.modulus, &md5);
 				gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.exponent, &md5);
-				MD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
+				GSMD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
 
 				// verify certificate
 				cert->mIsValid = wsLoginCertIsValid(cert);
@@ -407,7 +407,7 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 			}
 			else
 			{
-				MD5_CTX md5;
+				GSMD5_CTX md5;
 				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
@@ -415,10 +415,10 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 
 				// hash the private key
 				//   -- we use the has like a password for simple authentication
-				MD5Init(&md5);
+				GSMD5Init(&md5);
 				//gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.modulus, &md5);
 				gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.exponent, &md5);
-				MD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
+				GSMD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
 
 				// verify certificate
 				cert->mIsValid = wsLoginCertIsValid(cert);
@@ -593,7 +593,7 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 			}
 			else
 			{
-				MD5_CTX md5;
+				GSMD5_CTX md5;
 				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
@@ -601,10 +601,10 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 
 				// hash the private key
 				//   -- we use the has like a password for simple authentication
-				MD5Init(&md5);
+				GSMD5Init(&md5);
 				//gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.modulus, &md5);
 				gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.exponent, &md5);
-				MD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
+				GSMD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
 
 				// verify certificate
 				cert->mIsValid = wsLoginCertIsValid(cert);
@@ -919,27 +919,27 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 {
 	// Verify the signature
 	gsCryptRSAKey sigkeypub;
-	MD5_CTX md5;
+	GSMD5_CTX md5;
 	gsi_u8 hash[16];
 	gsi_i32 cryptResult = 0;
 	gsi_u32 temp;
 
 	// hash certificate data
-	MD5Init(&md5);
+	GSMD5Init(&md5);
 	temp = wsiMakeLittleEndian32(cert->mLength);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mVersion);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mPartnerCode);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mNamespaceId);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mUserId);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mProfileId);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 	temp = wsiMakeLittleEndian32(cert->mExpireTime);
-	MD5Update(&md5, (unsigned char*)&temp, 4);
+	GSMD5Update(&md5, (unsigned char*)&temp, 4);
 
 #if defined(GSI_UNICODE)
 	{
@@ -951,14 +951,14 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 		UCS2ToAsciiString(cert->mUniqueNick, uniquenick_A);
 		UCS2ToAsciiString(cert->mCdKeyHash, keyhash_A);
 
-		MD5Update(&md5, (unsigned char*)profile_A, strlen(profile_A));        //FIX for unicode
-		MD5Update(&md5, (unsigned char*)uniquenick_A, strlen(uniquenick_A));  //FIX for unicode
-		MD5Update(&md5, (unsigned char*)keyhash_A, strlen(keyhash_A));        //FIX for unicode
+		GSMD5Update(&md5, (unsigned char*)profile_A, strlen(profile_A));        //FIX for unicode
+		GSMD5Update(&md5, (unsigned char*)uniquenick_A, strlen(uniquenick_A));  //FIX for unicode
+		GSMD5Update(&md5, (unsigned char*)keyhash_A, strlen(keyhash_A));        //FIX for unicode
 	}
 #else
-	MD5Update(&md5, (unsigned char*)&cert->mProfileNick, strlen(cert->mProfileNick)); 
-	MD5Update(&md5, (unsigned char*)&cert->mUniqueNick, strlen(cert->mUniqueNick));   
-	MD5Update(&md5, (unsigned char*)&cert->mCdKeyHash, strlen(cert->mCdKeyHash));     
+	GSMD5Update(&md5, (unsigned char*)&cert->mProfileNick, strlen(cert->mProfileNick)); 
+	GSMD5Update(&md5, (unsigned char*)&cert->mUniqueNick, strlen(cert->mUniqueNick));   
+	GSMD5Update(&md5, (unsigned char*)&cert->mCdKeyHash, strlen(cert->mCdKeyHash));     
 #endif
 
 	// must be hashed in big endian byte order
@@ -966,8 +966,8 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 	gsLargeIntAddToMD5(&cert->mPeerPublicKey.modulus, &md5);
 	gsLargeIntAddToMD5(&cert->mPeerPublicKey.exponent, &md5);
 
-	MD5Update(&md5, (unsigned char*)&cert->mServerData, WS_LOGIN_SERVERDATA_LEN);
-	MD5Final(hash, &md5);
+	GSMD5Update(&md5, (unsigned char*)&cert->mServerData, WS_LOGIN_SERVERDATA_LEN);
+	GSMD5Final(hash, &md5);
 
 	gsLargeIntSetFromHexString(&sigkeypub.modulus, WS_AUTHSERVICE_SIGNATURE_KEY);
 	gsLargeIntSetFromHexString(&sigkeypub.exponent, WS_AUTHSERVICE_SIGNATURE_EXP);
@@ -1318,13 +1318,13 @@ const char* wsLoginValueString(int loginValue)
 void wsSetGameCredentials(const char* accessKey, const int gameId, const char* secretKey)
 {
 	char buffer[20];
-	SHA1Context sha1;
+	GSSHA1Context sha1;
 
 	strcpy(authCreds, accessKey);
-	SHA1Reset(&sha1);
-	SHA1Input(&sha1, (const uint8_t*)accessKey, strlen(accessKey));
-	SHA1Input(&sha1, (const uint8_t*)secretKey, strlen(secretKey));
-	SHA1Result(&sha1, (uint8_t*)&authCreds[33]);
+	GSSHA1Reset(&sha1);
+	GSSHA1Input(&sha1, (const uint8_t*)accessKey, strlen(accessKey));
+	GSSHA1Input(&sha1, (const uint8_t*)secretKey, strlen(secretKey));
+	GSSHA1Result(&sha1, (uint8_t*)&authCreds[33]);
 
 	for (int i = 0; i < 20; ++i)
 		sprintf(&authCreds[2 * i + 53], "%02x", (gsi_u8)authCreds[i + 33]);

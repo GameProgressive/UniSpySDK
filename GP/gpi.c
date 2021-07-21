@@ -20,11 +20,11 @@
 // This is so VisualAssist will know about these functions.
 ///////////////////////////////////////////////////////////
 #if 0
-void MD5Init(MD5_CTX *);
-void MD5Update(MD5_CTX *, unsigned char *, unsigned int);
-void MD5Final(unsigned char [16], MD5_CTX *);
-void MD5Print(unsigned char [16], char[33]);
-void MD5Digest(unsigned char *, unsigned int, char[33]);
+void GSMD5Init(GSMD5_CTX *);
+void GSMD5Update(GSMD5_CTX *, unsigned char *, unsigned int);
+void GSMD5Final(unsigned char [16], GSMD5_CTX *);
+void GSMD5Print(unsigned char [16], char[33]);
+void GSMD5Digest(unsigned char *, unsigned int, char[33]);
 #endif
 
 //FUNCTIONS

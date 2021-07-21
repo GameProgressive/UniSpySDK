@@ -78,7 +78,7 @@
 				seedPlusIter[GS_CRYPT_RSA_DATABLOCKSIZE+1] = 0x00;
 				seedPlusIter[GS_CRYPT_RSA_DATABLOCKSIZE+2] = 0x00;
 				seedPlusIter[GS_CRYPT_RSA_DATABLOCKSIZE+3] = (gsi_u8)(i/GS_CRYPT_HASHSIZE);
-				MD5Digest(seedPlusIter, seedLen+sizeof(gsi_u32), hashHexStr);
+				GSMD5Digest(seedPlusIter, seedLen+sizeof(gsi_u32), hashHexStr);
 
 				// convert from hexstr to integer form
 				for(k=0; k<seedLen+sizeof(gsi_u32))

@@ -738,7 +738,7 @@ typedef struct
 typedef struct  
 {
 	GPResult result;
-	int numOfUniqueMatchs;
+	int numOfUniqueMatches;
 	GPUniqueMatch *matches;
 } GPGetReverseBuddiesListResponseArg;
 
@@ -1022,6 +1022,7 @@ GPResult gpRegisterCdKey
 (
   GPConnection * connection,
   const gsi_char cdkey[GP_CDKEY_LEN],
+  int gameId,
   GPEnum blocking,
   GPCallback callback,
   void * param

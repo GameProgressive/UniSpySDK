@@ -710,7 +710,7 @@ gpiProcessConnect(
 			data->serverChallenge,
 			data->userChallenge,
 			data->passwordHash);
-		MD5Digest((unsigned char *)buffer, strlen(buffer), check);
+		GSMD5Digest((unsigned char *)buffer, strlen(buffer), check);
 
 		// Get the proof.
 		/////////////////

@@ -198,7 +198,7 @@ char *GenerateAuthA(const char *challenge, const char *password, char response[3
 	sprintf(rawout, "%s%s",password, challenge );
 
 	/* do the response md5 */
-	MD5Digest((unsigned char *)rawout, strlen(rawout), response);
+	GSMD5Digest((unsigned char *)rawout, strlen(rawout), response);
 	return response;
 }
 #ifdef GSI_UNICODE
@@ -976,7 +976,7 @@ static int SendChallengeResponse(const char *indata, int gameport)
 	
 	len = sprintf(resp, "%d%s",g_crc32(challenge,(int)strlen(challenge)), gcd_secret_key);
 	
-	MD5Digest((unsigned char *)resp, (unsigned int)len, md5val);
+	GSMD5Digest((unsigned char *)resp, (unsigned int)len, md5val);
 	DOXCODE(respformat, sizeof(respformat)-1, enc3);
 	len = sprintf(resp,respformat,gcd_gamename, md5val, gameport);
 	

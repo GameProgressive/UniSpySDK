@@ -101,7 +101,7 @@ static unsigned char PADDING[64] = {
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-void MD5Init (MD5_CTX *context)
+void GSMD5Init (GSMD5_CTX *context)
 {
   context->count[0] = context->count[1] = 0;
 
@@ -116,8 +116,8 @@ void MD5Init (MD5_CTX *context)
 /* MD5 block update operation. Continues an MD5 message-digest operation,
      processing another message block, and updating the context.
  */
-void MD5Update (
-  MD5_CTX *context,                                                /* context */
+void GSMD5Update (
+  GSMD5_CTX *context,                                                /* context */
   unsigned char *input,                                        /* input block */
   unsigned int inputLen                              /* length of input block */
 )
@@ -156,9 +156,9 @@ void MD5Update (
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
      the message digest and zeroizing the context.
  */
-void MD5Final (
+void GSMD5Final (
   unsigned char digest[16],                                 /* message digest */
-  MD5_CTX *context                                                 /* context */
+  GSMD5_CTX *context                                                 /* context */
   )
 {
   unsigned char bits[8];
@@ -171,10 +171,10 @@ void MD5Final (
    */
   index = (unsigned int)((context->count[0] >> 3) & 0x3f);
   padLen = (index < 56) ? (56 - index) : (120 - index);
-  MD5Update (context, PADDING, padLen);
+  GSMD5Update (context, PADDING, padLen);
   
   /* Append length (before padding) */
-  MD5Update (context, bits, 8);
+  GSMD5Update (context, bits, 8);
 
   /* Store state in digest */
   Encode (digest, context->state, 16);
@@ -325,7 +325,7 @@ static void MD5_memset (POINTER output, int value, unsigned int len)
 
 #endif
 
-void MD5Print (unsigned char digest[16], char output[33])
+void GSMD5Print (unsigned char digest[16], char output[33])
 {
 	static const char hex_digits[] = "0123456789abcdef";
 	unsigned int i;
@@ -338,15 +338,15 @@ void MD5Print (unsigned char digest[16], char output[33])
 	output[32] = '\0';
 }
 
-void MD5Digest (unsigned char *input, unsigned int len, char output[33])
+void GSMD5Digest (unsigned char *input, unsigned int len, char output[33])
 {
-	MD5_CTX ctx;
+	GSMD5_CTX ctx;
 	unsigned char digest[16];
 
-	MD5Init(&ctx);
-	MD5Update(&ctx, input, len);
-	MD5Final(digest, &ctx);
-	MD5Print(digest, output);
+	GSMD5Init(&ctx);
+	GSMD5Update(&ctx, input, len);
+	GSMD5Final(digest, &ctx);
+	GSMD5Print(digest, output);
 
 }
 #ifdef __cplusplus
