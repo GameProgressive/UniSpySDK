@@ -397,10 +397,9 @@ SCResult SC_CALL sciReportBeginGlobalData(SCIReport * theReport)
 	SCIReportHeader* aHeader;
 
 	GS_ASSERT(theReport != NULL);
-	
-	theReport = (SCIReportHeader*)theReport->mBuffer.mData;
-
 	GS_ASSERT(theReport->mReportState == SCIReportState_ROSTER);
+	
+	aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 
 	theReport->mReportState = SCIReportState_GLOBALDATA;
 	//theReport->mCurEntityIndex = 0;
