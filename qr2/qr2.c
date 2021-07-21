@@ -1648,7 +1648,7 @@ static void send_keepalive(qr2_t qrec)
 	qrec->lastka = current_time();
 
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_Comment,
-		"Sent keepalive to master\r\n", buf);
+		"Sent keepalive to master (size %d)\r\n", buf.len);
 }
 
 /* send_heartbeat: Sends a heartbeat to the gamemaster,
