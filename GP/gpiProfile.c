@@ -111,8 +111,6 @@ static GPResult gpiOpenDiskProfiles(GPConnection * connection,
 	*failed = GPIFalse;
 
 	return GP_NO_ERROR;
-	
-	GSI_UNUSED(write);
 }
 
 static void
