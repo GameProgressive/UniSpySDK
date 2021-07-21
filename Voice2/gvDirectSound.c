@@ -5,7 +5,6 @@
 #include "gvCodec.h"
 #include "gvSource.h"
 #include "gvUtil.h"
-#pragma warning(disable:4201)
 #include <mmsystem.h>
 #include <dsound.h>
 #if (DIRECTSOUND_VERSION == 0x0800)
