@@ -658,7 +658,7 @@ gpiReadMessageFromBuffer(
 
 			// Set the position to the end of the message.
 			//////////////////////////////////////////////
-			inputBuffer->pos = ((str - inputBuffer->buffer) + len + 1);
+			inputBuffer->pos = (int)((str - inputBuffer->buffer) + len + 1);
 		}
 		else
 		{

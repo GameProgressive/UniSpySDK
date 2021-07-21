@@ -12,7 +12,8 @@ add_library(rsgp
     gpiOperation.c
     gpiPeer.c
     gpiProfile.c
-    gpiPS3.c
+    # Should be build only for PS3.
+    # gpiPS3.c
     gpiSearch.c
     gpiTransfer.c
     gpiUnique.c

@@ -336,6 +336,7 @@ gpiSendLogin(GPConnection * connection,
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIProfile * profile;
 	char * passphrase;
+	size_t passphraseLen = 0;
 	char partnerBuffer[11];
 	char userBuffer[GP_NICK_LEN + GP_EMAIL_LEN + 1 + sizeof(partnerBuffer) / sizeof(partnerBuffer[0])];
 	char * user;
@@ -350,7 +351,11 @@ gpiSendLogin(GPConnection * connection,
 		passphrase = data->partnerchallenge;
 	else
 		passphrase = iconnection->password;
-	GSMD5Digest((unsigned char*)passphrase, strlen(passphrase), data->passwordHash);
+
+	passphraseLen = strlen(passphrase);
+	GS_ASSERT(passphraseLen <= UINT_MAX);
+
+	GSMD5Digest((unsigned char*)passphrase, (unsigned int)passphraseLen, data->passwordHash);
 
 	// Construct the user.
 	//////////////////////
@@ -386,7 +391,7 @@ gpiSendLogin(GPConnection * connection,
 		data->userChallenge,
 		data->serverChallenge,
 		data->passwordHash);
-	GSMD5Digest((unsigned char *)buffer, strlen(buffer), response);
+	GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), response);
 
 	// Check for an existing profile.
 	/////////////////////////////////
@@ -710,7 +715,7 @@ gpiProcessConnect(
 			data->serverChallenge,
 			data->userChallenge,
 			data->passwordHash);
-		GSMD5Digest((unsigned char *)buffer, strlen(buffer), check);
+		GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), check);
 
 		// Get the proof.
 		/////////////////

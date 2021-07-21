@@ -253,7 +253,7 @@ gpiProcessPeerAcceptingConnection(
 				iconnection->password,
 				iconnection->profileid,
 				pid);
-			GSMD5Digest((unsigned char *)buffer, strlen(buffer), sigCheck);
+			GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), sigCheck);
 
 			// Check the sig.
 			/////////////////

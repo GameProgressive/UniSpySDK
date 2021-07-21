@@ -123,6 +123,9 @@ gpiSendRegisterCdKey(
   int operationid
 )
 {
+	// TODO: Looks like some code using gameId not ported from Open SDK.
+	GSI_UNUSED(gameId);
+
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Encrypt the cdkey (xor with random values)

@@ -333,7 +333,7 @@ gpiProcessConnectionManager(
 
 			// Copy the command to the input buffer.
 			////////////////////////////////////////
-			len = (next - iconnection->socketBuffer.buffer);
+			len = (int)(next - iconnection->socketBuffer.buffer);
 			if(len > iconnection->inputBufferSize)
 			{
 				iconnection->inputBufferSize += GS_MAX(GPI_READ_SIZE, len);
@@ -350,7 +350,7 @@ gpiProcessConnectionManager(
 
 			// Move the rest of the connect buffer up to the front.
 			///////////////////////////////////////////////////////
-			iconnection->socketBuffer.len -= (next - iconnection->socketBuffer.buffer);
+			iconnection->socketBuffer.len -= (int)(next - iconnection->socketBuffer.buffer);
 			memmove(iconnection->socketBuffer.buffer, next, (unsigned int)iconnection->socketBuffer.len + 1);
 
 			// Check for an id.
