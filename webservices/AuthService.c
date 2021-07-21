@@ -71,7 +71,7 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 #define WS_LOGIN_SERVICE_URL_FORMAT RS_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
 
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
-char authCreds[54];
+char authCreds[92];
 
 typedef struct WSIRequestData
 {
