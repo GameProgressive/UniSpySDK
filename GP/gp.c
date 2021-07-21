@@ -1319,7 +1319,6 @@ GPResult gpGetInfoNoWait(
 
 	// Check for simulation mode.
 	/////////////////////////////
-	iconnection = (GPIConnection*)*connection;
 	if(iconnection->simulation)
 	{
 		memset(arg, 0, sizeof(*arg));
