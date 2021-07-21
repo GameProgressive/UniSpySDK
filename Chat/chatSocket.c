@@ -532,7 +532,6 @@ CHATBool ciSocketSendf(ciSocket * sock,
 
 	ASSERT_SOCK(sock);
 	ASSERT_CONNECTED(sock);
-	GS_ASSERT(buffer != NULL);
 
 	// Disconnected?
 	////////////////
