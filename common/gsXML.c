@@ -1107,7 +1107,7 @@ gsi_bool gsXmlWriteIntElement(GSXmlStreamWriter stream, const char * namespaceNa
 	GS_ASSERT(tag != NULL);
 	GS_ASSERT(gsi_is_false(writer->mClosed));
 
-	sprintf(buf, "%d", value);
+	sprintf(buf, "%u", value);
 
 	if ( gsi_is_false(gsXmlWriteOpenTag(stream, namespaceName, tag)) ||
 		 gsi_is_false(gsiXmlUtilWriteString(writer, buf)) ||
@@ -1131,7 +1131,7 @@ gsi_bool gsXmlWriteIntElementNoNamespace(GSXmlStreamWriter stream, const char * 
     GS_ASSERT(tag != NULL);
     GS_ASSERT(gsi_is_false(writer->mClosed));
 
-    sprintf(buf, "%d", value);
+    sprintf(buf, "%u", value);
 
     if ( gsi_is_false(gsXmlWriteOpenTagNoNamespace(stream, tag)) ||
         gsi_is_false(gsiXmlUtilWriteString(writer, buf)) ||
