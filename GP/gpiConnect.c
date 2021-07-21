@@ -540,8 +540,8 @@ gpiProcessConnect(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPICallback callback;
 	GPIProfile * profile;
-	char userBuffer[GP_NICK_LEN + GP_EMAIL_LEN];
 	char partnerBuffer[11];
+	char userBuffer[GP_NICK_LEN + GP_EMAIL_LEN + sizeof(partnerBuffer) / sizeof(partnerBuffer[0]) + 1];  // + 1 for @
 	char * user;
 
 	// Check for an error.
