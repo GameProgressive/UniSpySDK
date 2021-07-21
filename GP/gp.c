@@ -1322,7 +1322,7 @@ GPResult gpGetInfoNoWait(
 	iconnection = (GPIConnection*)*connection;
 	if(iconnection->simulation)
 	{
-		memset(arg, 0, sizeof(arg));
+		memset(arg, 0, sizeof(*arg));
 		return GP_NO_ERROR;
 	}
 
