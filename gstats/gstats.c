@@ -215,7 +215,7 @@ char *GenerateAuthW(const char* challenge, const unsigned short *password, char 
 int InitStatsAsync(int theGamePort, gsi_time theInitTimeout)
 {
 	struct sockaddr_in saddr;
-	char tempHostname[128];
+	char tempHostname[sizeof(gcd_gamename)/sizeof(gcd_gamename[0])];
 	int  ret;
 		
 	gameport = theGamePort;
