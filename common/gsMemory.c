@@ -660,11 +660,11 @@ void MEM_CHUNK_POOLSplitChunk(MEM_CHUNK_POOL *_this, MEM_CHUNK *header, gsi_bool
 	#if (MEM_PROFILE)
 		if(ReAlloc)
 		{
+			GS_ASSERT(_this->MemUsed >= MEM_CHUNKChunkSizeGet(header));
 			//09-OCT-07 BED: Since we're splitting the chunk, it seems more accurate
 			//               to use the full size of the chunk, not just the used portion
 			_this->MemUsed -= MEM_CHUNKChunkSizeGet(header);
 			//_this->MemUsed -= MEM_CHUNKMemUsedGet(header);		
-			GS_ASSERT(_this->MemUsed >= 0);
 		}
 	#endif
 
@@ -912,8 +912,8 @@ void MEM_CHUNK_POOLFreeChunk(MEM_CHUNK_POOL *_this,MEM_CHUNK *header)
 	MEM_CHUNK *PrevFree;
 
 	#if (MEM_PROFILE)
+		GS_ASSERT(_this->MemUsed >= MEM_CHUNKMemUsedGet(header));
 		_this->MemUsed -= MEM_CHUNKMemUsedGet(header);
-		GS_ASSERT(_this->MemUsed >= 0);
 	#endif
 
 	while (next->next && (MEM_CHUNKIsFree(next->next)))
