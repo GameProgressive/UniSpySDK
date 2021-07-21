@@ -99,7 +99,7 @@
 
 
 #define FINISH_FILTER          ciFinishFilter(chat, filter, &params)
-#define IS_ALPHA(c) ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+#define IS_ALPHA(c) (((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
 
 enum
 {
