@@ -240,7 +240,7 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
 
-				sprintf(buffer, "%d", cert->mProfileId);
+				sprintf(buffer, "%u", cert->mProfileId);
 				gsiCoreSetProfileId(buffer);
 			}
 		}
@@ -427,7 +427,7 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
 
-				sprintf(buffer, "%d", cert->mProfileId);
+				sprintf(buffer, "%u", cert->mProfileId);
 				gsiCoreSetProfileId(buffer);
 			}
 		}
@@ -613,7 +613,7 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
 
-				sprintf(buffer, "%d", cert->mProfileId);
+				sprintf(buffer, "%u", cert->mProfileId);
 			}
 		}
 	}
