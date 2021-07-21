@@ -1247,7 +1247,7 @@ static int ghiParseChunkSize
 {
 	char * header;
 	int len;
-	int num;
+	unsigned num;
 	int rcode;
 
 	header = connection->chunkHeader;
@@ -1257,10 +1257,10 @@ static int ghiParseChunkSize
 	GSI_UNUSED(len);
 
 	rcode = sscanf(header, "%x", &num);
-	if(rcode != 1)
+	if(rcode != 1 || num > INT_MAX)
 		return -1;
 
-	return num;
+	return (int)num;
 }
 
 // Appends the data to the chunk header buffer.
