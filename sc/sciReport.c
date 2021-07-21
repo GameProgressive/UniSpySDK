@@ -354,8 +354,11 @@ SCResult SC_CALL sciReportBeginNewTeam(SCIReport * theReport)
 ///////////////////////////////////////////////////////////////////////////////
 SCResult SC_CALL sciReportBeginNewPlayer(SCIReport * theReport)
 {
-	SCIReportHeader * aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
+	SCIReportHeader* aHeader;
+
 	GS_ASSERT(theReport != NULL);
+
+	aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 
 	//if (theReport->mReportState == SCIReportState_ROSTER)
 	{
@@ -391,9 +394,12 @@ SCResult SC_CALL sciReportBeginNewPlayer(SCIReport * theReport)
 ///////////////////////////////////////////////////////////////////////////////
 SCResult SC_CALL sciReportBeginGlobalData(SCIReport * theReport)
 {
-	SCIReportHeader * aHeader = (SCIReportHeader*)theReport->mBuffer.mData;
+	SCIReportHeader* aHeader;
 
 	GS_ASSERT(theReport != NULL);
+	
+	theReport = (SCIReportHeader*)theReport->mBuffer.mData;
+
 	GS_ASSERT(theReport->mReportState == SCIReportState_ROSTER);
 
 	theReport->mReportState = SCIReportState_GLOBALDATA;
