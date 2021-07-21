@@ -602,7 +602,7 @@ static GHTTPBool ptaFilePlanetCompletedCallback
 
 		// Copy off the name.
 		/////////////////////
-		len = (str - Line);
+		len = (int)(str - Line);
 		mirrorNames[i] = (char *)gsimalloc((unsigned int)len + 1);
 		if(!mirrorNames[i])
 			break;
