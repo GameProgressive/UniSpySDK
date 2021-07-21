@@ -1779,7 +1779,7 @@ void ghiDoReceivingHeaders
                 if( pEnd-pStart == nMaxLen )
                 {
                     // Same length, maybe a bigger number
-                    if( strncmp(pStart,szMaxSize,(unsigned int)(pEnd-pStart)) >= 0 )
+                    if( strncmp(pStart,szMaxSize,(size_t)(pEnd-pStart)) >= 0 )
                     {
                         connection->completed = GHTTPTrue;
                         connection->result = GHTTPFileToBig;
