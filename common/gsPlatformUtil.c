@@ -461,9 +461,15 @@ void SocketStartUp()
 
 	// added support for winsock2
 	#if (!defined(_XBOX) || defined(_X360)) && (defined(GSI_WINSOCK2) || defined(_X360))
-		WSAStartup(MAKEWORD(2,2), &data);
+		if (0 != WSAStartup(MAKEWORD(2,2), &data))
+		{
+			OutputDebugString("WSAStartup(2, 2) failed\n");
+		}
 	#else
-		WSAStartup(MAKEWORD(1,1), &data);
+		if (0 != WSAStartup(MAKEWORD(1,1), &data))
+		{
+			OutputDebugString("WSAStartup(1, 1) failed\n");
+		}
 	#endif
 	// end added
 #endif
@@ -472,9 +478,15 @@ void SocketStartUp()
 void SocketShutDown()
 {
 #if defined(_WIN32)
-	WSACleanup();
+	if (0 != WSACleanup())
+	{
+		OutputDebugString("WSACleanup failed\n");
+	}
 	#if defined(_X360)
-		XNetCleanup();
+	if (0 != XNetCleanup())
+	{
+		OutputDebugString("XNetCleanup failed\n");
+	}
 	#endif
 #endif
 }
