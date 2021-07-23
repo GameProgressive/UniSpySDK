@@ -958,7 +958,7 @@ static int SendChallengeResponse(const char *indata, int gameport)
 {
 	static char challengestr[] = {'\0','h','a','l','l','e','n','g','e','\0'};
 	char *challenge;
-	char resp[256];
+	char resp[384];
 	char md5val[33];
 
 	/* make this harder to find in the string table */
