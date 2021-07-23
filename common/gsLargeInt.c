@@ -9,6 +9,8 @@
 
 #include "gsLargeInt.h"
 
+#include "gsMemory.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1430,15 +1432,6 @@ gsi_bool gsLargeIntPowerMod(const gsLargeInt_t *b, const gsLargeInt_t *p, const 
 #define NEWMULTM
 #ifdef  NEWMULTM
 
-// Prevent compiler from inlining memset and further removal if SafeZeroMemory buffer
-// is not accessed later.
-static volatile void* (*memset_func)(void*, int, size_t) = memset;
-
-void SafeZeroMemory(void* buffer, size_t size)
-{
-	memset_func(buffer, 0, size);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Montgomery multiplication
@@ -1507,7 +1500,7 @@ gsi_bool gsiLargeIntMultM(gsLargeInt_t *x, gsLargeInt_t *y, const gsLargeInt_t *
 	{
 		if (gsi_is_false(gsiLargeIntSub(m->mData, m->mLength, &temp[logB_r], tempLen - logB_r, dest->mData, &dest->mLength)))
 		{
-			SafeZeroMemory(temp, sizeof(temp));
+			gsiZeroMemory(temp, sizeof(temp));
 			memset(dest, 0, sizeof(gsLargeInt_t));
 			return gsi_false;
 		}
@@ -1517,7 +1510,7 @@ gsi_bool gsiLargeIntMultM(gsLargeInt_t *x, gsLargeInt_t *y, const gsLargeInt_t *
 		memset(dest, 0, sizeof(gsLargeInt_t));
 		dest->mLength = m->mLength;
 		memcpy(dest->mData, &temp[logB_r], (tempLen - logB_r)*GS_LARGEINT_DIGIT_SIZE_BYTES);
-		SafeZeroMemory(temp, sizeof(temp));
+		gsiZeroMemory(temp, sizeof(temp));
 	}
 
 	return gsi_true;

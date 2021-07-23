@@ -119,6 +119,15 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 	}
 #endif
 
+// Prevent compiler from inlining memset and further removal if gsiZeroMemory buffer
+// is not accessed later.
+static volatile void* (*memset_func)(void*, int, size_t) = memset;
+
+void gsiZeroMemory(void* buffer, size_t size)
+{
+	memset_func(buffer, 0, size);
+}
+
 #ifdef GS_NO_STANDARD_ALLOC
 // If you define GS_NO_STANDARD_ALLOC, you must call gsiMemoryCallbacksSet() before using GameSpySDK.
 // used by NITRO && REVOLUTION DWC wrapper to reduce library size
