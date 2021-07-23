@@ -295,7 +295,7 @@ void piSetLocalFlags
 	PEER peer
 )
 {
-	char buffer[NumRooms][128];
+	char buffer[NumRooms][128] = { {'\0'}, {'\0'}, {'\0'} };
 	char * titleRoom;
 	char * groupRoom;
 	char * stagingRoom;
