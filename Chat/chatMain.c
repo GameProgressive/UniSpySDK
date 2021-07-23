@@ -2835,7 +2835,7 @@ void chatSetGlobalKeysA(CHAT chat,
 		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
 		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(key) + strlen(value)) {
 			GS_ASSERT(0);
-			break;
+			return;
 		}
 		sprintf(buffer + bufferLen, "\\%s\\%s", key, value);
 	}
@@ -3028,7 +3028,7 @@ void chatSetChannelKeysA(CHAT chat,
 		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
 		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(keys[i]) + strlen(value)) {
 			GS_ASSERT(0);
-			break;
+			return;
 		}
 		sprintf(buffer + strlen(buffer), "\\%s\\%s", keys[i], value);
 	}
