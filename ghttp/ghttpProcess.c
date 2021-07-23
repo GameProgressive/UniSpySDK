@@ -1247,7 +1247,7 @@ static int ghiParseChunkSize
 {
 	char * header;
 	int len;
-	unsigned num;
+	unsigned int num;
 	int rcode;
 
 	header = connection->chunkHeader;

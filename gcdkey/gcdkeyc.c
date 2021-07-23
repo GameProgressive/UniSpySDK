@@ -59,11 +59,11 @@ void gcd_compute_response(char *cdkey, char *challenge, char response[RESPONSE_S
 	GS_ASSERT(rawoutLen <= UINT_MAX);
 
 	/* do the cd key md5 */
-	GSMD5Digest((unsigned char *)cdkey, (unsigned)cdKeyLen, response);
+	GSMD5Digest((unsigned char *)cdkey, (unsigned int)cdKeyLen, response);
 	/* add the random value */
 	gsiSafeStrcpyA(&response[32], randstr, RESPONSE_SIZE - 32);
 	/* do the response md5 */
-	GSMD5Digest((unsigned char *)rawout, (unsigned)rawoutLen, &response[40]);
+	GSMD5Digest((unsigned char *)rawout, (unsigned int)rawoutLen, &response[40]);
 }
 
 
