@@ -79,7 +79,7 @@ static void CheckDiskFile();
 static void DiskWrite(char *line, int len);
 #endif
 static void InternalInit();
-static int SendChallengeResponse(const char *indata, int gameport);
+static int SendChallengeResponse(const char *indata, int theGameport);
 static int RecvSessionKey();
 static int DoSend(char *data, int len);
 static void xcode_buf(char *buf, int len);
@@ -954,7 +954,7 @@ void InternalInit()
 }
 
 
-static int SendChallengeResponse(const char *indata, int gameport)
+static int SendChallengeResponse(const char *indata, int theGameport)
 {
 	static char challengestr[] = {'\0','h','a','l','l','e','n','g','e','\0'};
 	char *challenge;
@@ -978,7 +978,7 @@ static int SendChallengeResponse(const char *indata, int gameport)
 	
 	GSMD5Digest((unsigned char *)resp, (unsigned int)len, md5val);
 	DOXCODE(respformat, sizeof(respformat)-1, enc3);
-	len = sprintf(resp,respformat,gcd_gamename, md5val, gameport);
+	len = sprintf(resp,respformat,gcd_gamename, md5val, theGameport);
 	
 	if ( DoSend(resp, len) <= 0 )
 	{
