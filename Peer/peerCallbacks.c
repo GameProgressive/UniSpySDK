@@ -3570,7 +3570,7 @@ static int piAddCallback
 	PEER_CONNECTION;
 
 	GS_ASSERT(callback);
-	//GS_ASSERT(type >= 0);
+	GS_ASSERT(type >= PI_CONNECT_CALLBACK);
 	GS_ASSERT(type < PI_NUM_CALLBACK_TYPES);
 	GS_ASSERT(paramsIn);
 	GS_ASSERT(paramsSize > 0);
