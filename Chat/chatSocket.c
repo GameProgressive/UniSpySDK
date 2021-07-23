@@ -543,7 +543,7 @@ CHATBool ciSocketSendf(ciSocket * sock,
 	// Do the formatting.
 	/////////////////////
 	va_start(args, format);
-	num = vsprintf(buffer, format, args);
+	num = vsnprintf(buffer, sizeof(buffer), format, args);
 	if(num != -1)
 		buffer[num] = '\0';
 	else
