@@ -183,7 +183,7 @@ gpiValueForKeyAlloc(
 	const char * start;
 	char c;
 	char * value;
-	int len;
+	size_t len;
 
 	// Check for NULL.
 	//////////////////
@@ -210,13 +210,13 @@ gpiValueForKeyAlloc(
 
 	// Allocate the value.
 	//////////////////////
-	value = (char *)gsimalloc((unsigned int)len + 1);
+	value = (char *)gsimalloc(len + 1);
 	if(!value)
 		return NULL;
 
 	// Copy in the value.
 	/////////////////////
-	memcpy(value, start, (unsigned int)len);
+	memcpy(value, start, len);
 	value[len] = '\0';
 
 	return value;

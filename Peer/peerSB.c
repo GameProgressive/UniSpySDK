@@ -359,7 +359,7 @@ PEERBool piSBStartListingGroups
 )
 {
 	char fullFields[MAX_FIELD_LIST_LEN + 1];
-	int len;
+	size_t len;
 
 	PEER_CONNECTION;
 
@@ -379,8 +379,8 @@ PEERBool piSBStartListingGroups
 	// Setup the fields list.
 	/////////////////////////
 	gsiSafeStrcpyA(fullFields, "\\hostname\\numwaiting\\maxwaiting\\numservers\\numplayers", sizeof(fullFields));
-	len = (int)strlen(fullFields);
-	strzcpy(fullFields + len, fields, (unsigned int)MAX_FIELD_LIST_LEN - len);
+	len = strlen(fullFields);
+	strzcpy(fullFields + len, fields, (size_t)MAX_FIELD_LIST_LEN - len);
 
 	// Start updating the list.
 	///////////////////////////

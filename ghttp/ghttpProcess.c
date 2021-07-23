@@ -1647,7 +1647,7 @@ void ghiDoReceivingHeaders
             {
                 // Move any data to the front of the buffer.
                 ////////////////////////////////////////////
-                memmove(connection->recvBuffer.data, fileStart, (unsigned int)fileLength + 1);
+                memmove(connection->recvBuffer.data, fileStart, (size_t)fileLength + 1);
                 connection->recvBuffer.len = fileLength;
             }
             else

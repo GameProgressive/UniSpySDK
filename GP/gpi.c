@@ -337,12 +337,12 @@ gpiProcessConnectionManager(
 			if(len > iconnection->inputBufferSize)
 			{
 				iconnection->inputBufferSize += GS_MAX(GPI_READ_SIZE, len);
-				tempPtr = (char*)gsirealloc(iconnection->inputBuffer, (unsigned int)iconnection->inputBufferSize + 1);
+				tempPtr = (char*)gsirealloc(iconnection->inputBuffer, (size_t)iconnection->inputBufferSize + 1);
 				if(tempPtr == NULL)
 					Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 				iconnection->inputBuffer = tempPtr;
 			}
-			memcpy(iconnection->inputBuffer, iconnection->socketBuffer.buffer, (unsigned int)len + 1);
+			memcpy(iconnection->inputBuffer, iconnection->socketBuffer.buffer, (size_t)len + 1);
 
 			// Point to the start of the next one.
 			//////////////////////////////////////
@@ -351,7 +351,7 @@ gpiProcessConnectionManager(
 			// Move the rest of the connect buffer up to the front.
 			///////////////////////////////////////////////////////
 			iconnection->socketBuffer.len -= (int)(next - iconnection->socketBuffer.buffer);
-			memmove(iconnection->socketBuffer.buffer, next, (unsigned int)iconnection->socketBuffer.len + 1);
+			memmove(iconnection->socketBuffer.buffer, next, (size_t)iconnection->socketBuffer.len + 1);
 
 			// Check for an id.
 			///////////////////

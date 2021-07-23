@@ -43,7 +43,7 @@ gpiStartProfileSearch(
 	// Initialize the buffer.
 	/////////////////////////
 	data->inputBuffer.size = 4096;
-	data->inputBuffer.buffer = (char *)gsimalloc((unsigned int)data->inputBuffer.size + 1);
+	data->inputBuffer.buffer = (char *)gsimalloc((size_t)data->inputBuffer.size + 1);
 	if(data->inputBuffer.buffer == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 
@@ -123,7 +123,7 @@ gpiInitSearchData(
 	data->outputBuffer.len = 0;
 	data->outputBuffer.pos = 0;
 	data->outputBuffer.size = 4096;
-	data->outputBuffer.buffer = (char *)gsimalloc((unsigned int)data->outputBuffer.size + 1);
+	data->outputBuffer.buffer = (char *)gsimalloc((size_t)data->outputBuffer.size + 1);
 	if(data->outputBuffer.buffer == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 	data->processing = GPIFalse;

@@ -586,7 +586,7 @@ int SendGameSnapShotA(statsgame_t game, const char *snapshot, int final)
 		snapcopy = goastrdup(snapshot);
 	snaplen = (int)strlen(snapcopy);
 
-	data = (char *)gsimalloc((unsigned int)snaplen + 256);
+	data = (char *)gsimalloc((size_t)snaplen + 256);
 
 	/* Escape the data */
 	while (snaplen--)
@@ -898,7 +898,7 @@ int PersistThink()
 				rcvmax = 256;
 			else
 				rcvmax *= 2;
-			rcvbuffer = gsirealloc(rcvbuffer, (unsigned int)(rcvmax+1));
+			rcvbuffer = gsirealloc(rcvbuffer, (size_t)(rcvmax+1));
 			if (rcvbuffer == NULL)
 				return 0; //errcon
 		}
@@ -917,7 +917,7 @@ int PersistThink()
 		else
 		{
 			//shift the remaining data down
-			memmove(rcvbuffer,rcvbuffer + processed, (unsigned int)(rcvlen - processed));
+			memmove(rcvbuffer,rcvbuffer + processed, (size_t)(rcvlen - processed));
 			rcvlen -= processed;
 		}
 		
@@ -1311,14 +1311,14 @@ static void SetPersistDataHelper(int localid, int profileid, persisttype_t type,
 	tlen = sprintf(tdata, respformat, profileid, type, index, kvset, localid, len);
 	if (tlen + len < 480) //we have enough room to put it in the data block
 	{
-		memcpy(tdata + tlen, data, (unsigned int)len);
+		memcpy(tdata + tlen, data, (size_t)len);
 		senddata = tdata;
 
 	} else //need to alloc a temp buffer
 	{
-		senddata = (char *)gsimalloc((unsigned int)(len + tlen + 256));
-		memcpy(senddata, tdata, (unsigned int)tlen);
-		memcpy(senddata + tlen, data, (unsigned int)len);
+		senddata = (char *)gsimalloc((size_t)(len + tlen + 256));
+		memcpy(senddata, tdata, (size_t)tlen);
+		memcpy(senddata + tlen, data, (size_t)len);
 	}
 
 	if (sock != INVALID_SOCKET)

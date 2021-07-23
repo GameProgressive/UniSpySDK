@@ -2891,9 +2891,9 @@ void ciRplEndOfWhoHandler(CHAT chat, const ciServerMessage * message)
 	}
 }
 
-static char * ciParseValue(const char * flags, int * len)
+static char * ciParseValue(const char * flags, size_t * len)
 {
-	int i;
+	size_t i;
 	char * str;
 
 	GS_ASSERT(flags);
@@ -2914,13 +2914,13 @@ static char * ciParseValue(const char * flags, int * len)
 
 	// Allocate it.
 	///////////////
-	str = (char *)gsimalloc((unsigned int)i + 1);
+	str = (char *)gsimalloc(i + 1);
 	if(!str)
 		return NULL;
 
 	// Copy it in.
 	//////////////
-	memcpy(str, flags, (unsigned int)i);
+	memcpy(str, flags, i);
 	str[i] = '\0';
 
 	// Return it.
@@ -2966,7 +2966,7 @@ void ciRplGetKeyHandler(CHAT chat, const ciServerMessage * message)
 		char ** values;
 		char * str;
 		int i;
-		int len;
+		size_t len;
 
 		data = (GETKEYData *)filter->data;
 		num = data->num;
@@ -3147,7 +3147,7 @@ void ciRplGetCKeyHandler(CHAT chat, const ciServerMessage * message)
 		char * key;
 		char * value;
 		int i;
-		int len;
+		size_t len;
 		char ** tempPtr;
 
 		data = (GETCKEYData *)filter->data;
@@ -3376,7 +3376,7 @@ void ciRplGetChanKeyHandler(CHAT chat, const ciServerMessage * message)
 		char * key;
 		char * value;
 		int i;
-		int len;
+		size_t len;
 		char ** tempPtr;
 
 		data = (GETCHANKEYData *)filter->data;
