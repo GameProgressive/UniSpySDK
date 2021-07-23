@@ -932,10 +932,10 @@ gpiPeerStartConnect(
 	{
 		GSUdpPeerState aPeerState;
 		gsUdpEngineGetPeerState(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, &aPeerState);
-		if (aPeerState != GS_UDP_PEER_CONNECTED || aPeerState != GS_UDP_PEER_CONNECTING)
+		if (aPeerState != GS_UDP_PEER_CONNECTED && aPeerState != GS_UDP_PEER_CONNECTING)
 		{
 			anError = gsUdpEngineStartTalkingToPeer(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, 
-			iconnection->mHeader, GPI_PEER_TIMEOUT);
+				iconnection->mHeader, GPI_PEER_TIMEOUT);
 			if (anError != GS_UDP_ADDRESS_ALREADY_IN_USE)
 				CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error starting communication with a peer.");
 		}
