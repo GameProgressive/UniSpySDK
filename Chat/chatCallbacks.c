@@ -560,10 +560,10 @@ CHATBool ciAddCallback_(CHAT chat, int type, void * callback, void * callbackPar
 #endif
 	if(data.callbackParams == NULL)
 		return CHATFalse; //ERRCON
-#ifdef _DEBUG
-	memset(data.callbackParams, 0xC4, callbackParamsSize + 64);
-#endif
 	memcpy(data.callbackParams, callbackParams, callbackParamsSize);
+#ifdef _DEBUG
+	memset((unsigned char*)data.callbackParams + callbackParamsSize, 0xC4, 64);
+#endif
 	data.param = param;
 	data.ID = ID;
 	if(channel == NULL)
