@@ -337,8 +337,8 @@ gpiSendLogin(GPConnection * connection,
 	GPIProfile * profile;
 	char * passphrase;
 	size_t passphraseLen = 0;
-	char partnerBuffer[11];
-	char userBuffer[GP_NICK_LEN + GP_EMAIL_LEN + 1 + sizeof(partnerBuffer) / sizeof(partnerBuffer[0])];
+	char partnerBuffer[GP_PARNTERBUFFER_LEN];
+	char userBuffer[GP_PARNTERBUFFER_LEN + GSI_MAX(GP_NICK_LEN + 1 + GP_EMAIL_LEN, GP_UNIQUENICK_LEN)];  // + 1 for @
 	char * user;
 
 	// Construct the user challenge.
@@ -540,8 +540,8 @@ gpiProcessConnect(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPICallback callback;
 	GPIProfile * profile;
-	char partnerBuffer[11];
-	char userBuffer[GP_NICK_LEN + GP_EMAIL_LEN + sizeof(partnerBuffer) / sizeof(partnerBuffer[0]) + 1];  // + 1 for @
+	char partnerBuffer[GP_PARNTERBUFFER_LEN];
+	char userBuffer[GP_PARNTERBUFFER_LEN + GSI_MAX(GP_NICK_LEN + 1 + GP_EMAIL_LEN, GP_UNIQUENICK_LEN)];  // + 1 for @
 	char * user;
 
 	// Check for an error.

@@ -377,6 +377,7 @@ typedef enum _GPErrorCode
 #define GP_FIRSTNAME_LEN            31
 #define GP_LASTNAME_LEN             31
 #define GP_EMAIL_LEN                51
+#define GP_PARNTERBUFFER_LEN        11
 #define GP_PASSWORD_LEN             31
 #define GP_PASSWORDENC_LEN          ((((GP_PASSWORD_LEN+2)*4)/3)+1)
 #define GP_HOMEPAGE_LEN             76
