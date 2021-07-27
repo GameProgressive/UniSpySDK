@@ -999,7 +999,7 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
                                   if(lenoutSoFar + _tcslen(a) > maxlen) \
                                       return gsi_false; \
 								  strcpy(bufout+lenoutSoFar, a); \
-								  lenoutSoFar += (unsigned int)_tcslen(a) + 1; }
+								  lenoutSoFar += (gsi_u32)_tcslen(a) + 1; }
 
 #define WRITE_BINARY(a,l)  { \
                                   if(lenoutSoFar + l > maxlen) \
@@ -1087,7 +1087,7 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 								  if(lenoutSoFar + _tcslen(a)+1 > maxlen) \
                                       return gsi_false; \
 								  bufin += _tcslen(a)+1; \
-								  lenoutSoFar += (unsigned int)_tcslen(a)+1; }
+								  lenoutSoFar += (gsi_u32)_tcslen(a)+1; }
 
 #define READ_ASCII(a,l)  { \
 								  char temp[l]; \
