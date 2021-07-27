@@ -1336,7 +1336,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					//    Copy from a temp struct to circumvent alignment issues
 					int writePos = 0;
 					int padBytes = 0;
-					unsigned int writen;
+					size_t writen;
 					GHIDimeHeader header;
 
 					header.mVersionAndFlags = GHI_DIME_VERSION;
@@ -1354,7 +1354,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					writePos += sizeof(GHIDimeHeader);
 
 					// id
-					writen = (unsigned int)gsiSafeStrcpyA(&buffer[writePos], GHI_DIME_SOAPID, sizeof(buffer) - writePos);
+					writen = gsiSafeStrcpyA(&buffer[writePos], GHI_DIME_SOAPID, sizeof(buffer) - writePos);
 					writePos += writen;
 					padBytes = (int)(4-writen%4);
 					if (padBytes != 4)
@@ -1364,7 +1364,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					}
 
 					// type
-					writen = (unsigned int)gsiSafeStrcpyA(&buffer[writePos], GHI_DIME_SOAPTYPE, sizeof(buffer) - writePos);
+					writen = gsiSafeStrcpyA(&buffer[writePos], GHI_DIME_SOAPTYPE, sizeof(buffer) - writePos);
 					writePos += writen;
 					padBytes = (int)(4-writen%4);
 					if (padBytes != 4)
@@ -1403,7 +1403,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					//    Copy from a temp struct to circumvent alignment issues
 					int writePos = 0;
 					int padBytes = 0;
-					unsigned int writen;
+					size_t writen;
 					GHIDimeHeader header;
 
 					header.mVersionAndFlags = GHI_DIME_VERSION;
@@ -1421,7 +1421,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					writePos += sizeof(GHIDimeHeader);
 
 					// id
-					writen = (unsigned int)gsiSafeStrcpyA(&buffer[writePos], state->data->name, sizeof(buffer) - writePos);
+					writen = gsiSafeStrcpyA(&buffer[writePos], state->data->name, sizeof(buffer) - writePos);
 					writePos += writen;
 					padBytes = (int)(4-writen%4);
 					if (padBytes != 4)
@@ -1431,7 +1431,7 @@ static GHIPostingResult ghiPostStateDoPosting
 					}
 
 					// type
-					writen = (unsigned int)gsiSafeStrcpyA(&buffer[writePos], contentType, sizeof(buffer) - writePos);
+					writen = gsiSafeStrcpyA(&buffer[writePos], contentType, sizeof(buffer) - writePos);
 					writePos += writen;
 					padBytes = (int)(4-writen%4);
 					if (padBytes != 4)
