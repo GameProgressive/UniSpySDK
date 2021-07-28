@@ -3030,7 +3030,7 @@ void chatSetChannelKeysA(CHAT chat,
 			GS_ASSERT(0);
 			return;
 		}
-		sprintf(buffer + strlen(buffer), "\\%s\\%s", keys[i], value);
+		sprintf(buffer + bufferLen, "\\%s\\%s", keys[i], value);
 	}
 
 	ciSocketSend(&connection->chatSocket, buffer);
