@@ -21,15 +21,6 @@
 #include "chatCallbacks.h"
 #include "chatCrypt.h"
 
-#if defined(_WIN32)
-// Silence the cast function* to void* warning.  
-// Since we are explicitly casting it, I'm not sure why the compiler warns
-#pragma warning(disable:4054)  
-
-// Silence the "conditional expression is constant" on our "while(1)" statements
-#pragma warning(disable:4127)
-#endif
-
 /************
 ** DEFINES **
 ************/
@@ -99,7 +90,7 @@
 
 
 #define FINISH_FILTER          ciFinishFilter(chat, filter, &params)
-#define IS_ALPHA(c) ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+#define IS_ALPHA(c) (((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
 
 enum
 {
@@ -2900,9 +2891,9 @@ void ciRplEndOfWhoHandler(CHAT chat, const ciServerMessage * message)
 	}
 }
 
-static char * ciParseValue(const char * flags, int * len)
+static char * ciParseValue(const char * flags, size_t * len)
 {
-	int i;
+	size_t i;
 	char * str;
 
 	GS_ASSERT(flags);
@@ -2923,13 +2914,13 @@ static char * ciParseValue(const char * flags, int * len)
 
 	// Allocate it.
 	///////////////
-	str = (char *)gsimalloc((unsigned int)i + 1);
+	str = (char *)gsimalloc(i + 1);
 	if(!str)
 		return NULL;
 
 	// Copy it in.
 	//////////////
-	memcpy(str, flags, (unsigned int)i);
+	memcpy(str, flags, i);
 	str[i] = '\0';
 
 	// Return it.
@@ -2975,7 +2966,7 @@ void ciRplGetKeyHandler(CHAT chat, const ciServerMessage * message)
 		char ** values;
 		char * str;
 		int i;
-		int len;
+		size_t len;
 
 		data = (GETKEYData *)filter->data;
 		num = data->num;
@@ -3156,7 +3147,7 @@ void ciRplGetCKeyHandler(CHAT chat, const ciServerMessage * message)
 		char * key;
 		char * value;
 		int i;
-		int len;
+		size_t len;
 		char ** tempPtr;
 
 		data = (GETCKEYData *)filter->data;
@@ -3385,7 +3376,7 @@ void ciRplGetChanKeyHandler(CHAT chat, const ciServerMessage * message)
 		char * key;
 		char * value;
 		int i;
-		int len;
+		size_t len;
 		char ** tempPtr;
 
 		data = (GETCHANKEYData *)filter->data;
@@ -4307,7 +4298,7 @@ void ciErrNoSuchChannelHandler(CHAT chat, const ciServerMessage * message)
 
 	// Setup the filter matches.
 	////////////////////////////
-	memset(&matches, 0, sizeof(ciFilterMatch));
+	memset(&matches, 0, sizeof(matches));
 	matches[0].type = TYPE_JOIN;
 	matches[0].name = channel;
 	matches[1].type = TYPE_CMODE;

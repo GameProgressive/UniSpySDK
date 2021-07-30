@@ -592,16 +592,16 @@ static void NegotiateThink(NATNegotiator neg)
 
 	if (neg->state == ns_finished && current_time() > neg->retryTime) //check if it is ready to be removed
 	{
-		struct sockaddr_in saddr;
-		saddr.sin_family = AF_INET;
-		saddr.sin_port = htons(neg->guessedPort);
-		saddr.sin_addr.s_addr = neg->guessedIP;
+		struct sockaddr_in saddrReport;
+		saddrReport.sin_family = AF_INET;
+		saddrReport.sin_port = htons(neg->guessedPort);
+		saddrReport.sin_addr.s_addr = neg->guessedIP;
 			
 		// now that we've finished processing, send off the report
 		if (neg->gameSock == INVALID_SOCKET)
-			StartReport(neg, nr_success, neg->negotiateSock, (struct sockaddr_in *)&saddr);
+			StartReport(neg, nr_success, neg->negotiateSock, (struct sockaddr_in *)&saddrReport);
 		else
-			StartReport(neg, nr_success, neg->gameSock, (struct sockaddr_in *)&saddr);
+			StartReport(neg, nr_success, neg->gameSock, (struct sockaddr_in *)&saddrReport);
 	}
 
 	if (neg->state == ns_initack && current_time() > neg->retryTime) //see if the partner has timed out

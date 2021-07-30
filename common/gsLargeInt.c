@@ -9,6 +9,8 @@
 
 #include "gsLargeInt.h"
 
+#include "gsMemory.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,9 +184,9 @@ gsi_bool gsiLargeIntSizePower2(const gsLargeInt_t *src1, const gsLargeInt_t *src
 static gsi_i32 gsiLargeIntCompare(const l_word *data1, l_word len1, const l_word *data2, l_word len2)
 {
 	// skip leading whitespace, if any
-	while(data1[len1-1] == 0 && len1>0)
+	while(len1>0 && data1[len1-1] == 0)
 		len1--;
-	while(data2[len2-1] == 0 && len2>0)
+	while(len2>0 && data2[len2-1] == 0)
 		len2--;
 	if (len1<len2)
 		return -1;
@@ -591,9 +593,9 @@ static gsi_bool gsiLargeIntDiv(const l_word *src, l_word len, const gsLargeInt_t
 			if (quotient.mLength < (l_word)(readIndex+readLength))
 				quotient.mLength = (l_word)(readIndex+readLength);
 			// remove new leading zeroes
-			while(scopy[readIndex+readLength-1] == 0 && readLength>1)
+			while(readLength>1 && scopy[readIndex+readLength-1] == 0)
 				readLength--;
-			while(scopy[readIndex+readLength-1] == 0 && readIndex>1)
+			while(readIndex>1 && scopy[readIndex+readLength-1] == 0)
 				readIndex--;
 		}
 	}
@@ -1498,7 +1500,7 @@ gsi_bool gsiLargeIntMultM(gsLargeInt_t *x, gsLargeInt_t *y, const gsLargeInt_t *
 	{
 		if (gsi_is_false(gsiLargeIntSub(m->mData, m->mLength, &temp[logB_r], tempLen - logB_r, dest->mData, &dest->mLength)))
 		{
-			memset(temp, 0, sizeof(temp));
+			gsiZeroMemory(temp, sizeof(temp));
 			memset(dest, 0, sizeof(gsLargeInt_t));
 			return gsi_false;
 		}
@@ -1508,7 +1510,7 @@ gsi_bool gsiLargeIntMultM(gsLargeInt_t *x, gsLargeInt_t *y, const gsLargeInt_t *
 		memset(dest, 0, sizeof(gsLargeInt_t));
 		dest->mLength = m->mLength;
 		memcpy(dest->mData, &temp[logB_r], (tempLen - logB_r)*GS_LARGEINT_DIGIT_SIZE_BYTES);
-		memset(temp, 0, sizeof(temp));
+		gsiZeroMemory(temp, sizeof(temp));
 	}
 
 	return gsi_true;

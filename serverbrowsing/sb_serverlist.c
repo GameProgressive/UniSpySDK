@@ -1246,17 +1246,17 @@ static SBError ProcessMainListData(SBServerList *slist)
 		while (slist->expectedelements > ArrayLength(slist->keylist))
 		{
 			KeyInfo ki;
-			int keylen;
+			int arraykeylen;
 			if (inlen < 2)
 				break; //can't possibly be a full key (keytype + string)
-			keylen = NTSLengthSB(inbuf + 1, inlen - 1);
-			if (keylen == -1)
+			arraykeylen = NTSLengthSB(inbuf + 1, inlen - 1);
+			if (arraykeylen == -1)
 				break; //no full NTS string there
 			ki.keyType = (unsigned char)(inbuf[0]);
 			ki.keyName = SBRefStr(slist, inbuf + 1);
 			ArrayAppend(slist->keylist, &ki);
-			inbuf += keylen + 1;
-			inlen -= keylen + 1;
+			inbuf += arraykeylen + 1;
+			inlen -= arraykeylen + 1;
 		}
 		if (slist->expectedelements > ArrayLength(slist->keylist))
 			break; //didn't read them all...
@@ -1275,12 +1275,12 @@ static SBError ProcessMainListData(SBServerList *slist)
 		}
 		while (slist->expectedelements > slist->numpopularvalues)
 		{
-			int keylen = NTSLengthSB(inbuf, inlen);
-			if (keylen == -1)
+			int valkeylen = NTSLengthSB(inbuf, inlen);
+			if (valkeylen == -1)
 				break; //no full NTS string
 			slist->popularvalues[slist->numpopularvalues++] = SBRefStr(slist, inbuf);
-			inbuf += keylen;
-			inlen -= keylen;
+			inbuf += valkeylen;
+			inlen -= valkeylen;
 		}
 		if (slist->expectedelements > slist->numpopularvalues)
 			break; //didn't read all the popular values

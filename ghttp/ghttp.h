@@ -197,7 +197,7 @@ typedef int GHTTPRequest;
 	} GHTTPRequestError;
 #endif
 
-#define IS_GHTTP_ERROR(x) (x<0)
+#define IS_GHTTP_ERROR(x) ((x)<0)
 
 //DOM-IGNORE-BEGIN 
 //	Don't try to access this object directly, use the ghttpPost*() functions.

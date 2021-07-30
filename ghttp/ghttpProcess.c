@@ -97,10 +97,10 @@ static GHTTPBool ghiParseURL
 	if(!*URL)
 		URL = "/";
 	connection->requestPath = goastrdup(URL);
+	if (!connection->requestPath)
+		return GHTTPFalse;
 	while((str = strchr(connection->requestPath, ' ')) != NULL)
 		*str = '+';
-	if(!connection->requestPath)
-		return GHTTPFalse;
 
 	return GHTTPTrue;
 }
@@ -1117,7 +1117,7 @@ void ghiDoReceivingStatus
 
 		// Get the status length.
 		/////////////////////////
-		statusLength = (endOfStatus - connection->recvBuffer.data);
+		statusLength = (int)(endOfStatus - connection->recvBuffer.data);
 
 		// Log it.
 		//////////
@@ -1208,7 +1208,7 @@ static GHTTPBool ghiDeliverIncomingFileData
 	{
 		int bytesWritten = 0;
 #ifndef NOFILE
-		bytesWritten = fwrite(data, 1, len, connection->saveFile);
+		bytesWritten = (int)fwrite(data, 1, len, connection->saveFile);
 #endif
 		if(bytesWritten != len)
 		{
@@ -1247,7 +1247,7 @@ static int ghiParseChunkSize
 {
 	char * header;
 	int len;
-	int num;
+	unsigned int num;
 	int rcode;
 
 	header = connection->chunkHeader;
@@ -1257,10 +1257,10 @@ static int ghiParseChunkSize
 	GSI_UNUSED(len);
 
 	rcode = sscanf(header, "%x", &num);
-	if(rcode != 1)
+	if(rcode != 1 || num > INT_MAX)
 		return -1;
 
-	return num;
+	return (int)num;
 }
 
 // Appends the data to the chunk header buffer.
@@ -1339,12 +1339,12 @@ static GHTTPBool ghiProcessIncomingFileData
 				{
 					// Append what we have to the buffer.
 					/////////////////////////////////////
-					ghiAppendToChunkHeaderBuffer(connection, data, endOfHeader - data);
+					ghiAppendToChunkHeaderBuffer(connection, data, (int)(endOfHeader - data));
 
 					// Adjust data and len.
 					///////////////////////
 					endOfHeader++;
-					len -= (endOfHeader - data);
+					len -= (int)(endOfHeader - data);
 					data = endOfHeader;
 
 					// Read the chunk size.
@@ -1435,7 +1435,7 @@ static GHTTPBool ghiProcessIncomingFileData
 				// Adjust data and len.
 				///////////////////////
 				endOfFooter++;
-				len -= (endOfFooter - data);
+				len -= (int)(endOfFooter - data);
 				data = endOfFooter;
 
 				// Set up for reading the next header.
@@ -1625,11 +1625,11 @@ void ghiDoReceivingHeaders
 		connection->recvHeaders = goastrdup(headers);
 
         fileStart = (endOfHeaders + 2);
-        fileLength = (connection->recvBuffer.len - (fileStart - connection->recvBuffer.data));
+        fileLength = (connection->recvBuffer.len - (int)(fileStart - connection->recvBuffer.data));
 
         // Set the headers buffer's new length.
         ///////////////////////////////////////
-        connection->recvBuffer.len = (endOfHeaders - connection->recvBuffer.data + 1);
+        connection->recvBuffer.len = (int)(endOfHeaders - connection->recvBuffer.data + 1);
         connection->recvBuffer.pos = connection->recvBuffer.len;
 
         // Log it.
@@ -1647,7 +1647,7 @@ void ghiDoReceivingHeaders
             {
                 // Move any data to the front of the buffer.
                 ////////////////////////////////////////////
-                memmove(connection->recvBuffer.data, fileStart, (unsigned int)fileLength + 1);
+                memmove(connection->recvBuffer.data, fileStart, (size_t)fileLength + 1);
                 connection->recvBuffer.len = fileLength;
             }
             else
@@ -1725,7 +1725,10 @@ void ghiDoReceivingHeaders
                         connection->completed = GHTTPTrue;
                         connection->result = GHTTPOutOfMemory;
                     }
-                    sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
+                    else
+                    {
+                        sprintf(connection->redirectURL, "http://%s:%d%s", connection->serverAddress, connection->serverPort, location);
+                    }
                 }
                 else
                 {
@@ -1776,7 +1779,7 @@ void ghiDoReceivingHeaders
                 if( pEnd-pStart == nMaxLen )
                 {
                     // Same length, maybe a bigger number
-                    if( strncmp(pStart,szMaxSize,(unsigned int)(pEnd-pStart)) >= 0 )
+                    if( strncmp(pStart,szMaxSize,(size_t)(pEnd-pStart)) >= 0 )
                     {
                         connection->completed = GHTTPTrue;
                         connection->result = GHTTPFileToBig;

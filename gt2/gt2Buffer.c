@@ -74,6 +74,6 @@ void gti2BufferShorten(GTI2Buffer * buffer, int start, int shortenBy)
 	GS_ASSERT(start <= buffer->len);
 	GS_ASSERT(shortenBy <= (buffer->len - start));
 
-	memmove(buffer->buffer + start, buffer->buffer + start + shortenBy, (unsigned int)(buffer->len - start - shortenBy));
+	memmove(buffer->buffer + start, buffer->buffer + start + shortenBy, (size_t)(buffer->len - start - shortenBy));
 	buffer->len -= shortenBy;
 }

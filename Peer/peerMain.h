@@ -52,8 +52,8 @@ piConnection * connection;  // This is to fool Visual Assist.
                                   connection = (piConnection *)peer;\
 								  GSI_UNUSED(connection);
 
-#define ASSERT_ROOMTYPE(type)     GS_ASSERT((type == TitleRoom) || (type == GroupRoom) || (type == StagingRoom))
-#define ASSERT_MESSAGETYPE(type)  GS_ASSERT((type == NormalMessage) || (type == ActionMessage) || (type == NoticeMessage))
+#define ASSERT_ROOMTYPE(type)     GS_ASSERT(((type) == TitleRoom) || ((type) == GroupRoom) || ((type) == StagingRoom))
+#define ASSERT_MESSAGETYPE(type)  GS_ASSERT(((type) == NormalMessage) || ((type) == ActionMessage) || ((type) == NoticeMessage))
 
 #define ROOM                      (connection->rooms[roomType])
 #define ROOM_W					  (connection->rooms_W[roomType])

@@ -14,11 +14,6 @@
 #include "chatCallbacks.h"
 #include "chatChannel.h"
 
-#if defined(_WIN32)
-// warning about casting void* to function*
-#pragma warning(disable:4055)
-#endif
-
 /************
 ** DEFINES **
 ************/
@@ -562,11 +557,13 @@ CHATBool ciAddCallback_(CHAT chat, int type, void * callback, void * callbackPar
 	data.callbackParams = gsimalloc(callbackParamsSize);
 #else
 	data.callbackParams = gsimalloc(callbackParamsSize + 64);
-	memset(data.callbackParams, 0xC4, callbackParamsSize + 64);
 #endif
 	if(data.callbackParams == NULL)
 		return CHATFalse; //ERRCON
 	memcpy(data.callbackParams, callbackParams, callbackParamsSize);
+#ifdef _DEBUG
+	memset((unsigned char*)data.callbackParams + callbackParamsSize, 0xC4, 64);
+#endif
 	data.param = param;
 	data.ID = ID;
 	if(channel == NULL)

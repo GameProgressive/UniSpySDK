@@ -427,7 +427,7 @@ GVBool gviWriteSourcesToBuffer(GVISourceList sourceList, GVFrameStamp startTime,
 	timeSliceEnd = (GVFrameStamp)(startTime + numFrames);
 
 	// clear the sample buffer
-	memset(sampleBuffer, 0, (unsigned int)numFrames * GVIBytesPerFrame);
+	memset(sampleBuffer, 0, (size_t)numFrames * GVIBytesPerFrame);
 
 	// loop through the sources
 	for(i = 0 ; i < GVI_MAX_SOURCES ; i++)

@@ -43,7 +43,7 @@ gpiAppendCharToBuffer(
 	if(size == len)
 	{
 		size += GPI_READ_SIZE;
-		output = (char*)gsirealloc(output, (unsigned int)size + 1);
+		output = (char*)gsirealloc(output, (size_t)size + 1);
 		if(output == NULL)
 			Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 	}
@@ -92,7 +92,7 @@ gpiAppendStringToBufferLen(
 	if((size - len) < stringLen)
 	{
 		size += GS_MAX(GPI_READ_SIZE, stringLen);
-		output = (char*)gsirealloc(output, (unsigned int)size + 1);
+		output = (char*)gsirealloc(output, (size_t)size + 1);
 		if(output == NULL)
 			Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 	}
@@ -206,7 +206,7 @@ gpiSendData(
 		#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 		{
 			static int sendCount;
-			char *buf = (char *)gsimalloc((size_t)(rcode + 1));
+			char *buf = (char *)gsimalloc((size_t)rcode + 1);
 			memcpy(buf, buffer, (size_t)rcode);
 			buf[rcode] = '\0';
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump, "SENT%04d(%s): %s\n", sendCount++, id, buf);
@@ -370,7 +370,7 @@ gpiRecvToBuffer(
 		if((len + GPI_READ_SIZE) > size)
 		{
 			size = (len + GPI_READ_SIZE);
-			buffer = (char *)gsirealloc(buffer, (unsigned int)size + 1);
+			buffer = (char *)gsirealloc(buffer, (size_t)size + 1);
 			if(buffer == NULL)
 				Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 			// in case recv fails and line below it calls Error macro with return in it.
@@ -403,7 +403,7 @@ gpiRecvToBuffer(
 			#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 			{
 				static int recvCount;
-				char *buf = (char *)gsimalloc((size_t)(rcode + 1));
+				char *buf = (char *)gsimalloc((size_t)rcode + 1);
 				memcpy(buf, &buffer[len], (size_t)rcode);
 				buf[rcode] = '\0';
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump,
@@ -495,7 +495,7 @@ gpiSendFromBuffer(
 	{
 		if(total > 0)
 		{
-			memmove(buffer, &buffer[total], (unsigned int)remaining + 1);
+			memmove(buffer, &buffer[total], (size_t)remaining + 1);
 			len -= total;
 		}
 	}
@@ -658,7 +658,7 @@ gpiReadMessageFromBuffer(
 
 			// Set the position to the end of the message.
 			//////////////////////////////////////////////
-			inputBuffer->pos = ((str - inputBuffer->buffer) + len + 1);
+			inputBuffer->pos = (int)((str - inputBuffer->buffer) + len + 1);
 		}
 		else
 		{

@@ -602,18 +602,18 @@ static GHTTPBool ptaFilePlanetCompletedCallback
 
 		// Copy off the name.
 		/////////////////////
-		len = (str - Line);
-		mirrorNames[i] = (char *)gsimalloc((unsigned int)len + 1);
+		len = (int)(str - Line);
+		mirrorNames[i] = (char *)gsimalloc((size_t)len + 1);
 		if(!mirrorNames[i])
 			break;
-		memcpy(mirrorNames[i], Line, (unsigned int)len);
+		memcpy(mirrorNames[i], Line, (size_t)len);
 		mirrorNames[i][len] = '\0';
 
 		// Copy off the URL.
 		////////////////////
 		str++;
 		len = (int)strlen(str);
-		mirrorURLs[i] = (char *)gsimalloc((unsigned int)len + 1);
+		mirrorURLs[i] = (char *)gsimalloc((size_t)len + 1);
 		if(!mirrorURLs[i])
 		{
 			gsifree(mirrorNames[i]);

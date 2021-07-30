@@ -19,11 +19,6 @@
 #include "chatSocket.h"
 
 
-#if defined(_WIN32)
-// Silence the "conditional expression is constant" on the FD_SET macros
-#pragma warning(disable:4127)
-#endif
-
 /************
 ** DEFINES **
 ************/
@@ -91,7 +86,7 @@ static CHATBool ciBufferInit(ciBuffer * buffer)
 
 	buffer->length = 0;
 	buffer->size = BUFFER_INC;
-	buffer->buffer = (char *)gsimalloc((unsigned int)buffer->size + 1);
+	buffer->buffer = (char *)gsimalloc((size_t)buffer->size + 1);
 	if(buffer->buffer == NULL)
 		return CHATFalse;
 
@@ -129,7 +124,7 @@ static CHATBool ciBufferPreAppend(ciBuffer * buffer, int len)
 
 	// Allocate the memory.
 	///////////////////////
-	tempPtr = (char *)gsirealloc(buffer->buffer, (unsigned int)total + 1);
+	tempPtr = (char *)gsirealloc(buffer->buffer, (size_t)total + 1);
 	if(tempPtr == NULL)
 		return CHATFalse;
 
@@ -380,7 +375,14 @@ static void ciSocketThinkRecv(ciSocket * sock)
 	ASSERT_SOCK(sock);
 	ASSERT_CONNECTED(sock);
 
+#ifdef _WIN32
+#pragma warning ( push )
+#pragma warning ( disable: 4127 )  // conditional expression is constant
+#endif
 	while(CHATTrue)
+#ifdef _WIN32
+#pragma warning ( pop )
+#endif
 	{
 		// Check the read flag.
 		///////////////////////
@@ -532,7 +534,6 @@ CHATBool ciSocketSendf(ciSocket * sock,
 
 	ASSERT_SOCK(sock);
 	ASSERT_CONNECTED(sock);
-	GS_ASSERT(buffer != NULL);
 
 	// Disconnected?
 	////////////////
@@ -542,7 +543,7 @@ CHATBool ciSocketSendf(ciSocket * sock,
 	// Do the formatting.
 	/////////////////////
 	va_start(args, format);
-	num = vsprintf(buffer, format, args);
+	num = vsnprintf(buffer, sizeof(buffer), format, args);
 	if(num != -1)
 		buffer[num] = '\0';
 	else
@@ -601,11 +602,11 @@ static CHATBool ciParseUser(const char *pText, ciServerMessage * message)
 	
 	if(nNick)
 	{
-		message->nick = (char *)gsimalloc((unsigned int)nNick + 1);
+		message->nick = (char *)gsimalloc((size_t)nNick + 1);
 		
 		if(message->nick)
 		{
-			memcpy(message->nick, pTmpNick, (unsigned int)nNick);
+			memcpy(message->nick, pTmpNick, (size_t)nNick);
 			message->nick[nNick] = '\0';
 		}
 	}
@@ -614,11 +615,11 @@ static CHATBool ciParseUser(const char *pText, ciServerMessage * message)
 	
 	if(nUsername)
 	{
-		message->user = (char *)gsimalloc((unsigned int)nUsername + 1);
+		message->user = (char *)gsimalloc((size_t)nUsername + 1);
 		
 		if(message->user)
 		{
-			memcpy(message->user, pTmpUsername, (unsigned int)nUsername);
+			memcpy(message->user, pTmpUsername, (size_t)nUsername);
 			message->user[nUsername] = '\0';
 		}
 	}
@@ -627,11 +628,11 @@ static CHATBool ciParseUser(const char *pText, ciServerMessage * message)
 	
 	if(nHost)
 	{
-		message->host = (char *)gsimalloc((unsigned int)nHost + 1);
+		message->host = (char *)gsimalloc((size_t)nHost + 1);
 		
 		if(message->host)
 		{
-			memcpy(message->host, pTmpHost, (unsigned int)nHost);
+			memcpy(message->host, pTmpHost, (size_t)nHost);
 			message->host[nHost] = '\0';
 		}
 	}
@@ -744,10 +745,10 @@ static CHATBool ciParseMessage(ciSocket * sock, const char *sText)
 	}
 
 	nMessage = (int)strlen(sText);
-	message->message = (char *)gsimalloc((unsigned int)nMessage + 1);
+	message->message = (char *)gsimalloc((size_t)nMessage + 1);
 	if(message->message == NULL)
 		return CHATFalse; //ERRCON
-	memcpy(message->message, sText, (unsigned int)nMessage);
+	memcpy(message->message, sText, (size_t)nMessage);
 	message->message[nMessage] = '\0';
 
 	p = (char *)sText;
@@ -821,11 +822,11 @@ static CHATBool ciParseMessage(ciSocket * sock, const char *sText)
 	if(nServer)
 	{
 		temp = message->server;
-		message->server = (char *)gsimalloc((unsigned int)nServer + 1);
+		message->server = (char *)gsimalloc((size_t)nServer + 1);
 		
 		if(message->server)
 		{
-			memcpy(message->server, temp, (unsigned int)nServer);
+			memcpy(message->server, temp, (size_t)nServer);
 			message->server[nServer] = '\0';
 		}
 
@@ -877,11 +878,11 @@ static CHATBool ciParseMessage(ciSocket * sock, const char *sText)
 	if(nParam)
 	{
 		temp = message->param;
-		message->param = (char *)gsimalloc((unsigned int)nParam + 1);
+		message->param = (char *)gsimalloc((size_t)nParam + 1);
 
 		if(message->param)
 		{
-			memcpy(message->param, temp, (unsigned int)nParam);
+			memcpy(message->param, temp, (size_t)nParam);
 			message->param[nParam] = '\0';
 		}
 	}
@@ -893,11 +894,11 @@ static CHATBool ciParseMessage(ciSocket * sock, const char *sText)
 	if(nCommand)
 	{
 		temp = message->command;
-		message->command = (char *)gsimalloc((unsigned int)nCommand + 1);
+		message->command = (char *)gsimalloc((size_t)nCommand + 1);
 		
 		if(message->command)
 		{
-			memcpy(message->command, temp, (unsigned int)nCommand);
+			memcpy(message->command, temp, (size_t)nCommand);
 			message->command[nCommand] = '\0';
 		}
 	}
@@ -907,11 +908,11 @@ static CHATBool ciParseMessage(ciSocket * sock, const char *sText)
 	if(nMiddle)
 	{
 		temp = message->middle;
-		message->middle = (char *)gsimalloc((unsigned int)nMiddle + 1);
+		message->middle = (char *)gsimalloc((size_t)nMiddle + 1);
 		
 		if(message->middle)
 		{
-			memcpy(message->middle, temp, (unsigned int)nMiddle);
+			memcpy(message->middle, temp, (size_t)nMiddle);
 			message->middle[nMiddle] = '\0';
 		}
 	}
@@ -927,6 +928,7 @@ static CHATBool ciParseInput(ciSocket * sock)
 	char *p, *q, *r;
 	char   temp;
 	int i;
+	ptrdiff_t messageLen = 0;
 	
 	p = sock->inputQueue.buffer;  // start
 	
@@ -983,9 +985,13 @@ static CHATBool ciParseInput(ciSocket * sock)
 				//////////////////////////////
 				*r = temp;
 
+				messageLen = q - sock->inputQueue.buffer;
+
+				GS_ASSERT(messageLen <= INT_MAX);
+
 				// Take the message out of the buffer.
 				//////////////////////////////////////
-				ciBufferClipFront(&sock->inputQueue, (q - sock->inputQueue.buffer));
+				ciBufferClipFront(&sock->inputQueue, (int)messageLen);
 
 				return CHATTrue;
 			}

@@ -267,14 +267,14 @@ SCResult SC_CALL scSubmitReport(const SCInterfacePtr  theInterface,
 	// Prepare the report hash
 	{
 		SCIReportHeader * header = (SCIReportHeader*)aReport->mBuffer.mData;
-		MD5_CTX md5;
+		GSMD5_CTX md5;
 		// Clear out the checksum portion of the header so that the 
 		// MD5 hash is calculated on the entire report without a checksum
 		memset(header->mChecksum, 0, sizeof(header->mChecksum));
 		
-		MD5Init(&md5);
-		MD5Update(&md5, (unsigned char *)aReport->mBuffer.mData, aReport->mBuffer.mPos);
-		MD5Final(header->mChecksum, &md5);	
+		GSMD5Init(&md5);
+		GSMD5Update(&md5, (unsigned char *)aReport->mBuffer.mData, aReport->mBuffer.mPos);
+		GSMD5Final(header->mChecksum, &md5);	
 	}
 	
 	// Call web service

@@ -114,7 +114,6 @@ void ArrayFree(DArray array)
 	}
 	// mj to do: move these asserts into gsi_free.  maybe, depends on whether user overloads them
 	GS_ASSERT(array->list);
-	GS_ASSERT(array);
 	gsifree(array->list);
 	gsifree(array);
 }

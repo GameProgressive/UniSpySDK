@@ -122,8 +122,10 @@ void gsDebugVaList(GSIDebugCategory theCat, GSIDebugType theType,
 	GSIDebugLevel aCurLevel;
 
 	// Verify Parameters
-	GS_ASSERT(theCat   <= GSIDebugCat_Count);
-	GS_ASSERT(theType  <= GSIDebugType_Count);
+	GS_ASSERT(theCat   >= GSIDebugCat_App);
+	GS_ASSERT(theCat   < GSIDebugCat_Count);
+	GS_ASSERT(theType  >= GSIDebugType_Network);
+	GS_ASSERT(theType  < GSIDebugType_Count);
 	GS_ASSERT(theLevel <= (1<<GSIDebugLevel_Count));
 	GS_ASSERT(theTokenStr);
 
@@ -277,7 +279,9 @@ void gsSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType,
 					  GSIDebugLevel theLevel)
 {
 	// Verify Parameters
+	GS_ASSERT(theCat   >= GSIDebugCat_App);
 	GS_ASSERT(theCat   <= GSIDebugCat_Count);
+	GS_ASSERT(theType  >= GSIDebugType_Network);
 	GS_ASSERT(theType  <= GSIDebugType_Count);
 
 	// Set for all categories?

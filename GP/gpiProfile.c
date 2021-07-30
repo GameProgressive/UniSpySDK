@@ -11,6 +11,8 @@
 //////////
 #include "gpi.h"
 
+#include <stdint.h>
+
 //DEFINES
 /////////
 #define GPI_PROFILE_GROW_SIZE        16
@@ -111,8 +113,6 @@ static GPResult gpiOpenDiskProfiles(GPConnection * connection,
 	*failed = GPIFalse;
 
 	return GP_NO_ERROR;
-	
-	GSI_UNUSED(write);
 }
 
 static void
@@ -1059,7 +1059,7 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
             iconnection->profileList.numBuddies--;
             GS_ASSERT(iconnection->profileList.numBuddies >= 0);
 #ifndef _PS2
-            gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(unsigned long)index);
+            gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(intptr_t)index);
 #else
             gpiProfileMap(connection, gpiFixBuddyIndices, (void *)index);
 #endif
@@ -1071,17 +1071,17 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
             freeclear(profile->buddyStatusInfo->gameType);
             freeclear(profile->buddyStatusInfo->gameVariant);
             freeclear(profile->buddyStatusInfo->gameMapName);
-            freeclear(profile->buddyStatusInfo);
             if (profile->buddyStatusInfo->extendedInfoKeys)
             {
                 ArrayFree(profile->buddyStatusInfo->extendedInfoKeys);
                 profile->buddyStatusInfo->extendedInfoKeys = NULL;
             }
+            freeclear(profile->buddyStatusInfo);
 
             iconnection->profileList.numBuddies--;
             GS_ASSERT(iconnection->profileList.numBuddies >= 0);
 #ifndef _PS2
-            gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(unsigned long)index);
+            gpiProfileMap(connection, gpiFixBuddyIndices, (void *)(intptr_t)index);
 #else
             gpiProfileMap(connection, gpiFixBuddyIndices, (void *)index);
 #endif
@@ -1122,7 +1122,9 @@ static GPIBool gpiFixBlockIndices(GPConnection * connection,
 								  void * data)
 {
 #ifndef _PS2
-    int baseIndex = (int)(unsigned long)data;
+    int baseIndex = (int)(intptr_t)data;
+
+    GS_ASSERT((intptr_t)data <= INT_MAX);
 #else
     int baseIndex = (int)data;
 #endif
@@ -1153,7 +1155,7 @@ GPResult gpiRemoveFromBlockedList(GPConnection * connection,
         index = profile->blockIndex;
 
 #ifndef _PS2
-        gpiProfileMap(connection, gpiFixBlockIndices, (void *)(unsigned long)index);
+        gpiProfileMap(connection, gpiFixBlockIndices, (void *)(intptr_t)index);
 #else
         gpiProfileMap(connection, gpiFixBlockIndices, (void *)index);
 #endif

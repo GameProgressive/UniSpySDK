@@ -1008,8 +1008,8 @@ GSUdpErrorCode gsUdpEngineAddMsgHandler(char theInitMsg[GS_UDP_MSG_HEADER_LEN], 
 	GSUdpEngineObject *aUdp = gsUdpEngineGetEngine();
 	GSUdpMsgHandler aMsgHandler;
 	GS_ASSERT(aUdp->mInitialized);
-	GS_ASSERT(theInitMsg || theInitMsg[0]);
-	GS_ASSERT(theHeader || theHeader[0]);
+	GS_ASSERT(theInitMsg && theInitMsg[0]);
+	GS_ASSERT(theHeader && theHeader[0]);
 	if (!aUdp->mInitialized)
 	{
 		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Debug,

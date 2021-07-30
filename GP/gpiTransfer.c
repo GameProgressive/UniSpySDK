@@ -1348,7 +1348,9 @@ static GPResult gpiSendFileData
 	gpiSendOrBufferStringLenToPeer(connection, transfer->peer, "\\file\\", 6);
 	gpiSendOrBufferInt(connection, transfer->peer, transfer->currentFile);
 
-	gpiFinishTransferMessage(connection, transfer, (char *)data, len);
+	GS_ASSERT(len <= INT_MAX);
+
+	gpiFinishTransferMessage(connection, transfer, (char *)data, (int)len);
 
 	return GP_NO_ERROR;
 }
@@ -1362,7 +1364,7 @@ GPResult gpiProcessCurrentFile
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIFile * file;
 	GPTransferCallbackArg * arg;
-	size_t num;
+	unsigned int num;
 	int i;
 	int total;
 
@@ -1500,7 +1502,7 @@ GPResult gpiProcessCurrentFile
 
 				// Read data.
 				/////////////
-				num = fread(buffer, 1, sizeof(buffer), file->file);
+				num = (unsigned int)fread(buffer, 1, sizeof(buffer), file->file);
 				if(num)
 				{
 					// Update the md5.

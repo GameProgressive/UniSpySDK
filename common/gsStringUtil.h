@@ -46,7 +46,7 @@ extern "C" {
 #define UTF8ToUCSStringLen		UTF8ToUCS4StringLen
 #define UCSToUTF8String			UCS4ToUTF8String
 #define UCSToUTF8StringAlloc	UCS4ToUTF8StringAlloc
-#define IS_ASCII_UNICODE(a) (a & 0xFFFFFF00) == 0
+#define IS_ASCII_UNICODE(a) ((a) & 0xFFFFFF00) == 0
 #else
 	typedef UCS2String				UCSStringType;
 #define UCSToAsciiString		UCS2ToAsciiString	// all other are 2 bytes
@@ -56,7 +56,7 @@ extern "C" {
 #define UTF8ToUCSStringLen		UTF8ToUCS2StringLen
 #define UCSToUTF8String			UCS2ToUTF8String
 #define UCSToUTF8StringAlloc	UCS2ToUTF8StringAlloc
-#define IS_ASCII_UNICODE(a) (a & 0xFF00) == 0
+#define IS_ASCII_UNICODE(a) ((a) & 0xFF00) == 0
 #endif
 #endif // functions 
 

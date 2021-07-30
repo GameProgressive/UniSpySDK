@@ -184,26 +184,28 @@ int GSSHA1Input(    GSSHA1Context    *context,
     }
     while(length-- && !context->Corrupted)
     {
-    context->Message_Block[context->Message_Block_Index++] =
-                    (uint8_t)(*message_array & 0xFF);
+      GS_ASSERT(context->Message_Block_Index < sizeof(context->Message_Block));
 
-    context->Length_Low += 8;
-    if (context->Length_Low == 0)
-    {
-        context->Length_High++;
-        if (context->Length_High == 0)
-        {
-            /* Message is too long */
-            context->Corrupted = 1;
-        }
-    }
+      context->Message_Block[context->Message_Block_Index++] =
+          (uint8_t)(*message_array & 0xFF);
 
-    if (context->Message_Block_Index == 64)
-    {
-        SHA1ProcessMessageBlock(context);
-    }
+      context->Length_Low += 8;
+      if (context->Length_Low == 0)
+      {
+          context->Length_High++;
+          if (context->Length_High == 0)
+          {
+              /* Message is too long */
+              context->Corrupted = 1;
+          }
+      }
 
-    message_array++;
+      if (context->Message_Block_Index == 64)
+      {
+          SHA1ProcessMessageBlock(context);
+      }
+
+      message_array++;
     }
 
     return shaSuccess;

@@ -21,9 +21,11 @@ gpiFailedOpCallback(
 )
 {
 	GPICallback callback;
+	
+	GS_ASSERT(connection != NULL);
+
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
-	GS_ASSERT(connection != NULL);
 	GS_ASSERT(*connection != NULL);
 	GS_ASSERT(operation != NULL);
 

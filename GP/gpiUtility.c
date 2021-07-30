@@ -19,14 +19,6 @@
 /////////
 #define OUTPUT_MAX_COL     100
 
-// Disable compiler warnings for issues that are unavoidable.
-/////////////////////////////////////////////////////////////
-#if defined(_MSC_VER) // DevStudio
-// Level4, "conditional expression is constant". 
-// Occurs with use of the MS provided macro FD_SET
-#pragma warning ( disable: 4127 )
-#endif // _MSC_VER
-
 //FUNCTIONS
 ///////////
 void
@@ -130,7 +122,7 @@ gpiValueForKeyWithIndex(
 
     // Copy back current end point for index
     ////////////////////////////////////////
-    *index += ((start - command) + strlen(value));
+    *index += (int)((start - command) + strlen(value));
 
     return GPITrue;
 }
@@ -191,7 +183,7 @@ gpiValueForKeyAlloc(
 	const char * start;
 	char c;
 	char * value;
-	int len;
+	size_t len;
 
 	// Check for NULL.
 	//////////////////
@@ -218,13 +210,13 @@ gpiValueForKeyAlloc(
 
 	// Allocate the value.
 	//////////////////////
-	value = (char *)gsimalloc((unsigned int)len + 1);
+	value = (char *)gsimalloc(len + 1);
 	if(!value)
 		return NULL;
 
 	// Copy in the value.
 	/////////////////////
-	memcpy(value, start, (unsigned int)len);
+	memcpy(value, start, len);
 	value[len] = '\0';
 
 	return value;
@@ -321,7 +313,7 @@ gpiReadKeyAndValue(
 	}
 	*value = '\0';
 
-	*index += (buffer - start - 1);
+	*index += (int)(buffer - start - 1);
 
 	return GP_NO_ERROR;
 }
@@ -393,10 +385,3 @@ gpiEncodeString(
 	// Base 64 it (printable chars only)
 	B64Encode(passwordxor, encodedString, (int)passwordlen, useAlternateEncoding);
 }
-
-
-// Re-enable previously disabled compiler warnings
-///////////////////////////////////////////////////
-#if defined(_MSC_VER)
-#pragma warning ( default: 4127 )
-#endif // _MSC_VER

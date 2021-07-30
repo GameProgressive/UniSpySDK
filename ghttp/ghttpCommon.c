@@ -9,15 +9,6 @@
 
 #include "ghttpCommon.h"
 
-// Disable compiler warnings for issues that are unavoidable.
-/////////////////////////////////////////////////////////////
-#if defined(_MSC_VER) // DevStudio
-
-// Level4, "conditional expression is constant". 
-// Occurs with use of the MS provided macro FD_SET
-#pragma warning ( disable: 4127 )
-#endif // _MSC_VER
-
 #ifdef WIN32
 // A lock.
 //////////
@@ -626,9 +617,3 @@ void ghiThrottleSettings
 	ghiThrottleBufferSize = bufferSize;
 	ghiThrottleTimeDelay = timeDelay;
 }
-
-// Re-enable previously disabled compiler warnings
-///////////////////////////////////////////////////
-#if defined(_MSC_VER)
-#pragma warning ( default: 4127 )
-#endif // _MSC_VER

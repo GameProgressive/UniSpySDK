@@ -50,14 +50,6 @@
 	#define IF_MEM_PROFILE_ISON(a)
 #endif
 
-// Disable compiler warnings for issues that are unavoidable.
-/////////////////////////////////////////////////////////////
-#if defined(_MSC_VER) // DevStudio
-	// Level4, "conditional expression is constant". 
-	// Occurs with use of the MS provided macro FD_SET
-	#pragma warning ( disable: 4127 )
-#endif // _MSC_VER
-
 #ifdef _WIN32
 	#define MEM_MANAGER_CALL _cdecl
 #else
@@ -126,6 +118,15 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 		return ptr;
 	}
 #endif
+
+// Prevent compiler from inlining memset and further removal if gsiZeroMemory buffer
+// is not accessed later.
+static volatile void* (*memset_func)(void*, int, size_t) = memset;
+
+void gsiZeroMemory(void* buffer, size_t size)
+{
+	memset_func(buffer, 0, size);
+}
 
 #ifdef GS_NO_STANDARD_ALLOC
 // If you define GS_NO_STANDARD_ALLOC, you must call gsiMemoryCallbacksSet() before using GameSpySDK.
@@ -660,11 +661,11 @@ void MEM_CHUNK_POOLSplitChunk(MEM_CHUNK_POOL *_this, MEM_CHUNK *header, gsi_bool
 	#if (MEM_PROFILE)
 		if(ReAlloc)
 		{
+			GS_ASSERT(_this->MemUsed >= MEM_CHUNKChunkSizeGet(header));
 			//09-OCT-07 BED: Since we're splitting the chunk, it seems more accurate
 			//               to use the full size of the chunk, not just the used portion
 			_this->MemUsed -= MEM_CHUNKChunkSizeGet(header);
 			//_this->MemUsed -= MEM_CHUNKMemUsedGet(header);		
-			GS_ASSERT(_this->MemUsed >= 0);
 		}
 	#endif
 
@@ -912,8 +913,8 @@ void MEM_CHUNK_POOLFreeChunk(MEM_CHUNK_POOL *_this,MEM_CHUNK *header)
 	MEM_CHUNK *PrevFree;
 
 	#if (MEM_PROFILE)
+		GS_ASSERT(_this->MemUsed >= MEM_CHUNKMemUsedGet(header));
 		_this->MemUsed -= MEM_CHUNKMemUsedGet(header);
-		GS_ASSERT(_this->MemUsed >= 0);
 	#endif
 
 	while (next->next && (MEM_CHUNKIsFree(next->next)))

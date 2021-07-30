@@ -19,11 +19,6 @@
 #include "chatCallbacks.h"
 
 
-#if defined(_WIN32)
-// Silence the warning about explicitly casting a function* to a void*
-#pragma warning(disable:4054)
-#endif
-
 /************
 ** GLOBALS **
 ************/
@@ -325,9 +320,11 @@ void ciSendLogin(CHAT chat)
 		return;
 	}
 
+	GS_ASSERT(sizeof(connection->password) / sizeof(connection->password[0]) <= UINT_MAX);
+
 	// For uniquenick or profile logins, we need to MD5 the password.
 	/////////////////////////////////////////////////////////////////
-	GSMD5Digest((unsigned char *)connection->password, strlen(connection->password), passwordHash);
+	GSMD5Digest((unsigned char *)connection->password, (unsigned int)strlen(connection->password), passwordHash);
 
 	// Send the login message based on type.
 	////////////////////////////////////////
@@ -2816,6 +2813,7 @@ void chatSetGlobalKeysA(CHAT chat,
 	const char * key;
 	const char * value;
 	int i;
+	size_t bufferLen = 0;
 	ciConnection * connection;
 	GS_ASSERT(chat != NULL);
 	connection = (ciConnection *)chat;
@@ -2833,7 +2831,13 @@ void chatSetGlobalKeysA(CHAT chat,
 		value = values[i];
 		if(!value)
 			value = "";
-		sprintf(buffer + strlen(buffer), "\\%s\\%s", key, value);
+		bufferLen = strlen(buffer);
+		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
+		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(key) + strlen(value)) {
+			GS_ASSERT(0);
+			return;
+		}
+		sprintf(buffer + bufferLen, "\\%s\\%s", key, value);
 	}
 
 	ciSocketSend(&connection->chatSocket, buffer);
@@ -3005,6 +3009,7 @@ void chatSetChannelKeysA(CHAT chat,
 	char buffer[512];
 	const char * value;
 	int i;
+	size_t bufferLen = 0;
 	ciConnection * connection;
 	GS_ASSERT(chat != NULL);
 	connection = (ciConnection *)chat;
@@ -3019,7 +3024,13 @@ void chatSetChannelKeysA(CHAT chat,
 		value = values[i];
 		if(!value)
 			value = "";
-		sprintf(buffer + strlen(buffer), "\\%s\\%s", keys[i], value);
+		bufferLen = strlen(buffer);
+		// Do not overflow buffer with large key value pairs.  -1 for '\0'.
+		if (sizeof(buffer) - bufferLen - 1 < 2 + strlen(keys[i]) + strlen(value)) {
+			GS_ASSERT(0);
+			return;
+		}
+		sprintf(buffer + bufferLen, "\\%s\\%s", keys[i], value);
 	}
 
 	ciSocketSend(&connection->chatSocket, buffer);
@@ -3217,12 +3228,12 @@ void chatGetChannelKeysW(CHAT chat,
 // [in] nick		-  The nickname to validate
 int ciNickIsValid(const char* nick)
 {
-	if (strlen(nick) >= MAX_CHAT_NICK)
-		return CHAT_NICK_TOO_LONG;
-
 	// Empty nick is invalid
 	if ((NULL == nick) || ('\0' == *nick))
 		return CHAT_INVALID;
+
+	if (strlen(nick) >= MAX_CHAT_NICK)
+		return CHAT_NICK_TOO_LONG;
 
 
 	// 10-14-2004 Changed by Saad Nader

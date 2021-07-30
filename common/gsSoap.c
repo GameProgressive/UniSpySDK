@@ -212,7 +212,7 @@ gsi_bool gsiSoapGetSessionTokenFromHeaders(const char *headers, char valueBuffer
 		header += strlen(headerName);
 
 		// scan in the result
-		rcode = sscanf(header, " %s", valueBuffer);
+		rcode = sscanf(header, " %36s", valueBuffer);
 		
 		if(rcode == 1)
 			return gsi_true;

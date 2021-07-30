@@ -461,9 +461,15 @@ void SocketStartUp()
 
 	// added support for winsock2
 	#if (!defined(_XBOX) || defined(_X360)) && (defined(GSI_WINSOCK2) || defined(_X360))
-		WSAStartup(MAKEWORD(2,2), &data);
+		if (0 != WSAStartup(MAKEWORD(2,2), &data))
+		{
+			OutputDebugString("WSAStartup(2, 2) failed\n");
+		}
 	#else
-		WSAStartup(MAKEWORD(1,1), &data);
+		if (0 != WSAStartup(MAKEWORD(1,1), &data))
+		{
+			OutputDebugString("WSAStartup(1, 1) failed\n");
+		}
 	#endif
 	// end added
 #endif
@@ -472,9 +478,15 @@ void SocketStartUp()
 void SocketShutDown()
 {
 #if defined(_WIN32)
-	WSACleanup();
+	if (0 != WSACleanup())
+	{
+		OutputDebugString("WSACleanup failed\n");
+	}
 	#if defined(_X360)
-		XNetCleanup();
+	if (0 != XNetCleanup())
+	{
+		OutputDebugString("XNetCleanup failed\n");
+	}
 	#endif
 #endif
 }
@@ -1507,7 +1519,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	k = (unsigned int *)key;
 
 	// Load and zero-pad entire input stream as 32-bit words
-	sIn2 = (char *)gsimalloc((size_t)(4 * nIn));
+	sIn2 = (char *)gsimalloc(4 * (size_t)nIn);
 	strcpy(sIn2, sIn);
 	gsiPadRight( sIn2, '\0', 4*nIn);
 	v = (unsigned int *)sIn2;
@@ -1555,11 +1567,17 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 			sum -= 0x9E3779B9;
 		}
 	}
-	else return NULL;
+	else
+	{
+		// Logical error.
+		GS_ASSERT(0);
+		gsifree(sIn2);
+		return NULL;
+	}
+
 	// Convert result from 32-bit words to a byte stream
 	
-	
-	oStr = (char *)gsimalloc((size_t)(4 * nIn + 1));
+	oStr = (char *)gsimalloc(4 * (size_t)nIn + 1);
 	pStr = oStr;
 	*nOut = 4 *nIn;
 	for ( i = -1; ++i < nIn; ) 
@@ -1574,7 +1592,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	*pStr = '\0';
 	gsifree(sIn2);
 
-	return oStr;	
+	return oStr;
 }
 
 
@@ -1886,7 +1904,7 @@ const char * GOAGetUniqueID_Internal(void)
 		{
 			ret = RegCreateKeyExA(HKEY_CURRENT_USER, REG_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &thekey, &disp);
 		}
-		RegSetValueExA(thekey, (LPCSTR)"Crypt", 0, REG_SZ, (const LPBYTE)keyval, strlen(keyval)+1);
+		RegSetValueExA(thekey, (LPCSTR)"Crypt", 0, REG_SZ, (const LPBYTE)keyval, (DWORD)strlen(keyval)+1);
 #else
 		f = gsifopen("id.bin","w");
 		if (f)

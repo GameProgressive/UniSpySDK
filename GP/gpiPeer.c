@@ -253,7 +253,7 @@ gpiProcessPeerAcceptingConnection(
 				iconnection->password,
 				iconnection->profileid,
 				pid);
-			GSMD5Digest((unsigned char *)buffer, strlen(buffer), sigCheck);
+			GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), sigCheck);
 
 			// Check the sig.
 			/////////////////
@@ -506,10 +506,10 @@ gpiProcessPeerConnected(
 // makes no assumption of the operation queue
 void gpiCheckTimedOutPeerOperations(GPConnection * connection, GPIPeer *peer)
 {
-	GPIPeerOp *anIterator = peer->peerOpQueue.first;
 	GS_ASSERT(peer);
 	if (!peer)
 		return;
+	GPIPeerOp *anIterator = peer->peerOpQueue.first;
 	
 	while (anIterator && anIterator != peer->peerOpQueue.last)
 	{
@@ -932,10 +932,10 @@ gpiPeerStartConnect(
 	{
 		GSUdpPeerState aPeerState;
 		gsUdpEngineGetPeerState(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, &aPeerState);
-		if (aPeerState != GS_UDP_PEER_CONNECTED || aPeerState != GS_UDP_PEER_CONNECTING)
+		if (aPeerState != GS_UDP_PEER_CONNECTED && aPeerState != GS_UDP_PEER_CONNECTING)
 		{
 			anError = gsUdpEngineStartTalkingToPeer(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, 
-			iconnection->mHeader, GPI_PEER_TIMEOUT);
+				iconnection->mHeader, GPI_PEER_TIMEOUT);
 			if (anError != GS_UDP_ADDRESS_ALREADY_IN_USE)
 				CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error starting communication with a peer.");
 		}
@@ -1016,13 +1016,15 @@ gpiPeerStartTransferMessage(
 {
 	char buffer[64];
 	GPITransferID tid;
-	tid.count = transferID->count;
-	tid.profileid = transferID->profileid;
-	tid.time = transferID->time;
 
 	GS_ASSERT(transferID);
 	if (!transferID)
 		return GP_NETWORK_ERROR;
+
+	tid.count = transferID->count;
+	tid.profileid = transferID->profileid;
+	tid.time = transferID->time;
+
 	// Start the message.
 	/////////////////////
 	sprintf(buffer, "\\m\\%d\\xfer\\%d %u %u", type, tid.profileid, tid.count, tid.time);
@@ -1126,7 +1128,7 @@ void gpiPeerMessageCallback(unsigned int ip, unsigned short port, unsigned char 
 	{
 		unsigned char *reallocedBuff;
 		size = (writePos + GS_MAX(GPI_READ_SIZE,(int)messageLength));
-		reallocedBuff = (unsigned char *)gsirealloc(buff, (unsigned int)size + 1);
+		reallocedBuff = (unsigned char *)gsirealloc(buff, (size_t)size + 1);
 		if(reallocedBuff == NULL)
 		{
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Memory, GSIDebugLevel_HotError, 

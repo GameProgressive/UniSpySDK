@@ -59,6 +59,12 @@ void  gsifree		(void* ptr);
 void* gsimemalign	(size_t boundary, size_t size); // TODO
 
 //--------------------------------------------------------------------------
+// Zero memory buffer.  Never removed by compiler, so good candidate to
+// clear security sensitive temporary buffer on function exit, as memset can
+// be removed by compiler when no side effects present.
+void gsiZeroMemory(void* buffer, size_t size);
+
+//--------------------------------------------------------------------------
 // Customer supplied memory manager customization interface
 // call this to replace the Gamespy specific memory functions with your own.
 #ifdef WIN32

@@ -210,7 +210,7 @@ void *BucketConcat(bucketset_t set, char *name, void *value)
 	return DoGet(pbucket);
 }
 
-#define AVG(cur, new, num) (((cur * num) + new) / (++num))
+#define AVG(cur, new, num) ((((cur) * (num)) + (new)) / (++num))
 void *BucketAvg(bucketset_t set, char *name, void *value)
 {
 	bucket_t *pbucket = DoFind(set, name);	
@@ -249,14 +249,17 @@ static void DumpMap(void *elem, void *clientData)
 {
 	bucket_t *bucket = (bucket_t *)elem;
 	dumpdata_t *data = (dumpdata_t *)clientData;
+	const size_t bucketNameLen = strlen(bucket->name) + 3;
 	unsigned int minlen;
 
+	GS_ASSERT(bucketNameLen <= UINT_MAX);
+
 	//find out if we need to resize!
-	minlen = strlen(bucket->name) + 3;
+	minlen = (unsigned int)bucketNameLen;
 	if (bucket->type == bt_int || bucket->type == bt_float)
 		minlen += data->len + 16;
 	else if (bucket->type == bt_string)
-		minlen += data->len + strlen(bucket->vals.sval);
+		minlen += data->len + (unsigned int)strlen(bucket->vals.sval);
 
 	if (data->maxlen <= minlen) 
 	{
@@ -344,16 +347,15 @@ static bucket_t *DoFind(bucketset_t set, char *name)
 #define MULTIPLIER -1664117991
 static int BucketHash(const void *elem, int numbuckets)
 {
-    unsigned int i;
-    unsigned int len;
-    unsigned int hashcode = 0;
+	size_t i, len;
+	unsigned int hashcode = 0;
 
 	char *s = ((bucket_t *)elem)->name;
-    len = strlen(s);
+	len = strlen(s);
 	for (i = 0; i < len ; i++) {
 	  hashcode = (unsigned int)((int)hashcode * MULTIPLIER + tolower(s[i]));
 	}
-    return (int)(hashcode % numbuckets);
+	return (int)(hashcode % numbuckets);
 }
 
 

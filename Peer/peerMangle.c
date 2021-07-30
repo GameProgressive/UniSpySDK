@@ -63,7 +63,7 @@ static const char * EncodeIP(unsigned int ip, char * buffer, PEERBool newCrypt)
 	for(i = 0 ; i < 8 ; i++)
 	{
 		str = strchr(digits_hex, cryptbuffer[i]);
-		digit_idx = (str - digits_hex);
+		digit_idx = (int)(str - digits_hex);
 
 		if((digit_idx < 0) || (digit_idx > 15)) // sanity check
 		{
@@ -99,7 +99,10 @@ static unsigned int DecodeIP(const char * buffer, PEERBool newCrypt)
 	for(i = 0 ; i < 8 ; i++)
 	{
 		str = strchr(crypt, buffer[i]);
-		digit_idx = (str - crypt);
+
+		GS_ASSERT(str - crypt <= INT_MAX);
+
+		digit_idx = (int)(str - crypt);
 
 		if((digit_idx < 0) || (digit_idx > 15))
 			return 0;
