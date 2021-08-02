@@ -148,8 +148,8 @@ GVBool gvIsDeviceStarted(GVDevice device, GVDeviceType type)
 
 void gvSetDeviceVolume(GVDevice device, GVDeviceType type, GVScalar volume)
 {
-	volume = max(volume, 0.0);
-	volume = min(volume, 1.0);
+	volume = GSI_MAX(volume, 0.0);
+	volume = GSI_MIN(volume, 1.0);
 
 	device->m_methods.m_setDeviceVolume(device, type, volume);
 }
