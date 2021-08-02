@@ -46,14 +46,14 @@ typedef gsi_i32 GSResult;
 #define GS_RESULT_SECTIONBITS  8
 #define GS_RESULT_SDKBITS      6
 
-#define GS_RESULT(s,sdk,sec,code)   (GSResult)(s<<31 | sdk<<20 | sec<<12 | code)
+#define GS_RESULT(s,sdk,sec,code)   (GSResult)((s)<<31 | (sdk)<<20 | (sec)<<12 | (code))
 #define GS_ERROR(sdk, sec, code)    GS_RESULT(1,sdk,sec,code)
 
-#define GS_RESULT_CODE(result)      (GSResult)(result & 0x00000FFF)
-#define GS_RESULT_SECTION(result)   (GSResult)(result & 0x000FF000)
-#define GS_RESULT_SDK(result)       (GSResult)(result & 0x03F00000)
-#define GS_FAILED(result)           (gsi_bool)((result & 0x80000000)!=0)
-#define GS_SUCCEEDED(result)        (gsi_bool)((result & 0x80000000)==0)
+#define GS_RESULT_CODE(result)      (GSResult)((result) & 0x00000FFF)
+#define GS_RESULT_SECTION(result)   (GSResult)((result) & 0x000FF000)
+#define GS_RESULT_SDK(result)       (GSResult)((result) & 0x03F00000)
+#define GS_FAILED(result)           (gsi_bool)(((result) & 0x80000000)!=0)
+#define GS_SUCCEEDED(result)        (gsi_bool)(((result) & 0x80000000)==0)
 
 #define GS_SUCCESS 0 // generic success
 
