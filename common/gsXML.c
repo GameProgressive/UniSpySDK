@@ -1784,6 +1784,7 @@ gsi_bool gsXmlMoveToSibling (GSXmlStreamReader stream, const char * matchtag)
 	GSIXmlStreamReader * reader = (GSIXmlStreamReader*)stream;
 	int i=0;
 
+	// Search root elements only
 	int curElemParent = -1;
 	GSIXmlElement * searchElem = NULL;
 	
@@ -1793,9 +1794,6 @@ gsi_bool gsXmlMoveToSibling (GSXmlStreamReader stream, const char * matchtag)
 		GSIXmlElement * curElem = (GSIXmlElement*)ArrayNth(reader->mElementArray, reader->mElemReadIndex);
 		curElemParent = curElem->mParentIndex;
 	}
-	else
-		// otherwise search root elements only
-		curElemParent = -1;
 
 	for (i=(reader->mElemReadIndex+1); i < ArrayLength(reader->mElementArray); i++)
 	{
