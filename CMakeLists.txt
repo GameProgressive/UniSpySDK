@@ -4,6 +4,42 @@ project(retrospy VERSION 2.06 LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
+message(STATUS "CMake version: ${CMAKE_VERSION}.")
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}.")
+
+# Git.
+find_package(Git)
+if (Git_FOUND)
+    message(STATUS "Git version ${GIT_VERSION_STRING} found at '${GIT_EXECUTABLE}'.")
+
+    # Get the current working branch.
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE RS_GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # Get the latest commit hash.
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE RS_GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # Get the subject of the commit.
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" log -1 --format=%s
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE RS_GIT_COMMIT_SUBJECT
+        ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    message(STATUS
+        "Git using branch '${RS_GIT_BRANCH}', commit ${RS_GIT_COMMIT_HASH}/'${RS_GIT_COMMIT_SUBJECT}'.")
+endif()
+
+message(STATUS "${PROJECT_NAME} c compiler ${CMAKE_C_COMPILER_ID} at ${CMAKE_C_COMPILER}.")
+message(STATUS "${PROJECT_NAME} cxx compiler ${CMAKE_CXX_COMPILER_ID} at ${CMAKE_CXX_COMPILER}.")
+
 # Set default build to be release if no other specified.
 if (NOT CMAKE_CONFIGURATION_TYPES AND 
     NOT CMAKE_NO_BUILD_TYPE AND
