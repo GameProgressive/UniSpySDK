@@ -180,7 +180,7 @@ GT2Result gt2Connect
 
 	// create the connection object
 	result = gti2NewOutgoingConnection(socket, &connectionTemp, ip, port);
-	if(result)
+	if(result != GT2Success)
 		return result;
 
 	// save the timeout value
@@ -188,7 +188,7 @@ GT2Result gt2Connect
 
 	// initiate the connection attempt
 	result = gti2StartConnectionAttempt(connectionTemp, message, len, callbacks);
-	if(result)
+	if(result != GT2Success)
 	{
 		gti2FreeSocketConnection(connectionTemp);
 		return result;
