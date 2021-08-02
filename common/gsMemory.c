@@ -1377,10 +1377,8 @@ void __cdecl gs_free(void *ptr)
 void gs_free(void *ptr)
 #endif
 {	
-	gsMemMgrContext context;
-
-	context = gsMemMgrContextFind(ptr);
-	GS_ASSERT_STR(context != gsMemMgrContext_Invalid,"Attempt to free invalid ptr");
+	gsMemMgrContext context = gsMemMgrContextFind(ptr);
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count,"Context out of range");
 
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),"free: ptr context is invalid mempool");
 	MEM_CHUNK_POOLfree(&gChunkPool[context],ptr);
@@ -1389,8 +1387,7 @@ void gs_free(void *ptr)
 //--------------------------------------------------------------------------
 const char *MemMgrBufferGetName(gsMemMgrContext context)
 {
-	GS_ASSERT_STR(context != gsMemMgrContext_Invalid,	"Invalid Context");
-	GS_ASSERT_STR(context < gsMemMgrContext_Count,		"Context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count,		"Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context ]),"Invalid mempool");
 
 	return gChunkPool[context].Name;
@@ -1399,8 +1396,7 @@ const char *MemMgrBufferGetName(gsMemMgrContext context)
 
 void gsMemMgrContextSet(gsMemMgrContext context)
 {
-	GS_ASSERT_STR(context != gsMemMgrContext_Invalid,	"Invalid Context");
-	GS_ASSERT_STR(context < gsMemMgrContext_Count,		"Context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count,		"Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),"Setting context to invalid mempool");
 
 	gsMemMgrContextCurrent = context; 
@@ -1543,7 +1539,7 @@ gsi_u32			gsMemMgrMemAvailGet			(gsMemMgrContext context)
 {
 	MEM_STATS stats;
 	MEM_STATSClearAll(&stats);
-	GS_ASSERT_STR(context <	gsMemMgrContext_Count,				"gsMemMgrMemAvailGet: context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count, "Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),	"gsMemMgrMemAvailGet: context is invalid mempool");
 	MEM_CHUNK_POOLMemStatsGet	(&gChunkPool[context],	&stats);
 	return stats.MemAvail;
@@ -1555,7 +1551,7 @@ gsi_u32			gsMemMgrMemUsedGet			(gsMemMgrContext context)
 {
 	MEM_STATS stats;
 	MEM_STATSClearAll(&stats);
-	GS_ASSERT_STR(context <	gsMemMgrContext_Count,				"gsMemMgrMemUsedGet: context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count, "Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),	"gsMemMgrMemUsedGet: context is invalid mempool");
 	MEM_CHUNK_POOLMemStatsGet	(&gChunkPool[context],	&stats);
 	return stats.MemUsed;
@@ -1570,7 +1566,7 @@ gsi_u32			gsMemMgrMemLargestAvailGet	(gsMemMgrContext context)
 {
 	MEM_STATS stats;
 	MEM_STATSClearAll(&stats);
-	GS_ASSERT_STR(context <	gsMemMgrContext_Count,				"gsMemMgrMemLargestAvailGet: context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count, "Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),	"gsMemMgrMemLargestAvailGet: context is invalid mempool");
 	MEM_CHUNK_POOLMemStatsGet	(&gChunkPool[context],	&stats);
 	return stats.ChunksFreeLargestAvail;
@@ -1579,7 +1575,7 @@ gsi_u32			gsMemMgrMemLargestAvailGet	(gsMemMgrContext context)
 //--------------------------------------------------------------------------
 gsi_u32			gsMemMgrMemHighwaterMarkGet	(gsMemMgrContext context)
 {
-	GS_ASSERT_STR(context <	gsMemMgrContext_Count,				"gsMemMgrMemLargestAvailGet: context out of range");
+	GS_ASSERT_STR(context > gsMemMgrContext_Invalid && context < gsMemMgrContext_Count, "Context out of range");
 	GS_ASSERT_STR(MEM_CHUNK_POOLIsValid(&gChunkPool[context]),	"gsMemMgrMemLargestAvailGet: context is invalid mempool");
 	
 	#if(MEM_PROFILE)
