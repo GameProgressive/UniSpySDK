@@ -51,6 +51,11 @@ endif()
 add_definitions(-DGSI_MEM_MANAGED)
 #endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Clang, Apple Clang and GCC have stricter warning requirements.
+    add_compile_options(-Wall -Wno-unused-parameter)
+endif()
+
 #add_subdirectory(brigades)
 add_subdirectory(common) # Most of the common stuff gets built into this.
 add_subdirectory(Chat)
