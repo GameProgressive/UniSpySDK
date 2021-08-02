@@ -36,7 +36,7 @@ SAKEStartupResult SAKE_CALL sakeStartup(SAKE * sakePtr)
 		return SAKEStartupResult_NOT_AVAILABLE;
 
 	// check that the core is initialized
-	if(gsCoreIsShutdown())
+	if(gsCoreIsShutdown() != GSCore_IN_USE)
 		return SAKEStartupResult_CORE_SHUTDOWN;
 
 	// allocate the sake object
