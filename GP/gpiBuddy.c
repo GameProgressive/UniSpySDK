@@ -597,7 +597,7 @@ gpiProcessRecvBuddyList(
         {
             // Manually grab first profile in list - comma delimiter
             ////////////////////////////////////////////////////////
-            for(j=0 ; (j < sizeof(buffer)) && ((c = str[j]) != '\0') && (c != ',') ; j++)
+            for(j=0 ; (j < (int)sizeof(buffer)) && ((c = str[j]) != '\0') && (c != ',') ; j++)
             {
                 buffer[j] = c;
             }

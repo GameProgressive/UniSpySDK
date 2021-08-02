@@ -846,7 +846,7 @@ MEM_CHUNK *MEM_CHUNK_POOLAllocChunk(MEM_CHUNK_POOL *_this,size_t Size, gsi_i32 A
 			MEM_CHUNKAlloc(header,MemTagStack[MemTagStackIndex],Size);
 
 			// split as needed
-			if (MemRemain > sizeof(MEM_CHUNK)*2)
+			if (MemRemain > (int)sizeof(MEM_CHUNK)*2)
 			{
 
 				// split chunk, this will handle free chunk pointer list
