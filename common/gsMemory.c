@@ -95,7 +95,7 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 	#endif
 	static void* __cdecl _gsi_memalign(size_t boundary, size_t size)
 	{
-		return  _aligned_malloc(size, (int)boundary);
+		return  _aligned_malloc(size, boundary);
 	}
 #elif defined (_NITRO) || defined(_REVOLUTION)
 
