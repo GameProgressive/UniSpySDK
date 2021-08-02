@@ -61,7 +61,7 @@ GT2Byte * gti2GetResponse
 	int i;
 	int valid;
 	char cchar;
-	int keylen = (int)strlen(GT2ChallengeKey);
+	const int keylen = (int)sizeof(GT2ChallengeKey)/sizeof(GT2ChallengeKey[0]) - 1;
 	int chalrand;
 	valid = gti2VerifyChallenge(challenge); //it's an invalid challenge, give them a bogus response
 	for (i = 0 ; i < GTI2_RESPONSE_LEN ; i++)
