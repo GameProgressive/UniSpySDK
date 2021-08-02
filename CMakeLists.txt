@@ -9,7 +9,7 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND
     NOT CMAKE_NO_BUILD_TYPE AND
     NOT CMAKE_BUILD_TYPE
 )
-	set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
@@ -25,7 +25,7 @@ if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 
-	# WinSock1 is deprecated, it's better to use WinSock2
+    # WinSock1 is deprecated, it's better to use WinSock2
     option(RS_WINSOCK2 "Link against Windows Socket 2 instead of Windows Socket 1." ON)
 endif()
 
@@ -44,7 +44,7 @@ if(RS_WINSOCK2)
 endif()
 
 if(RS_SECURESECONNECT)
-	add_definitions(-DRS_HTTPS)
+    add_definitions(-DRS_HTTPS)
 endif()
 
 #if (RS_MEM_MANAGED)
@@ -70,4 +70,3 @@ add_subdirectory(webservices)
 add_subdirectory(sc) # depends on common webservices ghttp
 add_subdirectory(Voice2)
 add_subdirectory(RetroSpy)
-
