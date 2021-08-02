@@ -801,6 +801,7 @@ static void InitCryptKey(SBServerList *slist, char *key, int keylen)
 	//combine our secret key, our challenge, and the server's challenge into a crypt key
 	int i;
 	int seckeylen = (int)strlen(slist->queryfromkey);
+	GS_ASSERT(seckeylen != 0);
 	char *seckey = slist->queryfromkey;
 	for (i = 0 ; i < keylen ; i++)
 	{
