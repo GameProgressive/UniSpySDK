@@ -177,8 +177,9 @@ typedef struct gsOpenSSLInterface
 int verify_callback(int preverify, X509_STORE_CTX *x509_ctx)
 {
 	/* For error codes, see http://www.openssl.org/docs/apps/verify.html  */
-
+#ifdef GSI_COMMON_DEBUG
 	int depth = X509_STORE_CTX_get_error_depth(x509_ctx);
+#endif
 	int err = X509_STORE_CTX_get_error(x509_ctx);
 
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
@@ -219,7 +220,6 @@ int verify_callback(int preverify, X509_STORE_CTX *x509_ctx)
 GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
     struct GHIEncryptor  *theEncryptor)
 {
-    int i = 0;
     gsOpenSSLInterface *sslInterface = NULL;
 
     // There is only one place where this function should be called,
@@ -239,7 +239,7 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
     memset(theEncryptor->mInterface, 0, sizeof(gsOpenSSLInterface));
     sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
 
-	// Init the OpenSSL library
+    // Init the OpenSSL library
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     SSL_library_init();
     SSL_load_error_strings();
@@ -249,23 +249,23 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
 
     // Create an OpenSSL context to use.
     {
-		unsigned long ssl_err = 0;
+        unsigned long ssl_err = 0;
         SSL *ssl;
         char buff[64];
 
-		sslInterface->mContext = SSL_CTX_new(SSLv23_method());
-		ssl_err = ERR_get_error();
+        sslInterface->mContext = SSL_CTX_new(SSLv23_method());
+        ssl_err = ERR_get_error();
 
-		GS_ASSERT(sslInterface->mContext != NULL);
-		if (sslInterface->mContext == NULL)
-		{
-			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
-				"Failed to allocate OpenSSL context, %s.\r\n", ERR_reason_error_string(ssl_err));
-			return GHIEncryptionResult_Error;
-		}
+        GS_ASSERT(sslInterface->mContext != NULL);
+        if (sslInterface->mContext == NULL)
+        {
+                gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+                        "Failed to allocate OpenSSL context, %s.\r\n", ERR_reason_error_string(ssl_err));
+                return GHIEncryptionResult_Error;
+        }
 
         SSL_CTX_set_verify(sslInterface->mContext, SSL_VERIFY_PEER, verify_callback);
-		SSL_CTX_set_verify_depth(sslInterface->mContext, 5);
+        SSL_CTX_set_verify_depth(sslInterface->mContext, 5);
 
         sslInterface->mBio = BIO_new_ssl_connect(sslInterface->mContext);
         ssl_err = ERR_get_error();
@@ -448,7 +448,7 @@ GHIEncryptionResult ghiEncryptorSslEncryptSend(struct GHIConnection *connection,
     int          thePlainTextLength,
     int         *theBytesSentOut)
 {
-    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface; int result = 0;
+    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
     *theBytesSentOut = BIO_write(sslInterface->mBio, thePlainTextBuffer, thePlainTextLength);
     GSI_UNUSED(connection);
     return GHIEncryptionResult_Success;
@@ -460,7 +460,7 @@ GHIEncryptionResult ghiEncryptorSslDecryptRecv(struct GHIConnection * connection
     char * theDecryptedBuffer,
     int *  theDecryptedLength)
 {
-    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface; int result = 0;
+    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
     *theDecryptedLength = BIO_read(sslInterface->mBio, theDecryptedBuffer, *theDecryptedLength);
     GSI_UNUSED(connection);
     return GHIEncryptionResult_Success;
