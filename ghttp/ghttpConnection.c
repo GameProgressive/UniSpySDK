@@ -526,7 +526,6 @@ char* ghiGetServerAddressFromUrl(char *serverUrl)
 	serverAddress = goastrdup(url);
 	
 	url[nIndex] = tempChar;
-	url += nIndex;
 
 	return serverAddress;
 }
