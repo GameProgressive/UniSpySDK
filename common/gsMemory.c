@@ -121,7 +121,8 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 
 // Prevent compiler from inlining memset and further removal if gsiZeroMemory buffer
 // is not accessed later.
-static volatile void* (*memset_func)(void*, int, size_t) = memset;
+static volatile void* (*memset_func)(void*, int, size_t) =
+            (volatile void *(*)(void *, int, size_t))memset;
 
 void gsiZeroMemory(void* buffer, size_t size)
 {
