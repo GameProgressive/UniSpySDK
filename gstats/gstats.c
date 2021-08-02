@@ -898,7 +898,7 @@ int PersistThink()
 				rcvmax = 256;
 			else
 				rcvmax *= 2;
-			rcvbuffer = gsirealloc(rcvbuffer, (size_t)(rcvmax+1));
+			rcvbuffer = gsirealloc(rcvbuffer, (size_t)rcvmax+1);
 			if (rcvbuffer == NULL)
 				return 0; //errcon
 		}
@@ -1316,7 +1316,7 @@ static void SetPersistDataHelper(int localid, int profileid, persisttype_t type,
 
 	} else //need to alloc a temp buffer
 	{
-		senddata = (char *)gsimalloc((size_t)(len + tlen + 256));
+		senddata = (char *)gsimalloc((size_t)len + tlen + 256);
 		memcpy(senddata, tdata, (size_t)tlen);
 		memcpy(senddata + tlen, data, (size_t)len);
 	}
