@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(retrospy VERSION 2.06 LANGUAGES C CXX)
 
+# Only interpret if() arguments as variables or keywords when unquoted.
+# CMake version 3.21.1+ warns when the policy is not set and uses OLD behavior.
+cmake_policy(SET CMP0054 NEW)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 # Set default build to be release if no other specified.
@@ -54,6 +58,22 @@ add_definitions(-DGSI_MEM_MANAGED)
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Clang, Apple Clang and GCC have stricter warning requirements.
     add_compile_options(-Wall -Wno-unused-parameter)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # At least Ninja doesn't remove the /W3 flag when we add /W4|/Wall one, which
+    # leads to compilation warnings.  Remove /W3 entirely, as /W4|/Wall be used.
+    foreach(flag_var
+        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      if (${flag_var} MATCHES "/W3")
+        string(REGEX REPLACE "/W3" "" ${flag_var} "${${flag_var}}")
+      endif()
+    endforeach()
+
+    # Use almost max warning level (/W3 used by default).
+    # Exclude C4100 (unreferenced formal parameter).
+    add_compile_options("/W4;/wd4100")
 endif()
 
 #add_subdirectory(brigades)
