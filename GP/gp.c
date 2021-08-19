@@ -3576,16 +3576,11 @@ GPResult gpAcceptTransferA(
 )
 {
 	GPITransfer * pTransfer;
-	GPIConnection * iconnection;
 
 	// Error check.
 	///////////////
 	if((connection == NULL) || (*connection == NULL))
 		return GP_PARAMETER_ERROR;
-
-	// Get the connection object.
-	/////////////////////////////
-	iconnection = (GPIConnection*)*connection;
 
 	// Get the transfer.
 	////////////////////
@@ -4301,7 +4296,6 @@ GPResult gpGetTransfer(
   GPTransfer * transfer
 )
 {
-	GPIConnection * iconnection;
 	int localID;
 
 	// Error check.
@@ -4313,10 +4307,6 @@ GPResult gpGetTransfer(
 	//////////////////
 	if(transfer == NULL)
 		Error(connection, GP_PARAMETER_ERROR, "NULL pointer.");
-
-	// Get the connection object.
-	/////////////////////////////
-	iconnection = (GPIConnection *)*connection;
 
 	// Get the local ID.
 	////////////////////
