@@ -153,6 +153,15 @@ qr2_error_t qr2_init_socketA(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, cons
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
 		"qr2_init_socket()\r\n");
 
+#if 0 // NOTE: this is commented to avoid breaking things with old versions...
+	if(__isAuthenticated != gsi_true)
+	{
+		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_State, GSIDebugLevel_Warning,
+			"qr2_init_socketA(): User did not authenticate via AuthService!\n");
+		return e_qrnotauthenticated;
+	}
+#endif
+
 	if (qrec == NULL)
 	{
 		cr = &static_qr2_rec;		

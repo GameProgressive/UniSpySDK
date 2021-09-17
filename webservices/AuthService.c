@@ -71,6 +71,8 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
 char authCreds[92];
 
+gsi_bool __isAuthenticated = gsi_false; // new 2012!
+
 typedef struct WSIRequestData
 {
 	union 
@@ -236,6 +238,10 @@ static void wsiLoginProfileCallback(GHTTPResult theResult,
 				if (gsi_is_false(cert->mIsValid))
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
+				}
+				else
+				{
+					__isAuthenticated = gsi_true;
 				}
 
 				sprintf(buffer, "%u", cert->mProfileId);
@@ -424,6 +430,10 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
+				else
+				{
+					__isAuthenticated = gsi_true;
+				}
 
 				sprintf(buffer, "%u", cert->mProfileId);
 				gsiCoreSetProfileId(buffer);
@@ -610,6 +620,10 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 				{
 					response.mLoginResult = WSLogin_InvalidCertificate;
 				}
+				else
+				{
+					__isAuthenticated = gsi_true;
+				}
 
 				sprintf(buffer, "%u", cert->mProfileId);
 			}
@@ -774,6 +788,7 @@ static void wsLoginSonyCertCallback(GHTTPResult theResult,
 					memcpy(response.mPartnerChallenge, challengeStr, (gsi_u32)challengeLen);
 					response.mRemoteAuthToken[tokenLen] = '\0';
 					response.mPartnerChallenge[challengeLen] = '\0';
+					__isAuthenticated = gsi_true;
 				}
 			}
 		}
@@ -1343,3 +1358,19 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 	sprintf(buffer, "%d", gameId);
 	gsiCoreSetGameId(buffer);
 }
+
+/////////////////////////////////////////////////////////////
+// Missing functions from later : GameSpy SDK 2012
+
+#ifdef _IPHONE
+/*
+	wsSyncFacebook ...
+	wsLoginFacebook ...
+*/
+#endif
+
+/*
+	wsGetBuddyList...
+
+	wsCreateUserAccount... (2012!)
+*/

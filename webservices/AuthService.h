@@ -27,6 +27,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+extern gsi_bool __isAuthenticated;
 
 // URL for sc services.
 #define WS_LOGIN_MAX_URL_LEN		  (128)
@@ -37,6 +38,42 @@ extern char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN];
 #define	WSLogin_PARTNERCODE_GAMESPY        0
 #define	WSLogin_NAMESPACE_SHARED_NONUNIQUE 0
 #define	WSLogin_NAMESPACE_SHARED_UNIQUE    1
+
+typedef enum WSCreateUserAccountValue{
+	// Login response code (mResponseCode):
+	//   -- GameSpy Devs: Must match server.
+	WSCreateUserAccount_Success = 0,
+	WSCreateUserAccount_ServerInitFailed,
+
+	WSCreateUserAccount_InvalidPassword,
+	WSCreateUserAccount_NicknameInvalid,
+	WSCreateUserAccount_NicknameAlreadyExistsForUser,
+	WSCreateUserAccount_UniqueNicknameAlreadyInUse,
+	WSCreateUserAccount_UserFoundForEmailButNotSamePassword,
+
+	WSCreateUserAccount_DBError,
+	WSCreateUserAccount_ServerError,
+	WSCreateUserAccount_FailureMax,         // Must be the last failure.
+
+	// Login result (mLoginResult):
+	WSCreateUserAccount_HttpError = 100,    // Ghttp reported an error, the response was ignored.
+	WSCreateUserAccount_ParseError,         // Couldn't parse http response.
+	WSCreateUserAccount_InvalidCertificate, // Login was successful, but the certificate was invalid!
+	WSCreateUserAccount_LoginFailed,        // Failed login or other error condition.
+	WSCreateUserAccount_OutOfMemory,        // Could not process due to insufficient memory.
+	WSCreateUserAccount_InvalidParameters,  // Check the function arguments.
+	WSCreateUserAccount_NoAvailabilityCheck,// No Availability Check was performed.
+	WSCreateUserAccount_Cancelled,          // Login request was cancelled.
+	WSCreateUserAccount_UnknownError,       // An error occured, but detailed information is unavailable.
+
+	// Response codes dealing with errors in response headers:
+	WSCreateUserAccount_InvalidGameID = 200, // Make sure the GameID is properly set with wsSetGameCredentials.
+	WSCreateUserAccount_InvalidAccessKey,    // Make sure the Access Key is properly set with wsSetGameCredentials.
+
+	// Login results dealing with errors in response headers:
+	WSCreateUserAccount_InvalidGameCredentials // Check the parameters passed to wsSetGameCredentials.
+
+} WSCreateUserAccountValue;
 
 typedef enum WSLoginValue
 {
@@ -127,6 +164,23 @@ typedef struct GSLoginCertificatePrivate
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+// Create User Account callback format:
+typedef struct WSCreateUserAccountResponse{
+	WSCreateUserAccountValue	mCreateUserAccountResult;	// SDK high-level result (e.g., LoginFailed).
+	WSCreateUserAccountValue	mResponseCode;				// Server's result code (e.g., BadPassword).
+	GSLoginCertificate			mCertificate;	// Show this to others (proves: "Bill is a valid user").
+	GSLoginPrivateData			mPrivateData;	// Keep this secret (proves: "I am Bill")!
+	void * mUserData;
+} WSCreateUserAccountResponse;
+
+typedef void (*WSCreateUserAccountCallback)(
+	GHTTPResult						httpResult, 
+	WSCreateUserAccountResponse		* response, 
+	void							* userData
+);
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // CERTIFICATE login callback format 
 typedef struct WSLoginResponse
 {
@@ -193,6 +247,41 @@ const char* wsLoginValueString(int loginValue);
 // Notes
 //		This must be called prior to calling any wsLogin function
 void wsSetGameCredentials(const char * accessKey, const int gameId, const char * secretKey);
+
+//wsCreateUserAccount
+// Summary
+//		Login using the full GameSpy Presence login information, requiring 
+//		email, password, and profile name.
+// Parameters
+//		partnerCode 	: [in] The partner code.
+//		namespaceId		: [in] The namespace ID.
+//		email			: [in] The email associated with user's GameSpy account. 
+//		profileNick		: [in] The nickname associated with the user's GameSpy 
+//								account.
+//		uniqueNick		: [in] The uniquenick associated with the user's 
+//								GameSpy account.
+//		password		: [in] The password for the user's GameSpy account.
+//		callback		: [in] Pointer to a function that will be called by 
+//								the SDK to report the result of the 
+//								authentication request.
+//		userData		: [in] A pointer to data that will be supplied to the 
+//								callback function.
+// Returns
+//		WSLoginValue: If successful, the value WSLogin_Success will be returned. 
+//		Otherwise, a code specific to the error encountered will be returned.
+// Notes
+//		The GameSpy SDK Core must be initialized first using gsCoreInitialize 
+//		before using this function.
+WSCreateUserAccountValue wsCreateUserAccount(
+	int								partnerCode, 
+	int								namespaceId, 
+	const gsi_char					* email, 
+	const gsi_char					* profileNick, 
+	const gsi_char					* uniqueNick, 
+	const gsi_char					* password, 
+	WSCreateUserAccountCallback		userCallback, 
+	void							* userData
+);
 
 //wsLoginProfile
 // Summary

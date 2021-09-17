@@ -69,7 +69,7 @@ e_qrnochallengeerror,	// No challenge was received from the master. The common r
 //					6. "numplayers" or "maxplayers" being set to negative values <br> 
 //					7. Having 2 network adapters connected to an internal and external network, and the internal one 
 //					   is set as primary <br>
-
+e_qrnotauthenticated, // Did not use AuthService, deny service.
 qr2_error_t_count
 } qr2_error_t;
 
