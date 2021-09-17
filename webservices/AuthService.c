@@ -79,6 +79,7 @@ typedef struct WSIRequestData
 	{
 		WSLoginCallback mLoginCallback;
 		WSLoginSonyCertCallback mLoginSonyCertCallback;
+		WSCreateUserAccountCallback mCreateUserAccountCallback;
 	} mUserCallback;
 	//void * mUserCallback;
 	void * mUserData;
@@ -1278,7 +1279,7 @@ gsi_bool wsLoginCertReadXML(GSLoginCertificate * cert, GSXmlStreamReader reader)
 ///////////////////////////////////////////////////////////////////////////////
 char* wsGetServiceUrl()
 {
-	if (__GSIACResult == 1)
+	if (__GSIACResult == GSIACAvailable)
 	{
 		if (!wsAuthServiceURL[0])
 			_snprintf(wsAuthServiceURL, sizeof(wsAuthServiceURL),
@@ -1374,3 +1375,81 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 
 	wsCreateUserAccount... (2012!)
 */
+
+static void wsiCreateUserAccountCallback(GHTTPResult theResult,
+								   GSXmlStreamWriter theRequestXml,
+								   GSXmlStreamReader theResponseXml,
+								   void * theRequestData)
+{
+	GHTTPResult translatedResult = theResult;
+	WSIRequestData *requestData = (WSIRequestData *)theRequestData;
+
+	WSCreateUserAccountResponse response;
+	GSLoginCertificate *cert = &response.mCertificate;
+	cert->mIsValid = gsi_false;
+
+	memset(&response, 0, sizeof(response));
+
+	if (theResult != X)
+	{
+		response.mCreateUserAccountResult = WSCreateUserAccount_HttpError;
+	}
+	else
+	{
+		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
+			 gsi_is_false(gsXmlMoveToNext(theResponseXml, "CreateUserAccountResult")))
+		{
+			response.mCreateUserAccountResult = WSCreateUserAccount_ParseError;
+		}
+		else
+		{
+			if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "responseCode", (int*)&response.mResponseCode)))
+			{
+				response.mCreateUserAccountResult = WSCreateUserAccount_ParseError;
+			}
+			else if (response.mResponseCode != WSLogin_Success)
+			{
+				response.mCreateUserAccountResult = WSCreateUserAccount_ServerError;
+			}
+			else if (gsi_is_false(gsXmlMoveToChild(theResponseXml, "certificate")) ||
+				gsi_is_false(wsLoginCertReadXML(cert, theResponseXml)) ||
+				gsi_is_false(gsXmlMoveToParent(theResponseXml)) ||
+				gsi_is_false(gsXmlReadChildAsLargeInt(theResponseXml, "peerkeyprivate",
+								&response.mPrivateData.mPeerPrivateKey.exponent))
+					)
+			{
+				response.mCreateUserAccountResult = WSCreateUserAccount_ParseError;
+			}
+			else
+			{
+				GSMD5_CTX md5;
+				char buffer[20];
+
+				// peer privatekey modulus is same as peer public key modulus
+				memcpy(&response.mPrivateData.mPeerPrivateKey.modulus, &cert->mPeerPublicKey.modulus, sizeof(cert->mPeerPublicKey.modulus));
+
+				// hash the private key
+				//   -- we use the has like a password for simple authentication
+				GSMD5Init(&md5);
+				gsLargeIntAddToMD5(&response.mPrivateData.mPeerPrivateKey.exponent, &md5);
+				GSMD5Final((unsigned char*)response.mPrivateData.mKeyHash, &md5);
+
+				// verify certificate
+				cert->mIsValid = wsLoginCertIsValid(cert);
+				if (gsi_is_false(cert->mIsValid))
+				{
+					response.mCreateUserAccountResult = WSCreateUserAccount_InvalidCertificate;
+				}
+			}
+		}
+	}
+
+	if (requestData->mUserCallback.mCreateUserAccountCallback != NULL)
+	{
+		WSCreateUserAccountCallback userCallback = (WSCreateUserAccountCallback)(requestData->mUserCallback.mCreateUserAccountCallback);
+		(userCallback)(translatedResult, &response, requestData->mUserData);
+	}
+
+	gsifree(requestData);
+	GSI_UNUSED(theRequestXml);
+}
