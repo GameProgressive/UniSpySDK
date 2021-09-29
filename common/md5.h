@@ -72,7 +72,7 @@ typedef struct {
 void GSMD5Init PROTO_LIST ((GSMD5_CTX*));
 void GSMD5Update PROTO_LIST ((GSMD5_CTX*, unsigned char *, unsigned int));
 void GSMD5Final PROTO_LIST ((unsigned char [16], GSMD5_CTX*));
-void GSMD5Print PROTO_LIST ((unsigned char [16], char[33]));
+void GSMD5Print PROTO_LIST ((const unsigned char [16], char[33]));
 void GSMD5Digest PROTO_LIST ((unsigned char *, unsigned int, char[33]));
 #ifdef __cplusplus
 }

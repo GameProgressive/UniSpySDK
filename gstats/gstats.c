@@ -898,7 +898,7 @@ int PersistThink()
 				rcvmax = 256;
 			else
 				rcvmax *= 2;
-			rcvbuffer = gsirealloc(rcvbuffer, (size_t)(rcvmax+1));
+			rcvbuffer = gsirealloc(rcvbuffer, (size_t)rcvmax+1);
 			if (rcvbuffer == NULL)
 				return 0; //errcon
 		}
@@ -995,9 +995,9 @@ static int RecvSessionKey()
 {
 	/* get the response */
 	static char sesskeystr[] = {'\0','e','s','s','k','e','y','\0'};
-	char resp[128];
+	char resp[129];
 	char *stext;
-	int len = (int)recv(sock, resp, 128, 0);
+	int len = (int)recv(sock, resp, (int)(sizeof(resp)/sizeof(resp[0]) - 1), 0);
 	if (gsiSocketIsError(len))
 	{
 		int anError = GOAGetLastError(sock);
@@ -1009,7 +1009,7 @@ static int RecvSessionKey()
 			return GE_DATAERROR; //temp fix in case len == -1, SOCKET_ERROR
 	}
 
-	resp[len - 1] = '\0';
+	resp[len] = '\0';
 	DOXCODE(resp, len, enc1);
 	sesskeystr[0] = 's';
 	stext = value_for_key(resp, sesskeystr);
@@ -1316,7 +1316,7 @@ static void SetPersistDataHelper(int localid, int profileid, persisttype_t type,
 
 	} else //need to alloc a temp buffer
 	{
-		senddata = (char *)gsimalloc((size_t)(len + tlen + 256));
+		senddata = (char *)gsimalloc((size_t)len + tlen + 256);
 		memcpy(senddata, tdata, (size_t)tlen);
 		memcpy(senddata + tlen, data, (size_t)len);
 	}

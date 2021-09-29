@@ -1282,7 +1282,7 @@ char* wsGetServiceUrl()
 	if (__GSIACResult == GSIACAvailable)
 	{
 		if (!wsAuthServiceURL[0])
-			_snprintf(wsAuthServiceURL, sizeof(wsAuthServiceURL),
+			snprintf(wsAuthServiceURL, sizeof(wsAuthServiceURL),
 				WS_LOGIN_SERVICE_URL_FORMAT,
 				__GSIACGamename, "AuthService.asmx");
 

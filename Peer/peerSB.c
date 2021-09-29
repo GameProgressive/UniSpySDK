@@ -191,7 +191,7 @@ PEERBool piSBStartListingGames
 	if(filter)
 	{
 		sprintf(smartSpyFilter, "(%s) AND (", groupFilter);
-		strzcat(smartSpyFilter, filter, sizeof(smartSpyFilter) - 1);
+		strzcat(smartSpyFilter, filter, sizeof(smartSpyFilter));
 		strcat(smartSpyFilter, ")");
 	}
 	else

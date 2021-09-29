@@ -37,17 +37,17 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 	//   we'd lose the ability to determine the engine name in other places
 	if (engine == GHTTPEncryptionEngine_Default)
 	{
-        #if defined(OPENSSL)
-            engine = GHTTPEncryptionEngine_OpenSSL;
-		#elif defined(MATRIXSSL)
-			engine = GHTTPEncryptionEngine_MatrixSsl;
-		#elif defined(REVOEXSSL)
-			engine = GHTTPEncryptionEngine_RevoEx;
-		#elif defined(TWLSSL)
-		    engine = GHTTPEncryptionEngine_Twl;
-		#else
-			engine = GHTTPEncryptionEngine_GameSpy;
-		#endif
+#if defined(OPENSSL)
+		engine = GHTTPEncryptionEngine_OpenSSL;
+#elif defined(MATRIXSSL)
+		engine = GHTTPEncryptionEngine_MatrixSsl;
+#elif defined(REVOEXSSL)
+		engine = GHTTPEncryptionEngine_RevoEx;
+#elif defined(TWLSSL)
+		engine = GHTTPEncryptionEngine_Twl;
+#else
+		engine = GHTTPEncryptionEngine_GameSpy;
+#endif
 	}
 
 	// If the same engine has previously been set then we're done
@@ -104,7 +104,7 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 		connection->encryptor.mEncryptOnBuffer = GHTTPTrue;
 		connection->encryptor.mEncryptOnSend   = GHTTPFalse;
 		connection->encryptor.mLibSendsHandshakeMessages = GHTTPFalse;
-#if defined(TWLSSL) && defined(_NITRO)	
+#if defined(TWLSSL) && defined(_NITRO)
 	    connection->encryptor.mNotInCloseSocket = gsi_true; // This is special when TWLSSL & NITRO
 #endif
 		return GHTTPTrue;
@@ -177,13 +177,16 @@ typedef struct gsOpenSSLInterface
 int verify_callback(int preverify, X509_STORE_CTX *x509_ctx)
 {
 	/* For error codes, see http://www.openssl.org/docs/apps/verify.html  */
-
+#ifdef GSI_COMMON_DEBUG
 	int depth = X509_STORE_CTX_get_error_depth(x509_ctx);
+#endif
 	int err = X509_STORE_CTX_get_error(x509_ctx);
 
+#ifdef GSI_COMMON_DEBUG
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
 		"verify_callback (depth=%d)(preverify=%d)\n", depth, preverify);
-
+#endif
+ 
 	if (preverify == 0) {
 		if (err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)
 			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_WarmError, 
@@ -219,7 +222,6 @@ int verify_callback(int preverify, X509_STORE_CTX *x509_ctx)
 GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
     struct GHIEncryptor  *theEncryptor)
 {
-    int i = 0;
     gsOpenSSLInterface *sslInterface = NULL;
 
     // There is only one place where this function should be called,
@@ -239,7 +241,7 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
     memset(theEncryptor->mInterface, 0, sizeof(gsOpenSSLInterface));
     sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
 
-	// Init the OpenSSL library
+    // Init the OpenSSL library
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     SSL_library_init();
     SSL_load_error_strings();
@@ -249,70 +251,91 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection *connection,
 
     // Create an OpenSSL context to use.
     {
-		unsigned long ssl_err = 0;
+#ifdef GSI_COMMON_DEBUG
+        unsigned long ssl_err = 0;
+#endif
         SSL *ssl;
         char buff[64];
 
-		sslInterface->mContext = SSL_CTX_new(SSLv23_method());
-		ssl_err = ERR_get_error();
+        sslInterface->mContext = SSL_CTX_new(SSLv23_method());
 
-		GS_ASSERT(sslInterface->mContext != NULL);
-		if (sslInterface->mContext == NULL)
-		{
-			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
-				"Failed to allocate OpenSSL context, %s.\r\n", ERR_reason_error_string(ssl_err));
-			return GHIEncryptionResult_Error;
-		}
-
-        SSL_CTX_set_verify(sslInterface->mContext, SSL_VERIFY_PEER, verify_callback);
-		SSL_CTX_set_verify_depth(sslInterface->mContext, 5);
-
-        sslInterface->mBio = BIO_new_ssl_connect(sslInterface->mContext);
-        ssl_err = ERR_get_error();
-
-        if (sslInterface->mBio == NULL)
+        GS_ASSERT(sslInterface->mContext != NULL);
+        if (sslInterface->mContext == NULL)
         {
+#ifdef GSI_COMMON_DEBUG
+            ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
-                "Failed to allocate OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+                "Failed to allocate OpenSSL context, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
-        if (BIO_set_conn_hostname(sslInterface->mBio, connection->serverAddress) != 1) {
+        SSL_CTX_set_verify(sslInterface->mContext, SSL_VERIFY_PEER, verify_callback);
+        SSL_CTX_set_verify_depth(sslInterface->mContext, 5);
+
+        sslInterface->mBio = BIO_new_ssl_connect(sslInterface->mContext);
+
+        if (sslInterface->mBio == NULL)
+        {
+#ifdef GSI_COMMON_DEBUG
+            ssl_err = ERR_get_error();
+            gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+                "Failed to allocate OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
+            return GHIEncryptionResult_Error;
+        }
+
+        if (BIO_set_conn_hostname(sslInterface->mBio, connection->serverAddress) != 1)
+        {
+#ifdef GSI_COMMON_DEBUG
             ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to set URL for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
         snprintf(buff, sizeof(buff), "%hu", connection->serverPort);
 
-        if (BIO_set_conn_port(sslInterface->mBio, buff) != 1) {
+        if (BIO_set_conn_port(sslInterface->mBio, buff) != 1)
+        {
+#ifdef GSI_COMMON_DEBUG
             ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to set URL for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
         BIO_get_ssl(sslInterface->mBio, &ssl);
-        ssl_err = ERR_get_error();
 
-        if (ssl == NULL) {
+        if (ssl == NULL)
+        {
+#ifdef GSI_COMMON_DEBUG
+            ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to get SSL pointer for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
-        if (SSL_set_cipher_list(ssl, PREFERRED_CIPHERS) != 1) {
+        if (SSL_set_cipher_list(ssl, PREFERRED_CIPHERS) != 1)
+        {
+#ifdef GSI_COMMON_DEBUG
             ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to set preferred ciphers for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
-        if (SSL_set_tlsext_host_name(ssl, connection->serverAddress) != 1) {
+        if (SSL_set_tlsext_host_name(ssl, connection->serverAddress) != 1)
+        {
+#ifdef GSI_COMMON_DEBUG
             ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to set URL for OpenSSL connection TLS, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
     }
@@ -372,7 +395,9 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection *connection,
 {
     gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
     SSL *ssl = NULL;
+#ifdef GSI_COMMON_DEBUG
     unsigned long ssl_err;
+#endif
     long result;
     GS_ASSERT(theEncryptor->mSessionStarted == GHTTPFalse);
 
@@ -381,9 +406,11 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection *connection,
     {
         if (BIO_do_connect(sslInterface->mBio) != 1)
         {
+#ifdef GSI_COMMON_DEBUG
             ssl_err = ERR_get_error();
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
                 "Failed to open OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
             return GHIEncryptionResult_Error;
         }
 
@@ -395,18 +422,23 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection *connection,
     // begin securing the session
     if (BIO_do_handshake(sslInterface->mBio) != 1)
     {
+#ifdef GSI_COMMON_DEBUG
         ssl_err = ERR_get_error();
         gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
             "Failed handshake on OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
         return GHIEncryptionResult_Error;
     }
 
     BIO_get_ssl(sslInterface->mBio, &ssl);
-    ssl_err = ERR_get_error();
 
-    if (ssl == NULL) {
+    if (ssl == NULL)
+    {
+#ifdef GSI_COMMON_DEBUG
+        ssl_err = ERR_get_error();
         gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
             "Failed to get SSL pointer for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
         return GHIEncryptionResult_Error;
     }
 
@@ -417,9 +449,11 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection *connection,
     GS_ASSERT(cert != NULL);
     if (cert == NULL)
     {
+#ifdef GSI_COMMON_DEBUG
         ssl_err = ERR_get_error();
         gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
             "Failed to get peer certificate for OpenSSL connection, %s.\r\n", ERR_reason_error_string(ssl_err));
+#endif
         return GHIEncryptionResult_Error;
     }
 
@@ -435,7 +469,7 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection *connection,
         break;
     }
 
-    // Success	
+    // Success
     theEncryptor->mSessionStarted = GHTTPTrue;
     theEncryptor->mSessionEstablished = GHTTPTrue;
     return GHIEncryptionResult_Success;
@@ -448,7 +482,7 @@ GHIEncryptionResult ghiEncryptorSslEncryptSend(struct GHIConnection *connection,
     int          thePlainTextLength,
     int         *theBytesSentOut)
 {
-    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface; int result = 0;
+    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
     *theBytesSentOut = BIO_write(sslInterface->mBio, thePlainTextBuffer, thePlainTextLength);
     GSI_UNUSED(connection);
     return GHIEncryptionResult_Success;
@@ -460,7 +494,7 @@ GHIEncryptionResult ghiEncryptorSslDecryptRecv(struct GHIConnection * connection
     char * theDecryptedBuffer,
     int *  theDecryptedLength)
 {
-    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface; int result = 0;
+    gsOpenSSLInterface *sslInterface = (gsOpenSSLInterface*)theEncryptor->mInterface;
     *theDecryptedLength = BIO_read(sslInterface->mBio, theDecryptedBuffer, *theDecryptedLength);
     GSI_UNUSED(connection);
     return GHIEncryptionResult_Success;

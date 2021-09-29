@@ -41,7 +41,7 @@ SCResult sciWsInit(SCWebServices* theWebServices,
 	GS_ASSERT(!theWebServices->mInit);
 
 	// Check gsCore
-	if (gsCoreIsShutdown())
+	if (gsCoreIsShutdown() != GSCore_IN_USE)
 	{
 		return SCResult_CORE_NOT_INITIALIZED;
 	}

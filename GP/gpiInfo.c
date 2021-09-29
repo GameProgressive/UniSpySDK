@@ -222,10 +222,7 @@ gpiInfoCacheToArg(
 	strzcpy(arg->countrycode, cache->countrycode, GP_COUNTRYCODE_LEN);
 	arg->longitude = cache->longitude;
 	arg->latitude = cache->latitude;
-	if(cache->place)
-		strzcpy(arg->place, cache->place, GP_PLACE_LEN);
-	else
-		arg->place[0] = '\0';
+	strzcpy(arg->place, cache->place, GP_PLACE_LEN);
 	arg->birthday = cache->birthday;
 	arg->birthmonth = cache->birthmonth;
 	arg->birthyear = cache->birthyear;

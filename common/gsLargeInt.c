@@ -1821,7 +1821,8 @@ gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint)
 	int intSize = (int)lint->mLength;
 	int byteSize = 0;
 	unsigned int i;
-	l_word mask = 0xFF;
+	const l_word byteMask = 0xFF;
+	l_word mask = byteMask;
 
 	// skip leading zeros
 	while(intSize > 0 && lint->mData[intSize-1] == 0)
@@ -1832,7 +1833,6 @@ gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint)
 	byteSize = intSize * (gsi_i32)sizeof(l_word);
 
 	// subtract bytes for each leading 0x00 byte
-	mask = 0xFF;
 	for (i=1; i < GS_LARGEINT_DIGIT_SIZE_BYTES; i++)
 	{
 		if (lint->mData[intSize-1] <= mask)
@@ -1840,7 +1840,7 @@ gsi_u32  gsLargeIntGetByteLength(const gsLargeInt_t *lint)
 			byteSize -= sizeof(l_word)-i;
 			break;
 		}
-		mask = (l_word)((mask << 8) | 0xFF);
+		mask = (l_word)((mask << 8) | byteMask);
 	}
 
 	return (gsi_u32)byteSize;

@@ -527,7 +527,8 @@ static GPIBool gpiHandleSendRequest
 			return GPIFalse;
 		}
 		len = strlen(name);
-		if(strstr(name, "//") || strstr(name, "./") || (name[len - 1] == '.') || (name[0] == '/') || (strcspn(name, ":*?\"<>|\n") != len))
+		if(((len != 0) && (strstr(name, "//") || strstr(name, "./") || (name[len - 1] == '.') || (name[0] == '/'))) ||
+			 (strcspn(name, ":*?\"<>|\n") != len))
 		{
 			gpiFreeTransfer(connection, transfer);
 			return GPIFalse;

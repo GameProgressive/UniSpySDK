@@ -53,8 +53,8 @@ extern "C" {
 #define S44 21
 
 static void MD5Transform PROTO_LIST ((UINT4 [4], unsigned char [64]));
-static void Encode PROTO_LIST ((unsigned char *, UINT4 *, unsigned int));
-static void Decode PROTO_LIST ((UINT4 *, unsigned char *, unsigned int));
+static void Encode PROTO_LIST ((unsigned char *, const UINT4 *, unsigned int));
+static void Decode PROTO_LIST ((UINT4 *, const unsigned char *, unsigned int));
 static void MD5_memcpy PROTO_LIST ((POINTER, POINTER, unsigned int));
 static void MD5_memset PROTO_LIST ((POINTER, int, unsigned int));
 
@@ -66,10 +66,10 @@ static unsigned char PADDING[64] = {
 
 /* F, G, H and I are basic MD5 functions.
  */
-#define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
+#define F(x, y, z) (((x) & (y)) | ((~(x)) & (z)))
+#define G(x, y, z) (((x) & (z)) | ((y) & (~(z))))
 #define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | (~z)))
+#define I(x, y, z) ((y) ^ ((x) | (~(z))))
 
 /* ROTATE_LEFT rotates x left n bits.
  */
@@ -277,11 +277,9 @@ static void MD5Transform (UINT4 state[4], unsigned char block[64])
 /* Encodes input (UINT4) into output (unsigned char). Assumes len is
      a multiple of 4.
  */
-static void Encode (unsigned char *output, UINT4 *input, unsigned int len)
+static void Encode (unsigned char *output, const UINT4 *input, unsigned int len)
 {
-  unsigned int i, j;
-
-  for (i = 0, j = 0; j < len; i++, j += 4) {
+  for (unsigned int i = 0, j = 0; j < len; i++, j += 4) {
     output[j] = (unsigned char)(input[i] & 0xff);
     output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
     output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
@@ -292,11 +290,9 @@ static void Encode (unsigned char *output, UINT4 *input, unsigned int len)
 /* Decodes input (unsigned char) into output (UINT4). Assumes len is
      a multiple of 4.
  */
-static void Decode (UINT4 *output, unsigned char *input, unsigned int len)
+static void Decode (UINT4 *output, const unsigned char *input, unsigned int len)
 {
-  unsigned int i, j;
-
-  for (i = 0, j = 0; j < len; i++, j += 4)
+  for (unsigned int i = 0, j = 0; j < len; i++, j += 4)
     output[i] = ((UINT4)input[j]) | (((UINT4)input[j+1]) << 8) |
       (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
 }
@@ -305,49 +301,40 @@ static void Decode (UINT4 *output, unsigned char *input, unsigned int len)
  */
 static void MD5_memcpy (POINTER output, POINTER input, unsigned int len)
 {
-	memcpy(output, input, len);
-/*  unsigned int i;
-  
-  for (i = 0; i < len; i++)
-    output[i] = input[i];*/
+  memcpy(output, input, len);
 }
 
 /* Note: Replace "for loop" with standard memset if possible.
  */
 static void MD5_memset (POINTER output, int value, unsigned int len)
 {
-	memset(output, value, len);
- /* unsigned int i;
-  
-  for (i = 0; i < len; i++)
-    ((char *)output)[i] = (char)value; */
+  memset(output, value, len);
 }
 
 #endif
 
-void GSMD5Print (unsigned char digest[16], char output[33])
+void GSMD5Print (const unsigned char digest[16], char output[33])
 {
-	static const char hex_digits[] = "0123456789abcdef";
-	unsigned int i;
+  static const char hex_digits[] = "0123456789abcdef";
+  
+  for (unsigned i = 0; i < 16; i++)
+  {
+    output[i*2  ] = hex_digits[digest[i] / 16];
+    output[i*2+1] = hex_digits[digest[i] % 16];
+  }
 
-	for (i = 0; i < 16; i++)
-	{
-		output[i*2  ] = hex_digits[digest[i] / 16];
-		output[i*2+1] = hex_digits[digest[i] % 16];
-	}
-	output[32] = '\0';
+  output[32] = '\0';
 }
 
 void GSMD5Digest (unsigned char *input, unsigned int len, char output[33])
 {
-	GSMD5_CTX ctx;
-	unsigned char digest[16];
+  GSMD5_CTX ctx;
+  unsigned char digest[16];
 
-	GSMD5Init(&ctx);
-	GSMD5Update(&ctx, input, len);
-	GSMD5Final(digest, &ctx);
-	GSMD5Print(digest, output);
-
+  GSMD5Init(&ctx);
+  GSMD5Update(&ctx, input, len);
+  GSMD5Final(digest, &ctx);
+  GSMD5Print(digest, output);
 }
 #ifdef __cplusplus
 }
