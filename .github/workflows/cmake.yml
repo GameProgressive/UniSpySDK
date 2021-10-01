@@ -1,0 +1,45 @@
+# Copyright (c) 2017-2021, GameProgressive Team
+# All rights reserved.
+
+# Continuous integration workflow.
+name: build
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**.md'
+
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    name: Build and Test
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [ Release, Debug ]
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Configure
+        run: cmake -B ${{ github.workspace }}/out
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/out --config ${{ matrix.build }} --parallel
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/out
+        run: ctest -C ${{ matrix.build }}
