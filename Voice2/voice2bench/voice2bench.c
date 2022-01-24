@@ -62,7 +62,7 @@ static void Decode(GVSample * out, const GVByte * in, GVDecoderData data)
 
 #elif defined(_PSP) || defined(_WIN32)
 
-#include "libgsm/inc/gsm.h"
+#include "../libgsm/inc/gsm.h"
 
 gsm EncoderState;
 
