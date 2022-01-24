@@ -2,10 +2,11 @@
 // File:	gptestc.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include <wchar.h>
 #include "../gp.h"
@@ -25,11 +26,11 @@
 #endif
 
 #if defined(_WIN32)
-// disable the warning about our while(1) statement
+// Disable the warning about our while(1) statement.
 #pragma warning(disable:4127)
 #endif
 
-#ifdef __MWERKS__	// CodeWarrior will warn if function is not prototyped
+#ifdef __MWERKS__	// CodeWarrior will warn if function is not prototyped.
 int test_main(int argc, char **argv);
 #endif 
 
@@ -44,6 +45,7 @@ int test_main(int argc, char **argv);
 #define GPTC_PASSWORD   _T("gptestc")
 #define GPTC_PID1       2957553 
 #define GPTC_PID2       3052160
+
 #define GPTC_PID3       118305038
 #define GPTC_FIREWALL_OPTION   GP_FIREWALL
 
@@ -69,9 +71,7 @@ int totalErrors = 0;
 	{
 		GSI_UNUSED(theLevel);
 
-		printf("[%s][%s] ", 
-				gGSIDebugCatStrings[theCat], 
-				gGSIDebugTypeStrings[theType]);
+		printf("[%s][%s] ", gGSIDebugCatStrings[theCat], gGSIDebugTypeStrings[theType]);
 
 		vprintf(theTokenStr, theParamList);
 	}
@@ -384,18 +384,38 @@ static void printBlockedList()
 
 int test_main(int argc, char **argv)
 {
+#ifdef GSI_UNICODE
+	//unsigned char ucMsg[] ={ 0xF0, 0x90, 0x90, 0xA4, 0}; //deseret char
+   //unsigned char ucMsg[] = {0xD1, 0x81, 0xD0, 0xBB, 0xD1, 0x83, 0xD1, 0x88, 0xD0, 0xB0, 0xD1, 0x82, 0xD1, 0x8C, 0 }; //russian
+	gsi_char ucMsg[] = { 0x0441, 0x043B, 0x0443, 0x0448,0x0430, 0x0442, 0x044C, 0 };
+#else
+	gsi_char ucMsg[] = "Hello";
+#endif
+
 	gsi_char * nick;
 	gsi_char * email;
 	gsi_char * password;
 	gsi_char messageToSend[90];
+	//wchar_t messageToSend[90];
 	GPConnection connection;
 	GSIACResult acResult = GSIACWaiting;
 	int totalTime;
 	int messagesSent;
 
+#ifdef _PS3
+	// Set communication id to string provided by Sony.
+	SceNpCommunicationId communication_id = 
+	{
+		{'N','P','X','S','0','0','0','0','5'},
+		'\0',
+		0,
+		0
+	};
+#endif
+
 #ifdef GSI_COMMON_DEBUG
-	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
-	// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
+	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output.
+	// Set the SDK debug log file, or set your own handler using gsSetDebugCallback.
 	//gsSetDebugFile(stdout); // output to console
 	gsSetDebugCallback(DebugCallback);
 
@@ -448,6 +468,15 @@ int test_main(int argc, char **argv)
 	CHECK_GP_RESULT(gpSetCallback(pconn, GP_RECV_BUDDY_REQUEST, &RecvBuddyRequest, NULL), "gpSetCallback failed");
 	CHECK_GP_RESULT(gpSetCallback(pconn, GP_RECV_BUDDY_REVOKE, &RecvBuddyRevoke, NULL), "gpSetCallback failed");
 
+#ifdef _PS3
+	// set the NP communication ID (provided by Sony)
+	CHECK_GP_RESULT(gpSetNpCommunicationId(pconn, &communication_id), "gpSetNpCommunicationId failed");  
+
+	// register the slot for GameSpy to use for the CellSysUtilCallback to prevent overlap
+	// (0 is fine if you do not use this callback)
+	CHECK_GP_RESULT(gpRegisterCellSysUtilCallbackSlot(pconn, 0), "gpRegisterCellSysUtilCallbackSlot failed");
+#endif
+
 	//CONNECT
 	/////////
 	printf("\nConnecting...\n");
@@ -458,14 +487,24 @@ int test_main(int argc, char **argv)
 	printf("\nSearching (blocking)\n");
 
 	printf(" Search on email (dan@gamespy.com)\n");
-	CHECK_GP_RESULT(gpProfileSearch(pconn, _T(""), _T(""), _T("dan@gamespy.com"), _T(""), _T(""), 0, GP_BLOCKING, (GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+	CHECK_GP_RESULT(gpProfileSearch(pconn, (gsi_char *) _T(""), (gsi_char *) _T(""), 
+									(gsi_char *) _T("dan@gamespy.com"), (gsi_char *) _T(""), 
+									(gsi_char *) _T(""), 0,	GP_BLOCKING, 
+									(GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+
 	printf(" Search on nick ('crt')\n");
-	CHECK_GP_RESULT(gpProfileSearch(pconn, _T("crt"), _T(""), _T(""), _T(""), _T(""), 0, GP_BLOCKING, (GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+	CHECK_GP_RESULT(gpProfileSearch(pconn, (gsi_char *) _T("crt"), (gsi_char *) _T(""), (gsi_char *) _T(""), (gsi_char *) _T(""), 
+									(gsi_char *) _T(""), 0, GP_BLOCKING, 
+									(GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+
 	printf(" Search on nick and email ('gptestc1', gptestc@gptestc.com)\n");
-	CHECK_GP_RESULT(gpProfileSearch(pconn, GPTC_NICK1, _T(""), GPTC_EMAIL1, _T(""), _T(""), 0, GP_BLOCKING, (GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+	CHECK_GP_RESULT(gpProfileSearch(pconn, (gsi_char *) GPTC_NICK1, (gsi_char *) _T(""), (gsi_char *) GPTC_EMAIL1, (gsi_char *) _T(""), 
+									(gsi_char *) _T(""), 0, GP_BLOCKING, 
+									(GPCallback)ProfileSearchResponse, NULL), "gpProfileSearch failed");
+
 	printf(" Search on unique nick for different namespaces...\n");
-	CHECK_GP_RESULT(gpProfileSearchUniquenick(pconn, GPTC_NICK1, namespaceIds, GP_MAX_NAMESPACEIDS, GP_BLOCKING, (GPCallback)ProfileSearchResponse, NULL),
-		"gpProfileSearchUniquenick failed" );
+	CHECK_GP_RESULT(gpProfileSearchUniquenick(pconn, (gsi_char *) GPTC_NICK1, namespaceIds, GP_MAX_NAMESPACEIDS, GP_BLOCKING, 
+											  (GPCallback)ProfileSearchResponse, NULL),	"gpProfileSearchUniquenick failed" );
 
 	if(noComLineArgs)
 	{
@@ -549,9 +588,9 @@ int test_main(int argc, char **argv)
 			if (totalTime % 1000 == 0) 
 			{
 #ifdef GSI_UNICODE
-				_stprintf(messageToSend, sizeof(messageToSend), _T("%d_Hello!"), (int)(totalTime/1000));
+				_stprintf((wchar_t *)messageToSend, sizeof(messageToSend), _T("%d_%s!"), (int)(totalTime/1000), ucMsg);
 #else
-				_stprintf(messageToSend, _T("%d_Hello!"), (int)(totalTime/1000));
+				_stprintf(messageToSend, _T("%d_%s!"), (int)(totalTime/1000), ucMsg );
 #endif
 				CHECK_GP_RESULT(gpSendBuddyMessage(pconn, other, (gsi_char *)messageToSend), "gpSendBuddyMessage failed");
 				messagesSent++;

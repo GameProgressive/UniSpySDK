@@ -2,10 +2,11 @@
 // File:	gt2Message.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gt2Message.h"
 #include "gt2Buffer.h"
@@ -39,36 +40,36 @@ static int gti2SNDiff(unsigned short SN1, unsigned short SN2)
 
 static GT2Bool gti2ConnectionError(GT2Connection connection, GT2Result result, GT2CloseReason reason)
 {
-	// first check if we're still connecting
+	// First check if we're still connecting.
 	if(connection->state < GTI2Connected)
 	{
-		// check if the local side is the initiator
+		// Check if the local side is the initiator.
 		if(connection->initiated)
 		{
-			// mark it as closed
+			// Mark it as closed.
 			gti2ConnectionClosed(connection);
 
-			// call the callback
+			// Call the callback.
 			if(!gti2ConnectedCallback(connection, result, NULL, 0))
 				return GT2False;
 		}
 		else
 		{
-			// are we waiting for accept/reject?
+			// Are we waiting for accept/reject?
 			if(connection->state == GTI2AwaitingAcceptReject)
 				connection->freeAtAcceptReject = GT2True;
 
-			// mark it as closed
+			// Mark the connection as closed.
 			gti2ConnectionClosed(connection);
 		}
 	}
-	// report the close, as long as we're not already closed
+	// Report the close, as long as we're not already closed.
 	else if(connection->state != GTI2Closed)
 	{
-		// mark it as closed
+		// Mark the connection as closed.
 		gti2ConnectionClosed(connection);
 
-		// call the callback
+		// Call the callback.
 		if(!gti2ClosedCallback(connection, reason))
 			return GT2False;
 	}
@@ -83,7 +84,7 @@ static GT2Bool gti2ConnectionCommunicationError(GT2Connection connection)
 
 static GT2Bool gti2ConnectionMemoryError(GT2Connection connection)
 {
-	// let the other side know
+	// Let the remote client that the local client has accepted the connection.
 	if(!gti2SendClosed(connection))
 		return GT2False;
 
@@ -101,51 +102,51 @@ static GT2Bool gti2HandleESN(GT2Connection connection, unsigned short ESN)
 	GTI2OutgoingBufferMessage * message;
 	int shortenBy;
 
-	// get the number of messages in the outgoing queue
+	// Get the number of messages in the outgoing queue.
 	len = ArrayLength(connection->outgoingBufferMessages);
 	if(!len)
 		return GT2True;
 
-	// loop through until we hit one we can't remove
+	// Loop through until we hit a message we can't remove.
 	for(i = 0 ; i < len ; i++)
 	{
-		// get the message
+		// Get the message.
 		message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, i);
 
-		// don't stop until we get to the ESN
+		// Don't stop until we get to the ESN.
 		if(gti2SNDiff(message->serialNumber, ESN) >= 0)
 			break;
 	}
 
-	// check for not removing any
+	// Check for not removing any.
 	if(i == 0)
 		return GT2True;
 
-	// remove the message info structs
+	// Remove the message info structs.
 	while(i--)
 		ArrayDeleteAt(connection->outgoingBufferMessages, i);
 
-	// check how many messages are left
+	// Check yo see how many messages are left.
 	len = ArrayLength(connection->outgoingBufferMessages);
 	if(!len)
 	{
-		// buffer is empty
+		// Buffer is empty.
 		connection->outgoingBuffer.len = 0;
 		return GT2True;
 	}
 
-	// figure out how much to move everything forward
+	// Figure out how much to move everything forward.
 	message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, 0);
 	shortenBy = message->start;
 
-	// do the move on the info structs
+	// Do the move on the info structs.
 	for(i = 0 ; i < len ; i++)
 	{
 		message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, i);
 		message->start -= shortenBy;
 	}
 
-	// move the actual data
+	// Move the actual data.
 	gti2BufferShorten(&connection->outgoingBuffer, 0, shortenBy);
 
 	return GT2True;
@@ -153,11 +154,11 @@ static GT2Bool gti2HandleESN(GT2Connection connection, unsigned short ESN)
 
 static GT2Bool gti2HandleAppUnreliable(GT2Connection connection, GT2Byte * message, int len)
 {
-	// check the state
+	// Check the state.
 	if((connection->state != GTI2Connected) && (connection->state != GTI2Closing))
 		return GT2True;
 
-	// do we need to filter it?
+	// Do we need to filter it?
 	if(ArrayLength(connection->receiveFilters))
 	{
 		if(!gti2ReceiveFilterCallback(connection, 0, message, len, GT2False))
@@ -165,7 +166,7 @@ static GT2Bool gti2HandleAppUnreliable(GT2Connection connection, GT2Byte * messa
 		return GT2True;
 	}
 
-	// we received data, call the callback
+	// We received data, call the callback.
 	if(!gti2ReceivedCallback(connection, message, len, GT2False))
 		return GT2False;
 
@@ -174,7 +175,7 @@ static GT2Bool gti2HandleAppUnreliable(GT2Connection connection, GT2Byte * messa
 
 static GT2Bool gti2HandleAppReliable(GT2Connection connection, GT2Byte * message, int len)
 {
-	// check the state
+	// Check the state.
 	if((connection->state != GTI2Connected) && (connection->state != GTI2Closing))
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -182,7 +183,7 @@ static GT2Bool gti2HandleAppReliable(GT2Connection connection, GT2Byte * message
 	}
 	else
 	{
-		// do we need to filter it?
+		// Do we need to filter it?
 		if(ArrayLength(connection->receiveFilters))
 		{
 			if(!gti2ReceiveFilterCallback(connection, 0, message, len, GT2True))
@@ -190,7 +191,7 @@ static GT2Bool gti2HandleAppReliable(GT2Connection connection, GT2Byte * message
 			return GT2True;
 		}
 
-		// we received data, call the callback
+		// We received data, call the callback.
 		if(!gti2ReceivedCallback(connection, message, len, GT2True))
 			return GT2False;
 	}
@@ -203,7 +204,7 @@ static GT2Bool gti2HandleClientChallenge(GT2Connection connection, GT2Byte * mes
 	char response[GTI2_RESPONSE_LEN];
 	char challenge[GTI2_CHALLENGE_LEN];
 
-	// check the state
+	// Check the state.
 	if(connection->state != GTI2AwaitingClientChallenge)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -212,7 +213,7 @@ static GT2Bool gti2HandleClientChallenge(GT2Connection connection, GT2Byte * mes
 		return GT2True;
 	}
 
-	// make sure the message is long enough
+	// Make sure the message is long enough.
 	if(len < GTI2_CHALLENGE_LEN)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -221,20 +222,20 @@ static GT2Bool gti2HandleClientChallenge(GT2Connection connection, GT2Byte * mes
 		return GT2True;
 	}
 
-	// generate a response to the challenge
+	// Generate a response to the challenge.
 	gti2GetResponse((GT2Byte *)response, message);
 
-	// generate our own challenge
+	// Generate our own challenge.
 	gti2GetChallenge((GT2Byte *)challenge);
 
-	// store what our response will be
+	// Store what our response will be.
 	gti2GetResponse((GT2Byte *)connection->response, (GT2Byte *)challenge);
 
-	// send our own challenge
+	// Send our own challenge.
 	if(!gti2SendServerChallenge(connection, response, challenge))
 		return GT2False;
 
-	// new state
+	// New state.
 	connection->state = GTI2AwaitingClientResponse;
 
 	return GT2True;
@@ -246,7 +247,7 @@ static GT2Bool gti2HandleServerChallenge(GT2Connection connection, GT2Byte * mes
 {
 	char response[GTI2_RESPONSE_LEN];
 
-	// check the state
+	// Check the state.
 	if(connection->state != GTI2AwaitingServerChallenge)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -255,7 +256,7 @@ static GT2Bool gti2HandleServerChallenge(GT2Connection connection, GT2Byte * mes
 		return GT2True;
 	}
 
-	// make sure the message is long enough
+	// Make sure the message is long enough.
 	if(len < (GTI2_RESPONSE_LEN + GTI2_CHALLENGE_LEN))
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -264,7 +265,7 @@ static GT2Bool gti2HandleServerChallenge(GT2Connection connection, GT2Byte * mes
 		return GT2True;
 	}
 
-	// check the response
+	// Check the response.
 	if(!gti2CheckResponse(message, (GT2Byte *)connection->response))
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -273,21 +274,21 @@ static GT2Bool gti2HandleServerChallenge(GT2Connection connection, GT2Byte * mes
 		return GT2True;
 	}
 
-	// generate our response to the server's challenge
+	// Generate our response to the server's challenge.
 	gti2GetResponse((GT2Byte *)response, message + GTI2_RESPONSE_LEN);
 
-	// send the response, including our intial message
+	// Send the response, including our intial message.
 	if(!gti2SendClientResponse(connection, response, connection->initialMessage, connection->initialMessageLen))
 		return GT2False;
 
-	// free the initial message
+	// Free the initial message.
 	if(connection->initialMessage)
 	{
 		gsifree(connection->initialMessage);
 		connection->initialMessage = NULL;
 	}
 
-	// new state
+	// New state.
 	connection->state = GTI2AwaitingAcceptance;
 
 	return GT2True;
@@ -297,7 +298,7 @@ static GT2Bool gti2HandleClientResponse(GT2Connection connection, GT2Byte * mess
 {
 	int latency;
 
-	// check the state
+	// Check the state.
 	if(connection->state != GTI2AwaitingClientResponse)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -306,7 +307,7 @@ static GT2Bool gti2HandleClientResponse(GT2Connection connection, GT2Byte * mess
 		return GT2True;
 	}
 
-	// make sure the message is long enough
+	// Make sure the message is long enough.
 	if(len < (GTI2_RESPONSE_LEN))
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -315,7 +316,7 @@ static GT2Bool gti2HandleClientResponse(GT2Connection connection, GT2Byte * mess
 		return GT2True;
 	}
 
-	// check the response
+	// Check the response.
 	if(!gti2CheckResponse(message, (GT2Byte *)connection->response))
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -324,26 +325,26 @@ static GT2Bool gti2HandleClientResponse(GT2Connection connection, GT2Byte * mess
 		return GT2True;
 	}
 
-	// need to make sure the connection didn't just stop listening
+	// We need to make sure the connection didn't just stop listening.
 	if(!connection->socket->connectAttemptCallback)
 	{
-		// send them a closed
+		// Send them a closed.
 		if(!gti2SendClosed(connection))
 			return GT2False;
 
-		// mark it as closed
+		// Mark the connection as closed.
 		gti2ConnectionClosed(connection);
 
 		return GT2True;
 	}
 
-	// new state
+	// New state.
 	connection->state = GTI2AwaitingAcceptReject;
 
-	// calculate the approx. latency
+	// Calculate the approximate latency.
 	latency = (int)(current_time() - connection->challengeTime);
 
-	// it's up to the app now
+	// The app should now finish the rest.
 	if(!gti2ConnectAttemptCallback(connection->socket, connection, connection->ip, connection->port, latency, message + GTI2_RESPONSE_LEN, len - GTI2_RESPONSE_LEN))
 		return GT2False;
 
@@ -352,7 +353,7 @@ static GT2Bool gti2HandleClientResponse(GT2Connection connection, GT2Byte * mess
 
 static GT2Bool gti2HandleAccept(GT2Connection connection)
 {
-	// check the state
+	// Check the state.
 	if(connection->state != GTI2AwaitingAcceptance)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -361,10 +362,10 @@ static GT2Bool gti2HandleAccept(GT2Connection connection)
 		return GT2True;
 	}
 
-	// new state
+	// New state.
 	connection->state = GTI2Connected;
 
-	// call the callback
+	// Call the callback.
 	if(!gti2ConnectedCallback(connection, GT2Success, NULL, 0))
 		return GT2False;
 
@@ -373,7 +374,7 @@ static GT2Bool gti2HandleAccept(GT2Connection connection)
 
 static GT2Bool gti2HandleReject(GT2Connection connection, GT2Byte * message, int len)
 {
-	// check the state
+	// Check the state.
 	if(connection->state != GTI2AwaitingAcceptance)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -382,14 +383,14 @@ static GT2Bool gti2HandleReject(GT2Connection connection, GT2Byte * message, int
 		return GT2True;
 	}
 
-	// mark it as closed
+	// Mark the connection as closed.
 	gti2ConnectionClosed(connection);
 
-	// send a closed reply
+	// Send a closed reply.
 	if(!gti2SendClosed(connection))
 		return GT2False;
 
-	// call the callback
+	// Call the callback.
 	if(!gti2ConnectedCallback(connection, GT2Rejected, message, len))
 		return GT2False;
 
@@ -400,14 +401,14 @@ static GT2Bool gti2HandleClose(GT2Connection connection)
 {
 	GT2Bool localClose;
 
-	// send a closed reply
+	// Send a closed reply.
 	if(!gti2SendClosed(connection))
 		return GT2False;
 
-	// were we attempting to close this connection?
+	// Were we attempting to close this connection?
 	localClose = (connection->state == GTI2Closing);
 
-	// handle it as an error (so the right callbacks are called)
+	// Handle it as an error (so the right callbacks are called).
 	if(!gti2ConnectionError(connection, GT2Rejected, localClose?GT2LocalClose:GT2RemoteClose))
 		return GT2False;
 
@@ -416,7 +417,7 @@ static GT2Bool gti2HandleClose(GT2Connection connection)
 
 static GT2Bool gti2DeliverReliableMessage(GT2Connection connection, GTI2MessageType type, GT2Byte * message, int len)
 {
-	// bump our ESN
+	// Bump our ESN.
 	connection->expectedSerialNumber++;
 
 	if(type == GTI2MsgAppReliable)
@@ -456,7 +457,7 @@ static GT2Bool gti2DeliverReliableMessage(GT2Connection connection, GTI2MessageT
 	}
 	else if(type == GTI2MsgKeepAlive)
 	{
-		// ignore
+		// Ignore.
 	}
 
 	return GT2True;
@@ -480,58 +481,58 @@ static GT2Bool gti2BufferIncomingMessage(GT2Connection connection, GTI2MessageTy
 	int num;
 	int i;
 
-	// check the number of messages being held
+	// Check the number of messages being held.
 	num = ArrayLength(connection->incomingBufferMessages);
 
-	// check if this message is already buffered
+	// Check if this message is already buffered.
 	for(i = 0 ; i < num ; i++)
 	{
-		// get the message
+		// Get the message.
 		bufferedMessage = (GTI2IncomingBufferMessage *)ArrayNth(connection->incomingBufferMessages, i);
 
-		// check if this is the same message
+		// Check if this is the same message.
 		if(bufferedMessage->serialNumber == SN)
 		{
 			*overflow = GT2False;
 			return GT2True;
 		}
 
-		// check if we've already past the target SN
+		// Check if we've already past the target SN.
 		if(gti2SNDiff(bufferedMessage->serialNumber, SN) > 0)
 			break;
 	}
 
-	// check that there's enough space to store the message
+	// Check that there's enough space to store the message.
 	if(gti2GetBufferFreeSpace(&connection->incomingBuffer) < len)
 	{
 		*overflow = GT2True;
 		return GT2True;
 	}
 
-	// setup the message info
+	// Setup the message info.
 	messageInfo.start = connection->incomingBuffer.len;
 	messageInfo.len = len;
 	messageInfo.type = type;
 	messageInfo.serialNumber = SN;
 
-	// add it to the list
+	// Add it to the list.
 	ArrayInsertSorted(connection->incomingBufferMessages, &messageInfo, gti2IncomingBufferMessageCompare);
 
-	// make sure the length is one more
+	// Make sure the length is one more.
 	if(ArrayLength(connection->incomingBufferMessages) != (num + 1))
 	{
 		*overflow = GT2True;
 		return GT2True;
 	}
 
-	// copy the message into the buffer
+	// Copy the message into the buffer.
 	gti2BufferWriteData(&connection->incomingBuffer, message, len);
 
-	// check for sending a nack
-	// we want to send one when we think a message or messages were probably dropped
+	// Check for sending a nack.
+	// We want to send one when we think a message or messages were probably dropped.
 	if(num == 0)
 	{
-		// if we're the only message in the hold, send a nack
+		// If we're the only message in the hold, send a nack.
 		if(!gti2SendNack(connection, connection->expectedSerialNumber, (unsigned short)(SN - 1)))
 			return GT2False;
 	}
@@ -539,14 +540,14 @@ static GT2Bool gti2BufferIncomingMessage(GT2Connection connection, GTI2MessageTy
 	{
 		GTI2IncomingBufferMessage * msg;
 
-		// are we the highest message?
+		// Are we the highest message?
 		msg = (GTI2IncomingBufferMessage *)ArrayNth(connection->incomingBufferMessages, num);
 		if(msg->serialNumber == SN)
 		{
 			GTI2IncomingBufferMessage * prev;
 			unsigned short diff;
 
-			// if we're not right after the second-highest SN, the ones in between were probably dropped
+			// If we're not right after the second-highest SN, the ones in between were probably dropped.
 			prev = (GTI2IncomingBufferMessage *)ArrayNth(connection->incomingBufferMessages, num - 1);
 			diff = (unsigned short)gti2SNDiff(SN, prev->serialNumber);
 			if(diff > 1)
@@ -569,19 +570,19 @@ static void gti2RemoveHoldMessage(GT2Connection connection, GTI2IncomingBufferMe
 	int num;
 	int i;
 
-	// save off info about it
+	// Save off info about the message.
 	moveAfter = message->start;
 	shortenBy = message->len;
 
-	// delete it
+	// Delete the message.
 	ArrayDeleteAt(connection->incomingBufferMessages, index);
 
-	// loop through and fix up message's stored after this one in the buffer
-	// also figure out exactly how much data we'll need to move
+	// Loop through and fix up messages stored after this one in the buffer.
+	// Also figure out exactly how much data we'll need to move.
 	num = ArrayLength(connection->incomingBufferMessages);
 	for(i = 0 ; i < num ; i++)
 	{
-		// check if this message needs to be moved forward
+		// Check if this message needs to be moved forward.
 		message = (GTI2IncomingBufferMessage *)ArrayNth(connection->incomingBufferMessages, i);
 		if(message->start > moveAfter)
 		{
@@ -590,7 +591,7 @@ static void gti2RemoveHoldMessage(GT2Connection connection, GTI2IncomingBufferMe
 		}
 	}
 
-	// fix up the buffer itself
+	// Fix up the buffer itself.
 	gti2BufferShorten(&connection->incomingBuffer, moveAfter, shortenBy);
 }
 
@@ -600,28 +601,25 @@ static GT2Bool gti2DeliverHoldMessages(GT2Connection connection)
 	int num;
 	int i;
 
-restart:
-
-	// loop through the buffered messages, checking if there are any that can now be delivered
-	// loop through backwards to ease removal
+	// Loop through the buffered messages, checking if there are any that can now be delivered.
+	// Loop through backwards to ease removal.
 	num = ArrayLength(connection->incomingBufferMessages);
 	for(i = (num - 1) ; i >= 0 ; i--)
 	{
 		message = (GTI2IncomingBufferMessage *)ArrayNth(connection->incomingBufferMessages, i);
 
-		// we should deliver this if it's what we're expecting
+		// We should deliver this if it's what we're expecting.
 		if(message->serialNumber == connection->expectedSerialNumber)
 		{
-			// deliver it
+			// Deliver the message.
 			if(!gti2DeliverReliableMessage(connection, message->type, connection->incomingBuffer.buffer + message->start, message->len))
 				return GT2False;
 
-			// remove it
+			// Remove the message.
 			gti2RemoveHoldMessage(connection, message, i);
 
-			// we need to go through this loop again.
-			// goto's are evil, but a little evil is good here
-			goto restart;
+			// We need to go through this loop again.
+			num = ArrayLength(connection->incomingBufferMessages);
 		}
 	}
 
@@ -630,7 +628,7 @@ restart:
 
 static void gti2SetPendingAck(GT2Connection connection)
 {
-	// if there's not a pending ack, set one
+	// If there's not a pending ack, set one.
 	if(!connection->pendingAck)
 	{
 		connection->pendingAck = GT2True;
@@ -645,8 +643,8 @@ static GT2Bool gti2HandleReliableMessage(GT2Connection connection, GTI2MessageTy
 	const int headerLength = connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 1 + 2 + 2;
 	GT2Bool overflow;
 
-	// check if it's long enough
-	if(len < (connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 1 + 2 + 2))  // magic string + type + SN + ESN
+	// Check to see if th message is long enough.
+	if(len < (connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 1 + 2 + 2))  // Magic string + type + SN + ESN.
 	{
 		if(!gti2ConnectionCommunicationError(connection))
 			return GT2False;
@@ -654,13 +652,13 @@ static GT2Bool gti2HandleReliableMessage(GT2Connection connection, GTI2MessageTy
 		return GT2True;
 	}
 
-	// get the SN
+	// Get the SN
 	SN = gti2UShortFromBuffer(message + connection->socket->protocolOffset, GTI2_MAGIC_STRING_LEN + 1);
 
-	// get the ESN
+	// Get the ESN
 	ESN = gti2UShortFromBuffer(message + connection->socket->protocolOffset, GTI2_MAGIC_STRING_LEN + 3);
 
-	// update the message and length to point to the actual message
+	// Update the message and length to point to the actual message
 	if (connection->socket->protocolType == GTI2VdpProtocol && type == GTI2MsgAppReliable)
 	{
 		message[connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 3] = message[0];
@@ -674,43 +672,45 @@ static GT2Bool gti2HandleReliableMessage(GT2Connection connection, GTI2MessageTy
 		len -= headerLength;
 	}
 	
-	// handle the ESN
+	// Handle the ESN.
 	if(!gti2HandleESN(connection, ESN))
 		return GT2False;
 
-	// check if it's the SN we expected
+	// Check if it's the SN we expected.
 	if(SN == connection->expectedSerialNumber)
 	{
-		// make sure we ack this message
-		// do this before delivering, because we might send an ack as part of a reliable reply
+		// Make sure we ack this message.
+		// Do this before delivering, because we might send an ack as part of a
+		// reliable reply.
 		gti2SetPendingAck(connection);
 
-		// deliver the message
+		// Deliver the message.
 		if(!gti2DeliverReliableMessage(connection, type, message, len))
 			return GT2False;
 
-		// check if there are any messages in the hold that can now be delivered
+		// Check to see if there are any messages in the hold that can now be 
+		// delivered.
 		if(!gti2DeliverHoldMessages(connection))
 			return GT2False;
 
 		return GT2True;
 	}
 
-	// check if the message is a duplicate
+	// Check to see if the message is a duplicate.
 	if(gti2SNDiff(SN, connection->expectedSerialNumber) < 0)
 	{
-		// it's a duplicate, ack it again
+		// The message is a duplicate, ack it again.
 		gti2SetPendingAck(connection);
 
-		// ignore it
+		// Ignore the message.
 		return GT2True;
 	}
 
-	// we can't deliver this yet, so put it in the hold
+	// We can't deliver the message yet, so put it in the hold.
 	if(!gti2BufferIncomingMessage(connection, type, SN, message, len, &overflow))
 		return GT2False;
 
-	// check for a buffer overflow
+	// Check for a buffer overflow.
 	if(overflow)
 	{
 		if(!gti2ConnectionMemoryError(connection))
@@ -724,7 +724,7 @@ static GT2Bool gti2HandleAck(GT2Connection connection, const GT2Byte * message, 
 {
 	unsigned short ESN;
 
-	// make sure it has enough space for the ESN
+	// Make sure there is enough space for the ESN.
 	if(len != 2)
 	{
 		if(!gti2ConnectionCommunicationError(connection))
@@ -733,10 +733,10 @@ static GT2Bool gti2HandleAck(GT2Connection connection, const GT2Byte * message, 
 		return GT2True;
 	}
 
-	// get the ESN
+	// Get the ESN.
 	ESN = gti2UShortFromBuffer(message, 0);
 
-	// handle it
+	// Handle the message.
 	if(!gti2HandleESN(connection, ESN))
 		return GT2False;
 
@@ -751,7 +751,7 @@ static GT2Bool gti2HandleNack(GT2Connection connection, const GT2Byte * message,
 	int i;
 	GTI2OutgoingBufferMessage * messageInfo;
 
-	// read based on length.
+	// Read based on length.
 	SNMin = gti2UShortFromBuffer(message, 0);
 	if(len == 2)
 	{
@@ -769,7 +769,7 @@ static GT2Bool gti2HandleNack(GT2Connection connection, const GT2Byte * message,
 		return GT2True;
 	}
 
-	// loop through the messages, resending any specified ones
+	// Loop through the messages, resending any specified ones.
 	num = ArrayLength(connection->outgoingBufferMessages);
 	for(i = 0 ; i < num ; i++)
 	{
@@ -786,7 +786,7 @@ static GT2Bool gti2HandleNack(GT2Connection connection, const GT2Byte * message,
 
 static GT2Bool gti2HandlePing(GT2Connection connection, GT2Byte * message, int len)
 {
-	// send it right back
+	// Send the message right back.
 	return gti2SendPong(connection, message, len);
 }
 
@@ -794,21 +794,21 @@ static GT2Bool gti2HandlePong(GT2Connection connection, const GT2Byte * message,
 {
 	gsi_time startTime;
 
-	// do we care about this?
+	// Do we care about this ping?
 	if(!connection->callbacks.ping)
 		return GT2True;
 
-	// is this a pong we're interested in?
+	// Is this a pong we're interested in?
 	// "time" + ping-sent-time
 	if(len != (4 + sizeof(gsi_time)))
 		return GT2True;
 	if(memcmp(message, "time", 4) != 0)
 		return GT2True;
 
-	// get the start time
+	// Get the start time.
 	memcpy(&startTime, message + 4, sizeof(gsi_time));
 
-	// call the callback
+	// Call the callback.
 	if(!gti2PingCallback(connection, (int)(current_time() - startTime)))
 		return GT2False;
 
@@ -819,14 +819,14 @@ static GT2Bool gti2HandleClosed(GT2Connection connection)
 {
 	GT2Bool localClose;
 
-	// are we already closed?
+	// Are we already closed?
 	if(connection->state == GTI2Closed)
 		return GT2True;
 
-	// were we attempting to close this connection?
+	// Were we attempting to close this connection?
 	localClose = (connection->state == GTI2Closing);
 
-	// handle it as an error (so the right callbacks are called)
+	// Handle it as an error (so the right callbacks are called).
 	if(!gti2ConnectionError(connection, GT2Rejected, localClose?GT2LocalClose:GT2RemoteClose))
 		return GT2False;
 
@@ -839,12 +839,12 @@ static GT2Bool gti2HandleUnreliableMessage(GT2Connection connection, GTI2Message
 	GT2Byte * dataStart;
 	int dataLen;
 
-	// most unreliable messages don't need the header
+	// Most unreliable messages don't need the header.
 	headerLength = (connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 1);
 	dataStart = (message + headerLength);
 	dataLen = (len - headerLength);
 	
-	// handle unreliable messages based on type
+	// Handle unreliable messages based on type.
 	if(type == GTI2MsgAck)
 	{
 		if(!gti2HandleAck(connection, dataStart, dataLen))
@@ -874,7 +874,7 @@ static GT2Bool gti2HandleUnreliableMessage(GT2Connection connection, GTI2Message
 	return GT2True;
 }
 
-// VDP sockets have data length which needs to be stripped off
+// VDP sockets have data length which needs to be stripped off.
 static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, unsigned int ip, unsigned short port)
 {
 	GT2Connection connection;
@@ -884,38 +884,38 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 	GT2Bool handled;
 	int actualLength = len - socket->protocolOffset;
 
-	// VDP messages have 2 byte header which is removed based on protocol
+	// VDP messages have 2 byte header which is removed based on protocol.
 	GT2Byte *actualMessage = message + socket->protocolOffset;
 	
-	// find out if we have an existing connection for this address
+	// Find out if we have an existing connection for this address.
 	connection = gti2SocketFindConnection(socket, ip, port);
 
-	// let the dump handle this
+	// Let the dump handle this.
 	if(socket->receiveDumpCallback)
 	{
 		if(!gti2DumpCallback(socket, connection, ip, port, GT2False, message, len, GT2False))
 			return GT2False;
 	}
 	
-	// check if the message starts with the magic string
-	// use greater than for the len compare because it also must have a type
+	// Check if the message starts with the magic string.
+	// Use greater than for the len compare because it also must have a type.
 	magicString = ((actualLength > GTI2_MAGIC_STRING_LEN) && (memcmp(actualMessage, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN) == 0));
 	
-	// check if we don't have a connection
+	// Check if we don't have a connection
 	if(!connection)
 	{
-		// if we don't know who this is from, let the unrecognized message callback have first crack at it
+		// If we don't know who this is from, let the unrecognized message callback have first crack at it.
 		if(!gti2UnrecognizedMessageCallback(socket, ip, port, message, len, &handled))
 			return GT2False;
 
-		// if they handled it, we don't care about it.
+		// If they handled it, we don't care about it.
 		if(handled)
 			return GT2True;
 
-		// if this isn't a connection request, tell them the connection is closed
+		// If this isn't a connection request, tell them the connection is closed.
 		if(!magicString || (actualMessage[GTI2_MAGIC_STRING_LEN] != GTI2MsgClientChallenge))
 		{
-			// if this is a closed message, don't send one back (to avoid recursion)
+			// If this is a closed message, don't send one back (to avoid recursion).
 			if(!magicString || (actualMessage[GTI2_MAGIC_STRING_LEN] != GTI2MsgClosed))
 			{
 				if(!gti2SendClosedOnSocket(socket, ip, port))
@@ -924,16 +924,16 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 			return GT2True;
 		}	
 		
-		// if we're not listening, we just ignore this
+		// If we're not listening, we just ignore this.
 		if(!socket->connectAttemptCallback)
 			return GT2True;
 
-		// create a connection
+		// Create a connection.
 		result = gti2NewIncomingConnection(socket, &connection, ip, port);
 		if(result != GT2Success)
 		{
-			// as long as this wasn't a duplicate address error, tell them we're closed
-			// in the case of duplicates, we don't want to close the existing connection
+			// As long as this wasn't a duplicate address error, tell them we're closed.
+			// In the case of duplicates, we don't want to close the existing connection.
 			if(result != GT2DuplicateAddress)
 			{
 				if(!gti2SendClosedOnSocket(socket, ip, port))
@@ -943,10 +943,10 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 		}
 	}
 
-	// is the connection already closed?
+	// Is the connection already closed?
 	if(connection->state == GTI2Closed)
 	{
-		// if this is a closed message, don't send one back (to avoid recursion)
+		// If this is a closed message, don't send one back (to avoid recursion).
 		if(!magicString || (actualMessage[GTI2_MAGIC_STRING_LEN] != GTI2MsgClosed))
 		{
 			if(!gti2SendClosed(connection))
@@ -956,26 +956,27 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 		return GT2True;
 	}
 	
-	// check if this is an unreliable app message with a magic string header
+	// Check if this is an unreliable app message with a magic string header.
 	if(magicString && ((actualLength >= (GTI2_MAGIC_STRING_LEN * 2)) && (memcmp(actualMessage + GTI2_MAGIC_STRING_LEN, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN) == 0)))
 	{
 		message[3] = message[1];
 		message[2] = message[0];
-		message = actualMessage;
-		actualMessage += socket->protocolOffset;
-		actualLength -= socket->protocolOffset;
+		message += GTI2_MAGIC_STRING_LEN;
+		actualMessage += GTI2_MAGIC_STRING_LEN;
+		actualLength -= GTI2_MAGIC_STRING_LEN;
 		len -= GTI2_MAGIC_STRING_LEN;
 		magicString = GT2False;
 	}
 	
-	// if it doesn't have a magic string it's an app unreliable
+	// If it doesn't have a magic string, it's an unreliable app message.
 	if(!magicString)
 	{
-		// First determine if the connection found has gone throught the internal challenge response
+		// First determine if the connection found has gone throught the 
+		// internal challenge response.
 		if (connection->state < GTI2Connected)
 		{
-			// pass any message that doesn't have a magic string to 
-			// the app so that the SDK doesn't drop them
+			// Pass any message that doesn't have a magic string to the app so 
+			// that the SDK doesn't drop them.
 			if(!gti2UnrecognizedMessageCallback(socket, ip, port, message, len, &handled))
 				return GT2False;
 		}
@@ -988,19 +989,19 @@ static GT2Bool gti2HandleMessage(GT2Socket socket, GT2Byte * message, int len, u
 		return GT2True;
 	}
 
-	// get the message type
+	// Get the message type.
 	type = (GTI2MessageType)actualMessage[GTI2_MAGIC_STRING_LEN];
 
-	// check if it's reliable
+	// Check to see if the message is reliable.
 	if(type < GTI2NumReliableMessages)
 	{
-		// handle it
+		// Handle the message.
 		if(!gti2HandleReliableMessage(connection, type, message, len))
 			return GT2False;
 		return GT2True;
 	}
 
-	// handle unreliable messages
+	// Handle unreliable messages.
 	if(!gti2HandleUnreliableMessage(connection, type, message, len))
 		return GT2False;
 
@@ -1012,34 +1013,34 @@ GT2Bool gti2HandleConnectionReset(GT2Socket socket, unsigned int ip, unsigned sh
 {
 	GT2Connection connection;
 
-	// find the connection for the reset
+	// Find the connection for the reset.
 	connection = gti2SocketFindConnection(socket, ip, port);
 
-	// let the dump know about this
+	// Let the dump know about this.
 	if(socket->receiveDumpCallback)
 	{
 		if(!gti2DumpCallback(socket, connection, ip, port, GT2True, NULL, 0, GT2False))
 			return GT2False;
 	}
 
-	// there's no connection, so ignore it
+	// There's no connection, so ignore it.
 	if(!connection)
 		return GT2True;
 
-	// are we waiting for a response from the server?
+	// Are we waiting for a response from the server?
 	if(connection->state == GTI2AwaitingServerChallenge)
 	{
-		// are we still within the timeout time?
+		// Are we still within the timeout time?
 		if(!connection->timeout || ((current_time() - connection->startTime) < connection->timeout))
 			return GT2True;
 
-		// report this as a timeout
+		// Report this as a timeout.
 		if(!gti2ConnectionError(connection, GT2TimedOut, GT2RemoteClose))
 			return GT2False;
 	}
 	else
 	{
-		// report the error
+		// Report the error.
 		if(!gti2ConnectionError(connection, GT2Rejected, GT2RemoteClose))
 			return GT2False;
 	}
@@ -1051,22 +1052,22 @@ GT2Bool gti2HandleHostUnreachable(GT2Socket socket, unsigned int ip, unsigned sh
 {
 	GT2Connection connection;
 
-	// find the connection for the reset
+	// Find the connection for the reset.
 	connection = gti2SocketFindConnection(socket, ip, port);
 
-	// let the dump know about this
+	// Let the dump know about this.
 	if(socket->receiveDumpCallback)
 	{
 		if(!gti2DumpCallback(socket, connection, ip, port, GT2True, NULL, 0, send))
 			return GT2False;
 	}
 
-	// there's no connection, so ignore it
+	// There's no connection, so ignore it.
 	if(!connection)
 		return GT2True;
 
 
-	// report the error
+	// Report the error.
 	if(!gti2ConnectionError(connection, GT2TimedOut, GT2RemoteClose))
 		return GT2False;
 
@@ -1078,13 +1079,13 @@ GT2Bool gti2HandleHostUnreachable(GT2Socket socket, unsigned int ip, unsigned sh
 
 
 
-// return length if successful
-// <=0 on error
+// Return length if successful.
+// <=0 on error.
 gsi_bool _NetworkAdHocSocketRecv(int socket_id,
 							char	*buf,
 							int		bufferlen,
 							int		flags,
-							char	*saddr,		//struct SceNetEtherAddr  = char[6];
+							char	*saddr,		// struct SceNetEtherAddr  = char[6];
 							gsi_u16 *sport);
 
 
@@ -1094,7 +1095,7 @@ gsi_bool _NetworkAdHocSocketRecv(int socket_id,
 
 
 
-// return 0 if no data, -1 if error,  >0 if data to read
+// Return 0 if no data, -1 if error,  >0 if data to read.
 int _NetworkAdHocCanReceiveOnSocket(int socket_id);
 
 GT2Bool gti2ReceiveAdHocMessages(GT2Socket socket,char *buffer, int buffersize)
@@ -1103,21 +1104,21 @@ GT2Bool gti2ReceiveAdHocMessages(GT2Socket socket,char *buffer, int buffersize)
 	SOCKADDR_IN address;
 	int addressLen;//, datasize;
 
-	// check for messages
+	// Check for messages.
 	while	(1)
 	{
 		int datasize =  _NetworkAdHocCanReceiveOnSocket(socket->socket);
-		if (datasize < 0)	// error
+		if (datasize < 0)	// There was an error.
 		{
 			gti2SocketError(socket);
 			return GT2False;
 		}
 
 		if (datasize == 0)
-			break;		// no data
+			break;		// There is no data.
 		{
-			// We have data to recv
-			// receive the message
+			// We have data to receive.
+			// Receive the message.
 			char		mac[6];
 			gsi_u16		port;
 			//gsi_u32		ip;
@@ -1125,12 +1126,12 @@ GT2Bool gti2ReceiveAdHocMessages(GT2Socket socket,char *buffer, int buffersize)
 			addressLen = sizeof(address);
 
 			rcode = _NetworkAdHocSocketRecv(socket->socket, buffer,buffersize , 0, mac,&port);
-			if(rcode < 0)	// fatal socket error
+			if(rcode < 0)	// Fatal socket error.
 			{
-				#if(0)	// notes
+				#if(0)	// Notes
 					if(0)//rcode == WSAECONNRESET)
 					{
-							// handle the reset
+							// Handle the reset.
 							if(!gti2HandleConnectionReset(socket, address.sin_addr.s_addr, ntohs(address.sin_port)))
 								return GT2False;
 					}
@@ -1147,24 +1148,24 @@ GT2Bool gti2ReceiveAdHocMessages(GT2Socket socket,char *buffer, int buffersize)
 						return GT2False;
 					}
 			}
-			if(rcode == 0)	// no data
+			if(rcode == 0)	// There is no data.
 			{
 				return GT2False;
 			}
 
-			// at this point we have valid data
+			// At this point we have valid data.
 
-			// change ethernet to IP address
+			// Change ethernet to IP address.
 			address.sin_addr.s_addr = gt2MacToIp(mac);
 			address.sin_port = port;
 
 			#ifdef RECV_LOG
-				// log it
+				// Log the message.
 				gti2LogMessage(address.sin_addr.s_addr, ntohs(address.sin_port),
 					socket->ip, socket->port,
 					buffer, rcode);
 			#endif
-			// handle the message
+			// Handle the message.
 			if(!gti2HandleMessage(socket, (GT2Byte *)buffer, rcode, address.sin_addr.s_addr, address.sin_port))
 				return GT2False;
 		}
@@ -1181,7 +1182,7 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 	socklen_t addressLen;
 
 
-	// avoid overflowing stack
+	// Avoid overflowing stack.
 	#if (GTI2_STACK_RECV_BUFFER_SIZE > 1600)
 		static char buffer[GTI2_STACK_RECV_BUFFER_SIZE];
 	#else
@@ -1196,13 +1197,13 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 	}
 	#endif
 
-	// check for messages
+	// Check for messages.
 	while	(CanReceiveOnSocket(socket->socket))
 	{
 		// mj todo: get this plat specific stuff out of here.  Belongs in play specific layer.
 		// abstract recvfrom
 
-		// receive the message
+		// Receive the message.
 		addressLen = sizeof(address);
 		
 		rcode = recvfrom(socket->socket, buffer, sizeof(buffer), 0, (SOCKADDR *)&address, &addressLen);
@@ -1212,7 +1213,7 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 			rcode = GOAGetLastError(socket->socket);
 			if(rcode == WSAECONNRESET)
 			{
-				// handle the reset
+				// Handle the reset.
 				if(!gti2HandleConnectionReset(socket, address.sin_addr.s_addr, ntohs(address.sin_port)))
 					return GT2False;
 			}
@@ -1225,7 +1226,7 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 			#endif
 			else if(rcode != WSAEMSGSIZE)
 			{
-				// fatal socket error
+				// Fatal socket error.
 				gti2SocketError(socket);
 				return GT2False;
 			}
@@ -1233,12 +1234,12 @@ GT2Bool gti2ReceiveMessages(GT2Socket socket)
 		else
 		{
 			#ifdef RECV_LOG
-				// log it
+				// Log the message.
 				gti2LogMessage(address.sin_addr.s_addr, ntohs(address.sin_port),
 					socket->ip, socket->port,
 					buffer, rcode);
 			#endif
-			// handle the message
+			// Handle the message.
 			if(!gti2HandleMessage(socket, (GT2Byte *)buffer, rcode, address.sin_addr.s_addr, ntohs(address.sin_port)))
 				return GT2False;
 		}
@@ -1252,20 +1253,20 @@ static GT2Bool gti2StoreOutgoingReliableMessageInfo(GT2Connection connection, un
 	GTI2OutgoingBufferMessage messageInfo;
 	int num;
 
-	// setup the message info
+	// Setup the message info.
 	memset(&messageInfo, 0, sizeof(messageInfo));
 	messageInfo.start = connection->outgoingBuffer.len;
 	messageInfo.len = len;
 	messageInfo.serialNumber = SN;
 	messageInfo.lastSend = current_time();
 
-	// check the number of messages before we do the add
+	// Check the number of messages before we do the add.
 	num = ArrayLength(connection->outgoingBufferMessages);
 
-	// add it to the list
+	// Add it to the list.
 	ArrayAppend(connection->outgoingBufferMessages, &messageInfo);
 
-	// make sure the length is one more
+	// Make sure the length is one more.
 	if(ArrayLength(connection->outgoingBufferMessages) != (num + 1))
 		return GT2False;
 
@@ -1276,13 +1277,13 @@ static GT2Bool gti2BeginReliableMessage(GT2Connection connection, GTI2MessageTyp
 {
 	int freeSpace;
 
-	// VDP data length needed in the front of every packet
+	// VDP data length needed in the front of every packet.
 	unsigned short vdpDataLength = (unsigned short)(len - connection->socket->protocolOffset);
 	
-	// check how much free space is in the outgoing buffer
+	// Check how much free space is in the outgoing buffer.
 	freeSpace = gti2GetBufferFreeSpace(&connection->outgoingBuffer);
 
-	// do we have the space to hold it?
+	// Do we have the space to hold it?
 	if(freeSpace < len)
 	{
 		if(!gti2ConnectionMemoryError(connection))
@@ -1292,7 +1293,7 @@ static GT2Bool gti2BeginReliableMessage(GT2Connection connection, GTI2MessageTyp
 		return GT2True;
 	}
 
-	// store the message's info
+	// Store the message's info.
 	if(!gti2StoreOutgoingReliableMessageInfo(connection, connection->serialNumber, len))
 	{
 		if(!gti2ConnectionMemoryError(connection))
@@ -1302,7 +1303,7 @@ static GT2Bool gti2BeginReliableMessage(GT2Connection connection, GTI2MessageTyp
 		return GT2True;
 	}
 
-	// setup the header
+	// Setup the header.
 	if (connection->socket->protocolType == GTI2VdpProtocol)
 		gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)&vdpDataLength, connection->socket->protocolOffset);
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
@@ -1319,16 +1320,16 @@ static GT2Bool gti2EndReliableMessage(GT2Connection connection)
 	GTI2OutgoingBufferMessage * message;
 	int len;
 
-	// the message we're sending is the last one
+	// The message we're sending is the last one.
 	len = ArrayLength(connection->outgoingBufferMessages);
 	GS_ASSERT(len > 0);
 	message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, len - 1);
 
-	// send it
+	// Send the message.
 	if(!gti2ConnectionSendData(connection, connection->outgoingBuffer.buffer + message->start, message->len))
 		return GT2False;
 
-	// we just did an ack (as part of the message)
+	// We just did an ack (as part of the message).
 	connection->pendingAck = GT2False;
 
 	return GT2True;
@@ -1339,19 +1340,19 @@ GT2Bool gti2SendAppReliable(GT2Connection connection, const GT2Byte * message, i
 	int totalLen;
 	GT2Bool overflow;
 
-	// magic string + type + SN + ESN + message
+	// This totalLen is: magic string + type + SN + ESN + message.
 	totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2 + len);
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgAppReliable, totalLen, &overflow))
 		return GT2False;
 	if(overflow)
 		return GT2True;
 
-	// write the message
+	// Write the message.
 	gti2BufferWriteData(&connection->outgoingBuffer, message, len);
 
-	// end the message
+	// End the message
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1360,21 +1361,21 @@ GT2Bool gti2SendAppReliable(GT2Connection connection, const GT2Byte * message, i
 
 GT2Bool gti2SendClientChallenge(GT2Connection connection, const char challenge[GTI2_CHALLENGE_LEN])
 {
-	// magic string + type + SN + ESN + challenge
+	// This totalLen is: magic string + type + SN + ESN + challenge.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2 + GTI2_CHALLENGE_LEN);
 	GT2Bool overflow;
 
-	// begin the message
+	// Bbegin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgClientChallenge, totalLen + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// write the challenge
+	// Write the challenge.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)challenge, GTI2_CHALLENGE_LEN);
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1383,28 +1384,28 @@ GT2Bool gti2SendClientChallenge(GT2Connection connection, const char challenge[G
 
 GT2Bool gti2SendServerChallenge(GT2Connection connection, const char response[GTI2_RESPONSE_LEN], const char challenge[GTI2_CHALLENGE_LEN])
 {
-	// magic string + type + SN + ESN + response + challenge
+	// This totalLen is: magic string + type + SN + ESN + response + challenge.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2 + GTI2_RESPONSE_LEN + GTI2_CHALLENGE_LEN);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgServerChallenge, totalLen + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// write the response
+	// Write the response.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)response, GTI2_RESPONSE_LEN);
 
-	// write the challenge
+	// Write the challenge.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)challenge, GTI2_CHALLENGE_LEN);
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
-	// save the time
+	// Save the time.
 	connection->challengeTime = connection->lastSend;
 
 	return GT2True;
@@ -1412,24 +1413,24 @@ GT2Bool gti2SendServerChallenge(GT2Connection connection, const char response[GT
 
 GT2Bool gti2SendClientResponse(GT2Connection connection, const char response[GTI2_RESPONSE_LEN], const char * message, int len)
 {
-	// magic string + type + SN + ESN + response + message
+	// This totalLen is: magic string + type + SN + ESN + response + message.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2 + GTI2_RESPONSE_LEN + len);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgClientResponse, totalLen + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// write the response
+	// Write the response.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)response, GTI2_RESPONSE_LEN);
 
-	// write the message
+	// Write the message.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)message, len);
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1438,18 +1439,18 @@ GT2Bool gti2SendClientResponse(GT2Connection connection, const char response[GTI
 
 GT2Bool gti2SendAccept(GT2Connection connection)
 {
-	// magic string + type + SN + ESN
+	// This totalLen is: magic string + type + SN + ESN.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgAccept, totalLen  + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1458,21 +1459,21 @@ GT2Bool gti2SendAccept(GT2Connection connection)
 
 GT2Bool gti2SendReject(GT2Connection connection, const GT2Byte * message, int len)
 {
-	// magic string + type + SN + ESN + message
+	// This totalLen is: magic string + type + SN + ESN + message.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2 + len);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgReject, totalLen + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// write the message
+	// Write the message.
 	gti2BufferWriteData(&connection->outgoingBuffer, message, len);
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1481,18 +1482,18 @@ GT2Bool gti2SendReject(GT2Connection connection, const GT2Byte * message, int le
 
 GT2Bool gti2SendClose(GT2Connection connection)
 {
-	// magic string + type + SN + ESN
+	// This totalLen is: magic string + type + SN + ESN.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgClose, totalLen + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1501,18 +1502,18 @@ GT2Bool gti2SendClose(GT2Connection connection)
 
 GT2Bool gti2SendKeepAlive(GT2Connection connection)
 {
-	// magic string + type + SN + ESN
+	// This totalLen is: magic string + type + SN + ESN.
 	int totalLen = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2);
 	GT2Bool overflow;
 
-	// begin the message
+	// Begin the message.
 	if(!gti2BeginReliableMessage(connection, GTI2MsgKeepAlive, totalLen  + connection->socket->protocolOffset, &overflow))
 		return GT2False;
 
 	if(overflow)
 		return GT2True;
 
-	// end the message
+	// End the message.
 	if(!gti2EndReliableMessage(connection))
 		return GT2False;
 
@@ -1525,7 +1526,8 @@ GT2Bool gti2SendAppUnreliable(GT2Connection connection, const GT2Byte * message,
 	int totalLen;
 	GT2Byte * start;
 
-	// check if we can send it right away (unreliable that doesn't start with the magic string)
+	// Check to see if we can send the message right away (unreliable that 
+	// doesn't start with the magic string).
 	if((len < GTI2_MAGIC_STRING_LEN) || 
 		(memcmp(message + connection->socket->protocolOffset, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN) != 0))
 	{
@@ -1535,38 +1537,38 @@ GT2Bool gti2SendAppUnreliable(GT2Connection connection, const GT2Byte * message,
 		return GT2True;
 	}
 	
-	// magic string + message
+	// This totalLen is: magic string + message.
 	totalLen = (GTI2_MAGIC_STRING_LEN + len);
 
-	// check how much free space is in the outgoing buffer
+	// Check how much free space is in the outgoing buffer.
 	freeSpace = gti2GetBufferFreeSpace(&connection->outgoingBuffer);
 
-	// do we have the space to hold it?
+	// Do we have the space to hold the message?
 	if(freeSpace < totalLen)
 	{
-		// just drop it
+		// Since we don't have the space, just drop the message.
 		return GT2True;
 	}
 
-	// store the start of the actual message in the buffer
+	// Store the start of the actual message in the buffer.
 	start = (connection->outgoingBuffer.buffer + connection->outgoingBuffer.len);
 
-	// Copy the VDP data length if necessary	
+	// Copy the VDP data length if necessary.
 	if (connection->socket->protocolType == GTI2VdpProtocol)
 		gti2BufferWriteData(&connection->outgoingBuffer, message, 2);
 	
-	// copy it in, repeating the magic string at the beginning
+	// Copy the message in, repeating the magic string at the beginning.
 	gti2BufferWriteData(&connection->outgoingBuffer, (const GT2Byte *)GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
 	
-	// copy the data at the starting position + offset based on the protocol
+	// Copy the data at the starting position + offset based on the protocol.
 	gti2BufferWriteData(&connection->outgoingBuffer, message + connection->socket->protocolOffset, 
 		(int)(len - connection->socket->protocolOffset));
 	
-	// do the send
+	// Do the send.
 	if(!gti2ConnectionSendData(connection, start, totalLen))
 		return GT2False;
 
-	// we don't need to save the message
+	// We don't need to save the message.
 	gti2BufferShorten(&connection->outgoingBuffer, -1, totalLen);
 	
 	return GT2True;
@@ -1574,12 +1576,13 @@ GT2Bool gti2SendAppUnreliable(GT2Connection connection, const GT2Byte * message,
 
 GT2Bool gti2SendAck(GT2Connection connection)
 {
-	// always allocate data length + magic string + type + ESN
-	// part of the buffer may not be used but more efficience to be on stack
+	// Always allocate data length + magic string + type + ESN.
+	// Part of the buffer may not be used, but it's more efficient to be on the 
+	// stack.
 	char buffer[MAX_PROTOCOL_OFFSET + GTI2_MAGIC_STRING_LEN + 1 + 2];
 	int pos = 0;
 	
-	// write the VDP data length
+	// Write the VDP data length.
 	if (connection->socket->protocolType == GTI2VdpProtocol)
 	{
 		short dataLength = (GTI2_MAGIC_STRING_LEN + 1 + 2);
@@ -1587,22 +1590,22 @@ GT2Bool gti2SendAck(GT2Connection connection)
 		pos += 2;
 	}
 
-	// write the magic string
+	// Write the magic string.
 	memcpy(buffer + pos, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
 	pos += GTI2_MAGIC_STRING_LEN;
 
-	// write the type
+	// Write the type.
 	buffer[pos++] = GTI2MsgAck;
 
-	// write the ESN
+	// Write the ESN.
 	gti2UShortToBuffer((GT2Byte *)buffer, pos, connection->expectedSerialNumber);
 	pos += 2;
 	
-	// send it
+	// send the message.
 	if(!gti2ConnectionSendData(connection, (const GT2Byte *)buffer, pos))
 		return GT2False;
 
-	// we just did an ack
+	// We just did an ack.
 	connection->pendingAck = GT2False;
 
 	return GT2True;
@@ -1612,11 +1615,12 @@ GT2Bool gti2SendAck(GT2Connection connection)
 GT2Bool gti2SendNack(GT2Connection connection, unsigned short SNMin, unsigned short SNMax)
 {
 	// data length + magic string + type + SNMin [+ SNMax]
-	// part of the buffer may not be used but more efficience to be on stack
+	// Part of the buffer may not be used, but it's more efficient to be on the
+	// stack.
 	char buffer[MAX_PROTOCOL_OFFSET + GTI2_MAGIC_STRING_LEN + 1 + 2 + 2];
 	int pos = 0;
 
-	// write the VDP data length
+	// Write the VDP data length.
 	if (connection->socket->protocolType == GTI2VdpProtocol)
 	{
 		short dataLength = (GTI2_MAGIC_STRING_LEN + 1 + 2 + 2);
@@ -1624,25 +1628,25 @@ GT2Bool gti2SendNack(GT2Connection connection, unsigned short SNMin, unsigned sh
 		pos += 2;
 	}
 
-	// write the magic string
+	// Write the magic string.
 	memcpy(buffer + pos, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
 	pos += GTI2_MAGIC_STRING_LEN;
 
-	// write the type
+	// Write the type.
 	buffer[pos++] = GTI2MsgNack;
 
-	// write the SNMin
+	// Write the SNMin.
 	gti2UShortToBuffer((GT2Byte *)buffer, pos, SNMin);
 	pos += 2;
 
-	// write the SNMax if it's different
+	// Write the SNMax if it's different.
 	if(SNMin != SNMax)
 	{
 		gti2UShortToBuffer((GT2Byte *)buffer, pos, SNMax);
 		pos += 2;
 	}
 
-	// send it
+	// Send the message.
 	if(!gti2ConnectionSendData(connection, (const GT2Byte *)buffer, pos))
 		return GT2False;
 
@@ -1653,35 +1657,36 @@ GT2Bool gti2SendNack(GT2Connection connection, unsigned short SNMin, unsigned sh
 GT2Bool gti2SendPing(GT2Connection connection)
 {
 	// data length + magic string + type + "time" + current time
-	// part of the buffer may not be used but more efficience to be on stack
+	// Part of the buffer may not be used, but it's more efficient to be on the 
+	// stack.
 	char buffer[MAX_PROTOCOL_OFFSET + GTI2_MAGIC_STRING_LEN + 1 + 4 + sizeof(gsi_time)];
 	int pos = 0;
 	gsi_time now;
 
-	// write the VDP data length
+	// Write the VDP data length.
 	if (connection->socket->protocolType == GTI2VdpProtocol)
 	{
 		short dataLength = (GTI2_MAGIC_STRING_LEN + 1 + 4 + sizeof(gsi_time));
 		memcpy(buffer, &dataLength, 2);
 		pos += 2;
 	}
-	// write the magic string
+	// Write the magic string.
 	memcpy(buffer + pos, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
 	pos += GTI2_MAGIC_STRING_LEN;
 
-	// write the type
+	// Write the type.
 	buffer[pos++] = GTI2MsgPing;
 
-	// copy the time id
+	// Copy the time id.
 	memcpy(buffer + pos, "time", 4);
 	pos += 4;
 
-	// write the current time
+	// Write the current time.
 	now = current_time();
 	memcpy(buffer + pos, &now, sizeof(gsi_time));
 
 	pos += (int)sizeof(gsi_time);
-	// send it
+	// Send the message.
 	if(!gti2ConnectionSendData(connection, (const GT2Byte *)buffer, pos))
 		return GT2False;
 
@@ -1691,16 +1696,16 @@ GT2Bool gti2SendPing(GT2Connection connection)
 
 GT2Bool gti2SendPong(GT2Connection connection, GT2Byte * message, int len)
 {
-	// change the ping to a pong
+	// Change the ping to a pong.
 	message[GTI2_MAGIC_STRING_LEN] = GTI2MsgPong;
 
-	// send it
+	// Send it.
 	return gti2ConnectionSendData(connection, message, len);
 }
 
 GT2Bool gti2SendClosed(GT2Connection connection)
 {
-	// normal close
+	// Normal close.
 	return gti2SendClosedOnSocket(connection->socket, connection->ip, connection->port);
 }
 
@@ -1708,11 +1713,12 @@ GT2Bool gti2SendClosed(GT2Connection connection)
 GT2Bool gti2SendClosedOnSocket(GT2Socket socket, unsigned int ip, unsigned short port)
 {
 	// Vdp data length (not including voice) + magic string + type
-	// part of the buffer may not be used but more efficience to be on stack
+	// Part of the buffer may not be used, but it's more efficient to be on the 
+	// stack.
 	char buffer[MAX_PROTOCOL_OFFSET + GTI2_MAGIC_STRING_LEN + 1]; 
 	int pos = 0;
 
-	// write the data length
+	// Write the data length.
 	if (socket->protocolType == GTI2VdpProtocol)
 	{
 		short dataLength = GTI2_MAGIC_STRING_LEN + 1;
@@ -1720,14 +1726,14 @@ GT2Bool gti2SendClosedOnSocket(GT2Socket socket, unsigned int ip, unsigned short
 		pos += 2;
 	}
 
-	// write the magic string
+	// Write the magic string.
 	memcpy(buffer + pos, GTI2_MAGIC_STRING, GTI2_MAGIC_STRING_LEN);
 	pos += GTI2_MAGIC_STRING_LEN;
 
-	// write the type
+	// Write the type.
 	buffer[pos++] = GTI2MsgClosed;
 
-	// send it
+	// Send it.
 	if(!gti2SocketSend(socket, ip, port, (const GT2Byte *)buffer, pos))
 		return GT2False;
 
@@ -1740,19 +1746,19 @@ GT2Bool gti2ResendMessage(GT2Connection connection, GTI2OutgoingBufferMessage * 
 	GTI2MessageType type;
 	int pos;
 
-	// replace the ESN (it's after the magic string, the type, and the SN)
+	// Replace the ESN (it's after the magic string, the type, and the SN).
 	pos = (message->start + connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN + 1 + 2);
 	
 	gti2UShortToBuffer(connection->outgoingBuffer.buffer, pos, connection->expectedSerialNumber);
 
-	// send the message
+	// Send the message.
 	if(!gti2ConnectionSendData(connection, connection->outgoingBuffer.buffer + message->start, message->len))
 		return GT2False;
 
-	// update the last time sent
+	// Update the last time sent.
 	message->lastSend = connection->lastSend;
 
-	// if it was a server challenge, update that time too
+	// If it was a server challenge, update that time too.
 	type = (GTI2MessageType)connection->outgoingBuffer.buffer[message->start + connection->socket->protocolOffset + GTI2_MAGIC_STRING_LEN];
 	
 	if(type == GTI2MsgServerChallenge)
@@ -1765,7 +1771,7 @@ GT2Bool gti2Send(GT2Connection connection, const GT2Byte * message, int len, GT2
 {
 	if (reliable)
 		return gti2SendAppReliable(connection, message, len);
-	//send unreliable messages
+	// Send unreliable messages.
 	return gti2SendAppUnreliable(connection, message, len);
 }
 
@@ -1774,19 +1780,20 @@ GT2Bool gti2WasMessageIDConfirmed(const GT2Connection connection, GT2MessageID m
 	GTI2OutgoingBufferMessage * message;
 	int len;
 
-	// if there are no reliable messages waiting confirmation, then this has already been confirmed
+	// If there are no reliable messages awaiting confirmation, then this has 
+	// already been confirmed.
 	len = ArrayLength(connection->outgoingBufferMessages);
 	if(!len)
 		return GT2True;
 
-	// get the oldest message waiting confirmation
+	// Get the oldest message awaiting confirmation.
 	message = (GTI2OutgoingBufferMessage *)ArrayNth(connection->outgoingBufferMessages, 0);
 
-	// if the message id we are looking for is older than the first one waiting confirmation,
-	// then it has already been confirmed
+	// If the message id we are looking for is older than the first one 
+	// awaiting confirmation, then it has already been confirmed.
 	if(gti2SNDiff(messageID, message->serialNumber) < 0)
 		return GT2True;
 
-	// the message hasn't been confirmed yet
+	// The message hasn't been confirmed yet.
 	return GT2False;
 }

@@ -2,17 +2,17 @@
 // File:	gpiInfo.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
+
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //FUNCTIONS
-///////////
 static GPIBool
 gpiIsValidDate(
   int day,
@@ -21,30 +21,24 @@ gpiIsValidDate(
 )
 {
 	// Check for a blank.
-	/////////////////////
 	if((day == 0) && (month == 0) && (year == 0))
 		return GPITrue;
 
 	// Check for negatives.
-	///////////////////////
 	if((day < 0) || (month < 0) || (year < 0))
 		return GPIFalse;
 
 	// Validate the day of the month.
-	/////////////////////////////////
 	switch(month)
 	{
 	// No month.
-	////////////
 	case 0:
 		// Can't specify a day without a month.
-		///////////////////////////////////////
 		if(day != 0)
 			return GPIFalse;
 		break;
 
 	// 31-day month.
-	////////////////
 	case 1:
 	case 3:
 	case 5:
@@ -57,7 +51,6 @@ gpiIsValidDate(
 		break;
 
 	// 30-day month.
-	////////////////
 	case 4:
 	case 6:
 	case 9:
@@ -67,10 +60,8 @@ gpiIsValidDate(
 		break;
 
 	// 28/29-day month.
-	///////////////////
 	case 2:
 		// Leap year?
-		/////////////
 		if((((year % 4) == 0) && ((year % 100) != 0)) || ((year % 400) == 0))
 		{
 			if(day > 29)
@@ -84,14 +75,12 @@ gpiIsValidDate(
 		break;
 
 	// Invalid month.
-	/////////////////
 	default:
 		return GPIFalse;
 	}
 
 	// Check that the date is in the valid range:
 	// 01.01.1900 - 06.06.2079
-	/////////////////////////////////////////////
 	if(year < 1900)
 		return GPIFalse;
 	if(year > 2079)
@@ -122,23 +111,19 @@ gpiDateToInt(
 	// 31-22: day
 	// 23-16: month
 	// 15-00: year
-	///////////////////////////////////////
 	
 	// Error check.
-	///////////////
 	GS_ASSERT(gpiIsValidDate(day, month, year));
 	if(!gpiIsValidDate(day, month, year))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid date.");
 
 	// Pack!
-	////////
 	temp = 0;
 	temp |= (day << 24);
 	temp |= (month << 16);
 	temp |= year;
 
 	// Set it.
-	//////////
 	*date = temp;
 
 	return GP_NO_ERROR;
@@ -161,22 +146,18 @@ gpiIntToDate(
 	// 31-22: day
 	// 23-16: month
 	// 15-00: year
-	////////////////////////////////////////
 
 	// Split up the date.
-	/////////////////////
 	d = ((date >> 24) & 0xFF);
 	m = ((date >> 16) & 0xFF);
 	y = (date & 0xFFFF);
 
 	// Error check.
-	///////////////
 	GS_ASSERT(gpiIsValidDate(d, m, y));
 	if(!gpiIsValidDate(d, m, y))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid date.");
 
 	// It's all good.
-	/////////////////
 	*day = d;
 	*month = m;
 	*year = y;
@@ -192,7 +173,6 @@ gpiInfoCacheToArg(
 {
 #ifndef GSI_UNICODE
 	// Copy....
-	///////////
 	if(cache->nick)
 		strzcpy(arg->nick, cache->nick, GP_NICK_LEN);
 	else
@@ -234,39 +214,38 @@ gpiInfoCacheToArg(
 		arg->aimname[0] = '\0';
 #else
 	// Copy....
-	///////////
 	if(cache->nick)
-		UTF8ToUCS2StringLen(cache->nick, arg->nick, GP_NICK_LEN);
+		UTF8ToUCSStringLen(cache->nick, arg->nick, GP_NICK_LEN);
 	else
 		arg->nick[0] = '\0';
 	if(cache->uniquenick)
-		UTF8ToUCS2StringLen(cache->uniquenick, arg->uniquenick, GP_UNIQUENICK_LEN);
+		UTF8ToUCSStringLen(cache->uniquenick, arg->uniquenick, GP_UNIQUENICK_LEN);
 	else
 		arg->uniquenick[0] = '\0';
 	if(cache->email)
-		UTF8ToUCS2StringLen(cache->email, arg->email, GP_EMAIL_LEN);
+		UTF8ToUCSStringLen(cache->email, arg->email, GP_EMAIL_LEN);
 	else
 		arg->email[0] = '\0';
 	if(cache->firstname)
-		UTF8ToUCS2StringLen(cache->firstname, arg->firstname, GP_FIRSTNAME_LEN);
+		UTF8ToUCSStringLen(cache->firstname, arg->firstname, GP_FIRSTNAME_LEN);
 	else
 		arg->firstname[0] = '\0';
 	if(cache->lastname)
-		UTF8ToUCS2StringLen(cache->lastname, arg->lastname, GP_LASTNAME_LEN);
+		UTF8ToUCSStringLen(cache->lastname, arg->lastname, GP_LASTNAME_LEN);
 	else
 		arg->lastname[0] = '\0';
 	if(cache->homepage)
-		UTF8ToUCS2StringLen(cache->homepage, arg->homepage, GP_HOMEPAGE_LEN);
+		UTF8ToUCSStringLen(cache->homepage, arg->homepage, GP_HOMEPAGE_LEN);
 	else
 		arg->homepage[0] = '\0';
-	UTF8ToUCS2StringLen(cache->zipcode, arg->zipcode, GP_ZIPCODE_LEN);
-	UTF8ToUCS2StringLen(cache->countrycode, arg->countrycode, GP_COUNTRYCODE_LEN);
+	UTF8ToUCSStringLen(cache->zipcode, arg->zipcode, GP_ZIPCODE_LEN);
+	UTF8ToUCSStringLen(cache->countrycode, arg->countrycode, GP_COUNTRYCODE_LEN);
 	if(cache->place)
-		UTF8ToUCS2StringLen(cache->place, arg->place, GP_PLACE_LEN);
+		UTF8ToUCSStringLen(cache->place, arg->place, GP_PLACE_LEN);
 	else
 		arg->place[0] = '\0';
 	if(cache->aimname)
-		UTF8ToUCS2StringLen(cache->aimname, arg->aimname, GP_AIMNAME_LEN);
+		UTF8ToUCSStringLen(cache->aimname, arg->aimname, GP_AIMNAME_LEN);
 	else
 		arg->aimname[0] = '\0';
 #endif
@@ -317,28 +296,23 @@ gpiProcessGetInfo(
 	GPIBool saveSig;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPITrue))
 		return GP_SERVER_ERROR;
 
 	// This should be \pi\.
-	///////////////////////
 	if(strncmp(input, "\\pi\\", 4) != 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	// Get the profile id.
-	//////////////////////
 	if(!gpiValueForKey(input, "\\profileid\\", buffer, sizeof(buffer)))
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 	profileid = atoi(buffer);
 	GS_ASSERT(profileid > 0);
 
 	// Get the profile - we might not have a profile object.
-	////////////////////////////////////////////////////////
 	gpiGetProfile(connection, (GPProfile)profileid, &profile);
 
 	// Setup the info cache.
-	////////////////////////
 	memset(&infoCache, 0, sizeof(GPIInfoCache));
 	infoCache.nick = nick;
 	infoCache.uniquenick = uniquenick;
@@ -349,7 +323,6 @@ gpiProcessGetInfo(
 	infoCache.aimname = aimname;
 
 	// Parse the info.
-	//////////////////
 	if(!gpiValueForKey(input, "\\nick\\", infoCache.nick, GP_NICK_LEN))
 		infoCache.nick[0] = '\0';
 	if(!gpiValueForKey(input, "\\uniquenick\\", infoCache.uniquenick, GP_UNIQUENICK_LEN))
@@ -442,31 +415,25 @@ gpiProcessGetInfo(
 		infoCache.conntypeid = atoi(buffer);
 
 	// Get the peer sig.
-	////////////////////
 	if(!gpiValueForKey(input, "\\sig\\", buffer, sizeof(buffer)))
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	saveSig = iconnection->infoCaching;
 
 	// Is there a pending peer connection looking for a sig?
-	////////////////////////////////////////////////////////
 	for(peer = iconnection->peerList ; peer != NULL ; peer = peer->pnext)
 	{
 		// Is it the same profile?
-		//////////////////////////
 		if(peer->profile == profileid)
 		{
 			// Is it getting the sig?
-			/////////////////////////
 			if(peer->state == GPI_PEER_GETTING_SIG)
 			{
 				// We need to make sure there's an actual profile object.
-				/////////////////////////////////////////////////////////
 				if(!profile)
 					profile = gpiProfileListAdd(connection, profileid);
 
 				// It got it.
-				/////////////
 				peer->state = GPI_PEER_GOT_SIG;
 
 				saveSig = GPITrue;
@@ -475,12 +442,10 @@ gpiProcessGetInfo(
 	}
 
 	// Cache info?
-	//////////////
 	if(!profile && iconnection->infoCaching)
 		profile = gpiProfileListAdd(connection, profileid);
 
 	// Set the peer sig.
-	////////////////////
 	if(saveSig)
 	{
 		freeclear(profile->peerSig);
@@ -488,12 +453,10 @@ gpiProcessGetInfo(
 	}
 
 	// Caching info?
-	////////////////
 	if(iconnection->infoCaching)
 		gpiSetInfoCache(connection, profile, &infoCache);
 
 	// Call the callback.
-	/////////////////////
 	callback = operation->callback;
 	if(callback.callback != NULL)
 	{
@@ -510,7 +473,6 @@ gpiProcessGetInfo(
 	}
 
 	// This operation is complete.
-	//////////////////////////////
 	gpiRemoveOperation(connection, operation);
 
 	return GP_NO_ERROR;
@@ -525,7 +487,6 @@ gpiAddLocalInfo(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Add updatepro info.
-	//////////////////////
 	if(iconnection->updateproBuffer.len > 0)
 	{
 		gpiAppendStringToBuffer(connection, buffer, "\\updatepro\\\\sesskey\\");
@@ -539,7 +500,6 @@ gpiAddLocalInfo(
 	}
 
 	// Add updateui info.
-	//////////////////////
 	if(iconnection->updateuiBuffer.len > 0)
 	{
 		gpiAppendStringToBuffer(connection, buffer, "\\updateui\\\\sesskey\\");
@@ -593,28 +553,23 @@ gpiSetInfoi(
 	char intValue[16];
 
 	// Check the info param.
-	////////////////////////
 	switch(info)
 	{
 	case GP_ZIPCODE:
 		// Error check.
-		///////////////
 		if(value < 0)
 			Error(connection, GP_PARAMETER_ERROR, "Invalid zipcode.");
 
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\zipcode\\", intValue));
 
 		break;
 
 	case GP_SEX:
 		// Check the sex type.
-		//////////////////////
 		switch(value)
 		{
 		case GP_MALE:
@@ -637,193 +592,157 @@ gpiSetInfoi(
 
 	case GP_ICQUIN:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\icquin\\", intValue));
 
 		break;
 		
 	case GP_CPUBRANDID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\cpubrandid\\", intValue));
 
 		break;
 
 	case GP_CPUSPEED:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\cpuspeed\\", intValue));
 
 		break;
 
 	case GP_MEMORY:
 		// Divide by 16.
-		////////////////
 		value /= 16;
 
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\memory\\", intValue));
 
 		break;
 
 	case GP_VIDEOCARD1RAM:
 		// Divide by 4.
-		///////////////
 		value /= 4;
 
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\videocard1ram\\", intValue));
 
 		break;
 
 	case GP_VIDEOCARD2RAM:
 		// Divide by 4.
-		///////////////
 		value /= 4;
 
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\videocard2ram\\", intValue));
 
 		break;
 
 	case GP_CONNECTIONID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\connectionid\\", intValue));
 
 		break;
 
 	case GP_CONNECTIONSPEED:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\connectionspeed\\", intValue));
 
 		break;
 
 	case GP_HASNETWORK:
 		// A boolean.
-		/////////////
 		if(value)
 			value = 1;
 
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\hasnetwork\\", intValue));
 
 		break;
 
 	case GP_PIC:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\pic\\", intValue));
 
 		break;
 
 	case GP_OCCUPATIONID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\occ\\", intValue));
 
 		break;
 
 	case GP_INDUSTRYID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\ind\\", intValue));
 
 		break;
 
 	case GP_INCOMEID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\inc\\", intValue));
 
 		break;
 
 	case GP_MARRIEDID:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\mar\\", intValue));
 
 		break;
 
 	case GP_CHILDCOUNT:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\chc\\", intValue));
 
 		break;
 
 	case GP_INTERESTS1:
 		// Convert it to a string.
-		//////////////////////////
 		sprintf(intValue,"%d",value);
 
 		// Send it to the server.
-		/////////////////////////
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\i1\\", intValue));
 
 		break;
@@ -851,12 +770,10 @@ gpiSetInfos(
 	char passwordenc[GP_PASSWORDENC_LEN];
 	
 	// Error check.
-	///////////////
 	if(value == NULL)
 		Error(connection, GP_PARAMETER_ERROR, "Invalid value.");
 
 	// Check the info param.
-	////////////////////////
 	switch(info)
 	{
 	case GP_NICK:
@@ -865,7 +782,7 @@ gpiSetInfos(
 		strzcpy(buffer, value, GP_NICK_LEN);
 		strzcpy(iconnection->nick, buffer, GP_NICK_LEN);
 #ifdef GSI_UNICODE
-		UTF8ToUCS2StringLen(iconnection->nick, iconnection->nick_W, GP_NICK_LEN); // update the UCS2 version
+		UTF8ToUCSStringLen(iconnection->nick, iconnection->nick_W, GP_NICK_LEN); // update the UCS2 version
 #endif
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\nick\\", buffer));
 		break;
@@ -876,7 +793,7 @@ gpiSetInfos(
 		strzcpy(buffer, value, GP_UNIQUENICK_LEN);
 		strzcpy(iconnection->uniquenick, buffer, GP_UNIQUENICK_LEN);
 #ifdef GSI_UNICODE
-		UTF8ToUCS2StringLen(iconnection->uniquenick, iconnection->uniquenick_W, GP_UNIQUENICK_LEN);
+		UTF8ToUCSStringLen(iconnection->uniquenick, iconnection->uniquenick_W, GP_UNIQUENICK_LEN);
 #endif
 		CHECK_RESULT(gpiSendLocalInfo(connection, "\\uniquenick\\", buffer));
 		break;
@@ -888,7 +805,7 @@ gpiSetInfos(
 		_strlwr(buffer);
 		strzcpy(iconnection->email, buffer, GP_EMAIL_LEN);
 #ifdef GSI_UNICODE
-		UTF8ToUCS2StringLen(iconnection->email, iconnection->email_W, GP_EMAIL_LEN);
+		UTF8ToUCSStringLen(iconnection->email, iconnection->email_W, GP_EMAIL_LEN);
 #endif
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\email\\", buffer));
 		break;
@@ -899,7 +816,7 @@ gpiSetInfos(
 		strzcpy(buffer, value, GP_PASSWORD_LEN);
 		strzcpy(iconnection->password, buffer, GP_PASSWORD_LEN);
 #ifdef GSI_UNICODE
-		UTF8ToUCS2StringLen(iconnection->password, iconnection->password_W, GP_PASSWORD_LEN);
+		UTF8ToUCSStringLen(iconnection->password, iconnection->password_W, GP_PASSWORD_LEN);
 #endif
 		gpiEncodeString(iconnection->password, passwordenc);
 		CHECK_RESULT(gpiSendUserInfo(connection, "\\passwordenc\\", passwordenc));
@@ -927,7 +844,6 @@ gpiSetInfos(
 
 	case GP_COUNTRYCODE:
 		// Error check.
-		///////////////
 		if(strlen(value) != 2)
 			Error(connection, GP_PARAMETER_ERROR, "Invalid countrycode.");
 
@@ -1052,20 +968,16 @@ gpiSetInfod(
 	char intValue[16];
 
 	// Birthday is the only date supported.
-	///////////////////////////////////////
 	if(info != GP_BIRTHDAY)
 		Error(connection, GP_PARAMETER_ERROR, "Invalid info.");
 
 	// Convert the date into our internal format.
-	/////////////////////////////////////////////
 	CHECK_RESULT(gpiDateToInt(connection, &date, day, month, year));
 
 	// Convert the int to a string.
-	///////////////////////////////
 	sprintf(intValue,"%d",date);
 
 	// Send the date.
-	/////////////////
 	CHECK_RESULT(gpiSendLocalInfo(connection, "\\birthday\\", intValue));
 
 	return GP_NO_ERROR;
@@ -1080,11 +992,9 @@ gpiSetInfoMask(
 	char buffer[16];
 
 	// Convert the mask to a string.
-	////////////////////////////////
 	sprintf(buffer,"%d",mask);
 
 	// Send it.
-	///////////
 	CHECK_RESULT(gpiSendLocalInfo(connection, "\\publicmask\\", buffer));
 
 	return GP_NO_ERROR;
@@ -1129,16 +1039,13 @@ gpiGetInfo(
 	int id;
 
 	// Check checkCache.
-	////////////////////
 	useCache = (checkCache == GP_CHECK_CACHE) ? GPITrue:GPIFalse;
 
 	// Check the info cache state.
-	//////////////////////////////
 	if(!iconnection->infoCaching)
 		useCache = GPIFalse;
 
 	// Check for using cached info.
-	///////////////////////////////
 	if(callback && useCache && gpiGetProfile(connection, profile, &pProfile) && pProfile->cache)
 	{
 		GPICallback gpiCallback;
@@ -1156,33 +1063,27 @@ gpiGetInfo(
 		gpiCallback.param = param;
 
 		// Add a dummy operation.
-		/////////////////////////
 		CHECK_RESULT(gpiAddOperation(connection, GPI_GET_INFO, NULL, &operation, GP_BLOCKING, callback, param));
 		id = operation->id;
 
 		// Add the callback.
-		////////////////////
 		CHECK_RESULT(gpiAddCallback(connection, gpiCallback, arg, operation, 0));
 
 		// Remove the dummy operation.
-		//////////////////////////////
 		gpiRemoveOperation(connection, operation);
 	}
 	else
 	{
 		// Add the operation.
-		/////////////////////
 		CHECK_RESULT(gpiAddOperation(connection, GPI_GET_INFO, NULL, &operation, blocking, callback, param));
 		id = operation->id;
 
 		// Send a request for info.
-		///////////////////////////
 		result = gpiSendGetInfo(connection, profile, operation->id);
 		CHECK_RESULT(result);
 	}
 
 	// Process it if blocking.
-	//////////////////////////
 	if(blocking)
 	{
 		result = gpiProcess(connection, id);
@@ -1203,17 +1104,14 @@ gpiGetInfoNoWait(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Check the info cache state.
-	//////////////////////////////
 	if(!iconnection->infoCaching)
 		return GP_NETWORK_ERROR;
 
 	// Check to see if we have the info cached.
-	///////////////////////////////////////////
 	if(!gpiGetProfile(connection, profile, &pProfile) || !pProfile->cache)
 		return GP_NETWORK_ERROR;
 
 	// Fill in the arg.
-	///////////////////
 	gpiInfoCacheToArg(pProfile->cache, arg);
 	arg->result = GP_NO_ERROR;
 	arg->profile = profile;
@@ -1231,20 +1129,16 @@ gpiSetInfoCache(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Check if we're caching info.
-	///////////////////////////////
 	if(!iconnection->infoCaching)
 		return GPITrue;
 
 	// Free any old cached info.
-	////////////////////////////
 	gpiFreeInfoCache(profile);
 
 	// Allocate the new info.
-	/////////////////////////
 	profile->cache = (GPIInfoCache *)gsimalloc(sizeof(GPIInfoCache));
 
 	// Copy in the new info.
-	////////////////////////
 	if(profile->cache)
 	{
 		*profile->cache = *cache;

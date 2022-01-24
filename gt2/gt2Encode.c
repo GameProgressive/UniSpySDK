@@ -2,30 +2,31 @@
 // File:	gt2Encode.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include <stdarg.h>
 #include <string.h>
 #include "gt2Encode.h"
 #include "gt2Main.h"
 
-// This handles alignment issues and endianess
+// This function handles alignment issues and endianess.
 void gt2MemCopy16(char *out, char const *in)
 {
 	#ifdef _GT2_ENDIAN_CONVERT
 		*out   = in[1];
 		out[1] = *in;
 	#else
-	// straight copy
+	// Straight copy..
 		*out   = *in;
 		out[1] = in[1];
 	#endif
 }
 
-// This handles alignment issues and endianess
+// This function handles alignment issues and endianess.
 void gt2MemCopy32(char *out, char const *in)
 {
 	#ifdef _GT2_ENDIAN_CONVERT
@@ -34,7 +35,7 @@ void gt2MemCopy32(char *out, char const *in)
 		out[2] = in[1];
 		out[3] = in[0];
 	#else
-	// straight copy
+	// Straight copy..
 		*out   = *in;
 		out[1] = in[1];
 		out[2] = in[2];
@@ -42,7 +43,7 @@ void gt2MemCopy32(char *out, char const *in)
 	#endif
 }
 
-// This handles alignment issues and endianess
+// This function handles alignment issues and endianess.
 void gt2MemCopy64(char *out, char const *in)
 {		
 	#ifdef _GT2_ENDIAN_CONVERT
@@ -55,7 +56,7 @@ void gt2MemCopy64(char *out, char const *in)
 		out[6] = in[1];
 		out[7] = in[0];
 	#else
-		// straight copy
+		// Straight copy.
 		memcpy(out, in, 8);
 	#endif
 
@@ -78,11 +79,11 @@ void gt2MemCopy(char *out, char const *in, int size)
 	}
 	else
 	{
-		// warning... no endianess decode.
+		// Warning: no endianess decode.
 		memcpy(out,in,(size_t)size);
 	}
 }
-#if defined(_PS2) || defined(__linux__) || defined(__APPLE__) || defined(__MINGW32__) || defined(_PS3) || defined(_WIN64) || defined(_X360)
+#if defined(_PS2) || defined(_UNIX) || defined(_PS3) || defined(_WIN64) || defined(_X360)
 
 #define GT_ENCODE_ELEM(TYPE,b,l,args) \
 { \
@@ -191,13 +192,13 @@ static int gtiEncodeBits(int bitcount, char *outBuffer, int outLength, va_list *
 	for (i = 0 ; i < bitcount ; i++)
 	{
 		bucket |= (char)((va_arg(*args,int) ? 1 : 0) << i);
-		//bucket |= ((va_arg(*args,char) ? 1 : 0) << i);
+		// bucket |= ((va_arg(*args,char) ? 1 : 0) << i);
 	}
 	*outBuffer = bucket;
 	return 1;
 }
 
-// length in bytes including NUL, or -1 if error
+// Length in bytes including NUL, or -1 if error.
 static int gtiCheckStringLen(char *inBuffer, int inLength)
 {
 	int len = 0;
@@ -211,7 +212,7 @@ static int gtiCheckStringLen(char *inBuffer, int inLength)
 	return len;
 }
 
-// length in bytes (not chars) including NUL, or -1 if error
+// Length in bytes (not chars) including NUL, or -1 if error.
 static int gtiCheckDoubleStringLen(char *inBuffer, int inLength)
 {
 	int len = 0;
@@ -225,7 +226,7 @@ static int gtiCheckDoubleStringLen(char *inBuffer, int inLength)
 	return len;
 }
 
-// length in bytes including NULs, or -1 if error
+// Length in bytes including NULs, or -1 if error.
 static int gtiCheckStringArrayLen(char *inBuffer, int inLength)
 {
 	int len = 0;
@@ -266,7 +267,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 	case GT_FLOAT: 
 		{
 		#if(0)
-			// no endian convert
+			// No endian convert.
 				GT_FLOAT_TYPE* v; 
 				if (inLength < sizeof(GT_FLOAT_TYPE)) 
 					return -1; 
@@ -282,7 +283,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 		}
 	case GT_DOUBLE:
 		#if(0)
-			// no endian convert
+			// No endian convert.
 		{		GT_DOUBLE_TYPE* v; 
 				if (inLength < sizeof(GT_DOUBLE_TYPE)) 
 					return -1; 
@@ -361,7 +362,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 				return -1;
 			holdlen = *len;
 			memcpy(len, inBuffer, sizeof(*len));
-			if (*len > holdlen) //there isn't enough room in their dest!
+			if (*len > holdlen) // There isn't enough room in their dest!
 				return -1;
 			if (inLength < (int)sizeof(*len) + *len)
 				return -1;
@@ -381,7 +382,7 @@ static int gtiDecodeSingle(char elemType, char *inBuffer, int inLength, va_list 
 		//break;
 		
 	}
-	return -1; //bad type!
+	return -1; // Bad type!
 }
 
 static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_list *args)
@@ -406,7 +407,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 	case GT_UCHAR:
 		GT_ENCODE_ELEM(GT_UCHAR_TYPE,outBuffer, outLength, args);
 		//break;
-	case GT_FLOAT: //floats are promoted to double in varargs, need to demote
+	case GT_FLOAT: // Floats are promoted to double in varargs, need to demote.
 		{
 			double temp;
 			float f;
@@ -491,7 +492,7 @@ static int gtiEncodeSingle(char elemType, char *outBuffer, int outLength, va_lis
 		}
 		
 	}
-	return -1; //bad type!
+	return -1; // Bad elemType!
 }
 
 static int gtInternalEncodeV(int usetype, GTMessageType msgType, const char *fmtString, char *outBuffer, int outLength, va_list *args)
@@ -500,7 +501,7 @@ static int gtInternalEncodeV(int usetype, GTMessageType msgType, const char *fmt
 	int totSize = outLength;
 	const char *bitCounter;
 
-	//set the message type
+	// Set the message type.
 	if (usetype)
 	{
 		elemSize = sizeof(msgType);
@@ -513,7 +514,7 @@ static int gtInternalEncodeV(int usetype, GTMessageType msgType, const char *fmt
 	}
 	while (*fmtString)
 	{
-		if (*fmtString == GT_BIT) //see how many
+		if (*fmtString == GT_BIT) // See how many bits.
 		{
 			for (bitCounter = fmtString; *bitCounter == GT_BIT && bitCounter - fmtString <= 8; bitCounter++)  
 				{};
@@ -522,7 +523,7 @@ static int gtInternalEncodeV(int usetype, GTMessageType msgType, const char *fmt
 		} else
 			elemSize = gtiEncodeSingle(*fmtString, outBuffer, outLength, args);
 		if (elemSize < 0)
-			return -1; //out of space
+			return -1; // Out of space.
 		outBuffer += elemSize;
 		outLength -= elemSize;
 		fmtString++;
@@ -545,7 +546,7 @@ int gtEncode(GTMessageType msgType, const char *fmtString, char *outBuffer, int 
 	int rcode;
 	va_list args;
 
-	//set the values
+	// Set the values.
 	va_start(args, outLength);
 	rcode = gtEncodeV(msgType, fmtString, outBuffer, outLength, &args);
 	va_end(args);
@@ -558,7 +559,7 @@ int gtEncodeNoType(const char *fmtString, char *outBuffer, int outLength, ...)
 	int rcode;
 	va_list args;
 	
-	//set the values
+	// Set the values.
 	va_start(args, outLength);
 	rcode = gtEncodeNoTypeV(fmtString, outBuffer, outLength, &args);
 	va_end(args);
@@ -572,7 +573,7 @@ static int gtDecodeInternalV(int usetype, const char *fmtString, char *inBuffer,
 	int totSize = inLength;
 	const char *bitCounter;
 
-	//skip the message type
+	// Skip the message type.
 	if (usetype)
 	{
 		inBuffer += sizeof(GTMessageType);
@@ -581,7 +582,7 @@ static int gtDecodeInternalV(int usetype, const char *fmtString, char *inBuffer,
 
 	while (*fmtString)
 	{
-		if (*fmtString == GT_BIT) //see how many
+		if (*fmtString == GT_BIT) // See how many.
 		{
 			for (bitCounter = fmtString; *bitCounter == GT_BIT && bitCounter - fmtString <= 8; bitCounter++)
 				{};
@@ -590,15 +591,15 @@ static int gtDecodeInternalV(int usetype, const char *fmtString, char *inBuffer,
 		} else
 			elemSize = gtiDecodeSingle(*fmtString, inBuffer, inLength, args);
 		if (elemSize < 0)
-			return -1; //out of space
+			return -1; // Out of space.
 		inBuffer += elemSize;
 		inLength -= elemSize;
 		fmtString++;
 	}
-	//NOTE: inLength should be 0 here if we "ate" the whole message
-	//If it's not 0, then the encoding and decoding strings probably did not match
-	//which would generally indicate a bug
-	//PANTS - commented out because we could be decoding the rest with a gtDecodeNoType
+	//NOTE: inLength should be 0 here if we "ate" the whole message. If it's 
+	// not 0, then the encoding and decoding strings probably did not match,
+	// which would generally indicate a bug.
+	// PANTS - commented out because we could be decoding the rest with a gtDecodeNoType.
 //	GS_ASSERT(inLength == 0);
 	return totSize - inLength;
 }
@@ -618,7 +619,7 @@ int gtDecode(const char *fmtString, char *inBuffer, int inLength, ...)
 	int rcode;
 	va_list args;
 	
-	//set the values
+	// Set the values.
 	va_start(args, inLength);
 	rcode = gtDecodeV(fmtString, inBuffer, inLength, &args);
 	va_end(args);
@@ -631,7 +632,7 @@ int gtDecodeNoType(const char *fmtString, char *inBuffer, int inLength, ...)
 	int rcode;
 	va_list args;
 	
-	//set the values
+	// Set the values.
 	va_start(args, inLength);
 	rcode = gtDecodeNoTypeV(fmtString, inBuffer, inLength, &args);
 	va_end(args);
@@ -647,7 +648,7 @@ GTMessageType gtEncodedMessageType(char *inBuffer)
 	return type;
 }
 
-// change the message type for an encoded message
+// Change the message type for an encoded message.
 void	gtEncodedMessageTypeSet	(char *inBuffer, GTMessageType newtype)
 {
 	gt2MemCopy16(inBuffer, (char *)&newtype);

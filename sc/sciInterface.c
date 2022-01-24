@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // This is declared as an extern so it can be overriden when testing
-#define SC_SERVICE_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.comp.pubsvs." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx"
+#define SC_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.comp.pubsvs." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx"
 char scServiceURL[SC_SERVICE_MAX_URL_LEN] = "";
 
 

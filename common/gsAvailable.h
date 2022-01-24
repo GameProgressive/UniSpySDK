@@ -2,10 +2,11 @@
 // File:	gsAvailable.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GSAVAILABLE_H_
 #define _GSAVAILABLE_H_
@@ -37,7 +38,7 @@ typedef enum
 
 // start an available check for a particular game
 // return 0 if no error starting up, non-zero if there's an error
-void GSIStartAvailableCheck(const gsi_char * gamename);
+COMMON_API void GSIStartAvailableCheck(const gsi_char * gamename);
 
 // let the available check think
 // continue to call this while it returns GSIACWaiting
@@ -46,14 +47,14 @@ void GSIStartAvailableCheck(const gsi_char * gamename);
 // continue to use the GameSpy SDKs.  the backend services are not available
 // for the game.  in this case, you can show the user a
 // message based on the particular result.
-GSIACResult GSIAvailableCheckThink(void);
+COMMON_API GSIACResult GSIAvailableCheckThink(void);
 
 // this should only be used if the availability check needs to be aborted
 // for example, if the player leaves the game's multiplayer area before the check completes
-void GSICancelAvailableCheck(void);
+COMMON_API void GSICancelAvailableCheck(void);
 
 // Get the current availability
-GSIACResult GSIGetAvailable(void);
+COMMON_API GSIACResult GSIGetAvailable(void);
 
 // internal use only
 extern GSIACResult __GSIACResult;

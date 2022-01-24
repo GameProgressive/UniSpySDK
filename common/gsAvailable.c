@@ -2,10 +2,11 @@
 // File:	gsAvailable.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsCommon.h"
 #include "gsAvailable.h"
@@ -73,6 +74,11 @@ void GSIStartAvailableCheckA(const char * gamename)
 	// clear the sock
 	AC.sock = INVALID_SOCKET;
 #else
+
+#if defined(_PSP2)
+	int blockingOption;
+#endif
+
 	char hostname[64];
 	int override;
 	int rcode;
@@ -104,6 +110,11 @@ void GSIStartAvailableCheckA(const char * gamename)
 	if(AC.sock == INVALID_SOCKET)
 		return;
 
+#if defined(_PSP2)
+	blockingOption = 1;
+	setsockopt(AC.sock, SOL_SOCKET, SO_NBIO, &blockingOption, sizeof(blockingOption));
+#endif
+
 	// setup our packet
 	AC.packet[0] = PACKET_TYPE;
 	len = (int)strlen(gamename);
@@ -124,7 +135,7 @@ void GSIStartAvailableCheckW(const gsi_char * gamename)
 	char gamename_A[32];
 	GS_ASSERT(gamename != NULL);
 
-	UCS2ToAsciiString(gamename, gamename_A);
+	UCSToAsciiString(gamename, gamename_A);
 
 	GSIStartAvailableCheckA(gamename_A);
 }
@@ -169,7 +180,7 @@ GSIACResult GSIAvailableCheckThink(void)
 	SOCKADDR_IN address;
 	socklen_t len = sizeof(address);
 	int rcode;
-	int disabledservices;
+	int disabledservices = 0;
 
 	// if we don't have a sock, possibly because of an initialization error, default to available
 	if(AC.sock == INVALID_SOCKET)

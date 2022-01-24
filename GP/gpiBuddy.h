@@ -11,19 +11,16 @@
 #define _GPIBUDDY_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //DEFINES
-/////////
-// Types of bm's.
-/////////////////
+// Types of bms.
 #define GPI_BM_MESSAGE                    1
 #define GPI_BM_REQUEST                    2
-#define GPI_BM_REPLY                      3  // only used on the backend
+#define GPI_BM_REPLY                      3  // Only used on the backend.
 #define GPI_BM_AUTH                       4
 #define GPI_BM_UTM                        5
-#define GPI_BM_REVOKE                     6  // remote buddy removed from local list
+#define GPI_BM_REVOKE                     6  // Remote buddy removed from local list.
 #define GPI_BM_STATUS                   100						
 #define GPI_BM_INVITE                   101
 #define GPI_BM_PING                     102
@@ -41,60 +38,43 @@
 #define GPI_BM_FILE_TRANSFER_KEEPALIVE  208
 
 //FUNCTIONS
-///////////
-GPResult
-gpiProcessRecvBuddyMessage(
-  GPConnection * connection,
-  const char * input
-);
+GPResult gpiProcessRecvBuddyMessage(GPConnection * connection,
+									const char * input);
 
-GPResult gpiProcessRecvBuddyStatusInfo(GPConnection *connection, const char *input);
+GPResult gpiProcessRecvBuddyStatusInfo(GPConnection *connection, 
+									   const char *input);
 
-GPResult 
-gpiProcessRecvBuddyList(
-  GPConnection * connection, 
-  const char * input
-);
+GPResult gpiProcessRecvBuddyList(GPConnection * connection, 
+								 const char * input);
 
-GPResult
-gpiSendServerBuddyMessage(
-  GPConnection * connection,
-  int profileid,
-  int type,
-  const char * message
-);
+GPResult gpiSendServerBuddyMessage(GPConnection * connection,
+								   int profileid,
+								   int type,
+								   const char * message);
 
-GPResult
-gpiSendBuddyMessage(
-  GPConnection * connection,
-  int profileid,
-  int type,
-  const char * message,
-  int sendOptions,
-  GPIPeerOp *peerOp
-);
+GPResult gpiSendBuddyMessage(GPConnection * connection,
+							 int profileid,
+							 int type,
+							 const char * message,
+							 int sendOptions,
+							 GPIPeerOp *peerOp);
 
-GPResult gpiBuddyHandleKeyRequest(GPConnection *connection, GPIPeer *peer);
-GPResult gpiBuddyHandleKeyReply(GPConnection *connection, GPIPeer *peer, char *buffer);
+GPResult gpiBuddyHandleKeyRequest(GPConnection *connection, 
+								  GPIPeer *peer);
 
-GPResult
-gpiAuthBuddyRequest(
-  GPConnection * connection,
-  GPProfile profile
-);
+GPResult gpiBuddyHandleKeyReply(GPConnection *connection, 
+								GPIPeer *peer, 
+								char *buffer);
 
-GPIBool
-gpiFixBuddyIndices(
-  GPConnection * connection,
-  GPIProfile * profile,
-  void * data
-);
+GPResult gpiAuthBuddyRequest(GPConnection * connection,
+							 GPProfile profile);
 
-GPResult
-gpiDeleteBuddy(
-  GPConnection * connection,
-  GPProfile profile,
-  GPIBool sendServerRequest
-);
+GPIBool gpiFixBuddyIndices(GPConnection * connection,
+						   GPIProfile * profile,
+						   void * data);
+
+GPResult gpiDeleteBuddy(GPConnection * connection,
+						GPProfile profile,
+						GPIBool sendServerRequest);
 
 #endif

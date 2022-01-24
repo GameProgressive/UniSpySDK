@@ -2,24 +2,25 @@
 // File:	qr2regkeys.c
 // SDK:		GameSpy Query and Reporting 2 (QR2) SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "qr2regkeys.h"
-
+#include "qr2.h"
 #include "../common/gsStringUtil.h"
 #include "../common/gsDebug.h"
 
-#ifdef __MWERKS__ // CodeWarrior requires prototypes
+#if defined(__MWERKS__) || defined(_PSP2) // CodeWarrior requires prototypes.
 void qr2_register_keyW(int keyid, const unsigned short *key);
 void qr2_register_keyA(int keyid, const char *key);
 #endif
 
 const char *qr2_registered_key_list[MAX_REGISTERED_KEYS] =
 {
-	"",				//0 is reserved
+	"",				//0 is reserved.
 	"hostname",		//1
 	"gamename",		//2
 	"gamever",		//3
@@ -51,7 +52,7 @@ const char *qr2_registered_key_list[MAX_REGISTERED_KEYS] =
 	"score_t",		//29
 	"nn_groupid",	//30
 
-	// Query From Master Only keys
+	// Query From Master Only keys.
 	"country",		//31
 	"region"		//32
 };
@@ -59,8 +60,8 @@ const char *qr2_registered_key_list[MAX_REGISTERED_KEYS] =
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Keep a list of the unicode keys we've allocated internally so that we can free
-// them when qr2 is shutdown
+// Keep a list of the unicode keys that we have allocated internally so that 
+// we can free them when qr2 is shutdown.
 typedef struct QR2KeyListNodeS
 {
 	char* mKeyData;
@@ -80,17 +81,17 @@ void qr2_internal_key_list_append(char* theKey)
 
 	GS_ASSERT(theKey != NULL);
 
-	// Init the new node
+	// Initialize the new node.
 	aNewNode = (QR2KeyListNode*)gsimalloc(sizeof(QR2KeyListNode));
 	aNewNode->mKeyData = theKey;
 	aNewNode->mNextKey = NULL;
 
-	// Check for a NULL head
+	// Check for a NULL head.
 	if (qr2_internal_key_list.mHead == NULL)
 		qr2_internal_key_list.mHead = aNewNode;
 	else
 	{
-		// Find the end of the list and append this node
+		// Find the end of the list and append this node.
 		QR2KeyListNode* aInsertPlace = qr2_internal_key_list.mHead;
 		while(aInsertPlace->mNextKey != NULL)
 			aInsertPlace = aInsertPlace->mNextKey;
@@ -104,17 +105,17 @@ void qr2_internal_key_list_free()
 	QR2KeyListNode* aNodeToFree;
 	QR2KeyListNode* aNextNode;
 
-	// Free the nodes
+	// Free the nodes.
 	aNodeToFree = qr2_internal_key_list.mHead;
 	while (aNodeToFree != NULL)
 	{
-		aNextNode = aNodeToFree->mNextKey;	// Get a ptr to the next node (or will be lost)
-		gsifree(aNodeToFree->mKeyData);		// free the string we allocated in qr2_register_keyW
-		gsifree(aNodeToFree);				// free the current node
-		aNodeToFree = aNextNode;			// set the current node to the next node
+		aNextNode = aNodeToFree->mNextKey;	// Get a ptr to the next node (or will be lost).
+		gsifree(aNodeToFree->mKeyData);		// Free the string we allocated in qr2_register_keyW.
+		gsifree(aNodeToFree);				// Free the current node.
+		aNodeToFree = aNextNode;			// Set the current node to the next node.
 	}
 	
-	// Initialize the list back to NULL
+	// Initialize the list back to NULL.
 	qr2_internal_key_list.mHead = NULL;
 }
 
@@ -134,7 +135,7 @@ void qr2_register_keyA(int keyid, const char *key)
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
 		"qr2_register_keyA()\r\n");
 
-	// Verify the key range
+	// Verify the key range.
 	if (keyid < NUM_RESERVED_KEYS || keyid > MAX_REGISTERED_KEYS)
 	{
 		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_WarmError,
@@ -148,19 +149,21 @@ void qr2_register_keyA(int keyid, const char *key)
 	qr2_registered_key_list[keyid] = key;
 }
 
-void qr2_register_keyW(int keyid, const unsigned short *key)
+#if GSI_UNICODE
+void qr2_register_keyW(int keyid, const gsi_char *key)
 {
 	char* key_A = NULL;
 
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
 		"qr2_register_keyW()\r\n");
 
-	// Create UTF8 copy
-	key_A = UCS2ToUTF8StringAlloc(key);
+	// Create UTF8 copy.
+	key_A = UCSToUTF8StringAlloc(key);
 
-	// Register the ascii version
+	// Register the ascii version.
 	qr2_register_keyA(keyid, key_A);
 
-	// Keep track of the unicode version so we can delete it later
+	// Keep track of the unicode version that so we can delete it later.
 	qr2_internal_key_list_append(key_A);
 }
+#endif

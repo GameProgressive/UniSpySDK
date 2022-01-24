@@ -2,10 +2,11 @@
 // File:	gpiUtility.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
 //////////
@@ -20,7 +21,6 @@
 #define OUTPUT_MAX_COL     100
 
 //FUNCTIONS
-///////////
 void
 strzcpy(
   char * dest,
@@ -48,21 +48,18 @@ gpiCheckForError(
 	if(strncmp(input, "\\error\\", 7) == 0)
 	{
 		// Get the err code.
-		////////////////////
 		if(gpiValueForKey(input, "\\err\\", buffer, sizeof(buffer)))
 			iconnection->errorCode = (GPErrorCode)atoi(buffer);
 		
 		// Get the error string.
-		////////////////////////
 		if(!gpiValueForKey(input, "\\errmsg\\", iconnection->errorString, sizeof(iconnection->errorString)))
 			iconnection->errorString[0] = '\0';
 
 #ifdef GSI_UNICODE
-		// Update the UNICODE version
-		UTF8ToUCS2String(iconnection->errorString, iconnection->errorString_W);
+		// Update the UNICODE version.
+		UTF8ToUCSString(iconnection->errorString, iconnection->errorString_W);
 #endif
 		// Call the error callback?
-		///////////////////////////
 		if(callErrorCallback)
 		{
 			GPIBool fatal = (GPIBool)(strstr(input, "\\fatal\\") != NULL);
@@ -90,29 +87,24 @@ gpiValueForKeyWithIndex(
     char c;
 
     // Check for NULL.
-    //////////////////
     GS_ASSERT(command != NULL);
     GS_ASSERT(key != NULL);
     GS_ASSERT(value != NULL);
     GS_ASSERT(len > 0);
 
     // Find which char is the delimiter.
-    ////////////////////////////////////
     delimiter = key[0];
 
-    // Find the key - first navigate to the index
-    /////////////////////////////////////////////
+    // Find the key - first navigate to the index.
     command += *index;
     start = strstr(command, key);
     if(start == NULL)
         return GPIFalse;
 
     // Get to the start of the value.
-    /////////////////////////////////
     start += strlen(key);
 
     // Copy in the value.
-    /////////////////////
     len--;
     for(i = 0 ; (i < len) && ((c = start[i]) != '\0') && (c != delimiter) ; i++)
     {
@@ -120,8 +112,7 @@ gpiValueForKeyWithIndex(
     }
     value[i] = '\0';
 
-    // Copy back current end point for index
-    ////////////////////////////////////////
+    // Copy back current end point for index.
     *index += (int)((start - command) + strlen(value));
 
     return GPITrue;
@@ -141,28 +132,23 @@ gpiValueForKey(
 	char c;
 
 	// Check for NULL.
-	//////////////////
 	GS_ASSERT(command != NULL);
 	GS_ASSERT(key != NULL);
 	GS_ASSERT(value != NULL);
 	GS_ASSERT(len > 0);
 
 	// Find which char is the delimiter.
-	////////////////////////////////////
 	delimiter = key[0];
 
 	// Find the key.
-	////////////////
 	start = strstr(command, key);
 	if(start == NULL)
 		return GPIFalse;
 
 	// Get to the start of the value.
-	/////////////////////////////////
 	start += strlen(key);
 
 	// Copy in the value.
-	/////////////////////
 	len--;
 	for(i = 0 ; (i < len) && ((c = start[i]) != '\0') && (c != delimiter) ; i++)
 	{
@@ -186,36 +172,29 @@ gpiValueForKeyAlloc(
 	size_t len;
 
 	// Check for NULL.
-	//////////////////
 	GS_ASSERT(command != NULL);
 	GS_ASSERT(key != NULL);
 
 	// Find which char is the delimiter.
-	////////////////////////////////////
 	delimiter = key[0];
 
 	// Find the key.
-	////////////////
 	start = strstr(command, key);
 	if(start == NULL)
 		return NULL;
 
 	// Get to the start of the value.
-	/////////////////////////////////
 	start += strlen(key);
 
 	// Find the key length.
-	///////////////////////
 	for(len = 0 ; ((c = start[len]) != '\0') && (c != delimiter) ; len++)  { };
 
 	// Allocate the value.
-	//////////////////////
 	value = (char *)gsimalloc(len + 1);
 	if(!value)
 		return NULL;
 
 	// Copy in the value.
-	/////////////////////
 	memcpy(value, start, len);
 	value[len] = '\0';
 
@@ -234,7 +213,6 @@ gpiCheckSocketConnect(
 	int aReturnCode = 0;
 
 	// Check if the connect is completed.
-	/////////////////////////////////////
 	aReturnCode = GSISocketSelect(sock, NULL, &aWriteFlag, &aExceptFlag);
 	if ( gsiSocketIsError(aReturnCode))
 	{
@@ -246,7 +224,6 @@ gpiCheckSocketConnect(
 	if (aReturnCode > 0)
 	{
 		// Check for a failed attempt.
-		//////////////////////////////
 		if(aExceptFlag)
 		{
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_HotError,
@@ -256,7 +233,6 @@ gpiCheckSocketConnect(
 		}
 
 		// Check for a successful attempt.
-		//////////////////////////////////
 		if(aWriteFlag)
 		{
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_Notice,
@@ -267,7 +243,6 @@ gpiCheckSocketConnect(
 	}
 
 	// Not connected yet.
-	/////////////////////
 	*state = GPI_NOT_CONNECTED;
 	return GP_NO_ERROR;
 }
@@ -328,16 +303,14 @@ gpiSetError(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	
 	// Copy the string.
-	///////////////////
 	strzcpy(iconnection->errorString, errorString, GP_ERROR_STRING_LEN);
 
 #ifdef GSI_UNICODE
-	// Update the unicode version
-	UTF8ToUCS2StringLen(iconnection->errorString, iconnection->errorString_W, GP_ERROR_STRING_LEN);
+	// Update the unicode version.
+	UTF8ToUCSStringLen(iconnection->errorString, iconnection->errorString_W, GP_ERROR_STRING_LEN);
 #endif
 
 	// Set the code.
-	////////////////
 	iconnection->errorCode = errorCode;
 }
 
@@ -350,12 +323,11 @@ gpiSetErrorString(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	
 	// Copy the string.
-	///////////////////
 	strzcpy(iconnection->errorString, errorString, GP_ERROR_STRING_LEN);
 
 #ifdef GSI_UNICODE
-	// Update the unicode version
-	UTF8ToUCS2StringLen(iconnection->errorString, iconnection->errorString_W, GP_ERROR_STRING_LEN);
+	// Update the unicode version.
+	UTF8ToUCSStringLen(iconnection->errorString, iconnection->errorString_W, GP_ERROR_STRING_LEN);
 #endif
 
 }
@@ -369,14 +341,14 @@ gpiEncodeString(
 	size_t i;
 	const int useAlternateEncoding = 1;
 
-	// Encrypt the password (xor with random values)
+	// Encrypt the password (xor with random values).
 	char passwordxor[GP_PASSWORD_LEN];
 	size_t passwordlen = strlen(unencodedString);
 	
 	Util_RandSeed((unsigned long)GP_XOR_SEED);
 	for (i=0; i < passwordlen; i++)
 	{
-		// XOR each character with the next rand
+		// XOR each character with the next rand.
 		char aRand = (char)Util_RandInt(0, 0xFF);
 		passwordxor[i] = (char)(unencodedString[i] ^ aRand);
 	}

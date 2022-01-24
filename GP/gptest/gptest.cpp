@@ -2,10 +2,11 @@
 // File:	gptest.cpp
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // Defines the class behaviors for the application.
 
@@ -61,9 +62,9 @@ BOOL CGptestApp::InitInstance()
 	//  the specific initialization routines you do not need.
 /*
 #ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
+	Enable3dControls();			// Call this when using MFC in a shared DLL.
 #else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
+	Enable3dControlsStatic();	// Call this when linking to MFC statically.
 #endif
 */
 	CGptestDlg dlg;
@@ -72,12 +73,12 @@ BOOL CGptestApp::InitInstance()
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is
-		//  dismissed with OK
+		//  dismissed with OK.
 	}
 	else if (nResponse == IDCANCEL)
 	{
 		// TODO: Place code here to handle when the dialog is
-		//  dismissed with Cancel
+		//  dismissed with Cancel.
 	}
 
 	// Since the dialog has been closed, return FALSE so that we exit the
@@ -87,7 +88,7 @@ BOOL CGptestApp::InitInstance()
 
 int CGptestApp::ExitInstance() 
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// TODO: Add your specialized code here and/or call the base class.
 
 	return CWinApp::ExitInstance();
 }

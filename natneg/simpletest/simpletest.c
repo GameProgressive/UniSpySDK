@@ -20,7 +20,7 @@
 #endif
 
 int connected = 0;
-struct sockaddr_in otheraddr;
+SOCKADDR_IN otheraddr;
 SOCKET sock = INVALID_SOCKET;
 unsigned int ESTRING_SIZE = 128;
 char *aString = NULL;
@@ -46,11 +46,11 @@ static void tryread(SOCKET s)
 {
 	char buf[256];
 	int len;
-	struct sockaddr_in saddr;
+	SOCKADDR_IN saddr;
 	socklen_t saddrlen = sizeof(saddr);
 	while (CanReceiveOnSocket(s))
 	{
-		len = recvfrom(s, buf, sizeof(buf) - 1, 0, (struct sockaddr *)&saddr, &saddrlen);
+		len = recvfrom(s, buf, sizeof(buf) - 1, 0, (SOCKADDR *)&saddr, &saddrlen);
 
 		if (len < 0)
 		{
@@ -95,13 +95,13 @@ static void pc(NegotiateState state, void *userdata)
 	GSI_UNUSED(userdata);
 }
 
-static void cc(NegotiateResult result, SOCKET gamesocket, struct sockaddr_in *remoteaddr, void *userdata)
+static void cc(NegotiateResult result, SOCKET gamesocket, SOCKADDR_IN *remoteaddr, void *userdata)
 {
-	struct sockaddr_in saddr;
+	SOCKADDR_IN saddr;
 	socklen_t namelen = sizeof(saddr);
 	if (gamesocket != INVALID_SOCKET)
 	{
-		getsockname(gamesocket, (struct sockaddr *)&saddr, &namelen);
+		getsockname(gamesocket, (SOCKADDR *)&saddr, &namelen);
 
 		printf("|Local game socket: %d\n", ntohs(saddr.sin_port));
 	}
@@ -208,7 +208,7 @@ static void nr(gsi_bool success, NAT nat)
 	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice,	aString);
 }
 
-#ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
+#ifdef __MWERKS__ // CodeWarrior will warn if not prototyped.
 	int test_main(int argc, char **argp);
 #endif
 int test_main(int argc, char **argp)
@@ -218,20 +218,21 @@ int test_main(int argc, char **argp)
 	gsi_time startTime;
 	NegotiateError error;
 	
-	// for debug output on these platforms
-#if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO) || defined(_LINUX) || defined(_MACOSX) || defined(test_main)
+	// This is for debug output on these platforms.
+#if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO) || defined(_LINUX) || defined(_MACOSX) || defined (_PSP2)
 	#ifdef GSI_COMMON_DEBUG
-		// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
-		// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
-		//gsSetDebugFile(stdout); // output to console
+		// Define GSI_COMMON_DEBUG if you want to view the SDK debug output.
+		// Set the SDK debug log file, or set your own handler using 
+		// gsSetDebugCallback.
+		//gsSetDebugFile(stdout); // Output to console.
 		gsSetDebugCallback(DebugCallback);
 
-		// Set debug levels
+		// Set debug levels.
 		gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Verbose);
 	#endif
 #endif
 	
-#ifdef GSI_MEM_MANAGED	// use gsi mem managed
+#ifdef GSI_MEM_MANAGED	// Use gsi mem managed.
 	{
 		#define MEMPOOL_SIZE (8* 1024*1024)
 		PRE_ALIGN(16) static char _mempool[MEMPOOL_SIZE]	POST_ALIGN(16);
@@ -241,8 +242,7 @@ int test_main(int argc, char **argp)
 #endif
 
 	aString = (char *)gsimalloc(ESTRING_SIZE);
-
-	// check that the game's backend is available
+	// Perform the sandard GameSpy Availability Check.
 	GSIStartAvailableCheck(_T("gmtest"));
 	while((result = GSIAvailableCheckThink()) == GSIACWaiting)
 		msleep(5);
@@ -296,7 +296,7 @@ int test_main(int argc, char **argp)
 		{
 			if (current_time() - lastsendtime > 2000)
 			{
-				int ret = sendto(sock, "woohoo!!", 8, 0, (struct sockaddr *)&otheraddr, sizeof(struct sockaddr_in));
+				int ret = sendto(sock, "woohoo!!", 8, 0, (SOCKADDR *)&otheraddr, sizeof(SOCKADDR_IN));
 				int error2 = GOAGetLastError(sock);
 				printf("|Sending (%d:%d), remoteaddr: %s, remoteport: %d\n", ret, error2, inet_ntoa(otheraddr.sin_addr), ntohs(otheraddr.sin_port));
 				lastsendtime = current_time();

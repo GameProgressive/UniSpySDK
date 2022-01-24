@@ -2,10 +2,11 @@
 // File:	gt2.h
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // See "configurable defines" in gt2Main.h for certain performance settings 
 // that can be changed.
@@ -28,55 +29,63 @@ typedef int GT2Bool;
 #define GT2False 0
 #define GT2True 1
 
-// a byte
+// A byte
 typedef unsigned char GT2Byte;
 
-// a handle to a socket object (can be used to accept connections and initiate connections)
+// A handle to a socket object (can be used to accept connections and initiate
+// connections).
 typedef struct GTI2Socket * GT2Socket;
 
-// a handle to an object representing a connection to a specific IP and port
-// the local endpoint is a GT2Socket
+// A handle to an object representing a connection to a specific IP and port
+// the local endpoint is a GT2Socket.
 typedef struct GTI2Connection * GT2Connection;
 
-// the id of a reliably sent message
-// unreliable messages don't have ids
+// The id of a reliably sent message; unreliable messages don't have ids.
 typedef unsigned short GT2MessageID;
 
-// the result of a GT2 operation
-// check individual function definitions to see possible results
-// TODO: list possible results wherever this is used
+//////////////////////////////////////////////////////////////
+// GT2Result
+// Summary
+//		Result of a GT2 operation. Check individual function definitions to 
+//		see possible results.
 typedef enum
 {
-	GT2Success,             // success
-                            // errors:
-	GT2OutOfMemory,         // ran out of memory
-	GT2Rejected,            // attempt rejected
-	GT2NetworkError,        // networking error (could be local or remote)
-	GT2AddressError,        // invalid or unreachable address
-	GT2DuplicateAddress,    // a connection was attempted to an address that already has a connection on the socket
-	GT2TimedOut,			// time out reached
-	GT2NegotiationError,	// there was an error negotiating with the remote side
-	GT2InvalidConnection,	// the connection didn't exist
-	GT2InvalidMessage,		// used for vdp reliable messages containing voice data, no voice data in reliable messages
-	GT2SendFailed			// the send failed,
+	GT2Success,             // Success.
+	// Errors:
+	GT2OutOfMemory,         // Ran out of memory.
+	GT2Rejected,            // Attempt rejected.
+	GT2NetworkError,        // Networking error (could be local or remote).
+	GT2AddressError,        // Invalid or unreachable address.
+	GT2DuplicateAddress,    // A connection was attempted to an address that already has a connection on the socket.
+	GT2TimedOut,			// Time out reached.
+	GT2NegotiationError,	// There was an error negotiating with the remote side.
+	GT2InvalidConnection,	// The connection didn't exist.
+	GT2InvalidMessage,		// Used for vdp reliable messages containing voice data, no voice data in reliable messages.
+	GT2SendFailed			// The send failed.
 } GT2Result;
 
-// possible states for any GT2Connection
+//////////////////////////////////////////////////////////////
+// GT2ConnectionState
+// Summary
+//		Possible states for any GT2Connection.
 typedef enum
 {
-	GT2Connecting,   // negotiating the connection
-	GT2Connected,    // the connection is active
-	GT2Closing,      // the connection is being closed
-	GT2Closed        // the connection has been closed and can no longer be used
+	GT2Connecting,   // Negotiating the connection.
+	GT2Connected,    // The connection is active.
+	GT2Closing,      // The connection is being closed.
+	GT2Closed        // The connection has been closed and can no longer be used.
 } GT2ConnectionState;
 
-// The cause of the connection being closed.
+//////////////////////////////////////////////////////////////
+// GT2CloseReason
+// Summary
+//		Reason the connection was closed.
 typedef enum
 {
 	GT2LocalClose,         // The connection was closed with gt2CloseConnection.
 	GT2RemoteClose,        // The connection was closed remotely.
-	                       // errors:
-	GT2CommunicationError, // An invalid message was received (it was either unexpected or wrongly formatted).
+	// errors:
+	GT2CommunicationError, // An invalid message was received (it was either unexpected or incorrectly formatted).
 	GT2SocketError,        // An error with the socket forced the connection to close.
 	GT2NotEnoughMemory     // There wasn't enough memory to store an incoming or outgoing message.
 } GT2CloseReason;
@@ -85,21 +94,31 @@ typedef enum
 ** GLOBALS **
 ************/
 
-// The challenge key is a 32 character string
-// that is used in the authentication process.
-// The key can be set before GT2 is used so
-// that the key will be application-specific.
+// The challenge key is a 32 character string that is used in the 
+// authentication process. The key can be set before GT2 is used so that the 
+// key will be application-specific.
 extern char GT2ChallengeKey[33];
 
 /*********************
 ** SOCKET CALLBACKS **
 *********************/
 
-// this callback gets called when there was is an error that forces a socket to close
-// all connections that use this socket are terminated, and their gt2CloseCallback callbacks
-// will be called before this callback is called (with the reason set to GT2SocketError).
-// the socket cannot be used again after this callback returns
-typedef void (* gt2SocketErrorCallback)
+//////////////////////////////////////////////////////////////
+// gt2SocketErrorCallback
+// Summary
+//		This callback is used to notify the application of a closed socket 
+//		or fatal socket error condition.
+// Parameters
+//		socket	: [in] The handle to the socket.
+// Remarks
+//		Once this callback returns, the socket and all of its connections are 
+//		invalid and can no longer be used. All connections that use this socket 
+//		are terminated, and their gt2CloseCallback callbacks will be called 
+//		before this callback is called (with the reason set to 
+//		GT2SocketError).<p>
+// See Also
+//		gt2CreateSocket
+typedef void ( * gt2SocketErrorCallback)
 (
 	GT2Socket socket
 );
@@ -536,40 +555,77 @@ unsigned short gt2NetworkToHostShort(unsigned short s);
 ** ADDRESS FUNCTIONS **
 **********************/
 
-// Converts an IP and a port into a text string.  The IP must be in network byte order, and the port
-// in host byte order.  The string must be able to hold at least 22 characters (including the NUL).
-// "XXX.XXX.XXX.XXX:XXXXX"
-// If both the IP and port are non-zero, the string will be of the form "1.2.3.4:5" ("<IP>:<port>").
-// If the port is zero, and the IP is non-zero, the string will be of the form "1.2.3.4" ("<IP>").
-// If the IP is zero, and the port is non-zero, the string will be of the form ":5" (":<port>").
-// If both the IP and port are zero, the string will be an empty string ("")
-// The string is returned.  If the string paramater is NULL, then an internal static string will be
-// used.  There are two internal strings that are alternated between.
-const char * gt2AddressToString
+//////////////////////////////////////////////////////////////
+// gt2AddressToString
+// Summary
+//		Converts an IP and a port into a text string.
+// Parameters
+//		ip		: [in] IP in network byte order.  Can be 0.
+//		port	: [in] Port in host byte order.  Can be 0.
+//		string	: [out] String will be placed in here.  Can be NULL.
+// Returns
+//		The string is returned.  If the string paramater is NULL, then an
+//		 internal static string will be used.  There are two internal strings
+//		 that are alternated between.
+// Remarks
+//		The IP must be in network byte order, and the port in host byte order.
+//		The string must be able to hold at least 22 characters (including
+//		 the NUL).<p>
+//		"XXX.XXX.XXX.XXX:XXXXX"
+//		If both the IP and port are non-zero, the string will be of the form
+//		 "1.2.3.4:5" ("<IP>:<port>").
+//		If the port is zero, and the IP is non-zero, the string will be of
+//		 the form "1.2.3.4" ("<IP>").
+//		If the IP is zero, and the port is non-zero, the string will be of
+//		 the form ":5" (":<port>").
+//		If both the IP and port are zero, the string will be an empty string ("")
+//		The string is returned.  If the string parameter is NULL, then an
+//		 internal static string will be
+//		used.  There are two internal strings that are alternated between.
+// See Also
+//		gt2StringToAddress
+COMMON_API const char * gt2AddressToString
 (
 	unsigned int ip,                // IP in network byte order.  Can be 0.
 	unsigned short port,            // Port in host byte order.  Can be 0.
 	char string[22]                 // String will be placed in here.  Can be NULL.
 );
 
-// Converts a string address into an IP and a port.  The IP is stored in network byte order, and the port
-// is stored in host byte order.  Returns false if there was an error parsing the string, or if a supplied
-// hostname can't be resolved.
-// Possible string forms:
-// NULL => all IPs, any port (localAddress only).
-// "" => all IPs, any port (localAddress only).
-// "1.2.3.4" => 1.2.3.4 IP, any port (localAddress only).
-// "host.com" => host.com's IP, any port (localAddress only).
-// ":2786" => all IPs, 2786 port (localAddress only).
-// "1.2.3.4:0" => 1.2.3.4 IP, any port (localAddress only).
-// "host.com:0" => host.com's IP, any port (localAddress only).
-// "0.0.0.0:2786" => all IPs, 2786 port (localAddress only).
-// "1.2.3.4:2786" => 1.2.3.4 IP, 2786 port (localAddress or remoteAddress).
-// "host.com:2786" => host.com's IP, 2786 port (localAddress or remoteAddress).
-// If this function needs to resolve a hostname ("host.com") it may need to contact a DNS server, which can
-// cause the function to block for an indefinite period of time.  Usually it is < 2 seconds, but on certain
-// systems, and under certain circumstances, it can take 30 seconds or longer.
-GT2Bool gt2StringToAddress
+//////////////////////////////////////////////////////////////
+// gt2StringToAddress
+// Summary
+//		Converts a string address, which is either a hostname
+//		 ("www.gamespy.net") or a dotted IP ("1.2.3.4")
+//		into an IP and a port.
+// Parameters
+//		string	: [in] String to convert.
+//		ip		: [out] IP in network byte order.  Can be NULL.
+//		port	: [out] Port in host byte order.  Can be NULL.
+// Returns
+//		Returns GT2False if there was an error parsing the string, or if a
+//		 supplied hostname can't be resolved.
+// Remarks
+//		The IP is stored in network byte order, and the port is stored in
+//		 host byte order.<p>
+//		Possible string forms:
+//		NULL => all IPs, any port (localAddress only).
+//		"" => all IPs, any port (localAddress only).
+//		"1.2.3.4" => 1.2.3.4 IP, any port (localAddress only).
+//		"host.com" => host.com's IP, any port (localAddress only).
+//		":2786" => all IPs, 2786 port (localAddress only).
+//		"1.2.3.4:0" => 1.2.3.4 IP, any port (localAddress only).
+//		"host.com:0" => host.com's IP, any port (localAddress only).
+//		"0.0.0.0:2786" => all IPs, 2786 port (localAddress only).
+//		"1.2.3.4:2786" => 1.2.3.4 IP, 2786 port (localAddress or remoteAddress).
+//		"host.com:2786" => host.com's IP, 2786 port (localAddress or remoteAddress).
+//		If this function needs to resolve a hostname ("host.com") it may
+//		 need to contact a DNS server, which can
+//		cause the function to block for an indefinite period of time. 
+//		 Usually it is < 2 seconds, but on certain
+//		systems, and under certain circumstances, it can take 30 seconds or longer.
+// See Also
+//		gt2Connect, gt2CreateSocket, gt2StringToHostInfo
+COMMON_API GT2Bool gt2StringToAddress
 (
 	const char * string,            // The string to convert.
 	unsigned int * ip,              // The IP is stored here, in network byte order.  Can be NULL.
@@ -606,14 +662,15 @@ unsigned int ** gt2IPToIPs(unsigned int ip);
 unsigned int ** gt2StringToIPs(const char * string);
 
 #ifdef _XBOX
-unsigned int gt2XnAddrToIP(XNADDR theAddr, XNKID theKeyId);
-GT2Bool gt2IPToXnAddr(int ip, XNADDR *theAddr, XNKID *theKeyId);
+COMMON_API unsigned int gt2XnAddrToIP(XNADDR theAddr, XNKID theKeyId);
+COMMON_API GT2Bool gt2IPToXnAddr(int ip, XNADDR *theAddr, XNKID *theKeyId);
 #endif
 
-// these are for getting around adhoc which requires a 48 bit address v.s. a 32 bit inet address
-void gt2IpToMac(gsi_u32 ip,char *mac);
+// these are for getting around adhoc which requires a 48 bit address v.s. a
+//		 32 bit inet address
+COMMON_API void gt2IpToMac(gsi_u32 ip,char *mac);
 // change IP address to mac ethernet
-gsi_u32 gt2MacToIp(const char *mac);
+COMMON_API gsi_u32 gt2MacToIp(const char *mac);
 // change mac ethernet to IP address
 
 /*******************

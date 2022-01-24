@@ -2,10 +2,11 @@
 // File:	gsPlatform.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef __GSPLATFORM_H__
 #define __GSPLATFORM_H__
@@ -22,6 +23,7 @@
 // Nintendo Wii:     _REVOLUTION
 // PSP:              _PSP
 // PS3:              _PS3
+// Android:          ANDROID
 
 // PlayStation2:     _PS2
 //    w/ EENET:      EENET       (set by developer project)
@@ -54,7 +56,7 @@
 	#endif
 #endif
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(ANDROID)
 	#define _UNIX
 #endif
 
@@ -229,6 +231,16 @@
 	#include <utility\utility_module.h>
 	#include <utility\utility_sysparam.h>
 
+// Sony PSP2
+#elif defined(_PSP2) || TARGET_VITA
+#include <scetypes.h>
+#include <stdlib.h>
+#include <time.h>
+#include <rtc.h>
+#include <net.h>
+#include <limits.h>
+#include <kernel.h>
+
 // PS3
 #elif defined(_PS3)
 	#include <netex/errno.h>
@@ -279,6 +291,13 @@
 	#define GS_STATIC_CALLBACK
 #endif
 
+//---------- __declspec for dll ----------
+#ifdef GAMESPYDLL_EXPORTS //(returntype)
+	#define COMMON_API __declspec(dllexport)
+#else
+	#define COMMON_API
+#endif
+
 
 //---------- Handle Endianess ----------------------
 #if defined(_PS3) || defined(_REVOLUTION) || defined(_X360) //defined(_MACOSX) || defined (_IPHONE)
@@ -298,11 +317,11 @@
 
 #include <assert.h>
 
-#if defined(GS_NO_FILE) || defined(_PS2) || defined(_PS3) || defined(_PSP) || defined(_NITRO) || defined(_REVOLUTION) || defined(_XBOX)
+#if defined(GS_NO_FILE) || defined(_PS2) || defined(_PS3) || defined(_PSP) || defined(_NITRO) || defined(_REVOLUTION) || defined(_XBOX) || defined(ANDROID) || defined(_PSP2)
 	#define NOFILE
 #endif
 
-#if defined(_PSP) || defined(_NITRO) || defined(_IPHONE)
+#if defined(_PSP) || defined(_PSP2) || defined(_NITRO) || defined(_IPHONE) || defined(ANDROID)
 	#define GS_WIRELESS_DEVICE
 #endif
 
@@ -315,10 +334,10 @@
 	#define GSI_OPEN_DOMAIN_NAME "%s.api." GSI_DOMAIN_NAME
 #endif
 
-#if !defined(RS_HTTPS)
-	#define RS_HTTP_PROTOCOL_URL "http://"
+#if !defined(UNISPY_USE_HTTPS)
+	#define GSI_HTTP_PROTOCOL_URL "http://"
 #else
-	#define RS_HTTP_PROTOCOL_URL "https://"
+	#define GSI_HTTP_PROTOCOL_URL "https://"
 #endif
 
 //---------- Mac autorelease pool for working with CoreFoundation types ----------------------
@@ -371,6 +390,9 @@ typedef int               gsi_bool;
 #elif defined (_PSP)
 	typedef long long             gsi_i64;
 	typedef unsigned long long    gsi_u64;
+#elif defined (_PSP2)
+	typedef SceInt64              gsi_i64;
+	typedef SceUInt64		      gsi_u64;
 #elif defined (_PS3)
 	typedef int64_t               gsi_i64;
 	typedef uint64_t              gsi_u64;
@@ -461,16 +483,17 @@ extern "C" {
 	#define _tremove _wremove
     #define _trename _wrename
 	#define _T(a)       L##a
-	#define _STR_CST(a)		(gsi_u16 *)##a
-	#define _WRD_CST(a)		(wchar_t *)##a
+	#define _STR_CST(a)		(gsi_u16 *)L##a		// string casting for constants
+	#define _STR_CST_VAR(a)	(gsi_u16 *)##a		// string casting for variables
+	#define _WRD_CST(a)		(wchar_t *)L##a
 
-	#if defined(_WIN32) || defined(_PS2) || defined(_PSP)
+	#if defined(_WIN32) || defined(_PS2) || defined(_PSP) || defined(_PSP2)
 		#define _tsnprintf _snwprintf
 	#else
 		#define _tsnprintf swprintf
 	#endif
 
-	#ifndef _PSP
+	#if !defined(_PSP) && !defined(_PSP2)
 		#define _stprintf   swprintf
 		#define _vswprintf  vswprintf
 	#else
@@ -503,6 +526,7 @@ extern "C" {
 	#define _T(a)       a
 #endif
 	#define _STR_CST(a)		a
+	#define _STR_CST_VAR(a) a
 	#define _WRD_CST(a)		a
 
 	#if defined(_WIN32)
@@ -527,7 +551,7 @@ extern "C" {
 #endif
 
 char * goastrdup(const char *src);
-unsigned short * goawstrdup(const unsigned short *src);
+gsi_char * goawstrdup(const gsi_char *src);
 
 
 // ------ Cross Plat Alignment macros ------------
@@ -545,7 +569,7 @@ static char _mempool[MEMPOOL_SIZE]	POST_ALIGN(16);
 #if defined _WIN32
 	#define PRE_ALIGN(x)	__declspec(align(x))	// ignore Win32 directive
 	#define POST_ALIGN(x)	// ignore
-#elif defined  (_PS2) || defined (_PSP) || defined (_PS3) 
+#elif defined  (_PS2) || defined (_PSP) || defined (_PS3) || defined (_PSP2)
 	#define PRE_ALIGN(x)	// ignored this on psp/ps2
 	#define POST_ALIGN(x)	__attribute__((aligned (x)))		// 
 #elif defined (_REVOLUTION)

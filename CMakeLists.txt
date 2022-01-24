@@ -102,7 +102,7 @@ if (DEFINED UNISPY_FORCE_IP)
 endif()
 
 if(UNISPY_SECURESECONNECT)
-    add_definitions(-DRS_HTTPS)
+    add_definitions(-DUNISPY_USE_HTTPS)
 endif()
 
 #if (UNISPY_MEM_MANAGED)

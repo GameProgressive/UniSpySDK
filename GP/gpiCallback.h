@@ -2,22 +2,20 @@
 // File:	gpiCallback.h
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GPICALLBACK_H_
 #define _GPICALLBACK_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //DEFINES
-/////////
 // Unsolicited Callbacks.
-/////////////////////////
 enum GPICallbackId
 {
 	GPI_ERROR                      = GP_ERROR,
@@ -33,7 +31,6 @@ enum GPICallbackId
 };
 
 // Add type - not 0 only for a few.
-///////////////////////////////////
 enum GPIAddCallbackType
 {
 	GPI_ADD_NORMAL,
@@ -57,9 +54,7 @@ enum GPIAddCallbackType
 
 
 //TYPES
-///////
 // A Callback.
-//////////////
 typedef struct
 {
   GPCallback callback;
@@ -67,7 +62,6 @@ typedef struct
 } GPICallback;
 
 // Data for a pending callback.
-///////////////////////////////
 typedef struct GPICallbackData
 {
 	GPICallback callback;
@@ -78,7 +72,6 @@ typedef struct GPICallbackData
 } GPICallbackData;
 
 //FUNCTIONS
-///////////
 void
 gpiCallErrorCallback(
   GPConnection * connection,

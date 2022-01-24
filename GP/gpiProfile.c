@@ -8,22 +8,18 @@
 // manner not expressly authorized by IGN or GameSpy is prohibited.
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 #include <stdint.h>
 
 //DEFINES
-/////////
 #define GPI_PROFILE_GROW_SIZE        16
 #define GPI_PROFILE_CACHE_VERSION    2
 
-// GLOBALS
-//////////
+//GLOBALS
 static char GPIInfoCacheFilename[FILENAME_MAX + 1] = "gp.info";
 
 //FUNCTIONS
-///////////
 static int
 gpiProfilesTableHash(const void *arg,
 					 int numBuckets)
@@ -96,7 +92,6 @@ static GPResult gpiOpenDiskProfiles(GPConnection * connection,
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Open the file.
-	/////////////////
 	if(write)
 		fp = gsifopen(GPIInfoCacheFilename, "wt");
 	else
@@ -108,7 +103,6 @@ static GPResult gpiOpenDiskProfiles(GPConnection * connection,
 	}
 
 	// Excellent.
-	/////////////
 	iconnection->diskCache = fp;
 	*failed = GPIFalse;
 
@@ -121,7 +115,6 @@ gpiCloseDiskProfiles(GPConnection * connection)
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Close the file.
-	//////////////////
 	fclose(iconnection->diskCache);
 	iconnection->diskCache = NULL;
 
@@ -139,11 +132,9 @@ static GPResult gpiReadDiskKeyValue(GPConnection * connection,
 	int i;
 
 	// Grab the file pointer.
-	/////////////////////////
 	fp = iconnection->diskCache;
 
 	// Read the key.
-	////////////////
 	i = 0;
 	do
 	{
@@ -164,7 +155,6 @@ static GPResult gpiReadDiskKeyValue(GPConnection * connection,
 	key[--i] = '\0';
 
 	// Check for no key.
-	////////////////////
 	if(i == 0)
 	{
 		*failed = GPITrue;
@@ -172,7 +162,6 @@ static GPResult gpiReadDiskKeyValue(GPConnection * connection,
 	}
 
 	// Read the value.
-	//////////////////
 	i = 0;
 	do
 	{
@@ -192,7 +181,6 @@ static GPResult gpiReadDiskKeyValue(GPConnection * connection,
 	value[--i] = '\0';
 
 	// Done.
-	////////
 	*failed = GPIFalse;
 	
 	GSI_UNUSED(value);
@@ -225,15 +213,12 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 	char aimname[GP_AIMNAME_LEN];
 
 	// Grab the file pointer.
-	/////////////////////////
 	fp = iconnection->diskCache;
 
 	// Clear the temp profile.
-	//////////////////////////
 	memset(&profile, 0, sizeof(GPIProfile));
 
 	// Clear the temp cache.
-	////////////////////////
 	memset(&infoCache, 0, sizeof(GPIInfoCache));
 	infoCache.nick = nick;
 	infoCache.uniquenick = uniquenick;
@@ -251,7 +236,6 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 	aimname[0] = '\0';
 
 	// Read until we hit a [.
-	/////////////////////////
 	do
 	{
 		c = fgetc(fp);
@@ -264,7 +248,6 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 	while(c != '[');
 
 	// Grab the profileid.
-	//////////////////////
 	rcode = fscanf(fp, "%d]\n", &profile.profileId);
 	if(rcode != 1)
 	{
@@ -276,7 +259,6 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 		"Reading profile %d from disk cache:\n", profile.profileId);
 
 	// Read key/value pairs.
-	////////////////////////
 	do
 	{
 		CHECK_RESULT(gpiReadDiskKeyValue(connection, &failed, key, value));
@@ -286,7 +268,6 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 				"%d: %s=%s\n", profile.profileId, key, value);
 
 			// Set the data based on the key.
-			/////////////////////////////////
 			if(strcmp(key, "userid") == 0)
 			{
 				profile.userId = atoi(value);
@@ -406,16 +387,13 @@ static GPResult gpiReadDiskProfile(GPConnection * connection,
 	while(!failed);
 
 	// Create a new profile.
-	////////////////////////
 	pProfile = gpiProfileListAdd(connection, profile.profileId);
 	if(pProfile)
 	{
 		// Copy the profile we've set up into the list.
-		///////////////////////////////////////////////
 		*pProfile = profile;
 
 		// Copy the info if valid.
-		//////////////////////////
 		if(valid)
 			gpiSetInfoCache(connection, pProfile, &infoCache);
 	}
@@ -433,11 +411,9 @@ static GPResult gpiReadVersion(const GPConnection * connection,
 	FILE * fp;
 
 	// Grab the file pointer.
-	/////////////////////////
 	fp = iconnection->diskCache;
 
 	// Read the version.
-	////////////////////
 	if(fscanf(fp, "%d\n", version) != 1)
 		*version = 0;
 
@@ -454,11 +430,9 @@ static void gpiWriteVersion(GPConnection * connection,
 	FILE * fp;
 
 	// Grab the file pointer.
-	/////////////////////////
 	fp = iconnection->diskCache;
 
 	// Write the version.
-	/////////////////////
 	fprintf(fp, "%d\n", version);
 
 	GSI_UNUSED(connection);
@@ -472,7 +446,6 @@ GPResult gpiLoadDiskProfiles(GPConnection * connection)
 	int version = 0;
 
 	// Open the disk cache.
-	///////////////////////
 	CHECK_RESULT(gpiOpenDiskProfiles(connection, GPIFalse, &failed));
 	if(failed)
 	{
@@ -482,12 +455,10 @@ GPResult gpiLoadDiskProfiles(GPConnection * connection)
 	}
 
 	// Check the version.
-	//////////////////////
 	CHECK_RESULT(gpiReadVersion(connection, &version));
 	if(version == GPI_PROFILE_CACHE_VERSION)
 	{
 		// Read profiles.
-		/////////////////
 		count = 0;
 		do
 		{
@@ -501,7 +472,6 @@ GPResult gpiLoadDiskProfiles(GPConnection * connection)
 	}
 
 	// Close the cache.
-	///////////////////
 	gpiCloseDiskProfiles(connection);
 
 	return GP_NO_ERROR;
@@ -515,20 +485,16 @@ static GPIBool gpiSaveDiskProfile(GPConnection * connection,
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Grab the file pointer.
-	/////////////////////////
 	fp = iconnection->diskCache;
 
 	// Write the profile id.
-	////////////////////////
 	fprintf(fp, "[%d]\n", profile->profileId);
 
 	// Write the userid if not 0.
-	/////////////////////////////
 	if(profile->userId != 0)
 		fprintf(fp, "userid=%d\n", profile->userId);
 
 	// Is the cache valid?
-	//////////////////////
 	if(profile->cache)
 	{
 		fprintf(fp, "valid=1\n");
@@ -565,7 +531,6 @@ static GPIBool gpiSaveDiskProfile(GPConnection * connection,
 	}
 
 	// End this profile.
-	////////////////////
 	fprintf(fp, "\n");
 
 	GSI_UNUSED(data);
@@ -580,7 +545,6 @@ GPResult gpiSaveDiskProfiles(GPConnection * connection)
 	GPIBool failed;
 
 	// Open the disk cache.
-	///////////////////////
 	CHECK_RESULT(gpiOpenDiskProfiles(connection, GPITrue, &failed));
 	if(failed)
 	{
@@ -590,15 +554,12 @@ GPResult gpiSaveDiskProfiles(GPConnection * connection)
 	}
 
 	// Write the version.
-	/////////////////////
 	gpiWriteVersion(connection, GPI_PROFILE_CACHE_VERSION);
 
 	// Save profiles.
-	/////////////////
 	gpiProfileMap(connection, gpiSaveDiskProfile, NULL);
 
 	// Close the cache.
-	///////////////////
 	gpiCloseDiskProfiles(connection);
 
 	return GP_NO_ERROR;
@@ -615,23 +576,19 @@ GPResult gpiProcessNewProfile(GPConnection * connection,
 	GPICallback callback;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPITrue))
 		return GP_SERVER_ERROR;
 
 	// This should be \npr\.
-	////////////////////////
 	if(strncmp(input, "\\npr\\", 5) != 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	// Get the profile id.
-	//////////////////////
 	if(!gpiValueForKey(input, "\\profileid\\", buffer, sizeof(buffer)))
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 	pid = atoi(buffer);
 
 	// Call the callback.
-	/////////////////////
 	callback = operation->callback;
 	if(callback.callback != NULL)
 	{
@@ -647,7 +604,6 @@ GPResult gpiProcessNewProfile(GPConnection * connection,
 	}
 
 	// Remove the operation.
-	////////////////////////
 	gpiRemoveOperation(connection, operation);
 
 	return GP_NO_ERROR;
@@ -663,18 +619,15 @@ GPIProfile * gpiProfileListAdd(GPConnection *connection,
 
 	GS_ASSERT(id > 0);
 
-	// Check the parameters 
-	///////////////////////
+	// Check the parameters.
 	if(id <= 0)
 		return NULL;
 
 	// Check if this id is already in the list.
-	///////////////////////////////////////////
 	if(gpiGetProfile(connection, (GPProfile)id, &pProfile))
 		return pProfile;
 
 	// Setup the new profile.
-	/////////////////////////
 	memset(&profile, 0, sizeof(GPIProfile));
 	profile.profileId = id;
 	profile.userId = 0;
@@ -685,20 +638,16 @@ GPIProfile * gpiProfileListAdd(GPConnection *connection,
 	profile.deletedLocally = gsi_false;
 
 	// Add it to the table.
-	///////////////////////
 	TableEnter(profileList->profileTable, &profile);
 
 	// One new one.
-	///////////////
 	profileList->num++;
 
 	// Get a pointer to the profile.
-	////////////////////////////////
 	if(gpiGetProfile(connection, (GPProfile)id, &pProfile))
 		return pProfile;
 
 	// It wasn't added.
-	///////////////////
 	return NULL;
 }
 
@@ -731,18 +680,15 @@ GPResult gpiNewProfile(GPConnection * connection,
 	char buffer[31];
 
 	// Error check.
-	///////////////
 	if(nick == NULL)
 		Error(connection, GP_PARAMETER_ERROR, "Invalid nick.");
 	if((replace != GP_REPLACE) && (replace != GP_DONT_REPLACE))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid replace.");
 
 	// Create a new operation.
-	//////////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_NEW_PROFILE, NULL, &operation, blocking, callback, param));
 
 	// Send the request.
-	////////////////////
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\newprofile\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
 	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
@@ -761,7 +707,6 @@ GPResult gpiNewProfile(GPConnection * connection,
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
 
 	// Process it if blocking.
-	//////////////////////////
 	if(operation->blocking)
 	{
 		result = gpiProcess(connection, operation->id);
@@ -783,18 +728,15 @@ GPResult gpiProcessDeleteProfle(GPConnection * connection,
 	GPICallback callback;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPITrue))
 		return GP_SERVER_ERROR;
 
 	// This should be \dpr\.
-	////////////////////////
 	if(strncmp(input, "\\dpr\\", 5) != 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	
 	// Call the callback.
-	/////////////////////
 	callback = operation->callback;
 	if(callback.callback != NULL)
 	{
@@ -810,7 +752,6 @@ GPResult gpiProcessDeleteProfle(GPConnection * connection,
 	}
 
 	// Remove the operation.
-	////////////////////////
 	gpiRemoveOperation(connection, operation);
 
 	return GP_NO_ERROR;
@@ -827,7 +768,6 @@ GPResult gpiDeleteProfile(GPConnection * connection,
 
 	CHECK_RESULT(gpiAddOperation(connection, GPI_DELETE_PROFILE, NULL, &operation, GP_BLOCKING, callback, param));
 	// Send the message.
-	////////////////////
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\delprofile\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
 	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
@@ -836,11 +776,9 @@ GPResult gpiDeleteProfile(GPConnection * connection,
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
 
 	// Remove the profile object.
-	/////////////////////////////
 	gpiRemoveProfileByID(connection, iconnection->profileid);
 
 	// Disconnect the connection. 05.16.00
-	/////////////////////////////
 	iconnection->connectState = GPI_PROFILE_DELETING;	
 	result = gpiProcess(connection, operation->id);
 	if (result != GP_NO_ERROR)
@@ -888,15 +826,12 @@ static GPIBool gpiCheckProfileForUser(GPConnection * connection,
 	GSI_UNUSED(connection);
 
 	// Check for a valid cache.
-	///////////////////////////
 	if(profile->cache)
 	{
 		// Check the nick and email.
-		////////////////////////////
 		if((strcmp(data->nick, profile->cache->nick) == 0) && (strcmp(data->email, profile->cache->email) == 0))
 		{
 			// Found it.
-			////////////
 			*data->profile = profile;
 			data->found = GPITrue;
 			return GPIFalse;
@@ -1037,19 +972,16 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
     int index;
 
     // Check if profile already in list
-    ///////////////////////////////////
     if(!gpiGetProfile(connection, profileid, &profile))
     {
-        // It's not, so Add profile
-        /////////////////////////////////////
+        // It's not, so Add profile.
         profile = gpiProfileListAdd(connection, profileid);
         if(!profile)
             Error(connection, GP_MEMORY_ERROR, "Out of memory.");
     }
     else
     {
-        // Already in the list, nix the buddy status if it's a buddy
-        ////////////////////////////////////////////////////////////
+        // Already in the list, nix the buddy status if it's a buddy.
         if (profile->buddyStatus)
         {
             index = profile->buddyStatus->buddyIndex;
@@ -1076,7 +1008,6 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
                 ArrayFree(profile->buddyStatusInfo->extendedInfoKeys);
                 profile->buddyStatusInfo->extendedInfoKeys = NULL;
             }
-            freeclear(profile->buddyStatusInfo);
 
             iconnection->profileList.numBuddies--;
             GS_ASSERT(iconnection->profileList.numBuddies >= 0);
@@ -1088,15 +1019,14 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
         }
     }
 
-    // Set profile as blocked if it wasn't already
-    //////////////////////////////////////////////
+    // Set profile as blocked if it wasn't already.
     if (!profile->blocked)
     {
         profile->blocked = gsi_true;
         profile->blockIndex = iconnection->profileList.numBlocked++;
 
 #ifdef _PS3
-        // Only perform if profile isn't already locally blocked and the sync isnt taking place
+        // Only perform if profile isn't already locally blocked and the sync isnt taking place.
         if (!iconnection->npSyncLock)
             gpiAddToNpBlockList(connection, profileid);
 #endif
@@ -1106,8 +1036,7 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
     // with the existing GP structure. If an error occurs, it gets passed to the error callback
     // else its considered the request was processed correctly.
 
-    // Add to outgoing buffer - have server handle error check if block already exists (consistency)
-    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // Add to outgoing buffer - have server handle error check if block already exists (consistency).
     gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\addblock\\\\sesskey\\");
     gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
     gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\profileid\\");
@@ -1143,12 +1072,10 @@ GPResult gpiRemoveFromBlockedList(GPConnection * connection,
     GPIProfile * profile;
     int index;
 
-    // Grab the profile if already in list
-    //////////////////////////////////////
+    // Grab the profile if already in list.
     if(gpiGetProfile(connection, profileid, &profile) && profile->blocked)
     {
-        // Set profile as non-blocked 
-        /////////////////////////////
+        // Set profile as non-blocked.
         profile->blocked = gsi_false;
 
         iconnection->profileList.numBlocked--;
@@ -1165,8 +1092,7 @@ GPResult gpiRemoveFromBlockedList(GPConnection * connection,
     // with the existing GP structure. If an error occurs, it gets passed to the error callback
     // else its considered the request was processed correctly.
 
-    // Add to outgoing buffer - have server handle error check if block already removed (consistency)
-    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // Add to outgoing buffer - have server handle error check if block already removed (consistency).
     gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\removeblock\\\\sesskey\\");
     gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
     gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\profileid\\");
@@ -1220,7 +1146,6 @@ GPResult gpiProcessRecvBlockedList(GPConnection * connection,
     GPIConnection * iconnection = (GPIConnection*)*connection;
 
     // Check for an error.
-    //////////////////////
     if(gpiCheckForError(connection, input, GPITrue))
         return GP_SERVER_ERROR;
 
@@ -1233,14 +1158,12 @@ GPResult gpiProcessRecvBlockedList(GPConnection * connection,
         CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
     num = atoi(buffer);
 
-    // Check to make sure list is there 
-    ///////////////////////////////////
+    // Check to make sure list is there.
 	str = strstr(input, "\\list\\");
     if (str == NULL)
         CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
     
-    // Then increment index to get ready for parsing
-    ////////////////////////////////////////////////
+    // Then increment index to get ready for parsing.
     str += 6;
     index += 6;
 
@@ -1248,8 +1171,7 @@ GPResult gpiProcessRecvBlockedList(GPConnection * connection,
     {     
         if (i==0)
         {
-            // Manually grab first profile in list - comma delimiter
-            ////////////////////////////////////////////////////////
+            // Manually grab first profile in list - comma delimiter.
             for(j=0 ; (j < sizeof(buffer)) && ((c = str[j]) != '\0') && (c != ',') ; j++)
             {
                 buffer[j] = c;
@@ -1266,13 +1188,11 @@ GPResult gpiProcessRecvBlockedList(GPConnection * connection,
         profileid = atoi(buffer);
 
         // Get the profile, adding if needed.
-        /////////////////////////////////////
         profile = gpiProfileListAdd(connection, profileid);
         if(!profile)
             Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 
-        // Mark as blocked, increment list counter
-        //////////////////////////////////////////
+        // Mark as blocked, increment list counter.
         profile->blocked = gsi_true; 
         profile->blockIndex = iconnection->profileList.numBlocked++;
     }

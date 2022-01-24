@@ -2,18 +2,17 @@
 // File:	gpiCallback.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdlib.h>
 #include "gpi.h"
 
 //FUNCTIONS
-///////////
 void
 gpiCallErrorCallback(
   GPConnection * connection,
@@ -67,7 +66,6 @@ gpiAddCallback(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Allocate the callback data.
-	//////////////////////////////
 	data = (GPICallbackData *)gsimalloc(sizeof(GPICallbackData));
 	if(data == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -81,7 +79,6 @@ gpiAddCallback(
 	data->pnext = NULL;
 
 	// Update the list.
-	///////////////////
 	if(iconnection->callbackList == NULL)
 		iconnection->callbackList = data;
 	if(iconnection->lastCallback != NULL)
@@ -98,7 +95,6 @@ gpiCallCallback(
 )
 {
 	// Call the callback.
-	/////////////////////
 	GS_ASSERT(data->callback.callback != NULL);
 	GS_ASSERT(data->arg != NULL);
 	data->callback.callback(connection, data->arg, data->callback.param);
@@ -215,7 +211,6 @@ gpiProcessCallbacks(
 			if((pcurr->operationID == blockingOperationID) || (pcurr->type == GPI_ADD_ERROR))
 			{
 				// Take this one out of the list.
-				/////////////////////////////////
 				if(pprev != NULL)
 					pprev->pnext = pcurr->pnext;
 				else
@@ -224,7 +219,6 @@ gpiProcessCallbacks(
 					last = pprev;
 	
 				// Call the callback.
-				/////////////////////
 				gpiCallCallback(connection, pcurr);
 			}
 			else
@@ -236,7 +230,6 @@ gpiProcessCallbacks(
 		}
 
 		// Were callbacks added within the callback?
-		////////////////////////////////////////////
 		if(iconnection->callbackList != NULL)
 		{
 			iconnection->lastCallback->pnext = list;
@@ -245,7 +238,6 @@ gpiProcessCallbacks(
 		else
 		{
 			// Reset the list.
-			//////////////////
 			iconnection->callbackList = list;
 			iconnection->lastCallback = last;
 		}
@@ -264,7 +256,6 @@ gpiProcessCallbacks(
 			pnext = pcurr->pnext;
 			
 			// Call the callback.
-			/////////////////////
 			gpiCallCallback(connection, pcurr);
 		}
 	}

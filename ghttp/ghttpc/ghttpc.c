@@ -272,7 +272,7 @@ int test_main(int argc, char **argv)
 
 	// get a header
 	request = ghttpHead(
-		_T(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/index.html"),
+		_T(GSI_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/index.html"),
 		GHTTPFalse,
 		CompletedCallback,
 		&pendingRequests);
@@ -282,7 +282,7 @@ int test_main(int argc, char **argv)
 	// stream a secure page	
 	request = ghttpStreamEx(
 #if defined(_REVOLUTION)
-		_T(RS_HTTP_PROTOCOL_URL "mariokartwii.race." GSI_DOMAIN_NAME "/RaceService/test.txt"),
+		_T(GSI_HTTP_PROTOCOL_URL "mariokartwii.race." GSI_DOMAIN_NAME "/RaceService/test.txt"),
 #else
 		_T("https://encrypted.google.com/"),
 #endif

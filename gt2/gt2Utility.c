@@ -2,10 +2,11 @@
 // File:	gt2Utility.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gt2Main.h"
 #include "gt2Utility.h"
@@ -81,7 +82,7 @@ const char * gt2AddressToString(unsigned int ip, unsigned short port, char strin
 
 GT2Bool gt2StringToAddress(const char * string, unsigned int * ip, unsigned short * port)
 {
-	unsigned int srcIP		= 0;	// avoid use uninit condition
+	unsigned int srcIP		= 0;	// Avoid use uninit condition.
 	unsigned short srcPort	= 0;
 
 	if(!string || !string[0])
@@ -102,7 +103,7 @@ GT2Bool gt2StringToAddress(const char * string, unsigned int * ip, unsigned shor
 			// The string is the host.
 			host = string;
 
-			// No port.
+			// The to port.
 			srcPort = 0;
 		}
 		else
@@ -143,7 +144,6 @@ GT2Bool gt2StringToAddress(const char * string, unsigned int * ip, unsigned shor
 		if(host)
 		{
 			// Try dotted IP.
-			/////////////////
 			srcIP = inet_addr(host);
 			if(srcIP == INADDR_NONE)
 			{
@@ -172,24 +172,24 @@ GT2Bool gt2StringToAddress(const char * string, unsigned int * ip, unsigned shor
 
 #ifdef GSI_ADHOC
 gsi_u32 gti2MacToIp(const char *mac)
-// change mac ethernet to IP address
+// Change mac ethernet to IP address.
 {
-	// Mac (48 bit)<---> IP (32 bit) convertion.
-	// horrible hack.  But the chances of a conflict are less then getting struck by lightning
-	// but in order to translate back, we will need to keep a table
-	// stick real value in table.
+	// Mac (48 bit)<---> IP (32 bit) conversion.
+	// The chances of a conflict are less then getting struck by lightning,	but
+	// in order to translate back, we will need to keep a table.
+	// Stick real value in table.
 	GTI2MacEntry *entry;
 	int i;
 	gsi_u32 ip;
-	memcpy(&ip,mac,4);		// store rest in table
+	memcpy(&ip,mac,4);		// Store rest in table.
 
 
-	// find match in table 
+	// Find match in table.
 	for (i=0;i< MAC_TABLE_SIZE;i++)
 	{
 		if(MacTable[i].ip == ip)
 		{
-			return ip;	// already there, don't add to the table.
+			return ip;	// Already there, don't add to the table.
 		}
 	}
 
@@ -309,7 +309,7 @@ const char * gt2StringToHostname(const char * string)
 
 char ** gt2IPToAliases(unsigned int ip)
 {
-	char ** aliases;
+	char ** aliases = NULL;
 
 	if(!gt2IPToHostInfo(ip, &aliases, NULL))
 		return NULL;
@@ -319,7 +319,7 @@ char ** gt2IPToAliases(unsigned int ip)
 
 char ** gt2StringToAliases(const char * string)
 {
-	char ** aliases;
+	char ** aliases = NULL;
 
 	if(!gt2StringToHostInfo(string, &aliases, NULL))
 		return NULL;
@@ -329,7 +329,7 @@ char ** gt2StringToAliases(const char * string)
 
 unsigned int ** gt2IPToIPs(unsigned int ip)
 {
-	unsigned int ** ips;
+	unsigned int ** ips = NULL;
 
 	if(!gt2IPToHostInfo(ip, NULL, &ips))
 		return NULL;
@@ -339,7 +339,7 @@ unsigned int ** gt2IPToIPs(unsigned int ip)
 
 unsigned int ** gt2StringToIPs(const char * string)
 {
-	unsigned int ** ips;
+	unsigned int ** ips = NULL;
 
 	if(!gt2StringToHostInfo(string, NULL, &ips))
 		return NULL;
@@ -351,20 +351,20 @@ unsigned int ** gt2StringToIPs(const char * string)
 ** INTERNAL FUNCTIONS **
 ***********************/
 
-#ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
+#ifdef __MWERKS__ // CodeWarrior will warn if not prototyped.
 void gti2MessageCheck(const GT2Byte ** message, int * len);
 #endif
 
-// Used from gt2main.c
+// Used from gt2main.c.
 void gti2MessageCheck(const GT2Byte ** message, int * len)
 {
-	// check for an empty message
+	// Check for an empty message.
 	if(!*message)
 	{
 		*message = (const GT2Byte *)"";
 		*len = 0;
 	}
-	// check for calculating the message length
+	// Check for calculating the message length.
 	else if(*len == -1)
 	{
 		*len = (int)(strlen((const char *)*message) + 1);
@@ -391,7 +391,7 @@ void gti2LogMessage
 	if(!file)
 		return;
 
-	// date-time
+	// Date-time
 #ifdef WIN32
 	_ftime(&utcTime);
 	now = localtime(&utcTime.time);
@@ -400,15 +400,15 @@ void gti2LogMessage
 		now->tm_hour, now->tm_min, now->tm_sec, utcTime.millitm);
 #endif
 
-	// from
+	// From
 	ip.s_addr = fromIP;
 	fprintf(file, "%s:%d -> ", inet_ntoa(ip), fromPort);
 
-	// to
+	// To
 	ip.s_addr = toIP;
 	fprintf(file, "%s:%d\n", inet_ntoa(ip), toPort);
 
-	// data
+	// Data
 	fprintf(file, "%d: ", len);
 	for(i = 0 ; i < len ; i++)
 		fprintf(file, "%02X ", message[i]);

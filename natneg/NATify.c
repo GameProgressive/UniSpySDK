@@ -2,10 +2,11 @@
 // File:	NATify.c
 // SDK:		GameSpy NAT Negotiation SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include <stddef.h>
 #include "nninternal.h"
@@ -14,7 +15,7 @@
 gsi_bool gotERT1, gotERT2, gotERT3;
 gsi_bool gotADDRESS1a, gotADDRESS1b, gotADDRESS2, gotADDRESS3;
 
-// prototypes for compilers that complain
+// Avoids strict compiler warnings.
 const char * AddressToString(unsigned int ip, unsigned short port, char string[22]);
 unsigned int NameToIp(const char *name);
 
@@ -56,7 +57,7 @@ static unsigned int GetLocalIP()
 {
 	int num_local_ips;
 	struct hostent *phost;
-	struct in_addr *addr;
+	IN_ADDR *addr;
 	unsigned int localip = 0;
 	phost = getlocalhost();
 	if (phost == NULL)
@@ -65,7 +66,7 @@ static unsigned int GetLocalIP()
 	{
 		if (phost->h_addr_list[num_local_ips] == 0)
 			break;
-		addr = (struct in_addr *)phost->h_addr_list[num_local_ips];
+		addr = (IN_ADDR *)phost->h_addr_list[num_local_ips];
 		if (addr->s_addr == htonl(0x7F000001))
 			continue;
 		localip = addr->s_addr;
@@ -73,15 +74,15 @@ static unsigned int GetLocalIP()
 		if(IsPrivateIP(addr))
 			return localip;
 	}
-	return localip; //else a specific private address wasn't found - return what we've got
+	return localip; // Else, a specific private address wasn't found; return what we've got.
 }
 
 static unsigned short GetLocalPort(SOCKET sock)
 {
 	int ret;
-	struct sockaddr_in saddr;
+	SOCKADDR_IN saddr;
 	socklen_t saddrlen = sizeof(saddr);
-	ret = getsockname(sock,(struct sockaddr *)&saddr, &saddrlen);
+	ret = getsockname(sock,(SOCKADDR *)&saddr, &saddrlen);
 	if (gsiSocketIsError(ret))
 		return 0;
 	return saddr.sin_port;
@@ -189,24 +190,24 @@ static int Think(SOCKET sock, NAT * nat)
 	int length;
 	unsigned char ptype;
 	NatNegPacket p;
-	struct sockaddr_in saddr;
-	socklen_t saddrlen = sizeof(struct sockaddr_in);
+	SOCKADDR_IN saddr;
+	socklen_t saddrlen = sizeof(SOCKADDR_IN);
 
-	// Is natification complete?
+	// Is NATification complete?
 	if(gotERT1 && gotERT2 && gotERT3 && 
 		gotADDRESS1a && gotADDRESS1b && gotADDRESS2 && gotADDRESS3)
 	{
-		// Don't need to wait any longer, got all the stuff.
+		// No need to wait any longer, we got all the information.
 		return(gsi_false);
 	}
 
-	// Process incoming data if there is any.
+	// Process incoming data (if there is any).
 	if(sock != INVALID_SOCKET)
 	{
 		// Check if there is data.
 		while(CanReceiveOnSocket(sock))
 		{
-			length = recvfrom(sock, data, NNINBUF_LEN, 0, (struct sockaddr *)&saddr, &saddrlen);
+			length = recvfrom(sock, data, NNINBUF_LEN, 0, (SOCKADDR *)&saddr, &saddrlen);
 
 			if (gsiSocketIsError(length))
 			{
@@ -310,8 +311,8 @@ gsi_bool DetermineNatType(NAT * nat)
 	nat->promiscuity = promiscuity_not_applicable;
 	nat->qr2Compatible = gsi_true;
 
-	// Some of the address mappings are crucial in determining the NAT type.
-	// If we don't have them, then we should not proceed.
+	// Some of the address mappings are crucial in determining the NAT type. If 
+	// we don't have them, we should not proceed.
 	if(nat->mappings[packet_map1a].publicIp == 0 ||
 	   nat->mappings[packet_map2].publicIp == 0 ||
 	   nat->mappings[packet_map3].publicIp == 0)
@@ -382,7 +383,7 @@ gsi_bool DetermineNatType(NAT * nat)
 	else if(nat->mappings[packet_map1a].publicPort == nat->mappings[packet_map1a].privatePort && 
 			nat->mappings[packet_map3].publicPort - nat->mappings[packet_map2].publicPort == 1)
 		// Using private port as the public port for the first mapping.
-		// Using an incremental (+1) port mapping scheme there after.
+		// Using an incremental (+1) port mapping scheme thereafter.
 		nat->mappingScheme = mixed;
 	else if(nat->mappings[packet_map3].publicPort - nat->mappings[packet_map2].publicPort == 1)
 		// Using an incremental (+1) port mapping scheme.

@@ -834,8 +834,8 @@ static gsi_bool RunTests(gsi_u8 loginMethod, gsi_bool isLoginOnly)
 
 	
 	// Override service URLs for debugging?
-	//strcpy(wsAuthServiceURL, RS_HTTP_PROTOCOL_URL "mwstage." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx");
-	//strcpy(scServiceURL, RS_HTTP_PROTOCOL_URL "mwstage." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx");
+	//strcpy(wsAuthServiceURL, GSI_HTTP_PROTOCOL_URL "mwstage." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx");
+	//strcpy(scServiceURL, GSI_HTTP_PROTOCOL_URL "mwstage." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx");
 
 
 	////////////////////////////////////////////////

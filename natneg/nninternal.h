@@ -2,10 +2,11 @@
 // File:	nninternal.h
 // SDK:		GameSpy NAT Negotiation SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _NNINTERNAL_H_
 #define _NNINTERNAL_H_
@@ -57,7 +58,7 @@
 #define NN_REPORT_ACK 14
 
 #if !defined(_PS2) && !defined(_NITRO)
-#pragma pack(1)
+# pragma pack(1)
 #endif
 
 
@@ -92,8 +93,8 @@ typedef struct _ConnectPacket
 	unsigned char finished;
 } ConnectPacket;
 
-#define BASEPACKET_SIZE 12
-#define BASEPACKET_TYPE_OFFSET 7
+#define BASEPACKET_SIZE				12
+#define BASEPACKET_TYPE_OFFSET		7
 typedef struct _NatNegPacket {
 	// Base members:
 	unsigned char magic[NATNEG_MAGIC_LEN];
@@ -112,7 +113,7 @@ typedef struct _NatNegPacket {
 
 
 #if !defined(_PS2) && !defined(_NITRO)
-#pragma pack()
+# pragma pack()
 #endif
 
 #endif

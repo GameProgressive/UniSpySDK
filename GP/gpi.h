@@ -2,16 +2,16 @@
 // File:	gpi.h
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GPI_H_
 #define _GPI_H_
 
 //INCLUDES
-//////////
 #include "../common/gsCommon.h"
 #include "../common/gsAvailable.h"
 #include "../common/gsUdpEngine.h"
@@ -20,17 +20,17 @@
 #include "../common/md5.h"
 #include "gp.h"
 
-// Extended message support
+// Extended message support.
 #define GPI_NEW_AUTH_NOTIFICATION	(1<<0)
 #define GPI_NEW_REVOKE_NOTIFICATION (1<<1)
 
-// New Status Info support
+// New Status Info support.
 #define GPI_NEW_STATUS_NOTIFICATION (1<<2)
 
-// Buddy List + Block List retrieval on login
+// Buddy List + Block List retrieval on login.
 #define GPI_NEW_LIST_RETRIEVAL_ON_LOGIN (1<<3)
 
-// Extended SDK features
+// Extended SDK features.
 #ifndef GPI_SDKREV
 #ifdef GP_NEW_STATUS_INFO
 #define GPI_SDKREV (GPI_NEW_AUTH_NOTIFICATION | GPI_NEW_REVOKE_NOTIFICATION | GPI_NEW_STATUS_NOTIFICATION | GPI_NEW_LIST_RETRIEVAL_ON_LOGIN)
@@ -43,9 +43,7 @@
 #define GPI_PEER_PORT 6500
 
 //TYPES
-///////
 // Boolean.
-///////////
 typedef enum _GPIBool
 {
 	GPIFalse,
@@ -66,7 +64,7 @@ typedef enum _GPIBool
 #include "gpiUnique.h"
 #include "gpiKeys.h"
 
-// For PS3 NP Sync functionality
+// For PS3 NP Sync functionality.
 #ifdef _PS3
 #include "gpiPS3.h"
 
@@ -79,7 +77,6 @@ typedef struct GpiNpBasicCallback
 #endif
 
 // Connection data.
-///////////////////
 typedef struct
 {
 	char errorString[GP_ERROR_STRING_LEN];
@@ -102,14 +99,14 @@ typedef struct
 	char * inputBuffer;
 	int inputBufferSize;
 	GPIBuffer outputBuffer;
-	// Replaced by UDP Layer
+	// Replaced by UDP Layer.
 	//SOCKET peerSocket;
 	char mHeader[GS_UDP_MSG_HEADER_LEN];
 	unsigned short peerPort;
 	int nextOperationID;
 	int numSearches;
   
-	// new style status info 
+	// New style status info.
 	GPEnum lastStatusState;
 	unsigned int hostIp;
 	unsigned int hostPrivateIp;
@@ -122,7 +119,7 @@ typedef struct
 	char gameVariant[GP_STATUS_BASIC_STR_LEN];
 	char gameMapName[GP_STATUS_BASIC_STR_LEN];
 
-	// New Status Info extended info Keys
+	// New Status Info extended info Keys.
 	DArray extendedInfoKeys;
 
 	// Deprecated
@@ -165,7 +162,7 @@ typedef struct
 #endif
 
 #ifdef _PS3
-	// NP sync info
+	// NP sync info.
 	gsi_bool  npInitialized;
 	gsi_bool  npStatusRetrieved;
 	gsi_bool  npBasicGameInitialized;
@@ -189,7 +186,6 @@ typedef struct
 } GPIConnection;
 
 //FUNCTIONS
-///////////
 GPResult
 gpiInitialize(
   GPConnection * connection,

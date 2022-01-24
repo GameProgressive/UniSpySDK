@@ -2,10 +2,11 @@
 // File:	gsPlatformUtil.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef __GSUTILITY_H__
 #define __GSUTILITY_H__
@@ -40,11 +41,11 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle);
 ///////////////////////////////////////////////////////////////////////////////
 // Get rid of compiler warnings when parameters are never used
 // (Mainly used in sample apps and callback for platform switches)
-#if (defined(__MWERKS__) && !defined(_NITRO)) || defined(WIN32)
+#if (defined(__MWERKS__) && !defined(_NITRO)) || defined(WIN32) || defined(ANDROID)
 	#define GSI_UNUSED(x) x
 #elif defined(_PS2) || defined(_NITRO) || defined(_PS3) || defined(_MACOSX) || defined (_IPHONE)
 	#define GSI_UNUSED(x) {void* y=&x;y=NULL;}
-#elif defined(_PSP)
+#elif defined(_PSP) || defined(_PSP2)
 	#define GSI_UNUSED(x) (void)x;
 #elif defined(_LINUX)
 	#define GSI_UNUSED(x) (void)x

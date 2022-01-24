@@ -2,10 +2,11 @@
 // File:	gsCore.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // Core task/callback manager.
 
@@ -101,7 +102,7 @@ void gsCoreInitialize()
 
 		// initialize strings that correlate to response header entries
 		strcpy(aCore->authError, "");
-		aCore->authErrorCode = 0;
+		aCore->authErrorCode = GSAuthErrorCode_None;
 		strcpy(aCore->sessionToken, "");
 		strcpy(aCore->gameId, "");
 		strcpy(aCore->profileId, "");

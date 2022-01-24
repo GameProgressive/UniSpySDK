@@ -2,10 +2,11 @@
 // File:	gsPlatformSocket.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // GSI Cross Platform Socket Wrapper
 
@@ -18,14 +19,7 @@
 extern "C" {
 #endif
 
-
-
-
-// GSI Cross Platform Socket Wrapper
-
-// this should all inline and optimize out... I hope
-// if they somehow get really complex, we need to move the implementation into the .c file.
-#if defined _PS3 || defined _PSP
+#if defined _PS3 || defined _PSP || defined _PSP2
 	#define  gsiSocketIsError(theReturnValue)		((theReturnValue) <  0)
 	#define  gsiSocketIsNotError(theReturnValue)	((theReturnValue) >= 0)
 #else
@@ -224,6 +218,119 @@ gsiSocketGethostbyname(n) SOC_GetHostByName(n)
 	const char* gsSocketInetNtoa(struct in_addr in);
 	typedef SceNetInetSocklen_t socklen_t;
 
+#elif defined(_PSP2)
+	#define AF_INET     SCE_NET_AF_INET
+	#define SOCK_STREAM SCE_NET_SOCK_STREAM
+	#define SOCK_DGRAM  SCE_NET_SOCK_DGRAM
+	#define SOCK_RAW    SCE_NET_SOCK_RAW
+	#define INADDR_ANY  SCE_NET_INADDR_ANY
+	#define SOL_SOCKET  SCE_NET_SOL_SOCKET
+	#define SO_SNDBUF   SCE_NET_SO_SNDBUF
+	#define SO_RCVBUF   SCE_NET_SO_RCVBUF
+	#define SO_NBIO     SCE_NET_SO_NBIO
+	#define SO_BROADCAST SCE_NET_SO_BROADCAST
+    #define SO_KEEPALIVE SCE_NET_SO_KEEPALIVE
+    #define SO_REUSEADDR SCE_NET_SO_REUSEADDR
+
+	#define IPPROTO_TCP SCE_NET_IPPROTO_TCP // protocol defined by SOCK_STREAM
+	#define IPPROTO_UDP SCE_NET_IPPROTO_UDP // protocol defined by SOCK_DGRAM
+	#define IPPROTO_ICMP SCE_NET_IPPROTO_ICMP // protocol for ICMP pings
+
+	// structures
+	#define in_addr     SceNetInAddr
+	#define sockaddr_in	SceNetSockaddrIn
+	#define sockaddr    SceNetSockaddr
+
+	// Remove FD types set in sys/types.h
+	// Replace with types in pspnet/sys/select.h
+	#if defined(_SYS_TYPES_H) && defined(FD_SET)
+		#undef fd_set
+		#undef FD_SET
+		#undef FD_CLR
+		#undef FD_ZERO
+		#undef timeval
+		#undef FD_SETSIZE	
+	#endif
+	#define fd_set  SceNetFdSet
+	#define timeval SceNetTimeval
+	#define FD_SET  SCE_NET_FD_SET
+	#define FD_CLR  SCE_NET_FD_CLR
+	#define FD_ZERO SCE_NET_FD_ZERO
+	#define FD_SETSIZE SCE_NET_FD_SETSIZE
+	#define FD_ISSET SCE_NET_FD_ISSET
+
+	// functions
+	#define htonl		sceNetHtonl
+	#define ntohl		sceNetNtohl
+#ifndef htons
+	#define htons		sceNetHtons
+#endif
+	#define ntohs		sceNetNtohs
+	#define socket(x,y,z)      sceNetSocket("", x, y, z)
+    #define shutdown    sceNetShutdown
+	#define closesocket sceNetSocketClose
+	
+	#define setsockopt					  sceNetSetsockopt
+	#define getsockopt(s, l, on, ov, ol)  sceNetGetsockopt(s, l, on, ov, (SceNetSocklen_t *)ol)
+
+	#define bind			sceNetBind
+	#define select			sceNetSelect
+
+	#define connect			sceNetConnect
+    #define listen			sceNetListen
+	#define accept(s,a,l)	sceNetAccept(s, a, (SceNetSocklen_t *)l)
+    
+	#define send		sceNetSend  
+	#define recv		sceNetRecv
+	#define sendto		sceNetSendto 
+	#define recvfrom(s, b, l, f, fr, fl)	sceNetRecvfrom(s, b, l, f, fr, (SceNetSocklen_t *)fl)
+
+	gsi_u32 inet_addr(const char * name);
+	// This is not the correct function for gethostname, it should get the string name of the local host
+	// not the sockaddr_in struct
+	#define gethostname // sceNetInetGetsockname 
+	#define getsockname(s,n,l) sceNetGetsockname(s, n, (SceNetSocklen_t *)l)
+	
+    #define GOAGetLastError(s) sce_net_errno
+	
+	// hostent support
+	struct hostent
+	{
+		char* h_name;       
+		char** h_aliases;    
+		gsi_u16 h_addrtype; // AF_INET
+		gsi_u16 h_length;   
+		char** h_addr_list; 
+	};
+
+	#define GS_MAX_HOSTNAME_LEN 512
+
+	typedef struct _gsDnsCache
+	{
+		char hostname[GS_MAX_HOSTNAME_LEN];
+		SceNetInAddr ip;
+		struct _gsDnsCache *next;
+
+	} gsDnsCache;
+
+	#define gethostbyname gsSocketGetHostByName
+	#define inet_ntoa     gsSocketInetNtoa
+
+	#define GSI_RESOLVER_TIMEOUT  (5*1000*1000) // 5 seconds
+	#define GSI_RESOLVER_RETRY    (2)
+
+	struct hostent* gsSocketGetHostByName(const char* name); // gsSocketPSP.c
+	const char* gsSocketInetNtoa(in_addr in);
+	typedef SceNetSocklen_t socklen_t;
+
+	#ifndef SOCKET_ERROR
+	#define SOCKET_ERROR             -1
+	#endif
+
+	#ifndef INVALID_SOCKET
+	#define INVALID_SOCKET           ~0u
+	#endif
+
 #endif // _PSP
 
 // XBOX doesn't have host lookup
@@ -356,6 +463,45 @@ gsiSocketGethostbyname(n) SOC_GetHostByName(n)
 	#define WSAESTALE           SYS_NET_ESTALE                  
 	#define WSAEREMOTE          SYS_NET_EREMOTE
 	#define WSAEINVAL           SYS_NET_EINVAL
+#elif defined(_PSP2)
+	#define WSAEWOULDBLOCK      SCE_NET_EWOULDBLOCK	            
+	#define WSAEINPROGRESS      SCE_NET_EINPROGRESS		          //SCE_NET_ERROR_EINPROGRESS		          
+	#define WSAEALREADY         SCE_NET_EALREADY                
+	#define WSAENOTSOCK         SCE_NET_ENOTSOCK                
+	#define WSAEDESTADDRREQ     SCE_NET_EDESTADDRREQ            
+	#define WSAEMSGSIZE         SCE_NET_EMSGSIZE 
+	#define WSAEPROTOTYPE       SCE_NET_EPROTOTYPE              
+	#define WSAENOPROTOOPT      SCE_NET_ENOPROTOOPT             
+	#define WSAEPROTONOSUPPORT  SCE_NET_EPROTONOSUPPORT         
+	#define WSAESOCKTNOSUPPORT  SCE_NET_ESOCKTNOSUPPORT         
+	#define WSAEOPNOTSUPP       SCE_NET_EOPNOTSUPP              
+	#define WSAEPFNOSUPPORT     SCE_NET_EPFNOSUPPORT            
+	#define WSAEAFNOSUPPORT     SCE_NET_EAFNOSUPPORT            
+	#define WSAEADDRINUSE       SCE_NET_EADDRINUSE              
+	#define WSAEADDRNOTAVAIL    SCE_NET_EADDRNOTAVAIL           
+	#define WSAENETDOWN         SCE_NET_ENETDOWN                
+	#define WSAENETUNREACH      SCE_NET_ENETUNREACH             
+	#define WSAENETRESET        SCE_NET_ENETRESET               
+	#define WSAECONNABORTED     SCE_NET_ECONNABORTED            
+	#define WSAECONNRESET       SCE_NET_ECONNRESET 				// SCE_NET_ERROR_ECONNRESET 
+	#define WSAENOBUFS          SCE_NET_ENOBUFS    				// SCE_NET_ERROR_ENOBUFS               
+	#define WSAEISCONN          SCE_NET_EISCONN                 
+	#define WSAENOTCONN         SCE_NET_ENOTCONN                
+	#define WSAESHUTDOWN        SCE_NET_ESHUTDOWN               
+	#define WSAETOOMANYREFS     SCE_NET_ETOOMANYREFS            
+	#define WSAETIMEDOUT        SCE_NET_ETIMEDOUT 
+	#define WSAECONNREFUSED     SCE_NET_ECONNREFUSED            
+	#define WSAELOOP            SCE_NET_ELOOP                   
+	#define WSAENAMETOOLONG     SCE_NET_ENAMETOOLONG            
+	#define WSAEHOSTDOWN        SCE_NET_EHOSTDOWN             
+	#define WSAEHOSTUNREACH     SCE_NET_EHOSTUNREACH             
+	#define WSAENOTEMPTY        SCE_NET_ENOTEMPTY               
+	#define WSAEPROCLIM         SCE_NET_EPROCLIM                
+	#define WSAEUSERS           SCE_NET_EUSERS                  
+	#define WSAEDQUOT           SCE_NET_EDQUOT                  
+	#define WSAESTALE           SCE_NET_ESTALE                  
+	#define WSAEREMOTE          SCE_NET_EREMOTE
+	#define WSAEINVAL           SCE_NET_EINVAL
 #elif !defined(_WIN32)
 	#define WSAEWOULDBLOCK      EWOULDBLOCK             
 	#define WSAEINPROGRESS      EINPROGRESS             
@@ -400,11 +546,17 @@ gsiSocketGethostbyname(n) SOC_GetHostByName(n)
 // make caps types interchangeable on all platforms
 #if !defined(_WIN32) && !defined(_NITRO) && !defined(_REVOLUTION) // necessary for Wii??
 	typedef int SOCKET;
-	typedef struct sockaddr    SOCKADDR;
-	typedef struct sockaddr_in SOCKADDR_IN;
-	typedef struct in_addr     IN_ADDR;
 	typedef struct hostent     HOSTENT;
 	typedef struct timeval     TIMEVAL;
+	#if defined(_PSP2)
+		typedef struct SceNetSockaddr    SOCKADDR;
+		typedef struct SceNetSockaddrIn  SOCKADDR_IN;
+		typedef struct SceNetInAddr      IN_ADDR;
+	#else
+		typedef struct sockaddr          SOCKADDR;
+		typedef struct sockaddr_in       SOCKADDR_IN;
+		typedef struct in_addr           IN_ADDR;
+	#endif
 #endif
 
 #ifdef EENET
@@ -644,10 +796,19 @@ int IsPrivateIP(IN_ADDR * addr);
 gsi_u32 gsiGetBroadcastIP(void);
 
 
-#if defined(_PSP)
+#if defined(_PSP) || defined(_PSP2)
 	#define gethostbyaddr(a,b,c)   NULL
 #endif
 
+#if defined(_PSP2)
+int vitaSocketselect
+(
+	SOCKET theSocket, 
+	int* theReadFlag, 
+	int* theWriteFlag, 
+	int* theExceptFlag
+);
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

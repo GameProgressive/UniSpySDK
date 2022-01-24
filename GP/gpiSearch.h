@@ -11,11 +11,9 @@
 #define _GPISEARCH_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //TYPES
-///////
 #define GPI_SEARCH_PROFILE			    1
 #define GPI_SEARCH_IS_VALID             2
 #define GPI_SEARCH_NICKS                3
@@ -28,11 +26,10 @@
 #define GPI_SEARCH_PROFILE_UNIQUENICK  10
 #define GPI_SEARCH_PROFILE_BUDDYLIST   11
 
-// A timeout used to abort searches taking too long
+// A timeout used to abort searches taking too long.
 #define GPI_SEARCH_TIMEOUT 60000
 
 // Profile Search operation data.
-/////////////////////////////////
 typedef struct
 {
 	int type;
@@ -62,7 +59,6 @@ typedef struct
 } GPISearchData;
 
 //FUNCTIONS
-///////////
 GPResult
 gpiProfileSearch(
   GPConnection * connection,

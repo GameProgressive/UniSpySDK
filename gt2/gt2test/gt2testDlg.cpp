@@ -2,10 +2,11 @@
 // File:	gt2testDlg.cpp
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "stdafx.h"
 #include "gt2test.h"
@@ -160,23 +161,23 @@ BOOL CGt2testDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);
 	SetIcon(m_hIcon, FALSE);
 
-	// so we can reference members from callbacks
+	// So we can reference members from callbacks.
 	dlg = this;
 
-	// disable the socket controls
+	// Disable the socket controls.
 	EnableSocketControls(FALSE);
 
-	// we initialize sockets ourself because it might be needed for the address functions
-	// this function is declared in nonport.h
+	// We initialize sockets ourselves because they might be needed for the 
+	// address functions. This function is declared in nonport.h.
 	SocketStartUp();
 
-	// setup the think timer
+	// Setup the think timer.
 	SetTimer(100, 20, NULL);
 
-	// not thinking yet
+	// Not thinking yet.
 	m_thinking = GT2False;
 
-	// create the delay arrays
+	// Create the delay arrays.
 	m_delayedSends = ArrayNew(sizeof(DelayedMessage), 10, DelayedMessageFree);
 	m_delayedReceives = ArrayNew(sizeof(DelayedMessage), 10, DelayedMessageFree);
 
@@ -187,7 +188,7 @@ void CGt2testDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
 
-	// free our arrays of delayed messages
+	// Free our arrays of delayed messages.
 	if(m_delayedSends)
 	{
 		ArrayFree(m_delayedSends);
@@ -234,10 +235,10 @@ HCURSOR CGt2testDlg::OnQueryDragIcon()
 ** GENERAL **
 ************/
 
-// enable or disable a control based on it's control ID
+// Enable or disable a control based on it's control ID.
 #define ENABLE(control, enable) GetDlgItem(control)->EnableWindow(enable)
 
-// check if a delayed message should be passed on to it's filter function
+// Check if a delayed message should be passed on to it's filter function.
 static void DelayCheck(DArray delayedMessages, unsigned long now, BOOL send)
 {
 	DelayedMessage * message;
@@ -246,12 +247,13 @@ static void DelayCheck(DArray delayedMessages, unsigned long now, BOOL send)
 
 	num = ArrayLength(delayedMessages);
 
-	// loop through the list backwards to allow for safe removals
+	// Loop through the list backwards to allow for safe removals.
 	for(i = (num - 1) ; i >= 0 ; i--)
 	{
 		message = (DelayedMessage *)ArrayNth(delayedMessages, i);
 
-		// check if the time passed since the start time is greater than the delay time
+		// Check if the time passed since the start time is greater than the
+		// delay time.
 		if((now - message->startTime) > message->delayTime)
 		{
 			if(send)
@@ -271,12 +273,12 @@ static void RemoveDelayedMessages(DArray delayedMessages, GT2Connection connecti
 
 	num = ArrayLength(delayedMessages);
 
-	// loop through the list backwards to allow for safe removals
+	// Loop through the list backwards to allow for safe removals.
 	for(i = (num - 1) ; i >= 0 ; i--)
 	{
 		message = (DelayedMessage *)ArrayNth(delayedMessages, i);
 
-		// remove it if the connection matches
+		// Remove it if the connection matches.
 		if(message->connection == connection)
 			ArrayDeleteAt(delayedMessages, i);
 	}
@@ -284,12 +286,13 @@ static void RemoveDelayedMessages(DArray delayedMessages, GT2Connection connecti
 
 void CGt2testDlg::OnTimer(UINT nIDEvent) 
 {
-	// check for our timer
+	// Check for our timer.
 	if(nIDEvent == 100)
 	{
-		// we have a socket, "always think" is checked, and we're not already thinking, think
-		// the check for already thinking is because this can get called from inside a dialog box brought up
-		// inside a callback - this would be bad (recursive thinking).
+		// We have a socket, "always think" is checked, and we're not already
+		// thinking; the check for already thinking is because this can get 
+		// called from inside a dialog box brought up inside a callback -- this
+		// would be bad (recursive thinking).
 		m_alwaysThink = (((CButton *)GetDlgItem(IDC_ALWAYS_THINK))->GetCheck() == BST_CHECKED);
 		if(m_socket && m_alwaysThink && !m_thinking)
 		{
@@ -298,7 +301,8 @@ void CGt2testDlg::OnTimer(UINT nIDEvent)
 			m_thinking = GT2False;
 		}
 
-		// find the active connection, and check what the connection's state should be
+		// Find the active connection, and check what the connection's state 
+		// should be.
 		GT2Connection connection = GetActiveConnection();
 		int newState;
 		if(connection)
@@ -306,22 +310,22 @@ void CGt2testDlg::OnTimer(UINT nIDEvent)
 		else
 			newState = -1;
 
-		// if this differs from the previous connection state, make the change
+		// If this differs from the previous connection state, make the change.
 		if(newState != m_connectionState)
 		{
-			// if there's a state, check it
+			// If there's a state, check it.
 			if(newState != -1)
 				((CButton *)GetDlgItem(IDC_CONNECTING + newState))->SetCheck(BST_CHECKED);
 
-			// if there's a previous state, uncheck it
+			// If there's a previous state, uncheck it.
 			if(m_connectionState != -1)
 				((CButton *)GetDlgItem(IDC_CONNECTING + m_connectionState))->SetCheck(BST_UNCHECKED);
 
-			// save the new state
+			// Save the new state.
 			m_connectionState = newState;
 		}
 
-		// update the buffer display
+		// Update the buffer display.
 		if(connection)
 		{
 			int freeSpace;
@@ -350,13 +354,13 @@ void CGt2testDlg::OnTimer(UINT nIDEvent)
 			m_outgoingBufferProgress.SetPos(0);
 		}
 
-		// check for delayed messages
+		// Check for delayed messages.
 		unsigned long now = current_time();
 		DelayCheck(m_delayedSends, now, TRUE);
 		DelayCheck(m_delayedReceives, now, FALSE);
 	}
 
-	// MFC stuff
+	// MFC stuff.
 	CDialog::OnTimer(nIDEvent);
 }
 
@@ -409,7 +413,7 @@ BOOL CGt2testDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-	// MFC stuff
+	// MFC stuff.
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
@@ -438,7 +442,8 @@ static const char * ResultToString(GT2Result result)
 	return "Unknown result";
 }
 
-// used to enable or disable socket controls when a socket is created or destroyed
+// This is used to enable or disable socket controls when a socket is created 
+// or destroyed.
 void CGt2testDlg::EnableSocketControls(BOOL enable)
 {
 	if(!enable)
@@ -464,7 +469,8 @@ void CGt2testDlg::EnableSocketControls(BOOL enable)
 	EnableConnectionControls(FALSE);
 }
 
-// used to enable or disable the listen controls, depending on if the socket is listening or not
+// This is used to enable or disable the listen controls, depending on if the 
+// socket is listening or not.
 void CGt2testDlg::EnableListenControls(BOOL enable)
 {
 	ENABLE(IDC_ACCEPT_ALL, enable);
@@ -473,7 +479,8 @@ void CGt2testDlg::EnableListenControls(BOOL enable)
 	ENABLE(IDC_REJECT_REASON, enable);
 }
 
-// used to enable or disable the connection controls, depending on if there's a connection or not
+// This is used to enable or disable the connection controls, depending on if 
+// there's a connection or not.
 void CGt2testDlg::EnableConnectionControls(BOOL enable)
 {
 	ENABLE(IDC_CONNECTIONS, enable);
@@ -499,7 +506,7 @@ void CGt2testDlg::EnableConnectionControls(BOOL enable)
 	ENABLE(IDC_RECEIVE_DELAY_VALUE, enable);
 }
 
-// get's the list index for a connection object
+// This gets the list index for a connection object.
 int CGt2testDlg::GetConnectionIndex(GT2Connection connection)
 {
 	int nIndex;
@@ -514,7 +521,7 @@ int CGt2testDlg::GetConnectionIndex(GT2Connection connection)
 	return -1;
 }
 
-// get's the connection for a given list index
+// This gets the connection for a given list index.
 GT2Connection CGt2testDlg::GetConnection(int nIndex)
 {
 	if(nIndex == -1)
@@ -527,7 +534,7 @@ GT2Connection CGt2testDlg::GetConnection(int nIndex)
 	return info->connection;
 }
 
-// get's the connection info for a given list index
+// Get the connection info for a given list index.
 ConnectionInfo * CGt2testDlg::GetConnectionInfo(int nIndex)
 {
 	if(nIndex == -1)
@@ -541,13 +548,13 @@ ConnectionInfo * CGt2testDlg::GetConnectionInfo(GT2Connection connection)
 	return GetConnectionInfo(GetConnectionIndex(connection));
 }
 
-// adds a connection to the connection list
+// This adds a connection to the connection list.
 void CGt2testDlg::AddConnection(GT2Connection connection)
 {
-	// the string to show in the list is it's IP and port
+	// The string to show in the list is its IP and port.
 	CString address = gt2AddressToString(gt2GetRemoteIP(connection), gt2GetRemotePort(connection), NULL);
 
-	// add the string to the list
+	// Add the string to the list.
 	int nIndex = m_connections.AddString(address);
 	if(nIndex == -1)
 	{
@@ -555,7 +562,7 @@ void CGt2testDlg::AddConnection(GT2Connection connection)
 		return;
 	}
 
-	// allocation the connection's info
+	// Allocation the connection's info.
 	ConnectionInfo * info = new ConnectionInfo;
 	info->connection = connection;
 	info->messages.Empty();
@@ -566,29 +573,32 @@ void CGt2testDlg::AddConnection(GT2Connection connection)
 	info->sendDelay = FALSE;
 	info->receiveDelay = FALSE;
 
-	// set the string's data pointer to point to it's info
+	// Set the string's data pointer to point to its info.
 	m_connections.SetItemDataPtr(nIndex, info);
 
-	// we have a connection, so enable the controls
+	// We have a connection, so enable the controls.
 	EnableConnectionControls();
 
-	// set this connection as the active connection
+	// Set this connection as the active connection.
 	SetActiveConnection(connection);
 }
 
-// sets a connection as active (or, if connection is NULL and nIndex is -1, sets the list to no active connectoin)
+// Sets a connection as active (or, if connection is NULL and nIndex is -1, 
+// sets the list to no active connection).
 void CGt2testDlg::SetActiveConnection(GT2Connection connection, int nIndex)
 {
-	// make sure this connection is selected
+	// Make sure this connection is selected.
 	m_connections.SetCurSel(nIndex);
 
-	// enable the connection controls depending on if this is a connection or not
+	// Enable the connection controls depending on if this is a connection or 
+	// not.
 	EnableConnectionControls(connection != NULL);
 
-	// make sure the controls reflect the proper connection (or lack thereof)
+	// Make sure the controls reflect the proper connection (or lack thereof).
 	if(connection)
 	{
-		// update the connection values with the saved values for this connection
+		// Update the connection values with the saved values for this 
+		// connection.
 		ConnectionInfo * info = GetConnectionInfo(connection);
 		m_messages = info->messages;
 		m_sendROT13 = info->sendROT13;
@@ -604,7 +614,7 @@ void CGt2testDlg::SetActiveConnection(GT2Connection connection, int nIndex)
 	}
 	else
 	{
-		// blank out all the connection values
+		// Blank out all the connection values.
 		m_messages = "";
 		m_sendROT13 = FALSE;
 		m_receiveROT13 = FALSE;
@@ -619,18 +629,18 @@ void CGt2testDlg::SetActiveConnection(GT2Connection connection, int nIndex)
 	}
 }
 
-// set the active connection using a connection object
+// Set the active connection using a connection object.
 void CGt2testDlg::SetActiveConnection(GT2Connection connection)
 {
 	int nIndex = GetConnectionIndex(connection);
-	ASSERT(nIndex != -1);  // tried to activate a bad connection
+	ASSERT(nIndex != -1);  // Tried to activate a bad connection.
 	if(nIndex == -1)
 		return;
 
 	SetActiveConnection(connection, nIndex);
 }
 
-// set the active connection using a list index
+// Set the active connection using a list index.
 void CGt2testDlg::SetActiveConnection(int nIndex)
 {
 	if(nIndex != -1)
@@ -639,7 +649,7 @@ void CGt2testDlg::SetActiveConnection(int nIndex)
 		SetActiveConnection(NULL, nIndex);
 }
 
-// get the selected connection, or NULL if there is none
+// Get the selected connection, or NULL if there is none.
 GT2Connection CGt2testDlg::GetActiveConnection()
 {
 	if(!m_connections.IsWindowEnabled())
@@ -652,36 +662,38 @@ GT2Connection CGt2testDlg::GetActiveConnection()
 	return GetConnection(nIndex);
 }
 
-// remove a connection from the list
+// Remove a connection from the list.
 void CGt2testDlg::RemoveConnection(GT2Connection connection)
 {
-	// check for any delayed messages that are supposed to use this connection
+	// Check for any delayed messages that are supposed to use this 
+	// connection.
 	RemoveDelayedMessages(m_delayedSends, connection);
 	RemoveDelayedMessages(m_delayedReceives, connection);
 
-	// get this connection's index
+	// Get this connection's index.
 	int nIndex = GetConnectionIndex(connection);
 	if(nIndex == -1)
 		return;
 
-	// check if this is the current selection
+	// Check if this is the current selection.
 	BOOL selected = (m_connections.GetCurSel() == nIndex);
 
-	// free it's info
+	// Free its info.
 	delete GetConnectionInfo(nIndex);
 
-	// delete it
+	// Delete it.
 	m_connections.DeleteString(nIndex);
 
 	UpdateData();
 
-	// if it was selected, select something else
+	// If it was selected, select something else.
 	if(selected)
 	{
 		int count = m_connections.GetCount();
 		if(count)
 		{
-			// if it was last, select the previous, otherwise select the next
+			// If it was last, select the previous connection, otherwise select
+			// the next one.
 			if(nIndex == count)
 				SetActiveConnection(nIndex - 1);
 			else
@@ -689,7 +701,7 @@ void CGt2testDlg::RemoveConnection(GT2Connection connection)
 		}
 		else
 		{
-			// it was the only one, set to no selection
+			// It was the only one, set to no selection.
 			SetActiveConnection(-1);
 		}
 	}
@@ -697,24 +709,24 @@ void CGt2testDlg::RemoveConnection(GT2Connection connection)
 	UpdateData(FALSE);
 }
 
-// adds a string to a connection's message list, and updates the displayed messages list if this is
-// the active connection
+// Adds a string to a connection's message list and updates the displayed 
+// messages list if this is the active connection.
 void CGt2testDlg::AddMessageString(GT2Connection connection, const char *string)
 {
-	// add this to the connection's info
+	// Add this to the connection's info.
 	ConnectionInfo * info = GetConnectionInfo(connection);
 	if(info)
 		info->messages += string;
 	
-	// is this the active connection?
+	// Is this the active connection?
 	if(GetActiveConnection() == connection)
 	{
-		// update the messages list
+		// Update the messages list.
 		UpdateData();
 		m_messages += string;
 		UpdateData(FALSE);
 
-		// scroll the messages to the bottom
+		// Scroll the messages to the bottom.
 		CEdit * messagesCtrl = (CEdit *)GetDlgItem(IDC_MESSAGES);
 		messagesCtrl->SetSel(m_messages.GetLength(), m_messages.GetLength());
 	}
@@ -759,7 +771,7 @@ void CGt2testDlg::OnCreateSocket()
 {
 	UpdateData();
 
-	// create the socket, using the info provided
+	// Create the socket, using the info provided.
 	GT2Result result = gt2CreateSocket(&m_socket, m_localAddress, atoi(m_outBufferSize), atoi(m_inBufferSize), SocketErrorCallback);
 	if(result != GT2Success)
 	{
@@ -769,16 +781,16 @@ void CGt2testDlg::OnCreateSocket()
 		return;
 	}
 
-	// set the dump callbacks
+	// Set the dump callbacks.
 	gt2SetSendDump(m_socket, SendDumpCallback);
 	gt2SetReceiveDump(m_socket, ReceiveDumpCallback);
 
-	// set the config settings to their actual values
+	// Set the config settings to their actual values.
 	m_localAddress = gt2AddressToString(gt2GetLocalIP(m_socket), gt2GetLocalPort(m_socket), NULL);
 	m_outBufferSize.Format("%d", atoi(m_outBufferSize));
 	m_inBufferSize.Format("%d", atoi(m_inBufferSize));
 
-	// enable the socket controls
+	// Enable the socket controls.
 	EnableSocketControls();
 
 	UpdateData(FALSE);
@@ -786,16 +798,16 @@ void CGt2testDlg::OnCreateSocket()
 
 void CGt2testDlg::OnCloseSocket() 
 {
-	// close the socket
+	// Close the socket.
 	gt2CloseSocket(m_socket);
 
-	// disable the socket controls
+	// Disable the socket controls.
 	EnableSocketControls(FALSE);
 }
 
 void CGt2testDlg::OnThink() 
 {
-	// let the socket think, if it's not already thinking
+	// Let the socket think, if it's not already thinking.
 	if(m_thinking)
 		return;
 	m_thinking = GT2True;
@@ -818,50 +830,50 @@ static void ConnectAttemptCallback
 
 	dlg->UpdateData();
 	
-	// check for an empty message
+	// Check for an empty message.
 	if(!message)
 		message = (GT2Byte *)"";
 
-	// get a string address for the connector
+	// Get a string address for the connector.
 	CString address = gt2AddressToString(ip, port, NULL);
 
-	// check if we should accept, reject, or prompt
+	// Check if we should accept, reject, or prompt.
 	if(dlg->m_acceptMode == 0)
 		accept = GT2True;
 	else if(dlg->m_acceptMode == 1)
 		accept = GT2False;
 	else
 	{
-		// ask the user, and set accept/reject based on their answer
+		// Ask the user, and set accept/reject based on their answer.
 		CString str;
 		str.Format("Accept a connection from %s (latency: %dms)?\n%s", (LPCSTR)address, latency, message);
 		accept = (dlg->MessageBox(str, "Accept/Reject", MB_YESNO) == IDYES);
 	}
 
-	// accept the connection?
+	// Accept the connection?
 	if(accept)
 	{
-		// setup the connection callbacks
+		// Setup the connection callbacks.
 		GT2ConnectionCallbacks callbacks;
 		dlg->SetupConnectionCallbacks(callbacks);
 
-		// do the accept
+		// Do the accept
 		if(gt2Accept(connection, &callbacks))
 		{
-			// add the connection to our list
+			// Add the connection to our list.
 			dlg->AddConnection(connection);
 		}
 		else
 		{
-			// the other side has terminated the connection attempt before we accepted
-			// only warn about this if they specifically accepted it
+			// The other side has terminated the connection attempt before we 
+			// accepted. Only warn about this if they specifically accepted it.
 			if(dlg->m_acceptMode == 2)
 				dlg->MessageBox("Connection already closed");
 		}
 	}
 	else
 	{
-		// reject them
+		// Reject them.
 		gt2Reject(connection, (GT2Byte *)(LPCSTR)dlg->m_rejectReason, -1);
 	}
 
@@ -875,21 +887,21 @@ void CGt2testDlg::OnListen()
 {
 	UpdateData();
 
-	// check if we're supposed to start or stop listening
+	// Check if we're supposed to start or stop listening.
 	if(m_listen)
 	{
-		// start listening
+		// Start listening.
 		gt2Listen(m_socket, ConnectAttemptCallback);
 
-		// enable the listening controls
+		// Enable the listening controls.
 		EnableListenControls();
 	}
 	else
 	{
-		// stop listening
+		// Stop listening.
 		gt2Listen(m_socket, NULL);
 
-		// disable the listening controls
+		// Disable the listening controls.
 		EnableListenControls(FALSE);
 	}
 }
@@ -898,17 +910,17 @@ void CGt2testDlg::OnConnect()
 {
 	UpdateData();
 
-	// check the timeout, and show what value we're actually using
+	// Check the timeout, and show what value we're actually using.
 	int timeout = atoi(m_timeout);
 	if(timeout < 0)
 		timeout = 0;
 	m_timeout.Format("%d", timeout);
 
-	// setup the connection callbacks
+	// Setup the connection callbacks.
 	GT2ConnectionCallbacks callbacks;
 	dlg->SetupConnectionCallbacks(callbacks);
 
-	// start the connection attempt, using the provided values
+	// Start the connection attempt, using the provided values.
 	GT2Connection connection;
 	GT2Result result = gt2Connect(m_socket, &connection, m_remoteAddress, (GT2Byte *)(LPCSTR)m_connectMessage, -1, timeout, &callbacks, m_blocking);
 	if(result != GT2Success)
@@ -919,7 +931,7 @@ void CGt2testDlg::OnConnect()
 		return;
 	}
 
-	// add the connection to our list
+	// Add the connection to our list.
 	AddConnection(connection);
 
 	UpdateData(FALSE);
@@ -927,13 +939,13 @@ void CGt2testDlg::OnConnect()
 
 void CGt2testDlg::OnCloseAllConnections() 
 {
-	// close all the connections
+	// Close all the connections.
 	gt2CloseAllConnections(m_socket);
 }
 
 void CGt2testDlg::OnCloseAllConnectionsHard() 
 {
-	// close all the connections without waiting for a response
+	// Close all the connections without waiting for a response.
 	gt2CloseAllConnectionsHard(m_socket);
 }
 
@@ -949,10 +961,10 @@ void ConnectedCallback
 	int len
 )
 {
-	// check if the attempt failed
+	// Check if the attempt failed.
 	if(result != GT2Success)
 	{
-		// let the user know
+		// Let the user know.
 		CString str;
 		str.Format("Failed to connect to server: %s", ResultToString(result));
 		if(message && len)
@@ -962,7 +974,7 @@ void ConnectedCallback
 		}
 		dlg->MessageBox(str);
 
-		// remove the connection from our list
+		// Remove the connection from our list.
 		dlg->RemoveConnection(connection);
 	}
 }
@@ -975,11 +987,11 @@ void ReceivedCallback
 	GT2Bool reliable
 )
 {
-	// empty messages are NULL
+	// Empty messages are NULL.
 	if(!message)
 		message = (GT2Byte *)"";
 
-	// add the message to the messages list
+	// Add the message to the messages list.
 	CString str;
 	str.Format("IN(%c): %s\xD\xA", reliable?'r':'u', (char *)message);
 	dlg->AddMessageString(connection, str);
@@ -993,7 +1005,7 @@ void ClosedCallback
 	GT2CloseReason reason
 )
 {
-	// show a message if it's an error
+	// Show a message if it's an error.
 	if(reason == GT2CommunicationError)
 		dlg->MessageBox("Connection closed: Communication Error");
 	else if(reason == GT2SocketError)
@@ -1001,7 +1013,7 @@ void ClosedCallback
 	else if(reason == GT2NotEnoughMemory)
 		dlg->MessageBox("Connection closed: Not Enough Memory");
 
-	// the connection is closed, so remove it from the list
+	// The connection is closed, so remove it from the list.
 	dlg->RemoveConnection(connection);
 }
 
@@ -1011,7 +1023,7 @@ void PingCallback
 	int latency
 )
 {
-	// add the ping to the messages list
+	// Add the ping to the messages list.
 	CString str;
 	str.Format("PING: %d\xD\xA", latency);
 	dlg->AddMessageString(connection, str);
@@ -1032,46 +1044,47 @@ void CGt2testDlg::OnSend()
 
 	UpdateData();
 
-	// print this out before the send because filtering could change it
+	// Print this out before the send because filtering could change it.
 	CString str;
 	str.Format("OUT(%c): %s\xD\xA", m_reliable?'r':'u', (LPCSTR)m_message);
 	AddMessageString(connection, str);
 
-	// do the send
+	// Do the send.
 	gt2Send(connection, (const GT2Byte *)(LPCSTR)m_message, -1, m_reliable);
 }
 
 void CGt2testDlg::OnPing() 
 {
-	// send the ping
+	// Send the ping.
 	gt2Ping(GetActiveConnection());
 }
 
 void CGt2testDlg::OnCloseConnection() 
 {
-	// start closing the connection
+	// Start closing the connection.
 	gt2CloseConnection(GetActiveConnection());
 }
 
 void CGt2testDlg::OnCloseConnectionHard() 
 {
-	// close the ocnnection without waiting for a response
+	// Close the ocnnection without waiting for a response.
 	gt2CloseConnectionHard(GetActiveConnection());
 }
 
 void CGt2testDlg::OnSelchangeConnections() 
 {
-	// make sure the newly selected connection is activated
+	// Make sure the newly selected connection is activated.
 	UpdateData();
 	SetActiveConnection(m_connections.GetCurSel());
 	UpdateData(FALSE);
 }
 
-// does a ROT13 transformation on a string
-// ROT13 changes every letter to it's "opposite" in the alphabet by adding 13 to it.
-// a->m, b->n, c->o, d->p, m->a, n->b, o->c, p->d, etc.
-// performing ROT13 twice results in the original string, allowing the same filter to be applied to both
-// sending and receiving to end up with the original string.  cheap encryption.
+// Does a ROT13 transformation on a string.
+// ROT13 changes every letter to its "opposite" in the alphabet by adding 13
+// to it (a->m, b->n, c->o, d->p, m->a, n->b, o->c, p->d, etc.) performing 
+// ROT13 twice results in the original string, allowing the same filter to be 
+// applied to both sending and receiving to end up with the original string. 
+// Easy encryption.
 static void ROT13(char * buffer, int len)
 {
 	int i;
@@ -1082,17 +1095,17 @@ static void ROT13(char * buffer, int len)
 	{
 		c = buffer[i];
 
-		// only change letters
+		// Only change letters.
 		if(isalpha(c))
 		{
-			// shift it by 13
+			// Shift it by 13.
 			c2 = c + 13;
 
-			// if it went past the end of the alphabet, mod it.
+			// If it went past the end of the alphabet, mod it.
 			if((c2 - (isupper(c)?'A':'a')) >= 26)
 				c2 -= 26;
 
-			// put it back in the string
+			// Put it back in the string.
 			buffer[i] = (char)c2;
 		}
 	}
@@ -1102,27 +1115,27 @@ static void SendFilterCallbackROT13(GT2Connection connection, int filterID, cons
 {
 	char * msg;
 
-	// we can override the const because we know we're the only filter,
-	// it's our data we're sending, and we're not changing the length
+	// We can override the const because we know we're the only filter,
+	// it's our data we're sending, and we're not changing the length.
 	msg = (char *)message;
 
-	// ROT13 the string
+	// ROT13 the string.
 	ROT13(msg, len);
 
-	// pass it back to GT2
+	// Pass it back to GT2.
 	gt2FilteredSend(connection, filterID, (GT2Byte *)msg, len, reliable);
 }
 
 static void ReceiveFilterCallbackROT13(GT2Connection connection, int filterID, GT2Byte * message, int len, GT2Bool reliable)
 {
-	// ROT13 the string
+	// ROT13 the string.
 	ROT13((char *)message, len);
 
-	// pass it back to GT2
+	// Pass it back to GT2.
 	gt2FilteredReceive(connection, filterID, message, len, reliable);
 }
 
-// returns true if a message should be dropped, based on the drop value
+// Returns true if a message should be dropped, based on the drop value.
 static BOOL CheckDrop(int dropValue)
 {
 	return ((rand() % 100) < dropValue);
@@ -1130,31 +1143,31 @@ static BOOL CheckDrop(int dropValue)
 
 static void SendFilterCallbackDrop(GT2Connection connection, int filterID, const GT2Byte * message, int len, GT2Bool reliable)
 {
-	// if it's unreliable, check if it should be dropped
+	// If it's unreliable, check if it should be dropped.
 	if(!reliable && CheckDrop(atoi(dlg->m_sendDropValue)))
 		return;
 
-	// pass it back to GT2
+	// Pass it back to GT2.
 	gt2FilteredSend(connection, filterID, message, len, reliable);
 }
 
 static void ReceiveFilterCallbackDrop(GT2Connection connection, int filterID, GT2Byte * message, int len, GT2Bool reliable)
 {
-	// if it's unreliable, check if it should be dropped
+	// If it's unreliable, check if it should be dropped.
 	if(!reliable && CheckDrop(atoi(dlg->m_receiveDropValue)))
 		return;
 
-	// pass it back to GT2
+	// Pass it back to GT2
 	gt2FilteredReceive(connection, filterID, message, len, reliable);
 }
 
 static void AddDelayedMessage(DArray array, int delayValue, GT2Connection connection, int filterID, const GT2Byte * message, int len, GT2Bool reliable)
 {
-	// don't allow negative delays!
+	// Don't allow negative delays!
 	if(delayValue < 0)
 		delayValue = 0;
 
-	// save off everything we need to remember about the message
+	// Save off everything we need to remember about the message.
 	DelayedMessage msg;
 	memset(&msg, 0, sizeof(msg));
 	msg.connection = connection;
@@ -1167,19 +1180,19 @@ static void AddDelayedMessage(DArray array, int delayValue, GT2Connection connec
 	msg.startTime = current_time();
 	msg.delayTime = delayValue;
 
-	// add it to the delay list
+	// Add it to the delay list.
 	ArrayInsertAt(array, &msg, 0);
 }
 
 static void SendFilterCallbackDelay(GT2Connection connection, int filterID, const GT2Byte * message, int len, GT2Bool reliable)
 {
-	// add it to the delayed sends list
+	// Add it to the delayed sends list.
 	AddDelayedMessage(dlg->m_delayedSends, atoi(dlg->m_sendDelayValue), connection, filterID, message, len, reliable);
 }
 
 static void ReceiveFilterCallbackDelay(GT2Connection connection, int filterID, GT2Byte * message, int len, GT2Bool reliable)
 {
-	// add it to the delayed receives list
+	// Add it to the delayed receives list.
 	AddDelayedMessage(dlg->m_delayedReceives, atoi(dlg->m_receiveDelayValue), connection, filterID, message, len, reliable);
 }
 
@@ -1189,13 +1202,13 @@ void CGt2testDlg::OnSendRot13()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_sendROT13)
 		gt2AddSendFilter(connection, SendFilterCallbackROT13);
 	else
 		gt2RemoveSendFilter(connection, SendFilterCallbackROT13);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->sendROT13 = m_sendROT13;
 }
 
@@ -1205,13 +1218,13 @@ void CGt2testDlg::OnReceiveRot13()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_receiveROT13)
 		gt2AddReceiveFilter(connection, ReceiveFilterCallbackROT13);
 	else
 		gt2RemoveReceiveFilter(connection, ReceiveFilterCallbackROT13);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->receiveROT13 = m_receiveROT13;
 }
 
@@ -1221,13 +1234,13 @@ void CGt2testDlg::OnSendDrop()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_sendDrop)
 		gt2AddSendFilter(connection, SendFilterCallbackDrop);
 	else
 		gt2RemoveSendFilter(connection, SendFilterCallbackDrop);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->sendDrop = m_sendDrop;
 }
 
@@ -1237,13 +1250,13 @@ void CGt2testDlg::OnReceiveDrop()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_receiveDrop)
 		gt2AddReceiveFilter(connection, ReceiveFilterCallbackDrop);
 	else
 		gt2RemoveReceiveFilter(connection, ReceiveFilterCallbackDrop);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->receiveDrop = m_receiveDrop;
 }
 
@@ -1253,13 +1266,13 @@ void CGt2testDlg::OnSendDelay()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_sendDelay)
 		gt2AddSendFilter(connection, SendFilterCallbackDelay);
 	else
 		gt2RemoveSendFilter(connection, SendFilterCallbackDelay);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->sendDelay = m_sendDelay;
 }
 
@@ -1269,13 +1282,13 @@ void CGt2testDlg::OnReceiveDelay()
 
 	GT2Connection connection = GetActiveConnection();
 
-	// add or remove the filter based on the check box
+	// Add or remove the filter based on the check box.
 	if(m_receiveDelay)
 		gt2AddReceiveFilter(connection, ReceiveFilterCallbackDelay);
 	else
 		gt2RemoveReceiveFilter(connection, ReceiveFilterCallbackDelay);
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(connection)->receiveDelay = m_receiveDelay;
 }
 
@@ -1283,7 +1296,7 @@ void CGt2testDlg::OnChangeSendDropValue()
 {
 	UpdateData();
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(GetActiveConnection())->sendDropValue = m_sendDropValue;
 }
 
@@ -1291,7 +1304,7 @@ void CGt2testDlg::OnChangeReceiveDropValue()
 {
 	UpdateData();
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(GetActiveConnection())->receiveDropValue = m_receiveDropValue;
 }
 
@@ -1299,7 +1312,7 @@ void CGt2testDlg::OnChangeSendDelayValue()
 {
 	UpdateData();
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(GetActiveConnection())->sendDelayValue = m_sendDelayValue;
 }
 
@@ -1307,7 +1320,7 @@ void CGt2testDlg::OnChangeReceiveDelayValue()
 {
 	UpdateData();
 
-	// save the setting with the connection's info
+	// Save the setting with the connection's info.
 	GetConnectionInfo(GetActiveConnection())->receiveDelayValue = m_receiveDelayValue;
 }
 
@@ -1319,7 +1332,7 @@ void CGt2testDlg::OnAddressTo()
 {
 	UpdateData();
 
-	// get the IP and port
+	// Get the IP and port.
 	DWORD IP;
 	unsigned int port;
 	if(m_addressIP.GetAddress(IP) != 4)
@@ -1330,7 +1343,7 @@ void CGt2testDlg::OnAddressTo()
 	IP = gt2HostToNetworkInt(IP);
 	port = atoi(m_addressPort);
 
-	// convert the ip and port to a string
+	// Convert the ip and port to a string.
 	m_addressString = gt2AddressToString(IP, (unsigned short)port, NULL);
 
 	UpdateData(FALSE);
@@ -1340,7 +1353,7 @@ void CGt2testDlg::OnAddressFrom()
 {
 	UpdateData();
 
-	// convert the string to an ip and port
+	// Convert the string to an ip and port.
 	unsigned int IP;
 	unsigned short port;
 	if(!gt2StringToAddress(m_addressString, &IP, &port))
@@ -1349,22 +1362,22 @@ void CGt2testDlg::OnAddressFrom()
 		return;
 	}
 
-	// set the ip and port
+	// Set the ip and port.
 	m_addressIP.SetAddress((DWORD)gt2NetworkToHostInt(IP));
 	m_addressPort.Format("%d", port);
 
 	UpdateData(FALSE);
 }
 
-// updates dialog based on returned host info
+// Updates dialog based on returned host info.
 void CGt2testDlg::HandleHostInfo(const char * hostname, char ** aliases, unsigned int ** ips)
 {
 	int count;
 
-	// set the hostname
+	// Set the hostname.
 	m_addressHostname = hostname;
 
-	// fill in the aliases
+	// Fill in the aliases.
 	m_addressAliases.Empty();
 	for(count = 0 ; aliases[count] ; count++)
 	{
@@ -1372,7 +1385,7 @@ void CGt2testDlg::HandleHostInfo(const char * hostname, char ** aliases, unsigne
 		m_addressAliases += "   ";
 	}
 
-	// fill in the ips
+	// Fill in the ips.
 	m_addressIPs.Empty();
 	for(count = 0 ; ips[count] ; count++)
 	{
@@ -1385,7 +1398,7 @@ void CGt2testDlg::OnGetIpHostInfo()
 {
 	UpdateData();
 
-	// get the ip
+	// Get the ip.
 	DWORD IP;
 	if(m_addressIP.GetAddress(IP) != 4)
 	{
@@ -1394,7 +1407,7 @@ void CGt2testDlg::OnGetIpHostInfo()
 	}
 	IP = gt2HostToNetworkInt(IP);
 
-	// get the info for the ip
+	// Get the info for the ip.
 	const char * hostname;
 	char ** aliases;
 	unsigned int ** ips;
@@ -1405,7 +1418,7 @@ void CGt2testDlg::OnGetIpHostInfo()
 		return;
 	}
 
-	// handle the info
+	// Handle the info.
 	HandleHostInfo(hostname, aliases, ips);
 
 	UpdateData(FALSE);
@@ -1415,7 +1428,7 @@ void CGt2testDlg::OnGetStringHostInfo()
 {
 	UpdateData();
 
-	// get the info for the string
+	// Get the info for the string.
 	const char * hostname;
 	char ** aliases;
 	unsigned int ** ips;
@@ -1429,7 +1442,7 @@ void CGt2testDlg::OnGetStringHostInfo()
 		return;
 	}
 
-	// handle the info
+	// Handle the info.
 	HandleHostInfo(hostname, aliases, ips);
 
 	UpdateData(FALSE);

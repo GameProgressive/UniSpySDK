@@ -2,10 +2,11 @@
 // File:	gsXML.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // GameSpy XML parser for soap messages
 //   Create the stream object and attach to an XML text buffer.  
@@ -64,7 +65,11 @@ int      gsXmlWriterGetDataLength     (GSXmlStreamWriter stream);
 gsi_bool gsXmlCloseWriter       (GSXmlStreamWriter stream);
 gsi_bool gsXmlWriteStringElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, const char * value);
 gsi_bool gsXmlWriteAsciiStringElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, const gsi_char * value);
-gsi_bool gsXmlWriteUnicodeStringElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, const unsigned short * value);
+#if defined(_UNIX) && defined(GSI_UNICODE)
+gsi_bool gsXmlWriteUnicodeStringElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, const gsi_u32 * value);
+#else
+gsi_bool gsXmlWriteUnicodeStringElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, const gsi_u16 * value);
+#endif
 gsi_bool gsXmlWriteIntElement   (GSXmlStreamWriter stream, const char * namespaceName, const char * tag, gsi_u32 value);
 gsi_bool gsXmlWriteInt64Element   (GSXmlStreamWriter stream, const char * namespaceName, const char * tag, gsi_i64 value);
 gsi_bool gsXmlWriteFloatElement (GSXmlStreamWriter stream, const char * namespaceName, const char * tag, float value);
@@ -99,7 +104,7 @@ gsi_bool gsXmlMoveToChild       (GSXmlStreamReader stream, const char * matchtag
 gsi_bool gsXmlReadChildAsString   (GSXmlStreamReader stream, const char * matchtag, const char ** valueOut, int * lenOut);
 gsi_bool gsXmlReadChildAsStringNT (GSXmlStreamReader stream, const char * matchtag, char valueOut[], int maxLen);
 //gsi_bool gsXmlReadChildAsUnicodeString   (GSXmlStreamReader stream, const char * matchtag, gsi_char ** valueOut, int * lenOut);
-gsi_bool gsXmlReadChildAsUnicodeStringNT (GSXmlStreamReader stream, const char * matchtag, unsigned short valueOut[], int maxLen);
+gsi_bool gsXmlReadChildAsUnicodeStringNT (GSXmlStreamReader stream, const char * matchtag, gsi_char valueOut[], int maxLen);
 gsi_bool gsXmlReadChildAsInt      (GSXmlStreamReader stream, const char * matchtag, int * valueOut);
 gsi_bool gsXmlReadChildAsInt64    (GSXmlStreamReader stream, const char * matchtag, gsi_i64 * valueOut);
 gsi_bool gsXmlReadChildAsFloat    (GSXmlStreamReader stream, const char * matchtag, float * valueOut);

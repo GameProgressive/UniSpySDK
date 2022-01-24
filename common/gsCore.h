@@ -2,10 +2,11 @@
 // File:	gsCore.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // Core task/callback manager.
 
@@ -136,8 +137,8 @@ typedef struct
 
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-void gsCoreInitialize       (void);
+/////////////////////////////////////////////////////////////////////////////// 
+COMMON_API void gsCoreInitialize       (void);
 void gsiCoreSetProfileId(const char profileId[PROFILEID_LENGTH]);
 gsi_bool gsiCoreGetProfileId(char profileId[PROFILEID_LENGTH]);
 void gsiCoreSetGameId(const char gameId[GAMEID_LENGTH]);
@@ -148,13 +149,13 @@ void gsiCoreSetAuthErrorCode(GSAuthErrorCode authErrorCode);
 GSAuthErrorCode gsiCoreGetAuthErrorCode();
 gsi_bool gsiCoreGetSessionToken(char sessionToken[SESSIONTOKEN_LENGTH]);
 void gsiCoreSetSessionToken (const char sessionToken[SESSIONTOKEN_LENGTH]);
-void gsCoreThink            (gsi_time theMS);
-void gsCoreShutdown         (void);
-GSCoreValue gsCoreIsShutdown(void);
+COMMON_API void gsCoreThink            (gsi_time theMS);
+COMMON_API void gsCoreShutdown         (void);
+COMMON_API GSCoreValue gsCoreIsShutdown(void);
 
 GSTaskResult gsCoreTaskThink(GSTask* theTask);
 void gsiCoreExecuteTask     (GSTask* theTask, gsi_time theTimeoutMs);
-void gsiCoreCancelTask      (GSTask* theTask);
+COMMON_API void gsiCoreCancelTask      (GSTask* theTask);
 
 GSTask* gsiCoreCreateTask(void);
 

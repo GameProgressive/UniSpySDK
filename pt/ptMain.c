@@ -16,8 +16,8 @@ Copyright 2000 GameSpy Industries, Inc
 /************
 ** DEFINES **
 ************/
-#define PTA_DEFAULT_VERCHECK_URL    RS_HTTP_PROTOCOL_URL "motd." GSI_DOMAIN_NAME "/motd/vercheck.asp"
-#define PTA_DEFAULT_MOTD_URL        RS_HTTP_PROTOCOL_URL "motd." GSI_DOMAIN_NAME "/motd/motd.asp"
+#define PTA_DEFAULT_VERCHECK_URL    GSI_HTTP_PROTOCOL_URL "motd." GSI_DOMAIN_NAME "/motd/vercheck.asp"
+#define PTA_DEFAULT_MOTD_URL        GSI_HTTP_PROTOCOL_URL "motd." GSI_DOMAIN_NAME "/motd/motd.asp"
 #define PTA_DEFAULT_FILEPLANET_URL  "http://www.fileplanet.com/dlfileraw.asp"
 #define MAX_MIRRORS         32
 #define PTA_MAX_STRING_SIZE 2048

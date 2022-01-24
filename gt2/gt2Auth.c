@@ -2,10 +2,12 @@
 // File:	gt2Auth.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
+// -----------------------
 
 #include "gt2Main.h"
 #include "gt2Auth.h"
@@ -38,13 +40,13 @@ GT2Byte * gti2GetChallenge
 	GS_ASSERT(buffer);
 
 	srand((unsigned int)current_time());
-	buffer[0] = (GT2Byte)(33 + rand() % 93); //use chars in the range 33 - 125
+	buffer[0] = (GT2Byte)(33 + rand() % 93); // Use chars in the range of 33 - 125.
 	oddmode = 0;
 	for (i = 1; i < GTI2_CHALLENGE_LEN ; i++)
 	{
 		oddmode = CALCULATEODDMODE(buffer,i, oddmode);
-		buffer[i] = (GT2Byte)(33 + rand() % 93); //use chars in the range 33 - 125
-		//if oddmode make sure the char is odd, otherwise make sure it's even
+		buffer[i] = (GT2Byte)(33 + rand() % 93); // Use chars in the range of 33 - 125.
+		// If oddmode, make sure the char is odd; otherwise, make sure the char is even.
 		if ((oddmode && (buffer[i] & 1) == 0) || (!oddmode && ((buffer[i] & 1) == 1)))
 			buffer[i]++;
 
@@ -63,14 +65,14 @@ GT2Byte * gti2GetResponse
 	char cchar;
 	const int keylen = (int)sizeof(GT2ChallengeKey)/sizeof(GT2ChallengeKey[0]) - 1;
 	int chalrand;
-	valid = gti2VerifyChallenge(challenge); //it's an invalid challenge, give them a bogus response
+	valid = gti2VerifyChallenge(challenge); // It's an invalid challenge, so give them a bogus response.
 	for (i = 0 ; i < GTI2_RESPONSE_LEN ; i++)
 	{
-		//use random vals for spots 0 and 13
+		// Use random values for spots 0 and 13.
 		if (!valid || i == 0 || i == 13)
-			buffer[i] = (GT2Byte)(33 + rand() % 93); //use chars in the range 33 - 125
+			buffer[i] = (GT2Byte)(33 + rand() % 93); // Use chars in the range of 33 - 125.
 		else
-		{ //set the character to look back at, never use the random ones!
+		{ // NOTE: Set the character to look back at, never use the random ones!
 			if (i == 1 || i == 14)
 				cchar = (char)challenge[i];
 			else
@@ -89,7 +91,7 @@ GT2Bool gti2CheckResponse
 	const GT2Byte * response2
 )
 {
-	int i; //when comparing ignore the ones that are random
+	int i; // When comparing, ignore the ones that are random.
 	for (i = 0 ; i < GTI2_RESPONSE_LEN ; i++)
 	{
 		if (i != 0 && i != 13 && response1[i] != response2[i])

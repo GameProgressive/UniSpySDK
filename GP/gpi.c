@@ -2,19 +2,18 @@
 // File:	gpi.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdlib.h>
 #include <string.h>
 #include "gpi.h"
 
 // DEFINES
-//////////
 #define KEEPALIVE_TIMEOUT (60 * 2000)
 
 // This is so VisualAssist will know about these functions.
@@ -28,7 +27,6 @@ void GSMD5Digest(unsigned char *, unsigned int, char[33]);
 #endif
 
 //FUNCTIONS
-///////////
 GPResult
 gpiInitialize(
   GPConnection * connection,
@@ -42,17 +40,14 @@ gpiInitialize(
 	GPResult result;
 
 	// Set the connection to NULL in case of error.
-	///////////////////////////////////////////////
 	*connection = NULL;
 
 	// Allocate the connection.
-	///////////////////////////
 	iconnection = (GPIConnection *)gsimalloc(sizeof(GPIConnection));
 	if(iconnection == NULL)
 		return GP_MEMORY_ERROR;
 
 	// Initialize connection-specific variables.
-	////////////////////////////////////////////
 	memset(iconnection, 0, sizeof(GPIConnection));
 	iconnection->errorString[0] = '\0';
 	iconnection->errorCode = (GPErrorCode)0;
@@ -65,7 +60,12 @@ gpiInitialize(
 	iconnection->partnerID = partnerID;
 
 #ifdef GSI_UNICODE
-	iconnection->errorString_W[0] = '\0';
+	iconnection->errorString_W[0] = 0;
+#endif
+
+#ifdef _PS3
+	iconnection->npBasicEventsToGet = 0;
+	iconnection->npSyncEnabled = GPITrue;
 #endif
 
 	if(!gpiInitProfiles((GPConnection *)&iconnection))
@@ -81,7 +81,6 @@ gpiInitialize(
 	}
 
 	// Reset connection-specific stuff.
-	///////////////////////////////////
 	result = gpiReset((GPConnection *)&iconnection);
 	if(result != GP_NO_ERROR)
 	{
@@ -90,16 +89,13 @@ gpiInitialize(
 	}
 
 	// Initialize the sockets library.
-	//////////////////////////////////
 	SocketStartUp();
 
 	// Seed the random number generator.
-	////////////////////////////////////
 	srand((unsigned int)current_time());
 
 #ifndef NOFILE
 	// Load profiles cached on disk.
-	////////////////////////////////
 	result = gpiLoadDiskProfiles((GPConnection *)&iconnection);
 	if(result != GP_NO_ERROR)
 	{
@@ -118,7 +114,6 @@ gpiInitialize(
 #endif
 
 	// Set the connection.
-	//////////////////////
 	*connection = (GPConnection)iconnection;
 
 	return GP_NO_ERROR;
@@ -132,21 +127,18 @@ gpiDestroy(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Cleanup connection-specific stuff.
-	/////////////////////////////////////
 	gpiDisconnect(connection, GPITrue);
 	gpiStatusInfoKeysDestroy(connection);
 
 #ifdef _PS3
-    // Destroy NP
-    /////////////
+    // Destroy NP.
     if (iconnection->npInitialized)
         gpiDestroyNpBasic(connection);
 #endif
 
 #ifndef NOFILE
 	// Write the profile info to disk.
-	//     BD - Don't update if we never connected.
-	//////////////////////////////////
+	// BD - Don't update if we never connected.
 	if(iconnection->infoCaching && iconnection->connectState != GPI_NOT_CONNECTED)
 	{
 		if(gpiSaveDiskProfiles(connection) != GP_NO_ERROR)
@@ -158,21 +150,17 @@ gpiDestroy(
 #endif
 
 	// Free the profile list.
-	/////////////////////////
 	TableFree(iconnection->profileList.profileTable);
 
 #ifndef NOFILE
 	// Free the transfers.
-	//////////////////////
 	gpiCleanupTransfers(connection);
 #endif
 
 	// Free the memory.
-	///////////////////
 	freeclear(iconnection);
 
 	// Set the connection pointer to NULL.
-	//////////////////////////////////////
 	*connection = NULL;
 }
 
@@ -271,6 +259,20 @@ gpiReset(
 	iconnection->lastLocationString_W[0] = '\0';
 #endif
 
+#ifdef _PS3
+	iconnection->npPerformBuddySync = gsi_false;
+	iconnection->npPerformBlockSync = gsi_false;
+	iconnection->npFriendListRetrieved = gsi_false;
+	iconnection->npBlockListRetrieved = gsi_false;
+	iconnection->loginTime = 0;
+	iconnection->npEventCallback.callback = NULL;
+	iconnection->npEventCallback.userData = NULL;
+	memset(&iconnection->npCommunicationId, 0, sizeof(iconnection->npCommunicationId));
+	iconnection->npCellSysUtilSlotNum = -1;
+	iconnection->npBasicEventsToGet = 0;
+	
+#endif
+
 	return GP_NO_ERROR;
 }
 
@@ -292,21 +294,17 @@ gpiProcessConnectionManager(
 	gsi_time now = current_time();
 
 	// Loop through the rest while waiting for any blocking operations.
-	///////////////////////////////////////////////////////////////////
 	do
 	{
 		// Add any waiting info to the output buffer.
-		/////////////////////////////////////////////
 		gpiAddLocalInfo(connection, &iconnection->outputBuffer);
 
 		// Send anything that needs to be sent.
-		///////////////////////////////////////
 		if ( iconnection->outputBuffer.len > 0 )
-			iconnection->kaTransmit = now;	// data already being transmitted. We don't need to send keep alives
+			iconnection->kaTransmit = now;	// Data already being transmitted. We don't need to send Keep-Alives.
 		CHECK_RESULT(gpiSendFromBuffer(connection, iconnection->cmSocket, &iconnection->outputBuffer, &connClosed, GPITrue, "CM"));
 
 		// Read everything the connection manager sent.
-		///////////////////////////////////////////////
 		result = gpiRecvToBuffer(connection, iconnection->cmSocket, &iconnection->socketBuffer, &len, &connClosed, "CM");
 		if(result != GP_NO_ERROR)
 		{
@@ -317,22 +315,18 @@ gpiProcessConnectionManager(
 		}
 
 		// Check if we have a completed command.
-		////////////////////////////////////////
 		while((next = strstr(iconnection->socketBuffer.buffer, "\\final\\")) != NULL)
 		{
-			// Received command. Connection is still valid
-			//////////////////////////////////////////////
+			// Received command. Connection is still valid.
 			iconnection->kaTransmit = now;
 
 			// NUL terminate the command.
-			/////////////////////////////
 			next[0] = '\0';
 
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump,
 				"CMD: %s\n", iconnection->socketBuffer.buffer);
 
 			// Copy the command to the input buffer.
-			////////////////////////////////////////
 			len = (int)(next - iconnection->socketBuffer.buffer);
 			if(len > iconnection->inputBufferSize)
 			{
@@ -345,25 +339,20 @@ gpiProcessConnectionManager(
 			memcpy(iconnection->inputBuffer, iconnection->socketBuffer.buffer, (size_t)len + 1);
 
 			// Point to the start of the next one.
-			//////////////////////////////////////
 			next += 7;
 
 			// Move the rest of the connect buffer up to the front.
-			///////////////////////////////////////////////////////
 			iconnection->socketBuffer.len -= (int)(next - iconnection->socketBuffer.buffer);
 			memmove(iconnection->socketBuffer.buffer, next, (size_t)iconnection->socketBuffer.len + 1);
 
 			// Check for an id.
-			///////////////////
 			str = strstr(iconnection->inputBuffer, "\\id\\");
 			if(str != NULL)
 			{
 				// Get the id.
-				//////////////
 				id = atoi(str + 4);
 
 				// Try and match the id with an operation.
-				//////////////////////////////////////////
 				if(!gpiFindOperationByID(connection, &operation, id))
 				{
 					gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_HotError,
@@ -372,16 +361,13 @@ gpiProcessConnectionManager(
 				else
 				{
 					// Process the operation.
-					/////////////////////////
 					CHECK_RESULT(gpiProcessOperation(connection, operation, iconnection->inputBuffer));
 				}
 			}
 			// This is an unsolicited message.
-			//////////////////////////////////
 			else
 			{
 				// Check for an error.
-				//////////////////////
 				if(gpiCheckForError(connection, iconnection->inputBuffer, GPITrue))
 				{
 					return GP_SERVER_ERROR;
@@ -393,12 +379,10 @@ gpiProcessConnectionManager(
 				else if(strncmp(iconnection->inputBuffer, "\\ka\\", 4) == 0)
 				{
 					// Ignore the keep-alive.
-					/////////////////////////
 				}
 				else if(strncmp(iconnection->inputBuffer, "\\lt\\", 4) == 0)
 				{
-					// Process the login ticket
-					/////////////////////////
+					// Process the login ticket.
 					gpiValueForKey(iconnection->inputBuffer, "\\lt\\", iconnection->loginTicket, sizeof(iconnection->loginTicket));
 				}
 				else if(strncmp(iconnection->inputBuffer, "\\bsi\\", 5) == 0)
@@ -407,22 +391,22 @@ gpiProcessConnectionManager(
 				}                
                 else if(strncmp(iconnection->inputBuffer, "\\bdy\\", 5) == 0)
                 {
-                    // Process the buddy list - retrieved upon login before final login response
-                    // * Note: this only gets the list of your buddies so at least you'll know who
-                    // is a buddy while the status of each is asynchronously updated.
-                    //////////////////////////////////////////////////////////////////////////////
+                    // Process the buddy list; retrieved upon login before 
+					// final login response.
+					// NOTE: this only gets the list of your buddies so that
+					// you'll at least know who is a buddy while the status of
+					// each is asynchronously updated.
                     CHECK_RESULT(gpiProcessRecvBuddyList(connection, iconnection->inputBuffer));
                 }
                 else if(strncmp(iconnection->inputBuffer, "\\blk\\", 5) == 0)
                 {
-                    // Process the block list - retrieved upon login before final login response
-                    //////////////////////////////////////////////////////////////////////////////
+                    // Process the block list; retrieved upon login before 
+					// final login response.
                     CHECK_RESULT(gpiProcessRecvBlockedList(connection, iconnection->inputBuffer));
                 }
 				else
 				{
 					// This is an unrecognized message.
-					///////////////////////////////////
 					gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_HotError,
 						"Received an unrecognized message.\n");
 				}
@@ -431,11 +415,9 @@ gpiProcessConnectionManager(
 
 		
 		// Check for a closed connection.
-		/////////////////////////////////
 		if(connClosed && iconnection->connectState != GPI_PROFILE_DELETING)
 		{
 			// We've been disconnected.
-			///////////////////////////
 			gpiSetError(connection, GP_CONNECTION_CLOSED, "The server has closed the connection.");
 			gpiCallErrorCallback(connection, GP_NETWORK_ERROR, GP_FATAL);
 			return GP_NO_ERROR;
@@ -450,11 +432,10 @@ gpiProcessConnectionManager(
 	}
 	while(loop);
 
-	// Send Keep-Alive. Just need TCP to ack the data
-	/////////////////////////////////////////////////	
+	// Send Keep-Alive. Just need TCP to ack the data.
 	if ( now - iconnection->kaTransmit > KEEPALIVE_TIMEOUT )
 	{
-		// keep alive packet will be sent next think
+		// Keep-Alive packet will be sent next think.
 		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\ka\\\\final\\");
 		iconnection->kaTransmit = now;
 	}
@@ -482,7 +463,6 @@ gpiProcess(
 		   (iconnection->connectState == GPI_PROFILE_DELETING));
 
 	// Check if we're connecting.
-	/////////////////////////////
 	if(iconnection->connectState == GPI_CONNECTING)
 	{
 		do
@@ -498,7 +478,6 @@ gpiProcess(
 		if(result != GP_NO_ERROR)
 		{
 			// Find the connect operation.
-			//////////////////////////////
 			if(gpiFindOperationByID(connection, &operation, 1))
 			{
 				operation->result = GP_SERVER_ERROR;
@@ -506,67 +485,76 @@ gpiProcess(
 			else
 			{
 				// Couldn't find the connect operation.
-				///////////////////////////////////////
 				GS_ASSERT(0);
 			}
 		}
 	}
 
 	// Only do this stuff if we're connected.
-	/////////////////////////////////////////
 	if (iconnection->connectState == GPI_CONNECTED || 
 		iconnection->connectState == GPI_NEGOTIATING || 
 		iconnection->connectState == GPI_PROFILE_DELETING)
 	{
 #ifdef _PS3
-        // initialize NP during the sync delay, if initialized wait for status == online
-        ////////////////////////////////////////////////////////////////////////////////
-        if (iconnection->npInitialized && !iconnection->npStatusRetrieved)
-            gpiCheckNpStatus(connection);
+        // Initialize NP during the sync delay, if initialized wait for status == online.
+		if (iconnection->npInitialized && !iconnection->npStatusRetrieved) 
+		{
+            result = gpiCheckNpStatus(connection);
+			if (result != GP_NO_ERROR)
+			{
+				iconnection->npPerformBuddySync = gsi_false;
+				iconnection->npPerformBlockSync = gsi_false;
+			}
+		}
 
-        // TODO: handle non-fatal errors (consider all errors from sync non-fatal?)
-        if (iconnection->npInitialized && iconnection->npStatusRetrieved)
+		// Make sure we are connected to GP and that NP initialization is 
+		// complete before triggering the buddy sync.
+        if (iconnection->npInitialized && iconnection->npStatusRetrieved && iconnection->connectState == GPI_CONNECTED)
         {
-            // Delay sync after initialization to ensure block list has been received
-            /////////////////////////////////////////////////////////////////////////
-            if ((current_time() - iconnection->loginTime) > GPI_NP_SYNC_DELAY)
-            {
-                if (iconnection->npPerformBuddySync)
+            // Only sync if NP friend list has been received.
+            if (iconnection->npFriendListRetrieved == gsi_true) //if ((current_time() - iconnection->loginTime) > GPI_NP_SYNC_DELAY)
+			{
+				// Check that sync flag has been triggered and sync has not 
+				// been disabled.
+				if (iconnection->npPerformBuddySync && iconnection->npSyncEnabled){
                     gpiSyncNpBuddies(connection);
-                if (iconnection->npPerformBlockSync)
-                    gpiSyncNpBlockList(connection);
+				}
+			}
+			// Only sync if NP block list has been received.
+			if (iconnection->npBlockListRetrieved == gsi_true)
+			{
+				// Check that sync flag has been triggered and sync has not 
+				// been disabled.
+				if (iconnection->npPerformBlockSync && iconnection->npSyncEnabled) {
+					gpiSyncNpBlockList(connection);
+				}
             }
 
-            // Need to check callback for lookups
+            // Need to check callback for lookups.
             gpiProcessNp(connection);
         }
 #endif		
         
         // Process the connection.
-		//////////////////////////
 		if(result == GP_NO_ERROR)
 			result = gpiProcessConnectionManager(connection);
 
 		// Process peer messaging stuff.
-		////////////////////////////////
 		if(result == GP_NO_ERROR)
 			result = gpiProcessPeers(connection);
 
 #ifndef NOFILE
 		// Process transfers.
-		/////////////////////
 		if(result == GP_NO_ERROR)
 			result = gpiProcessTransfers(connection);
 #endif
 	}
 
 	// Process searches.
-	////////////////////
 	if(result == GP_NO_ERROR)
 		result = gpiProcessSearches(connection);
 
 	// Look for failed operations.
-	//////////////////////////////
 	for(operation = iconnection->operationList ; operation != NULL ; )
 	{
 		if(operation->result != GP_NO_ERROR)
@@ -583,7 +571,6 @@ gpiProcess(
 	}
 
 	// Call callbacks.
-	//////////////////
 	CHECK_RESULT(gpiProcessCallbacks(connection, blockingOperationID));
 
 	if(iconnection->fatalError)
@@ -608,7 +595,6 @@ gpiEnable(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Enable the state.
-	////////////////////
 	switch(state)
 	{
 	case GP_INFO_CACHING:
@@ -663,7 +649,6 @@ gpiDisable(
 		iconnection->infoCaching = GPIFalse;
 
 		// freeclear everyone's info.
-		////////////////////////
 		while(!gpiProfileMap(connection, gpiFreeProfileInfo, NULL))  { };
 	}
 	else if(state == GP_SIMULATION)

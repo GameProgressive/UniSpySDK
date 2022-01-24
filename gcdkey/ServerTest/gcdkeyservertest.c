@@ -2,10 +2,11 @@
 // File:	gcdkeyservertest.c
 // SDK:		GameSpy CD Key SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "../gcdkeys.h"
 #include "../../common/gsCommon.h"
@@ -16,12 +17,13 @@
  
 
 #define MAXCLIENTS 64
-#define MY_GAMEID 0		// This is assigned by GameSpy
+#define MY_GAMEID 0		// GameId as assigned by GameSpy.
 #define MY_GAMENAME _T("gmtest")
 #define PORT 2000
 
 // A structure for storing client information. 
-// You will probably have most/all of these things in your client structure/object.
+// You will probably have most or all of these things in your client 
+// structure/object.
 typedef struct
 {
 	SOCKET sock;
@@ -30,7 +32,7 @@ typedef struct
 	int auth;
 } client_t;
 
-//generate a rand nchar challenge
+// Generate a random nchar challenge.
 static char *randomchallenge(int nchars)
 {
 	static char s[33];
@@ -43,16 +45,17 @@ static char *randomchallenge(int nchars)
 	return s;
 }
 
-/* Callback function to indicate whether a client has been authorized or not.
-If the client has been, then we send them a "welcome" string, representative of
-allowing them to "enter" the game. If they have not been authenticated, we dump
-them after sending an error message */
+// Callback function to indicate whether or not a client has been authorized.
+// If the client has been authenticated, we send them a "welcome" string, 
+// which allows them to "enter" the game. If they have not been authenticated, 
+// we dump them after sending an error message.
 static void ClientAuthorize(int gameid, int localid, int authenticated, char *errmsg, void *instance)
 {
 	client_t *clients = (client_t *)instance;
 	char outbuf[512];
 
-	if (!authenticated) //doh.. bad!
+	// The client was not authenticated, so print an error and shutdown.
+	if (!authenticated) 
 	{
 		printf("Client %d was NOT authenticated (%s)\n",localid, errmsg);
 		sprintf(outbuf,"E:%s\n",errmsg);
@@ -70,15 +73,16 @@ static void ClientAuthorize(int gameid, int localid, int authenticated, char *er
 	GSI_UNUSED(gameid);
 }
 
-/* Callback function to reauthorize players. */
+// Callback function to reauthorize players.
 static void ClientRefreshAuthorize(int gameid, int localid, int hint, char *challenge, void *instance)
 {
 	client_t *clients = (client_t *)instance;
 	char outbuf[512];
 
-	// Some one else is trying to login using this key, so we're asking the client to re-validate
-	// The hint is sent along as a pass through value.  The client will include it with the response.
-	// It is passed as the first 8 characters along with the challenge to the client.
+	// Somebody else is trying to login using this key, so we ask the client to 
+	// re-validate. The hint is sent along as a pass through value. The client 
+	// will include it with the response. It is passed as the first 8 
+	// characters along with the challenge to the client.
 	sprintf(outbuf, "r:%08d%s", hint, challenge);
 	send(clients[localid].sock, outbuf, strlen(outbuf),0);
 
@@ -86,16 +90,16 @@ static void ClientRefreshAuthorize(int gameid, int localid, int hint, char *chal
 }
 
 
-/* Primary "game" logic. Basically:
-1. Set up a "server" listen socket
-2. Initialize the client structures
-3. Enter a main loop
-	a. Let the gcd code think / do callbacks
-	b. Check for a new connection on the server socket and create a new client
-	c. Check for data on the client sockets
-	d. Check for disconnects on the client sockets
-4. Disconnect remaining players and exit
-*/
+// Primary "game" logic. Basically, we:
+// 1. Set up a "server" listen socket
+// 2. Initialize the client structures
+// 3. Enter a main loop
+// 	a. Let the gcd code think / do callbacks
+//	b. Check for a new connection on the server socket and create a new client
+// 	c. Check for data on the client sockets
+// 	d. Check for disconnects on the client sockets
+// 4. Disconnect remaining players and exit
+
 int test_main(int argc, char **argv)
 {
 	
@@ -112,7 +116,7 @@ int test_main(int argc, char **argv)
 	unsigned short port;
 	GSIACResult result;
 	
-	// check that the game's backend is available
+	// Perform the standard GameSpy Availability Check.
 	GSIStartAvailableCheck(MY_GAMENAME);
 	while((result = GSIAvailableCheckThink()) == GSIACWaiting)
 		msleep(5);
@@ -122,8 +126,7 @@ int test_main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Initialize the gcd system with the 
-	gameid you have been assigned */
+	// Initialize the gcd system with your assigned gameid.
 	if(gcd_init(MY_GAMEID) != 0)
 	{
 		printf("Error initializing\n");
@@ -135,7 +138,8 @@ int test_main(int argc, char **argv)
 	memset(&saddr, 0, sizeof(saddr));
 	saddr.sin_family = AF_INET;
 
-	i = 0; // initialize here just to prevent compiler error
+	// Initialize here to prevent strict compiler warnings.
+	i = 0;
 	for(port = PORT ; port < (PORT + 100) ; port++)
 	{
 		saddr.sin_port = htons(port);
@@ -155,7 +159,7 @@ int test_main(int argc, char **argv)
 
 	printf("Running on port %d... press any key to quit\n", port);
 	while (!quit)
-	{ //main loop
+	{ // Main loop.
 		msleep(10);
 		gcd_think();
 		
@@ -163,7 +167,7 @@ int test_main(int argc, char **argv)
 		#ifdef _WIN32
 			quit = _kbhit();
 		#else
-		 //on other systems, you gotta kill it hard
+		 // On other systems, perform a hard shutdown.
 		#endif
 	
 		FD_ZERO ( &set );
@@ -175,7 +179,7 @@ int test_main(int argc, char **argv)
 		if (/*gsiSocketIsError(ret) ||*/ 0 == error)
 			continue;
 
-		//new connection
+		// New connection.
 		if (FD_ISSET(ssock, &set))
 		{
 			for (i = 0 ; i < MAXCLIENTS ; i++)
@@ -185,45 +189,46 @@ int test_main(int argc, char **argv)
 					listen(ssock,SOMAXCONN);
 					strcpy(clients[i].challenge,randomchallenge(8));
 					len = sprintf(buf,"c:%s",clients[i].challenge);
-					send(clients[i].sock ,buf, len,0); //send a challenge
+					send(clients[i].sock ,buf, len,0); // Send a challenge.
 					clients[i].auth = 0;
 					printf("Client %d connected\n",i);
 					break;
 				}
 		}
 		
-		//client data
+		// Client data.
 		for (i = 0 ; i < MAXCLIENTS ; i++)
 			if (clients[i].sock != INVALID_SOCKET && FD_ISSET(clients[i].sock, &set))
 			{ 
 				len = recv(clients[i].sock,buf, 512, 0);
-				if (len <= 0) //the client disconnected
+				if (len <= 0) // The client disconnected, so print a message.
 				{
 					printf("Client %d disconnected\n",i);
 					closesocket(clients[i].sock);
 					clients[i].sock = INVALID_SOCKET;
-					if (clients[i].auth) //if they were authorized
+					if (clients[i].auth) // If they were authorized.
 						gcd_disconnect_user(MY_GAMEID, i);
 					continue;
 				} 
 				buf[len] = 0;
-				if (buf[0] == 'r' && buf[1] == ':' && clients[i].auth == 0) //challenge response
+				if (buf[0] == 'r' && buf[1] == ':' && clients[i].auth == 0) // Challenge response.
 				{
 					printf("Client %d said %s\n",i,buf);
 					clients[i].auth = 1;
 					gcd_authenticate_user(MY_GAMEID, i,clients[i].saddr.sin_addr.s_addr, 	  
 						clients[i].challenge, buf+2, ClientAuthorize, ClientRefreshAuthorize, clients);
 				}
-				else if (buf[0] == 'p' && buf[1] == ':' && clients[i].auth == 1) // ison proof response
+				else if (buf[0] == 'p' && buf[1] == ':' && clients[i].auth == 1) // ison proof response.
 				{
-					//gcd_send_reauth_response needs to know the sesskey (so keymaster can find the task)
-					//	and fromaddr (so gcdkey knows which keymaster to respond to)
+					// gcd_send_reauth_response needs to know the sesskey (so 
+					// that the keymaster can find the task) and fromaddr (so 
+					// gcdkey knows which keymaster to respond to).
 					if (len > 11)
 					{
 						char hintstr[9];
 						int hint = 0;
 
-						memcpy(hintstr, buf+2, 8); // first 8 characters are the hint
+						memcpy(hintstr, buf+2, 8); // The first 8 characters are the hint.
 						hintstr[8] = '\0';
 						hint = atoi(hintstr);
 

@@ -2,10 +2,11 @@
 // File:	gt2Socket.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gt2Socket.h"
 #include "gt2Buffer.h"
@@ -16,8 +17,8 @@
 #include <stdlib.h>
 
 #ifdef GSI_ADHOC
-// External functions defined at the platform specific level
-// to be moved to nonport or socket.h
+// External functions defined at the platform specific level to be moved to 
+// nonport or socket.h.
 extern int	_NetworkAdHocSocketCreate(gsi_u16 port);
 extern void _NetworkAdHocSocketDestroy	(	int adhoc_socket);
 extern int  _NetworkAdHocSocketSendTo	(	int adhoc_socket,
@@ -91,32 +92,32 @@ GT2Result gti2CreateSocket
 	unsigned int ip;
 	unsigned short port;
 
-	// startup the sockets engine if needed
+	// Startup the sockets engine if needed.
 	SocketStartUp();
 
-	// check for using defaults
+	// Check for using defaults.
 	if(!incomingBufferSize)
 		incomingBufferSize = GTI2_DEFAULT_INCOMING_BUFFER_SIZE;
 	if(!outgoingBufferSize)
 		outgoingBufferSize = GTI2_DEFAULT_OUTGOING_BUFFER_SIZE;
 
-	// convert the address to an IP and port
+	// Convert the address to an IP and port.
 	if(!gt2StringToAddress(localAddress, &ip, &port))
 		return GT2AddressError;
 
-	// allocate the object
+	// Allocate the object.
 	socketTemp = (GT2Socket)gsimalloc(sizeof(GTI2Socket));
 	if(!socketTemp)
 		return GT2OutOfMemory;
 
-	// set initial values
+	// Set initial values.
 	memset(socketTemp, 0, sizeof(GTI2Socket));
 	socketTemp->socket = INVALID_SOCKET;
 	socketTemp->incomingBufferSize = incomingBufferSize;
 	socketTemp->outgoingBufferSize = outgoingBufferSize;
 	socketTemp->socketErrorCallback = callback;
 
-	// create the connections table
+	// Create the connections table.
 	socketTemp->connections = TableNew2(sizeof(GT2Connection), 32, 2, gti2ConnectionHash, gti2ConnectionCompare, NULL);
 	if(!socketTemp->connections)
 	{
@@ -124,7 +125,7 @@ GT2Result gti2CreateSocket
 		return GT2OutOfMemory;
 	}
 
-	// create the closed connections list
+	// Create the closed connections list.
 	socketTemp->closedConnections = ArrayNew(sizeof(GT2Connection), 4, gti2ConnectionFree);
 	if(!socketTemp->closedConnections)
 	{
@@ -133,7 +134,7 @@ GT2Result gti2CreateSocket
 		return GT2OutOfMemory;
 	}
 
-	// create the socket
+	// Create the socket.
 
 #ifdef _XBOX
 	if (type == GTI2VdpProtocol)
@@ -175,7 +176,7 @@ GT2Result gti2CreateSocket
 		return GT2NetworkError;
 	}
 
-	// bind it
+	// Bind the socket.
 	memset(&address, 0, sizeof(SOCKADDR_IN));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = ip;
@@ -193,7 +194,7 @@ GT2Result gti2CreateSocket
 		}
 	}
 
-	// get the ip and port we're bound to
+	// Get the ip and port we're bound to.
 	#ifdef GSI_ADHOC
 	if (type == GTI2AdHocProtocol)
 	{
@@ -259,16 +260,16 @@ GT2Result gti2NewSocketConnection(GT2Socket socket, GT2Connection * connection, 
 {
 	GT2Connection connectionPtr = NULL;
 
-	// check if this ip and port already exists
+	// Check to see if this ip and port already exists.
 	if(gti2SocketFindConnection(socket, ip, port))
 		return GT2DuplicateAddress;
 
-	// allocate a connection object
+	// Allocate a connection object.
 	connectionPtr = gti2CreateConnectionObject();
 	if(!connectionPtr)
 		goto out_of_memory;
 
-	// set some basics
+	// Set some basics.
 	memset(connectionPtr, 0, sizeof(GTI2Connection));
 	connectionPtr->ip = ip;
 	connectionPtr->port = port;
@@ -278,13 +279,13 @@ GT2Result gti2NewSocketConnection(GT2Socket socket, GT2Connection * connection, 
 	connectionPtr->serialNumber = STARTING_SERIAL_NUMBER;
 	connectionPtr->expectedSerialNumber = STARTING_SERIAL_NUMBER;
 
-	// allocate the buffers
+	// Allocate the buffers.
 	if(!gti2AllocateBuffer(&connectionPtr->incomingBuffer, socket->incomingBufferSize))
 		goto out_of_memory;
 	if(!gti2AllocateBuffer(&connectionPtr->outgoingBuffer, socket->outgoingBufferSize))
 		goto out_of_memory;
 
-	// allocate the message arrays
+	// Allocate the message arrays.
 	connectionPtr->incomingBufferMessages = ArrayNew(sizeof(GTI2IncomingBufferMessage), 64, NULL);
 	if(!connectionPtr->incomingBufferMessages)
 		goto out_of_memory;
@@ -292,7 +293,7 @@ GT2Result gti2NewSocketConnection(GT2Socket socket, GT2Connection * connection, 
 	if(!connectionPtr->outgoingBufferMessages)
 		goto out_of_memory;
 	
-	// allocate the filter arrays
+	// Allocate the filter arrays.
 	connectionPtr->sendFilters = ArrayNew(sizeof(gt2SendFilterCallback), 2, NULL);
 	if(!connectionPtr->sendFilters)
 		goto out_of_memory;
@@ -300,10 +301,10 @@ GT2Result gti2NewSocketConnection(GT2Socket socket, GT2Connection * connection, 
 	if(!connectionPtr->receiveFilters)
 		goto out_of_memory;
 
-	// add it to the table
+	// Add the connection to the table.
 	TableEnter(socket->connections, &connectionPtr);
 
-	// check that it's in the table (and get the address)
+	// Check that the connection is in the table (and get the address).
 	*connection = gti2SocketFindConnection(socket, ip, port);
 	if(!*connection)
 		goto out_of_memory;
@@ -312,7 +313,7 @@ GT2Result gti2NewSocketConnection(GT2Socket socket, GT2Connection * connection, 
 
 out_of_memory:
 
-	// there wasn't enough memory, free everything and return the error
+	// There wasn't enough memory, free everything and return the error.
 	if(connectionPtr)
 	{
 		gsifree(connectionPtr->incomingBuffer.buffer);
@@ -333,11 +334,11 @@ out_of_memory:
 
 void gti2FreeSocketConnection(GT2Connection connection)
 {
-	// check if we can actually free it
+	// Check to see if we can actually free the connection.
 	if(connection->freeAtAcceptReject || connection->callbackLevel)
 		return;
 
-	// remove it from the correct list depending on the connect state
+	// Remove the connection from the correct list depending on the connect state.
 	if(connection->state == GTI2Closed)
 	{
 		int len;
@@ -365,31 +366,31 @@ GT2Bool gti2SocketSend(GT2Socket socket, unsigned int ip, unsigned short port, c
 	int rcode;
 
 #ifdef GTI2_DROP_SEND_RATE
-	// drop some percentage of packets and see what happens
+	// Drop some percentage of packets and see what happens.
 	if((rand() % 100) < GTI2_DROP_SEND_RATE)
 		return GT2True;
 #endif
 
-	// check the message and len
+	// Check the message and len.
 	gti2MessageCheck(&message, &len);
 
 	if (socket->protocolType != GTI2AdHocProtocol)
 	{
-		#ifndef INSOCK // insock never sets write flag for UDP sockets
-			// check if we can't send
+		#ifndef INSOCK // Insock never sets write flag for UDP sockets.
+			// Check to see if we can't send.
 			if(!CanSendOnSocket(socket->socket))
 				return GT2True;
 		#endif
 	}
 
-	// do the send
+	// Do the send.
 	#ifdef GSI_ADHOC
 		if (socket->protocolType == GTI2AdHocProtocol)
 		{
 			char	mac[6];
-			// convert to mac
+			// Convert to mac.
 			gt2IpToMac(ip,mac);
-			// change IP address to mac ethernet
+			// Change IP address to mac ethernet.
 			rcode = _NetworkAdHocSocketSendTo(socket->socket, (const char *)message, len, 0, mac, port);
 			if(rcode <0)
 			{
@@ -397,7 +398,7 @@ GT2Bool gti2SocketSend(GT2Socket socket, unsigned int ip, unsigned short port, c
 				return gsi_false;
 			}
 
-			// let the dump handle this
+			// Let the dump handle this.
 			if(socket->sendDumpCallback)
 			{
 				if(!gti2DumpCallback(socket, gti2SocketFindConnection(socket, ip, port), ip, port, GT2False, message, len, GT2True))
@@ -408,7 +409,7 @@ GT2Bool gti2SocketSend(GT2Socket socket, unsigned int ip, unsigned short port, c
 
 	#endif
 
-	// fill the address structure
+	// Fill the address structure.
 	memset(&address, 0, sizeof(SOCKADDR_IN));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = ip;
@@ -419,7 +420,7 @@ GT2Bool gti2SocketSend(GT2Socket socket, unsigned int ip, unsigned short port, c
 		rcode = GOAGetLastError(socket->socket);
 		if(rcode == WSAECONNRESET)
 		{
-			// handle the reset
+			// Handle the reset.
 			if(!gti2HandleConnectionReset(socket, ip, port))
 				return GT2False;
 		}
@@ -430,26 +431,26 @@ GT2Bool gti2SocketSend(GT2Socket socket, unsigned int ip, unsigned short port, c
 				return GT2False;
 		}
 #endif
-		// some systems might return these errors
+		// Some systems might return these errors.
 		else if((rcode == WSAENOBUFS) || (rcode == WSAEWOULDBLOCK))
 		{
 			return GT2True;
 		}
 #if defined(SN_SYSTEMS) || defined(_NITRO) || defined(_REVOLUTION)
-		// for systems that don't support WSAEHOSTDOWN (EHOSTDOWN)
+		// For systems that don't support WSAEHOSTDOWN (EHOSTDOWN).
 		else if((rcode != WSAEMSGSIZE))
 #else
 		else if((rcode != WSAEMSGSIZE) && (rcode != WSAEHOSTDOWN))
 #endif
 		{
-			// fatal socket error
+			// Fatal socket error.
 			gti2SocketError(socket);
 			return GT2False;
 		}
 	}
 	else
 	{
-		// let the dump handle this
+		// Let the dump handle this.
 		if(socket->sendDumpCallback)
 		{
 			if(!gti2DumpCallback(socket, gti2SocketFindConnection(socket, ip, port), ip, port, GT2False, message, len, GT2True))
@@ -465,15 +466,15 @@ static int gti2SocketConnectionsThinkMap(void * elem, void * clientData)
 	GT2Connection connection = *(GT2Connection *)elem;
 	gsi_time now = *(gsi_time *)clientData;
 
-	// only think if we're not closed
+	// Only think if the connection is not closed.
 	if(connection->state != GTI2Closed)
 	{
-		// think
+		// Think.
 		if(!gti2ConnectionThink(connection, now))
 			return 0;
 	}
 
-	// check for a closed connection
+	// Check for a closed connection.
 	if((connection->state == GTI2Closed) && !connection->freeAtAcceptReject && !connection->callbackLevel)
 		gti2FreeSocketConnection(connection);
 
@@ -484,10 +485,10 @@ GT2Bool gti2SocketConnectionsThink(GT2Socket socket)
 {
 	gsi_time now;
 
-	// get the current time
+	// Get the current time.
 	now = current_time();
 
-	// go through the list of connections and let them think
+	// Go through the list of connections and let them think.
 	if(TableMapSafe2(socket->connections, gti2SocketConnectionsThinkMap, &now))
 		return GT2False;
 
@@ -499,7 +500,7 @@ void gti2FreeClosedConnections(GT2Socket socket)
 	int i;
 	int len;
 
-	// loop through the closed connections, attempting to free them all
+	// Loop through the closed connections, attempting to free them all.
 	len = ArrayLength(socket->closedConnections);
 	for(i = (len - 1) ; i >= 0 ; i--)
 		gti2FreeSocketConnection(*(GT2Connection *)ArrayNth(socket->closedConnections, i));
@@ -507,20 +508,20 @@ void gti2FreeClosedConnections(GT2Socket socket)
 
 void gti2SocketError(GT2Socket socket)
 {
-	// if there was already an error, don't go through this again
+	// If there was already an error, don't go through this again.
 	if(socket->error)
 		return;
 
-	// flag the error
+	// Flag the error.
 	socket->error = GT2True;
 
-	// first close all the socket's connections
+	// First close all the socket's connections.
 	gt2CloseAllConnectionsHard(socket);
 
-	// call the error callback
+	// Call the error callback.
 	if(!gti2SocketErrorCallback(socket))
 		return;
 
-	// close the socket
+	// Close the socket.
 	gti2CloseSocket(socket);
 }

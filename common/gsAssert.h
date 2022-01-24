@@ -2,10 +2,11 @@
 // File:	gsAssert.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef __GSIASSERT_H__
 #define __GSIASSERT_H__
@@ -83,7 +84,7 @@ void gsDebugAssertCallbackSet(gsDebugAssertCallback theCallback);
 
 
 // This is like an assert, but test at compile, not run time.
-// ex use STATIC_CHECK(DIM(array) == enumArrayCount)
+// ex use GS_STATIC_CHECK(DIM(array) == enumArrayCount)
 #define GS_STATIC_CHECK(expr, msg)    { CompileTimeError<((expr) != 0)> ERROR_##msg; (void)ERROR_##msg; } 
 
 

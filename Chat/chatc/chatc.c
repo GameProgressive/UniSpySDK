@@ -260,32 +260,32 @@ static void ChannelModeChanged(CHAT chat, const gsi_char * channel, CHATChannelM
 	GSI_UNUSED(param);
 }
 
-static void UserListUpdated(CHAT chat, const gsi_char * channel, void * param)
+static void UserListUpdated(CHAT chat2, const gsi_char * channel, void * param)
 {
 	_tprintf(_T("User list updated\n"));
 	
-	GSI_UNUSED(chat);
+	GSI_UNUSED(chat2);
 	GSI_UNUSED(channel);
 	GSI_UNUSED(param);
 }
 
-static void ConnectCallback(CHAT chat, CHATBool success, int failureReason, void * param)
+static void ConnectCallback(CHAT chat2, CHATBool success, int failureReason, void * param)
 {
 	if (success == CHATFalse)
 		_tprintf(_T("Failed to connect (%d)\n"), failureReason);
 	else
 		_tprintf(_T("Connected\n"));
-	GSI_UNUSED(chat);
+	GSI_UNUSED(chat2);
 	GSI_UNUSED(success);
 	GSI_UNUSED(param);
 }
 
 
-static void FillInUserCallback(CHAT chat, unsigned int IP, gsi_char user[128], void * param)
+static void FillInUserCallback(CHAT chat2, unsigned int IP, gsi_char user[128], void * param)
 {
 	_tcscpy(user, chatUser);
 	
-	GSI_UNUSED(chat);
+	GSI_UNUSED(chat2);
 	GSI_UNUSED(IP);
 	GSI_UNUSED(param);
 }

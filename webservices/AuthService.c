@@ -13,20 +13,20 @@
 #define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNick"
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuth"
 #define WS_AUTHSERVICE_LOGINPS3CERT		 "LoginPs3Cert"
-#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginProfile\""
-#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginUniqueNick\""
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginRemoteAuth\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""*/
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginProfile\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginRemoteAuth\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""*/
 
 #define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfileWithGameId"
 #define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNickWithGameId"
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuthWithGameId"
 #define WS_AUTHSERVICE_LOGINPS3CERT      "LoginPs3CertWithGameId"
 
-#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginProfileWithGameId\""
-#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginUniqueNick\""
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginRemoteAuthWithGameId\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginPs3CertWithGameId\""
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginProfileWithGameId\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginRemoteAuthWithGameId\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginPs3CertWithGameId\""
 
 #define WS_AUTHSERVICE_PROTOVERSION      1
 
@@ -35,7 +35,7 @@
 #define WS_AUTHSERVICE_NAMESPACE_COUNT  1
 const char * WS_AUTHSERVICE_NAMESPACES[WS_AUTHSERVICE_NAMESPACE_COUNT] =
 {
-	WS_AUTHSERVICE_NAMESPACE "=\"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/\""
+	WS_AUTHSERVICE_NAMESPACE "=\"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/\""
 };
 
 const char WS_AUTHSERVICE_SIGNATURE_KEY[] = 
@@ -65,8 +65,8 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 // This is declared as an extern so it can be overriden when testing
 
 // Old API
-//#define WS_LOGIN_SERVICE_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
-#define WS_LOGIN_SERVICE_URL_FORMAT RS_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
+//#define WS_LOGIN_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+#define WS_LOGIN_SERVICE_URL_FORMAT GSI_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
 
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
 char authCreds[92];

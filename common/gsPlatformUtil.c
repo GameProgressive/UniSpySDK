@@ -2,10 +2,11 @@
 // File:	gsPlatformUtil.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsCommon.h"
 #include "gsPlatformUtil.h"
@@ -29,6 +30,8 @@
 	#include "ps3/gsUtilPs3.c"
 #elif defined(_PSP)
 	#include "psp/gsUtilPSP.c"
+#elif defined(_PSP2)
+	// #include "psp2/gsUtilPSP2.c"
 #elif defined(_REVOLUTION)
 	#include "revolution/gsUtilRevolution.c"
 #else
@@ -68,7 +71,7 @@ typedef struct GSIResolveHostnameInfo
 // * threading enabled
 // * and async lookup enabled
 ////////////////////////////////////////////////////////////////////////////////
-#if	(defined(_WIN32) || /*defined(_PS2) ||*/ defined(_UNIX) || defined (_REVOLUTION) || defined(_PS3)) && !defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS)
+#if	(defined(_WIN32) || /*defined(_PS2) ||*/ defined(_UNIX) || defined (_REVOLUTION) || defined(_PS3)) && !defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS) && !defined(ANDROID)
 
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32) /*|| defined(_PS2)*/
@@ -399,15 +402,15 @@ char * goastrdup(const char *src)
 	return res;
 }
 
-unsigned short * goawstrdup(const unsigned short *src)
+gsi_char * goawstrdup(const gsi_char *src)
 {
-	unsigned short *res;
+	gsi_char *res;
 	size_t len;
 
 	if(src == NULL)      
 		return NULL;
-	len = (wcslen((wchar_t*)src) + 1) * sizeof(unsigned short);
-	res = (unsigned short *)gsimalloc(len);
+	len = (wcslen((wchar_t*)src) + 1) * sizeof(gsi_char);
+	res = (gsi_char *)gsimalloc(len);
 	if(res != NULL)
 		memcpy(res, src, len);
 	return res;
@@ -645,6 +648,24 @@ gsi_time current_time()  //returns current time in milliseconds
 
 	return (gsi_time)(ticks.tick / 1000);
 
+#elif defined(_PSP2)
+	struct SceRtcTick ticks;
+	int result = 0;
+
+	result = sceRtcGetCurrentTick(&ticks);
+	if (result < 0)
+	{
+		SceDateTime time;
+		result = sceRtcGetCurrentClock(&time, 0);
+		if (result < 0)
+			return 0; // um...error handling? //Nope, should return zero since time cannot be zero					  
+		result = sceRtcGetTick(&time, &ticks);
+		if (result < 0)
+			return 0; //Nope, should return zero since time cannot be zero
+	}
+
+	return (gsi_time)(ticks.tick / 1000);
+
 #elif defined(_PS3)
 	return (gsi_time)(sys_time_get_system_time()/1000);
 
@@ -729,6 +750,8 @@ gsi_time current_time_hires()  // returns current time in microseconds
 	}
 
 	return (gsi_time)(ticks.tick);
+#elif defined(_PSP2)
+	return 0;
 #endif
 
 #ifdef _UNIX
@@ -772,6 +795,8 @@ void msleep(gsi_time msec)
 	#endif
 
 #elif defined(_PSP)
+	sceKernelDelayThread(msec * 1000);
+#elif defined(_PSP2)
 	sceKernelDelayThread(msec * 1000);
 
 #elif defined(_UNIX)
@@ -1519,7 +1544,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	k = (unsigned int *)key;
 
 	// Load and zero-pad entire input stream as 32-bit words
-	sIn2 = (char *)gsimalloc(4 * (size_t)nIn);
+	sIn2 = (char *)gsimalloc((size_t)(4 * nIn));
 	strcpy(sIn2, sIn);
 	gsiPadRight( sIn2, '\0', 4*nIn);
 	v = (unsigned int *)sIn2;
@@ -1577,7 +1602,8 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 
 	// Convert result from 32-bit words to a byte stream
 	
-	oStr = (char *)gsimalloc(4 * (size_t)nIn + 1);
+	
+	oStr = (char *)gsimalloc((size_t)(4 * nIn + 1));
 	pStr = oStr;
 	*nOut = 4 *nIn;
 	for ( i = -1; ++i < nIn; ) 
@@ -1592,7 +1618,7 @@ char * gsiXxteaAlg(const char *sIn, int nIn, char key[XXTEA_KEY_SIZE], int bEnc,
 	*pStr = '\0';
 	gsifree(sIn2);
 
-	return oStr;
+	return oStr;	
 }
 
 
@@ -1932,13 +1958,13 @@ const char * GOAGetUniqueID_Internal(void)
 
 #endif
 
-#ifdef _PSP
+#if defined(_PSP) || defined(_PSP2)
 // Included here so that the implementation can appear in gsPlatformPSP.c
 const char * GOAGetUniqueID_Internal(void);
 #endif
 
 
-#if (!defined(_PS2) && !defined(_PS3) && !defined(_XBOX) && !defined(_PSP)) || defined(UNIQUEID)
+#if (!defined(_PS2) && !defined(_PS3) && !defined(_XBOX) && !defined(_PSP) && !defined(_PSP2)) || (defined(UNIQUEID) && !defined(_X360))
 GetUniqueIDFunction GOAGetUniqueID = GOAGetUniqueID_Internal;
 #endif
 

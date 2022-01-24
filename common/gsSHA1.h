@@ -2,10 +2,11 @@
 // File:	gsSHA1.h
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 // ------------------------------------
 // This is the header file for code which implements the Secure
 // Hashing Algorithm 1 as defined in FIPS PUB 180-1 published
@@ -32,6 +33,8 @@
  *  int_least16_t    integer of >= 16 bits
  *
  */
+// WD : THOMAS : These are already defined in Android:
+#ifndef ANDROID
 #if !(defined(_PS3) || defined(_UNIX) || defined(_MACOSX))
 	// these common types are defined in sony libs
 	typedef gsi_u32 uint32_t;
@@ -39,6 +42,7 @@
 #endif
 
 typedef gsi_i16 int_least16_t;
+#endif
 
 #ifndef _SHA_enum_
 #define _SHA_enum_

@@ -2,18 +2,15 @@
 // File:	gsPlatformSocket.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsPlatformSocket.h"
 #include "gsPlatformUtil.h"
 #include "gsMemory.h"
-
-// mj-ToDo: remove these and include the files int the linker instead. 
-// removing reference to other platforms.
-// remove all plat specific code from here, move it to the platspecific files.
 
 // Include platform separated functions
 #if defined(_X360)
@@ -35,6 +32,8 @@
 	#include <sys/select.h>
 #elif defined(_PSP)
 	#include "psp/gsSocketPSP.c"
+#elif defined(_PSP2)
+	//#include "psp2/gsSocketPSP2.c"
 #elif defined(_REVOLUTION)
 	#include "revolution/gsSocketRevolution.c"
 #elif defined(_IPHONE)
@@ -112,6 +111,8 @@ int SetSockBlocking(SOCKET sock, int isblocking)
 		#endif
 	#elif defined(_PSP)
 		rcode = setsockopt(sock, SCE_NET_INET_SOL_SOCKET, SCE_NET_INET_SO_NBIO, &argp, sizeof(argp));
+	#elif defined(_PSP2)
+		rcode = setsockopt(sock, SCE_NET_SOL_SOCKET, SCE_NET_SO_NBIO, &argp, sizeof(argp));
 	#elif defined(_PS3)
 		rcode = setsockopt(sock, SOL_SOCKET, SO_NBIO, &argp, sizeof(argp));
 	#else
@@ -216,6 +217,10 @@ int DisableNagle(SOCKET sock)
 #if !defined(_NITRO) && !defined(INSOCK) && !defined(_REVOLUTION)
 	int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* theExceptFlag)
 	{
+#if defined(_PSP2)
+		// psp vita has no select, created a select like function that mimics gamespy's simple select, so just call it.		
+		return vitaSocketselect(theSocket, theReadFlag, theWriteFlag, theExceptFlag);
+#else
 		fd_set aReadSet;
 		fd_set aWriteSet;
 		fd_set aExceptSet;
@@ -251,7 +256,9 @@ int DisableNagle(SOCKET sock)
 		if(theExceptFlag != NULL)
 		{
 			FD_ZERO(&aExceptSet);
+		#if !defined(_PSP2)
 			FD_SET(theSocket, &aExceptSet);
+		#endif
 			aExceptFds = &aExceptSet;
 		}
 #ifdef _PS3
@@ -299,6 +306,7 @@ int DisableNagle(SOCKET sock)
 				*theExceptFlag = 0;
 		}
 		return aResult; // 0 or 1 at this point
+#endif // _PSP2
 	}
 #endif // !nitro && !revolution && !insock
 	
@@ -326,7 +334,7 @@ int CanSendOnSocket(SOCKET sock)
 }
 
 
-#if defined(_PS3) || defined (_PSP)
+#if defined(_PS3) || defined (_PSP) || defined (_PSP2)
 
 #else
 

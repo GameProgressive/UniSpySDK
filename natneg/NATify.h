@@ -2,10 +2,12 @@
 // File:	NATify.h
 // SDK:		GameSpy NAT Negotiation SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
+
 
 #if !defined(AFX_NATIFY_H__B8FF4369_8789_4674_8569_3D52CE8CA890__INCLUDED_)
 #define AFX_NATIFY_H__B8FF4369_8789_4674_8569_3D52CE8CA890__INCLUDED_
@@ -27,7 +29,8 @@ typedef enum { unrecognized, private_as_public, consistent_port, incremental, mi
 //////////////////////////////////////////////////////////////
 // AddressMapping
 // Summary
-//		Internal and external address pairing for an observed network address translation.
+//		Internal and external address pairing for an observed network address 
+//		translation.
 // See Also
 //		NAT
 typedef struct _AddressMapping {
@@ -41,7 +44,8 @@ typedef struct _AddressMapping {
 // NAT
 // Summary
 //		The result of a NAT detection.  
-//		Upon successful completion of a detection, this will contain as many properties of the NAT as could be determined.
+//		Upon successful completion of a detection, this will contain as many 
+//		properties of the NAT as could be determined.
 // See Also
 //		NNStartNatDetection, NatDetectionResultsFunc, NatType, NatMappingScheme, NatPromiscuity, AddressMapping
 typedef struct _NAT {

@@ -2,10 +2,11 @@
 // File:	gsAssert.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsCommon.h"
 #include "gsDebug.h"
@@ -89,7 +90,7 @@ void gsDebugAssert(const char *szError,
 		#endif
 	}
 
-#elif defined _PSP
+#elif defined _PSP || defined _PSP2
 	// ToDo:
 	// ErrorMessage: Displays message and goes into an infinite loop
 	// continues rendering

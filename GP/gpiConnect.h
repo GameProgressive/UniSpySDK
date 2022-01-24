@@ -2,22 +2,20 @@
 // File:	gpiConnect.h
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GPICONNECT_H_
 #define _GPICONNECT_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //DEFINES
-/////////
 // Connect States.
-//////////////////
 #define GPI_NOT_CONNECTED              0
 #define GPI_CONNECTING                 1
 #define GPI_NEGOTIATING                2
@@ -26,7 +24,6 @@
 #define GPI_PROFILE_DELETING           5
 
 //FUNCTIONS
-///////////
 GPResult
 gpiConnect(
   GPConnection * connection,

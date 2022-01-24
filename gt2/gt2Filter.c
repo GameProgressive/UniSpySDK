@@ -2,10 +2,11 @@
 // File:	gt2Filter.c
 // SDK:		GameSpy Transport 2 SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gt2Filter.h"
 #include "gt2Callback.h"
@@ -44,27 +45,27 @@ static int GS_STATIC_CALLBACK gti2ReceiveFiltersCompare
 
 GT2Bool gti2AddSendFilter(GT2Connection connection, gt2SendFilterCallback callback)
 {
-	// Check if we have a send filters list.
+	// Check to see if we have a send filters list.
 	if(!connection->sendFilters)
 		return GT2False;
 
 	// Add this callback to the list.
 	ArrayAppend(connection->sendFilters, &callback);
 
-	// Return GT2True if it was added.
+	// Return GT2True if the filter was added.
 	return (ArraySearch(connection->sendFilters, &callback, gti2SendFiltersCompare, 0, 0) != NOT_FOUND);
 }
 
 GT2Bool gti2AddReceiveFilter(GT2Connection connection, gt2ReceiveFilterCallback callback)
 {
-	// Check if we have a receive filters list.
+	// Check to see if we have a receive filters list.
 	if(!connection->receiveFilters)
 		return GT2False;
 
 	// Add this callback to the list.
 	ArrayAppend(connection->receiveFilters, &callback);
 
-	// Return GT2True if it was added.
+	// Return GT2True if the filter was added.
 	return (ArraySearch(connection->receiveFilters, &callback, gti2ReceiveFiltersCompare, 0, 0) != NOT_FOUND);
 }
 
@@ -76,20 +77,20 @@ void gti2RemoveSendFilter(GT2Connection connection, gt2SendFilterCallback callba
 	if(!connection->sendFilters)
 		return;
 
-	// check for removing all
+	// Check for removing all filters.
 	if(!callback)
 	{
-		// Remove all the filters.
+		// Remove all of the filters.
 		ArrayClear(connection->sendFilters);
 		return;
 	}
 
-	// Find it.
+	// Find the filter.
 	index = ArraySearch(connection->sendFilters, &callback, gti2SendFiltersCompare, 0, 0);
 	if(index == NOT_FOUND)
 		return;
 
-	// Remove it.
+	// Remove the filter.
 	ArrayRemoveAt(connection->sendFilters, index);
 }
 
@@ -101,20 +102,20 @@ void gti2RemoveReceiveFilter(GT2Connection connection, gt2ReceiveFilterCallback 
 	if(!connection->receiveFilters)
 		return;
 
-	// check for removing all
+	// Check for removing all filters.
 	if(!callback)
 	{
-		// Remove all the filters.
+		// Remove all of the filters.
 		ArrayClear(connection->receiveFilters);
 		return;
 	}
 
-	// Find it.
+	// Find the filter.
 	index = ArraySearch(connection->receiveFilters, &callback, gti2ReceiveFiltersCompare, 0, 0);
 	if(index == NOT_FOUND)
 		return;
 
-	// Remove it.
+	// Remove the filter.
 	ArrayRemoveAt(connection->receiveFilters, index);
 }
 
@@ -122,23 +123,23 @@ GT2Bool gti2FilteredSend(GT2Connection connection, int filterID, const GT2Byte *
 {
 	int num;
 
-	// Make sure we're connected.
+	// Make sure that we are connected.
 	if(connection->state != GTI2Connected)
 		return GT2True;
 
-	// check the message and len
+	// Check the message and len.
 	gti2MessageCheck(&message, &len);
 
 	// Get the number of filters.
 	num = ArrayLength(connection->sendFilters);
 
-	// Check if its a valid ID.
+	// Check that its a valid ID.
 	if(filterID < 0)
 		return GT2True;
 	if(filterID >= num)
 		return GT2True;
 
-	// Is it the last one?
+	// Is this filter the last one?
 	if(filterID == (num - 1))
 	{
 		// Do the actual send.
@@ -166,16 +167,16 @@ GT2Bool gti2FilteredReceive(GT2Connection connection, int filterID, GT2Byte * me
 	// Get the number of filters.
 	num = ArrayLength(connection->receiveFilters);
 
-	// Check if its a valid ID.
+	// Check that it's a valid ID.
 	if(filterID < 0)
 		return GT2True;
 	if(filterID >= num)
 		return GT2True;
 
-	// Is it the last one?
+	// Is this the last filter?
 	if(filterID == (num - 1))
 	{
-		// call the callback
+		// Call the callback.
 		if(!gti2ReceivedCallback(connection, message, len, reliable))
 			return GT2False;
 	}

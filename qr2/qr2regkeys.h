@@ -2,10 +2,11 @@
 // File:	qr2regkeys.h
 // SDK:		GameSpy Query and Reporting 2 (QR2) SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _QR2REGKEYS_H_
 #define _QR2REGKEYS_H_
@@ -52,9 +53,9 @@ extern "C" {
 #define SCORE_T_KEY			29
 #define NN_GROUP_ID_KEY		30
 
-// Query-From-Master-Only keys
-// - these two values are retrieved only from the master server so we need to make
-//   sure not to overwrite them when querying servers directly
+// Query-From-Master-Only keys:
+// These two values are retrieved only from the master server, so we need to 
+// make sure not to overwrite them when querying servers directly.
 #define COUNTRY_KEY			31
 #define REGION_KEY			32
 
@@ -66,22 +67,24 @@ extern "C" {
 #endif
 
 extern const char *qr2_registered_key_list[];
-void qr2_register_key(int keyid, const gsi_char *key);
+//void qr2_register_key(int keyid, const gsi_char *key);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Necessary for unicode support.  Must store a copy of the UTF8 keys
-// generated from qr2_register_keyW
+// Necessary for unicode support. Must store a copy of the UTF8 keys generated 
+// from qr2_register_keyW.
 void qr2_internal_key_list_append(char* theKey);
 void qr2_internal_key_list_free(); // call this at qr2 shutdown
 
-// internal function used by ServerBrowser to check if a key is Query-Master-Only
+// This is an internal function used by ServerBrowser to check if a key is 
+// Query-Master-Only.
 gsi_bool qr2_internal_is_master_only_key(const char * keyname);
 
 
-// Always define for direct access
-void qr2_register_keyA(int keyid, const char *key);
-void qr2_register_keyW(int keyid, const unsigned short *key);
+// Always define this for direct access.
+// Defined somewhere else.
+// void qr2_register_keyA(int keyid, const char *key);
+// void qr2_register_keyW(int keyid, const unsigned short *key);
 
 #ifdef __cplusplus
 }

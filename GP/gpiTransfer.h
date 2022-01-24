@@ -2,20 +2,19 @@
 // File:	gpiTransfer.h
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GPITRANSFER_H_
 #define _GPITRANSFER_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //DEFINES
-/////////
 #define GPI_FILE_DIRECTORY     (1 << 1)
 #define GPI_FILE_SKIP          (1 << 2)
 #define GPI_FILE_FAILED        (1 << 3)
@@ -31,7 +30,6 @@
 #define GPI_SKIP_USER_SKIP     2
 
 //TYPES
-///////
 typedef enum
 {
 	GPITransferPinging,
@@ -74,7 +72,7 @@ typedef struct
 	char * name;
 	
 #ifdef GSI_UNICODE
-	gsi_char * name_W; // must have this since developers are given pointers to internal memory
+	gsi_char * name_W; // Must have this since developers are given pointers to internal memory.
 	gsi_char * path_W;
 #endif
 
@@ -89,7 +87,6 @@ typedef struct
 } GPIFile;
 
 //FUNCTIONS
-///////////
 #ifndef NOFILE
 GPResult gpiInitTransfers(
   GPConnection * connection

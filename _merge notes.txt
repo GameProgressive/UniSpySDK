@@ -1,0 +1,21 @@
+SDK 2012 httpEncryption.C
+
+2012:
+					if ((data->data[data->pos]&0x80)==0x80) // ASN1 variable length field
+					{
+						int lensize = data->data[data->pos++]&0x7f;
+						if (lensize > 4)
+							return GHIEncryptionResult_Error;
+						temp = 0;
+						while(lensize-- > 0)
+							temp = (temp << 8) | (unsigned char)data->data[data->pos++];
+					}
+					else
+					{
+						temp = (unsigned char)data->data[data->pos++];
+					}
+
+2007:
+					if ((unsigned char)data->data[data->pos++] != 0x81) return GHIEncryptionResult_Error; // 1 byte len field
+					if (temp > (certListEndPos - data->pos)) return GHIEncryptionResult_Error;
+					temp = (unsigned char)data->data[data->pos++]; // remaining data size (check or ignore)

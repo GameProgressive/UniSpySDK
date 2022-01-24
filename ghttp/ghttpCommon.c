@@ -2,41 +2,36 @@
 // File:	ghttpCommon.c
 // SDK:		GameSpy HTTP SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed 
+// use or use in a  manner not expressly authorized by IGN or GameSpy 
+// Technology is prohibited.
 
 #include "ghttpCommon.h"
 
 #ifdef WIN32
 // A lock.
-//////////
 typedef void * GLock;
 
 // The lock used by ghttp.
-//////////////////////////
 static GLock ghiGlobalLock;
 #endif
 
 // Proxy server.
-////////////////
 char * ghiProxyAddress;
 unsigned short ghiProxyPort;
 
 // Throttle settings.
-/////////////////////
 int ghiThrottleBufferSize = 125;
 gsi_time ghiThrottleTimeDelay = 250;
 
-// Number of connections
-/////////////////////
+// Number of connections.
 extern int ghiNumConnections;
 
 
 #ifdef WIN32
 // Creates a lock.
-//////////////////
 static GLock GNewLock(void)
 {
 	CRITICAL_SECTION * criticalSection;
@@ -51,7 +46,6 @@ static GLock GNewLock(void)
 }
 
 // Frees a lock.
-////////////////
 static void GFreeLock(GLock lock)
 {
 	CRITICAL_SECTION * criticalSection = (CRITICAL_SECTION *)lock;
@@ -65,7 +59,6 @@ static void GFreeLock(GLock lock)
 }
 
 // Locks a lock.
-////////////////
 static void GLockLock(GLock lock)
 {
 	CRITICAL_SECTION * criticalSection = (CRITICAL_SECTION *)lock;
@@ -77,7 +70,6 @@ static void GLockLock(GLock lock)
 }
 
 // Unlocks a lock.
-//////////////////
 static void GUnlockLock(GLock lock)
 {
 	CRITICAL_SECTION * criticalSection = (CRITICAL_SECTION *)lock;
@@ -90,22 +82,18 @@ static void GUnlockLock(GLock lock)
 #endif
 
 // Creates the ghttp lock.
-//////////////////////////
 void ghiCreateLock(void)
 {
 #ifdef WIN32
 	// We shouldn't already have a lock.
-	////////////////////////////////////
 	GS_ASSERT(!ghiGlobalLock);
 
 	// Create the lock.
-	///////////////////
 	ghiGlobalLock = GNewLock();
 #endif
 }
 
 // Frees the ghttp lock.
-////////////////////////
 void ghiFreeLock(void)
 {
 #ifdef WIN32
@@ -118,7 +106,6 @@ void ghiFreeLock(void)
 }
 
 // Locks the ghttp lock.
-////////////////////////
 void ghiLock
 (
 	void
@@ -133,7 +120,6 @@ void ghiLock
 }
 
 // Unlocks the ghttp lock.
-//////////////////////////
 void ghiUnlock
 (
 	void
@@ -148,7 +134,6 @@ void ghiUnlock
 }
 
 // Logs traffic.
-////////////////
 #ifdef HTTP_LOG
 void ghiLogToFile(const char * buffer, int len, const char* fileName)
 {
@@ -176,16 +161,15 @@ void ghiLogToFile(const char * buffer, int len, const char* fileName)
 }
 #endif
 
-// Reads encrypted data from decodeBuffer
-// Appends decrypted data to recvBuffer
-// Returns GHTTPFalse if there was a fatal error
-////////////////////////////////////////////////
+// Reads encrypted data from decodeBuffer.
+// Appends decrypted data to recvBuffer.
+// Returns GHTTPFalse if there was a fatal error.
 GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 {
-	// Decrypt data from decodeBuffer to recvBuffer
+	// Decrypt data from decodeBuffer to recvBuffer.
 	GHIEncryptionResult aResult = GHIEncryptionResult_None;
 
-	// data to be decrypted
+	// Data to be decrypted.
 	char* aReadPos  = NULL;
 	char* aWritePos = NULL;
 	int   aReadLen  = 0;
@@ -193,7 +177,7 @@ GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 
 	do
 	{
-		// Call the decryption func
+		// Call the decryption function.
 		do 
 		{
 			aReadPos  = connection->decodeBuffer.data + connection->decodeBuffer.pos;
@@ -205,9 +189,9 @@ GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 				aReadPos, &aReadLen, aWritePos, &aWriteLen);
 			if (aResult == GHIEncryptionResult_BufferTooSmall)
 			{
-				// Make some more room
+				// Make some more room.
 				if (GHTTPFalse == ghiResizeBuffer(&connection->recvBuffer, connection->recvBuffer.sizeIncrement))
-					return GHTTPFalse; // error
+					return GHTTPFalse; // An error has occured.
 			}
 			else if(aResult == GHIEncryptionResult_Error)
 			{
@@ -215,7 +199,7 @@ GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 			}
 		} while (aResult == GHIEncryptionResult_BufferTooSmall && aWriteLen == 0);
 
-		// Adjust GHIBuffer sizes so they account for transfered data
+		// Adjust GHIBuffer sizes so they account for transfered data.
 		if(aReadLen > connection->decodeBuffer.len)
 		{
 			gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_HotError,
@@ -229,7 +213,7 @@ GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 
 	} while(aWriteLen > 0);
 
-	// Discard data from the decodedBuffer in chunks
+	// Discard data from the decodedBuffer in chunks.
 	if (connection->decodeBuffer.pos > 0xFF)
 	{
 		int bytesToKeep = connection->decodeBuffer.len - connection->decodeBuffer.pos;
@@ -249,7 +233,6 @@ GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection)
 }
 
 // Receive some data.
-/////////////////////
 GHIRecvResult ghiDoReceive
 (
 	GHIConnection * connection,
@@ -261,33 +244,27 @@ GHIRecvResult ghiDoReceive
 	int socketError;
 	int len;
 
-	// How much to try and receive.
-	///////////////////////////////
+	// How much to try to receive.
 	len = (*bufferLen - 1);
 
-	// Are we throttled?
-	////////////////////
+	// Check whether or not the connection is throttled.
 	if(connection->throttle)
 	{
 		unsigned long now;
 
 		// Don't receive too often.
-		///////////////////////////
 		now = current_time();
 		if(now < (connection->lastThrottleRecv + ghiThrottleTimeDelay))
 			return GHINoData;
 
 		// Update the receive time.
-		///////////////////////////
 		connection->lastThrottleRecv = (unsigned int)now;
 
 		// Don't receive too much.
-		//////////////////////////
 		len = GS_MIN(len, ghiThrottleBufferSize);
 	}
 
 	// Receive some data.
-	/////////////////////
 	if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
 		connection->encryptor.mSessionEstablished == GHTTPTrue &&
 		connection->encryptor.mEncryptOnSend == GHTTPTrue )
@@ -298,17 +275,15 @@ GHIRecvResult ghiDoReceive
 		result = ghiEncryptorSslDecryptRecv(connection, &connection->encryptor, buffer, &recvLength);
 		
 		// Check for an error.
-		//////////////////////
 		if (result == GHIEncryptionResult_Success) {
 			if (recvLength == -1) {
-				// means try again after wait
+				// This means to try again after waiting.
 				return GHINoData;
 			} else {
 				rcode = recvLength;
 			}
 		} else {
 			// There was a real error.
-			//////////////////////////
 			connection->completed = GHTTPTrue;
 			connection->result = GHTTPSocketFailed;
 			connection->socketError = 0;
@@ -322,16 +297,13 @@ GHIRecvResult ghiDoReceive
 		rcode = recv(connection->socket, buffer, len, 0);
 		
 		// There was an error.
-		//////////////////////
 		if(gsiSocketIsError(rcode))
 		{
 			// Get the error code.
-			//////////////////////
 			socketError = GOAGetLastError(connection->socket);
 
 
 			// Check for a closed connection.
-			/////////////////////////////////
 			if(socketError == WSAENOTCONN)
 			{
 				connection->connectionClosed = GHTTPTrue;
@@ -340,8 +312,7 @@ GHIRecvResult ghiDoReceive
 				return GHIConnClosed;
 			}
 
-			// Check for nothing waiting.
-			/////////////////////////////
+			// Check to make sure there's nothing to wait for.
 			if((socketError == WSAEWOULDBLOCK) || (socketError == WSAEINPROGRESS) || (socketError == WSAETIMEDOUT))
             {
                 gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
@@ -349,7 +320,6 @@ GHIRecvResult ghiDoReceive
 				return GHINoData;
             }
 			// There was a real error.
-			//////////////////////////
             gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_HotError,
                 "Got an error from recv: %d\n", socketError);
 
@@ -363,7 +333,6 @@ GHIRecvResult ghiDoReceive
 	}
 
 	// The connection was closed.
-	/////////////////////////////
 	if(rcode == 0)
 	{
 		connection->connectionClosed = GHTTPTrue;
@@ -371,14 +340,12 @@ GHIRecvResult ghiDoReceive
 	}
 
 	// Cap the buffer.
-	//////////////////
 	buffer[rcode] = '\0';
 	*bufferLen = rcode;
 
 	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Network, GSIDebugLevel_RawDump, "Received %d bytes\n", rcode);
 
 	// Notify app.
-	//////////////
 	return GHIRecvData;
 }
 
@@ -395,7 +362,6 @@ int ghiDoSend
 		return 0;
 	
 	// Do the send.
-	///////////////
 	if (connection->encryptor.mEngine != GHTTPEncryptionEngine_None &&
 		connection->encryptor.mSessionEstablished == GHTTPTrue &&
 		connection->encryptor.mEncryptOnSend == GHTTPTrue)
@@ -407,10 +373,9 @@ int ghiDoSend
 		result = ghiEncryptorSslEncryptSend(connection, &connection->encryptor, buffer, len, &bytesSent);
 	
 		// Check for an error.
-		//////////////////////
 		if (result == GHIEncryptionResult_Success) {
 			if (bytesSent == -1) {
-				// means try again after wait
+				// This means to try again after waiting.
 				return -2;
 			} else {
 				rcode = bytesSent;
@@ -425,17 +390,15 @@ int ghiDoSend
 	}
 	else
 	{
-		// send directly to socket
+		// Send directly to the socket.
 		rcode = send(connection->socket, buffer, len, 0);
 		
 		// Check for an error.
-		//////////////////////
 		if(gsiSocketIsError(rcode))
 		{
 			int error;
 
-			// Would block just means 0 bytes sent.
-			///////////////////////////////////////
+			// 'Would block' just means 0 bytes sent.
 			error = GOAGetLastError(connection->socket);
 			if((error == WSAEWOULDBLOCK) || (error == WSAEINPROGRESS) || (error == WSAETIMEDOUT))
 				return 0;
@@ -448,7 +411,7 @@ int ghiDoSend
 		}
 	}
 
-	//do not add CRLF as part of bytes posted - make sure waitPostContinue is false
+	// Do not add CRLF as part of bytes posted; make sure waitPostContinue is false.
 	if(connection->state == GHTTPPosting && connection->postingState.waitPostContinue == GHTTPFalse)
 	{
 		connection->postingState.bytesPosted += rcode;
@@ -475,13 +438,13 @@ GHITrySendResult ghiTrySendThenBuffer
 		if (!ghiEncryptDataToBuffer(&connection->sendBuffer, buffer + rcode, len - rcode))
 			return GHITrySendError;
 
-		// Try to send immediately
+		// Try to send immediately.
 		if (ghiSendBufferedData(connection) == GHTTPFalse)
 			return GHITrySendError;
 		if (connection->sendBuffer.pos >= connection->sendBuffer.len)
 		{
 			ghiResetBuffer(&connection->sendBuffer);
-			return GHITrySendSent; // everything sent
+			return GHITrySendSent; // Everything was sent.
 		}
 		return GHITrySendBuffered;
 	}
@@ -489,27 +452,23 @@ GHITrySendResult ghiTrySendThenBuffer
 	// **Plain text or SSL encrypt on send**
 
 	// If we already have something buffered, don't send.
-	/////////////////////////////////////////////////////
 	if(connection->sendBuffer.pos >= connection->sendBuffer.len)
 	{
-		// Try and send.
-		////////////////
+		// Try to send.
 		rcode = ghiDoSend(connection, buffer, len);
 		switch (rcode) {
-		case -1: // error
+		case -1: // There was an error.
 			return GHITrySendError;
-		case -2: // try again
+		case -2: // Try to send again.
 			return GHITrySendBuffered;
 		}
 
 		// Was it all sent?
-		///////////////////
 		if(rcode == len)
 			return GHITrySendSent;	
 	}
 	
 	// Buffer whatever wasn't sent.
-	///////////////////////////////
 	if(!ghiAppendDataToBuffer(&connection->sendBuffer, buffer + rcode, len - rcode))
 		return GHITrySendError;
 	return GHITrySendBuffered;
@@ -518,31 +477,28 @@ GHITrySendResult ghiTrySendThenBuffer
 static GHTTPBool ghiParseProxyServer
 (
 	const char * server,
-	char ** proxyAddress,       // [out] the proxy address
-	unsigned short * proxyPort  // [out] the proxy port
+	char ** proxyAddress,       // [out] The proxy address.
+	unsigned short * proxyPort  // [out] The proxy port.
 )
 {
 	char * strPort;
 
-	// Make sure each pointer is valid as well as what it points to
+	// Make sure each pointer and is valid, as well as what it points to.
 	GS_ASSERT(server && *server);
 	GS_ASSERT(proxyAddress && !*proxyAddress);
 	GS_ASSERT(proxyPort);
 
 	// Copy off the server address.
-	///////////////////////////////
 	*proxyAddress = goastrdup(server);
 	if(!*proxyAddress)
 		return GHTTPFalse;
 
 	// Check for a port.
-	////////////////////
 	if((strPort = strchr(*proxyAddress, ':')) != NULL)
 	{
 		*strPort++ = '\0';
 
 		// Try getting the port.
-		////////////////////////
 		*proxyPort = (unsigned short)atoi(strPort);
 		if(!*proxyPort)
 		{
@@ -564,7 +520,6 @@ GHTTPBool ghiSetProxy
 )
 {
 	// Free any existing proxy address.
-	///////////////////////////////////
 	if(ghiProxyAddress)
 	{
 		gsifree(ghiProxyAddress);
@@ -572,11 +527,11 @@ GHTTPBool ghiSetProxy
 	}
 	ghiProxyPort = 0;
 
-	// If a server was supplied, try to parse it
+	// If a server was supplied, try to parse it.
 	if(server && *server)
 		return ghiParseProxyServer(server, &ghiProxyAddress, &ghiProxyPort);
 
-	// No server supplied results in proxy being cleared
+	// No server supplied-results are in the proxy being cleared.
 	return GHTTPTrue;
 }
 
@@ -586,13 +541,12 @@ GHTTPBool ghiSetRequestProxy
 	const char * server
 )
 {
-	// Obtain the connection for this request
+	// Obtain the connection for this request.
 	GHIConnection* connection = ghiRequestToConnection(request);
 	if (connection == NULL)
 		return GHTTPFalse;
 
 	// Free any existing proxy address.
-	///////////////////////////////////
 	if(connection->proxyOverrideServer)
 	{
 		gsifree(connection->proxyOverrideServer);
@@ -600,11 +554,11 @@ GHTTPBool ghiSetRequestProxy
 		connection->proxyOverridePort = GHI_DEFAULT_PORT;
 	}
 
-	// If a server was supplied, try to parse it
+	// If a server was supplied, try to parse it.
 	if(server && *server)
 		return ghiParseProxyServer(server, &connection->proxyOverrideServer, &connection->proxyOverridePort);
 	
-	// No server supplied results in proxy being cleared
+	// No server supplied-results are in the proxy being cleared.
 	return GHTTPTrue;
 }
 

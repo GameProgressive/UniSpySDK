@@ -2,16 +2,19 @@
 // Linux Threading Support (pthreads)
 // 
 // NOTE: when implementing this make sure the "-lpthread" compiler option is used
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 ///////////////////////////////////////////////////////////////////////////////
 #include "../gsPlatformUtil.h"
 #include "../gsPlatformThread.h"
 #include "../gsAssert.h"
 #include "../gsDebug.h"
 #include <pthread.h>
+
+#if !defined(GSI_NO_THREADS)
 
 #define _REENTRANT
 
@@ -64,12 +67,17 @@ void gsiCancelThread(GSIThreadID id)
 	//should i destroy the attributes here?
 	pthread_attr_destroy(&id.attr);
 
+	// WD : THOMAS : FIXME : for now just kill the thread:
+#ifdef ANDROID
+	pthread_kill(id.thread, 0);
+#else
 	if (pthread_cancel(id.thread) != PTHREAD_NO_ERROR) {
 		//there was an error - how should we handle these? or should we?
 		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_WarmError,
 			"Failed to cancel thread\r\n");
 	}
 	//free up memory and set to NULL
+#endif
 
 	gsifree(&id.thread);
 }
@@ -220,3 +228,4 @@ void gsiCloseSemaphore(GSISemaphoreID theSemaphore)
 }
 
 
+#endif //!defined(GSI_NO_THREADS)

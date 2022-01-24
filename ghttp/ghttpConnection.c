@@ -2,10 +2,11 @@
 // File:	ghttpConnection.c
 // SDK:		GameSpy HTTP SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed 
+// use or use in a  manner not expressly authorized by IGN or GameSpy 
+// Technology is prohibited.
 
 #include "ghttpConnection.h"
 #include "ghttpCommon.h"
@@ -14,17 +15,15 @@
 ///////////////////////////////////////////////////////////////
 #define CONNECTIONS_CHUNK_LEN      4
 
-// An array of pointers to GHIConnection objects.
+// This is an array of pointers to GHIConnection objects.
 // A GHTTPRequest is an index into this array.
-/////////////////////////////////////////////////
 static GHIConnection ** ghiConnections;
 static int ghiConnectionsLen;
 static int ghiNumConnections;
 static int ghiNextUniqueID;
 
-// Finds a gsifree slot in the ghiConnections array.
+// This finds a gsifree slot in the ghiConnections array.
 // If there are no gsifree slots, the array size will be increased.
-////////////////////////////////////////////////////////////////
 static int ghiFindFreeSlot
 (
 	void
@@ -36,7 +35,6 @@ static int ghiFindFreeSlot
 	int newLen;
 
 	// Look for an open slot.
-	/////////////////////////
 	for(i = 0 ; i < ghiConnectionsLen ; i++)
 	{
 		if(!ghiConnections[i]->inUse)
@@ -45,8 +43,7 @@ static int ghiFindFreeSlot
 
 	GS_ASSERT(ghiNumConnections == ghiConnectionsLen);
 
-	// Nothing found, resize the array.
-	///////////////////////////////////
+	// No open slots were found, so resize the array.
 	oldLen = ghiConnectionsLen;
 	newLen = (ghiConnectionsLen + CONNECTIONS_CHUNK_LEN);
 	tempPtr = (GHIConnection **)gsirealloc(ghiConnections, sizeof(GHIConnection *) * newLen);
@@ -55,7 +52,6 @@ static int ghiFindFreeSlot
 	ghiConnections = tempPtr;
 
 	// Create the new connection objects.
-	/////////////////////////////////////
 	for(i = oldLen ; i < newLen ; i++)
 	{
 		ghiConnections[i] = (GHIConnection *)gsimalloc(sizeof(GHIConnection));
@@ -69,7 +65,6 @@ static int ghiFindFreeSlot
 	}
 
 	// Update the length.
-	/////////////////////
 	ghiConnectionsLen = newLen;
 
 	return oldLen;
@@ -87,7 +82,6 @@ GHIConnection * ghiNewConnection
 	ghiLock();
 
 	// Find a gsifree slot.
-	////////////////////
 	slot = ghiFindFreeSlot();
 	if(slot == -1)
 	{
@@ -96,11 +90,9 @@ GHIConnection * ghiNewConnection
 	}
 
 	// Get a pointer to the object.
-	///////////////////////////////
 	connection = ghiConnections[slot];
 
-	// Init the object.
-	///////////////////
+	// Initialize the object.
 	memset(connection, 0, sizeof(GHIConnection));
 	connection->inUse = GHTTPTrue;
 	connection->request = (GHTTPRequest)slot;
@@ -146,7 +138,7 @@ GHIConnection * ghiNewConnection
 	connection->encryptor.mInitialized = GHTTPFalse;
 	connection->receiveFileIdleTime = 0;
 
-//handle used for asynch DNS lookups
+// This handle is used for asynch DNS lookups.
 #if !defined(GSI_NO_THREADS)
 	connection->handle = NULL;
 #endif
@@ -167,7 +159,6 @@ GHIConnection * ghiNewConnection
 	}
 
 	// One more connection.
-	///////////////////////
 	ghiNumConnections++;
 
 	ghiUnlock();
@@ -182,7 +173,7 @@ GHTTPBool ghiCloseConnection(GHIConnection * connection)
 	GS_ASSERT(connection->request < ghiConnectionsLen);
 	GS_ASSERT(connection->inUse);
 
-	// Check args.
+	// Check arguments.
 	if(!connection)
 		return GHTTPFalse;
 	if(!connection->inUse)
@@ -194,14 +185,14 @@ GHTTPBool ghiCloseConnection(GHIConnection * connection)
 
     ghiLock();
 #if !defined(GSI_NO_THREADS)
-    // Cancel and free asynchronous lookup if it has not already been done
+    // Cancel and free asynchronous lookup if it has not already been done.
     if (connection->handle)
     {
         gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, 
             "Cancelling Thread and freeing memory\n");
         gsiCancelResolvingHostname(connection->handle);
         
-        // The handle is already freed, clear the handle here
+        // The handle is already freed, clear the handle here.
         connection->handle = NULL;
     }
 #endif
@@ -232,7 +223,7 @@ GHTTPBool ghiFreeConnectionData( GHIConnection * connection)
 	GS_ASSERT(connection->request < ghiConnectionsLen);
 	GS_ASSERT(connection->inUse);
 
-	// Check args.
+	// Check arguments.
 	if(!connection)
 		return GHTTPFalse;
 	if(!connection->inUse)
@@ -244,7 +235,7 @@ GHTTPBool ghiFreeConnectionData( GHIConnection * connection)
 
 	ghiLock();
 
-	// Free data.
+	// Free the data.
 	gsifree(connection->URL);
 	connection->URL = NULL;
 	gsifree(connection->saveFileName);
@@ -274,7 +265,7 @@ GHTTPBool ghiFreeConnectionData( GHIConnection * connection)
 	if(connection->postingState.states)
 		ghiPostCleanupState(connection);
    
-	// Check for an encryptor
+	// Check for an encryptor.
 	if (connection->encryptor.mInitialized != GHTTPFalse)
 	{
 		if (connection->encryptor.mCleanupFunc)
@@ -282,7 +273,7 @@ GHTTPBool ghiFreeConnectionData( GHIConnection * connection)
 		connection->encryptor.mInitialized = GHTTPFalse;
 	}
 
-	// clear this value here just in case.
+	// Clear this value just in case.
 	connection->receiveFileIdleTime = 0;
 	// Free the slot.
 	connection->inUse = GHTTPFalse;
@@ -304,8 +295,7 @@ GHTTPBool ghiFreeConnection
 	GS_ASSERT(connection->request < ghiConnectionsLen);
 	GS_ASSERT(connection->inUse);
 
-	// Check args.
-	//////////////
+	// Check arguments.
 	if(!connection)
 		return GHTTPFalse;
 	if(!connection->inUse)
@@ -334,8 +324,7 @@ GHIConnection * ghiRequestToConnection
 
 	ghiLock();
 
-	// Check args.
-	//////////////
+	// Check arguments.
 	if((request < 0) || (request >= ghiConnectionsLen))
 	{
 		ghiUnlock();
@@ -344,8 +333,7 @@ GHIConnection * ghiRequestToConnection
 
 	connection = ghiConnections[request];
 
-	// Check for not in use.
-	////////////////////////
+	// Check to make sure that the connection is not in use.
 	if(!connection->inUse)
 		connection = NULL;
 
@@ -362,7 +350,6 @@ void ghiEnumConnections
 	int i;
 
 	// Check for no connections.
-	////////////////////////////
 	if(ghiNumConnections <= 0)
 		return;
 
@@ -385,8 +372,7 @@ void ghiRedirectConnection
 
 
 #if !defined(GSI_NO_THREADS)
-    // Cancel and free asynchronous lookup if it has not already been done
-    /////////////////////////////////////////////////////////////////////
+    // Cancel and free asynchronous lookup if it has not already been done.
     if (connection->handle)
     {
         gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment, 
@@ -399,28 +385,25 @@ void ghiRedirectConnection
 
 
 	// Close the socket.
-	////////////////////
 	shutdown(connection->socket, 2);
 #if (defined(_NITRO) && defined(TWLSSL))
     if (!closesocketsure(connection->socket, &connection->encryptor.mNotInCloseSocket))
     {
-        // Let's wait until the socket closes for initializing the new connection.
+        // Let's wait until the socket closes to initialize the new connection.
         return;
     }
 #else
 	closesocket(connection->socket);
 #endif
 
-    // The following initializes the new connection
+    // The following initializes the new connection.
     
 	// New URL.
-	///////////
 	gsifree(connection->URL);
 	connection->URL = connection->redirectURL;
 	connection->redirectURL = NULL;
 
 	// Reset stuff parsed from the URL.
-	///////////////////////////////////
 	gsifree(connection->serverAddress);
 	connection->serverAddress = NULL;
 	connection->serverIP = 0;
@@ -429,19 +412,16 @@ void ghiRedirectConnection
 	connection->requestPath = NULL;
 
 	// Reset state.
-	///////////////
 	connection->state = GHTTPSocketInit;
 	connection->socket = INVALID_SOCKET;
 
 	// Reset buffers.
-	/////////////////
 	ghiResetBuffer(&connection->sendBuffer);
 	ghiResetBuffer(&connection->encodeBuffer);
 	ghiResetBuffer(&connection->recvBuffer);
 	ghiResetBuffer(&connection->decodeBuffer);
 
 	// Reset status.
-	////////////////
 	connection->statusMajorVersion = 0;
 	connection->statusMinorVersion = 0;
 	connection->statusCode = 0;
@@ -450,18 +430,17 @@ void ghiRedirectConnection
 	connection->headerStringIndex = 0;
 
 	// The connection isn't closed.
-	///////////////////////////////
 	connection->connectionClosed = GHTTPFalse;
 
-	// Check for an encryptor
+	// Check for an encryptor.
 	if (connection->encryptor.mInitialized != GHTTPFalse)
 	{
-		// cleanup the encryptor
+		// Cleanup the encryptor.
 		if (connection->encryptor.mCleanupFunc)
 			(connection->encryptor.mCleanupFunc)(connection, &connection->encryptor);
 		connection->encryptor.mInitialized = GHTTPFalse;
 
-		// if the redirect isn't secure, clear it
+		// If the redirect isn't secure, clear it.
 		if(strncmp("https://", connection->URL, 8) != 0)
 		{
 			connection->encryptor.mEngine = GHTTPEncryptionEngine_None;
@@ -470,7 +449,6 @@ void ghiRedirectConnection
 	}
 
 	// One more redirect.
-	/////////////////////
 	connection->redirectCount++;
 }
 
@@ -485,11 +463,9 @@ void ghiCleanupConnections
 		return;
 
 	// Cleanup all running connections.
-	///////////////////////////////////
 	ghiEnumConnections(ghiFreeConnection);
 
 	// Cleanup the connection states.
-	/////////////////////////////////
 	for(i = 0 ; i < ghiConnectionsLen ; i++)
 		gsifree(ghiConnections[i]);
 	gsifree(ghiConnections);
@@ -526,6 +502,7 @@ char* ghiGetServerAddressFromUrl(char *serverUrl)
 	serverAddress = goastrdup(url);
 	
 	url[nIndex] = tempChar;
+	url += nIndex;
 
 	return serverAddress;
 }

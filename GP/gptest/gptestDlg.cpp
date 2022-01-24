@@ -2,10 +2,11 @@
 // File:	gptestDlg.cpp
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "stdafx.h"
 #include "gptest.h"
@@ -20,7 +21,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CGptestDlg * dlg;
-FILE * theDebugFile = NULL;
 
 #define CHECK(result)  { if((result) != GP_NO_ERROR) { OutputDebugString(#result " failed\n");}}
 
@@ -45,7 +45,7 @@ void vsDebugOut(va_list args, const char * format, ...)
 	}
 	else
 		_vsnprintf(buffer, sizeof(buffer), format, args);
-	
+
 	OutputDebugString(buffer);
 #endif
 	GSI_UNUSED(args);
@@ -146,8 +146,10 @@ CGptestDlg::CGptestDlg(CWnd* pParent /*=NULL*/)
 	m_namespace = _T("");
 	m_productid = 0;
 	//}}AFX_DATA_INIT
-	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);	
+	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32.
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	
+	
 }
 
 void CGptestDlg::DoDataExchange(CDataExchange* pDX)
@@ -870,7 +872,7 @@ void SuggestUniqueNickResponse(GPConnection * connection, void * arg_, void * pa
 		{
 			dlg->m_results.InsertString(i, arg->suggestedNicks[i]);
 			dlg->m_results.SetItemData(i, 0);
-			// don't get info for this one
+			// Don't get info for this one.
 			searchMatches[i].profile = -1;
 		}
 	}
@@ -891,11 +893,13 @@ void GetProfileBuddyListTestResponse(GPConnection * connection, void * arg_, voi
 		int i;
 		CString str;
 
+#if 0 // TODO
 		if (arg->hidden == GP_HIDDEN)
 		{
 			dlg->MessageBox("Buddy list is hidden.");
 			return;
 		}
+#endif
 
 		if (arg->numProfiles == 0)
 		{
@@ -1105,7 +1109,7 @@ void TransferCallback(GPConnection * connection, void * arg_, void * param)
 	GSI_UNUSED(param);
 }
 
-// Utility func for converting an error code to a string.
+// Utility function for converting an error code to a string.
 /////////////////////////////////////////////////////////
 #define CtoS(code)  case code: string += " (" #code ")"; return;
 void CGptestDlg::CodeToString(CString & string)
@@ -1191,10 +1195,10 @@ BOOL CGptestDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// Set the icon for this dialog.  The framework does this automatically
-	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	// Set the icon for this dialog. The framework does this automatically
+	//  when the application's main window is not a dialog.
+	SetIcon(m_hIcon, TRUE);			// Set big icon.
+	SetIcon(m_hIcon, FALSE);		// Set small icon.
 
 	dlg = this;
 	m_connection = NULL;
@@ -1289,19 +1293,18 @@ void CGptestDlg::OnInitialize()
 		return;
 	}
 
-	fopen_s(&theDebugFile, "gpdebug.txt", "w");
 
 #ifdef GSI_COMMON_DEBUG
-	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output
-	// Set the SDK debug log file, or set your own handler using gsSetDebugCallback
+	// Define GSI_COMMON_DEBUG if you want to view the SDK debug output.
+	// Set the SDK debug log file, or set your own handler using 
+	// gsSetDebugCallback.
 	gsSetDebugCallback(DebugCallback);
 
-	// Set some debug levels
-	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, /*GSIDebugLevel_Debug*/GSIDebugLevel_Hardcore);
-	gsSetDebugFile(theDebugFile);
+	// Set some debug levels.
+	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Debug);
 #endif
 
-	// check that the game's backend is available
+	// Perform the GameSpy Availability Check.
 	GSIACResult result;
 	GSIStartAvailableCheck(GSI_TEST_GAMENAME);
 	while((result = GSIAvailableCheckThink()) == GSIACWaiting)
@@ -1339,10 +1342,6 @@ void CGptestDlg::OnDestroyGP()
 
 	gpDestroy(&m_connection);
 	m_connection = NULL;
-
-	if (theDebugFile)
-		fclose(theDebugFile);
-	theDebugFile = NULL;
 }
 
 void CGptestDlg::SetHost()
@@ -2034,7 +2033,7 @@ void CGptestDlg::OnGetBlocked()
 	m_blocklist.ResetContent();
     UpdateData();
 
-    // Grab block list
+    // Grab block list.
     GPProfile profile;
     int numBlocked;
     CHECK(gpGetNumBlocked(&m_connection, &numBlocked));
@@ -2130,6 +2129,9 @@ void CGptestDlg::OnBuddyList()
         GPProfile profile = (GPProfile)m_results.GetItemData(index);
 
 		dlg->m_results.ResetContent();
+
+#if 0 // TODO
 		CHECK(gpGetProfileBuddyList(&m_connection, profile, 0, (GPEnum)m_blocking, GetProfileBuddyListTestResponse, NULL));
+#endif
 	}
 }

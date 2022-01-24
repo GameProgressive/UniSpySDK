@@ -14,13 +14,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT] =
 {
-	"ns1=\"" RS_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake\""
+	"ns1=\"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake\""
 };
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#define SAKEI_SOAP_URL_FORMAT   RS_HTTP_PROTOCOL_URL "%s.sake." GSI_DOMAIN_NAME "/SakeStorageServer/StorageServer.asmx"
+#define SAKEI_SOAP_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.sake." GSI_DOMAIN_NAME "/SakeStorageServer/StorageServer.asmx"
 char sakeiSoapUrl[SAKE_MAX_URL_LENGTH] = "";
 
 

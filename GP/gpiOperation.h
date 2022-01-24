@@ -2,22 +2,20 @@
 // File:	gpiOperation.h
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #ifndef _GPIOPERATION_H_
 #define _GPIOPERATION_H_
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //DEFINES
-/////////
 // Operation Types.
-///////////////////
 #define GPI_CONNECT                    0
 #define GPI_NEW_PROFILE                1
 #define GPI_GET_INFO                   2
@@ -26,7 +24,6 @@
 #define GPI_DELETE_PROFILE             5
 #define GPI_REGISTER_CDKEY             6
 // Operation States.
-////////////////////
 #define GPI_START                      0
 //#define GPI_CONNECTING               1
 #define GPI_LOGIN                      2
@@ -35,9 +32,7 @@
 #define GPI_FINISHING                  5
 
 //TYPES
-///////
 // Operation data.
-//////////////////
 typedef struct GPIOperation_s
 {
   int type;
@@ -51,7 +46,6 @@ typedef struct GPIOperation_s
 } GPIOperation;
 
 // Connect operation data.
-//////////////////////////
 typedef struct
 {
   char serverChallenge[128];
@@ -65,7 +59,6 @@ typedef struct
 } GPIConnectData;
 
 //FUNCTIONS
-///////////
 GPResult
 gpiAddOperation(
   GPConnection * connection,

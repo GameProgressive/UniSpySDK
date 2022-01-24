@@ -2,13 +2,13 @@
 // File:	gpiConnect.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdio.h>
 #include <stdlib.h>
 #include "gpi.h"
@@ -16,25 +16,20 @@
 
 
 //DEFINES
-/////////
 
 // Connection Manager Address.
-//////////////////////////////
 #define GPI_CONNECTION_MANAGER_NAME    "gpcm." GSI_DOMAIN_NAME
 #define GPI_CONNECTION_MANAGER_PORT    29900
 
 #define GPI_UDP_HEADER "gamespygp"
 // Random String stuff.
-///////////////////////
 #define RANDSTRING      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 #define RANDOMCHAR()    (RANDSTRING[rand() % (sizeof(RANDSTRING) - 1)])
 
 //GLOBALS
-/////////
 char GPConnectionManagerHostname[64] = GPI_CONNECTION_MANAGER_NAME;
 
 //FUNCTIONS
-///////////
 static void randomString(
   char * buffer,
   int numChars
@@ -103,88 +98,39 @@ gpiStartConnect(
 	}
 	if(iconnection->firewall)
 	{
-		
-		/*
-		// Create the peer listening socket.
-		////////////////////////////////////
-		iconnection->peerSocket = socket(AF_INET, SOCK_STREAM, 0);
-		if(iconnection->peerSocket == INVALID_SOCKET)
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error creating a socket.");
-
-		// Make it non-blocking.
-		////////////////////////
-		rcode = SetSockBlocking(iconnection->peerSocket,0);
-		if (rcode == 0)
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error making a socket non-blocking.");
-		// Bind the socket.
-		///////////////////
-		memset(&address, 0, sizeof(address));
-		address.sin_family = AF_INET;
-		rcode = bind(iconnection->peerSocket, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
-		if(gsiSocketIsError(rcode))
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error binding a socket.");
-
-		// Start listening on the socket.
-		/////////////////////////////////
-		rcode = listen(iconnection->peerSocket, SOMAXCONN);
-		if(gsiSocketIsError(rcode))
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error listening on a socket.");
-
-		// Get the socket's port.
-		/////////////////////////
-		len = sizeof(struct sockaddr_in);
-		rcode = getsockname(iconnection->peerSocket, (struct sockaddr *)&address, &len);
-
-		if (gsiSocketIsError(rcode))
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error getting a socket's addres.");
-		iconnection->peerPort = address.sin_port;
-		*/
-		
-			
 		iconnection->peerPort = 0;
 	}
 	
 	// Create the cm socket.
-	////////////////////////
 	iconnection->cmSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if(iconnection->cmSocket == INVALID_SOCKET)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error creating a socket.");
 
 	// Make it non-blocking.
-	////////////////////////
 	rcode = SetSockBlocking(iconnection->cmSocket,0);
 	if(rcode == 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error making a socket non-blocking.");
-/* 
-	// Bind the socket.
-	///////////////////
+
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
-	rcode = bind(iconnection->cmSocket, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
-	if (gsiSocketIsError(rcode))
-		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error binding a socket.");
-*/
+
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
-	// Get the server host.
-	///////////////////////
+	// Get the server host and port.
 	if (inet_addr(GPConnectionManagerHostname) == INADDR_NONE)
 	{
 		host = gethostbyname(GPConnectionManagerHostname);
 		if(host == NULL)
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve connection mananger host name.");
+			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve connection manager host name.");
 		address.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
-		//printf("Resolved Hostname and copied address:  %s\n", inet_ntoa(address.sin_addr));
 	}
 	else
 	{
 		address.sin_addr.s_addr = inet_addr(GPConnectionManagerHostname);
-		//printf("Using hardcoded address: %s", GPConnectionManagerHostname);
 	}
 
 	// Connect the socket.
-	//////////////////////
-	assert(address.sin_addr.s_addr != 0);
+	GS_ASSERT(address.sin_addr.s_addr != 0);
 	address.sin_port = htons(GPI_CONNECTION_MANAGER_PORT);
 	rcode = connect(iconnection->cmSocket, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
 	if (gsiSocketIsError(rcode))
@@ -197,7 +143,6 @@ gpiStartConnect(
 	}
 
 	// We're waiting for the connect to complete.
-	/////////////////////////////////////////////
 	operation->state = GPI_CONNECTING;
 	iconnection->connectState = GPI_CONNECTING;
 
@@ -256,42 +201,37 @@ gpiConnect(
 #endif
 
 	// Get the nick, uniquenick, email, and password.
-	/////////////////////////////////////////////////
 	strzcpy(iconnection->nick, nick, GP_NICK_LEN);
 	strzcpy(iconnection->uniquenick, uniquenick, GP_UNIQUENICK_LEN);
 	strzcpy(iconnection->email, email, GP_EMAIL_LEN);
 	strzcpy(iconnection->password, password, GP_PASSWORD_LEN);
 
 #ifdef GSI_UNICODE
-	// Create the _W version in addition
-	UTF8ToUCS2StringLen(iconnection->nick, iconnection->nick_W, GP_NICK_LEN);
-	UTF8ToUCS2StringLen(iconnection->uniquenick, iconnection->uniquenick_W, GP_UNIQUENICK_LEN);
-	UTF8ToUCS2StringLen(iconnection->email, iconnection->email_W, GP_EMAIL_LEN);
-	UTF8ToUCS2StringLen(iconnection->password, iconnection->password_W, GP_PASSWORD_LEN);
+	// Create the _W version in addition.
+	UTF8ToUCSStringLen(iconnection->nick, iconnection->nick_W, GP_NICK_LEN);
+	UTF8ToUCSStringLen(iconnection->uniquenick, iconnection->uniquenick_W, GP_UNIQUENICK_LEN);
+	UTF8ToUCSStringLen(iconnection->email, iconnection->email_W, GP_EMAIL_LEN);
+	UTF8ToUCSStringLen(iconnection->password, iconnection->password_W, GP_PASSWORD_LEN);
 #endif
 
 	// Lowercase the email.
-	///////////////////////
 	_strlwr(iconnection->email);
 
 #ifdef GSI_UNICODE
-	// Update the UCS2 version (emails are ASCII anyhow so lowercasing didn't data)
-	AsciiToUCS2String(iconnection->email, iconnection->email_W);
+	// Update the UCS2 version (emails are ASCII anyhow so lowercasing didn't data).
+	AsciiToUCSString(iconnection->email, iconnection->email_W);
 #endif
 
 	// Create a connect operation data struct.
-	//////////////////////////////////////////
 	data = (GPIConnectData *)gsimalloc(sizeof(GPIConnectData));
 	if(data == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 	memset(data, 0, sizeof(GPIConnectData));
 
 	// Check for new user.
-	//////////////////////
 	data->newuser = newuser;
 
 	// Store pre-auth data.
-	///////////////////////
 	if(authtoken[0] && partnerchallenge[0])
 	{
 		strzcpy(data->authtoken, authtoken, GP_AUTHTOKEN_LEN);
@@ -299,16 +239,13 @@ gpiConnect(
 	}
 
 	// Store cdkey if we have one.
-	//////////////////////////////
 	if(cdkey)
 		strzcpy(data->cdkey, cdkey, GP_CDKEY_LEN);
 
 	// Add the operation to the list.
-	/////////////////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_CONNECT, data, &operation, blocking, callback, param));
 
 	// Start it.
-	////////////
 	result = gpiStartConnect(connection, operation);
 	if(result != GP_NO_ERROR)
 	{
@@ -319,7 +256,6 @@ gpiConnect(
 	}
 
 	// Process it if blocking.
-	//////////////////////////
 	if(operation->blocking)
 		CHECK_RESULT(gpiProcess(connection, operation->id));
 
@@ -342,11 +278,9 @@ gpiSendLogin(GPConnection * connection,
 	char * user;
 
 	// Construct the user challenge.
-	////////////////////////////////
 	randomString(data->userChallenge, sizeof(data->userChallenge) - 1);
 
 	// Hash the password.
-	/////////////////////
 	if(data->partnerchallenge[0])
 		passphrase = data->partnerchallenge;
 	else
@@ -358,7 +292,6 @@ gpiSendLogin(GPConnection * connection,
 	GSMD5Digest((unsigned char*)passphrase, (unsigned int)passphraseLen, data->passwordHash);
 
 	// Construct the user.
-	//////////////////////
 	if(iconnection->partnerID != GP_PARTNERID_GAMESPY)
 	{
 		sprintf(partnerBuffer, "%d@", iconnection->partnerID);
@@ -383,7 +316,6 @@ gpiSendLogin(GPConnection * connection,
 	}
 
 	// Construct the response.
-	//////////////////////////
 	sprintf(buffer, "%s%s%s%s%s%s",
 		data->passwordHash,
 		"                                                ",
@@ -394,21 +326,18 @@ gpiSendLogin(GPConnection * connection,
 	GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), response);
 
 	// Check for an existing profile.
-	/////////////////////////////////
 	if(iconnection->infoCaching)
 	{
 		gpiFindProfileByUser(connection, iconnection->nick, iconnection->email, &profile);
 		if(profile != NULL)
 		{
 			// Get the userid and profileid.
-			////////////////////////////////
 			iconnection->userid = profile->userId;
 			iconnection->profileid = profile->profileId;
 		}
 	}
 
 	// Construct the outgoing message.
-	//////////////////////////////////
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\login\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\challenge\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, data->userChallenge);
@@ -473,12 +402,11 @@ gpiSendNewuser(
 	size_t i;
 	const int useAlternateEncoding = 1;
 
-	// Encrypt the password (xor with random values)
+	// Encrypt the password (xor with random values).
 	char passwordenc[GP_PASSWORDENC_LEN];
 	gpiEncodeString(iconnection->password, passwordenc);
 
 	// Construct the outgoing message.
-	//////////////////////////////////
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\newuser\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\email\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, iconnection->email);
@@ -496,7 +424,7 @@ gpiSendNewuser(
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, iconnection->uniquenick);
 	if(data->cdkey[0])
 	{
-		// Encrypt the cdkey (xor with random values)
+		// Encrypt the cdkey (xor with random values).
 		char cdkeyxor[GP_CDKEY_LEN];
 		char cdkeyenc[GP_CDKEYENC_LEN];
 		size_t cdkeylen = strlen(data->cdkey);
@@ -504,13 +432,13 @@ gpiSendNewuser(
 		Util_RandSeed((unsigned long)GP_XOR_SEED);
 		for (i=0; i < cdkeylen; i++)
 		{
-			// XOR each character with the next rand
+			// XOR each character with the next rand.
 			char aRand = (char)Util_RandInt(0, 0xFF);
 			cdkeyxor[i] = (char)(data->cdkey[i] ^ aRand);
 		}
 		cdkeyxor[i] = '\0';
 
-		// Base 64 it (printable chars only)
+		// Base 64 it (printable chars only).
 		B64Encode(cdkeyxor, cdkeyenc, (int)cdkeylen, useAlternateEncoding);
 
 		//gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\cdkey\\");
@@ -545,74 +473,59 @@ gpiProcessConnect(
 	char * user;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPIFalse))
 	{
 		// Is this a deleted profile?
-		/////////////////////////////
 		if((iconnection->errorCode == GP_LOGIN_PROFILE_DELETED) && iconnection->profileid)
 		{
 			// Remove this profile object.
-			//////////////////////////////
 			gpiRemoveProfileByID(connection, iconnection->profileid);
 
 			// If we have the profileid/userid cached, lose them.
-			/////////////////////////////////////////////////////
 			iconnection->userid = 0;
 			iconnection->profileid = 0;
 		}
 		// Check for creating an existing profile.
-		//////////////////////////////////////////
 		else if(iconnection->errorCode == GP_NEWUSER_BAD_NICK)
 		{
 			// Store the pid.
-			/////////////////
 			if(gpiValueForKey(input, "\\pid\\", buffer, sizeof(buffer)))
 				iconnection->profileid = atoi(buffer);
 		}
 
 		// Call the callbacks.
-		//////////////////////
 		CallbackFatalError(connection, GP_SERVER_ERROR, iconnection->errorCode, iconnection->errorString);
 	}
 
 	// Get a pointer to the data.
-	/////////////////////////////
 	data = (GPIConnectData*)operation->data;
 
 	switch(operation->state)
 	{
 	case GPI_CONNECTING:
 		// This should be \lc\1.
-		////////////////////////
 		if(strncmp(input, "\\lc\\1", 5) != 0)
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 		// Get the server challenge.
-		////////////////////////////
 		if(!gpiValueForKey(input, "\\challenge\\", data->serverChallenge, sizeof(data->serverChallenge)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 		// Check if this is a new user.
-		///////////////////////////////
 		if(data->newuser)
 		{
 			// Send a new user message.
-			///////////////////////////
 			CHECK_RESULT(gpiSendNewuser(connection, data));
 
 			// Update the operation's state.
-			////////////////////////////////
 			operation->state = GPI_REQUESTING;
 		}
 		else
 		{
 			// Send a login message.
-			////////////////////////
 			CHECK_RESULT(gpiSendLogin(connection, data));
 
 			// Update the operation's state.
-			////////////////////////////////
 			operation->state = GPI_LOGIN;
 		}
 
@@ -620,69 +533,57 @@ gpiProcessConnect(
 
 	case GPI_REQUESTING:
 		// This should be \nur\.
-		////////////////////////
 		if(strncmp(input, "\\nur\\", 5) != 0)
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 		// Get the userid.
-		//////////////////
 		if(!gpiValueForKey(input, "\\userid\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 		iconnection->userid = atoi(buffer);
 
 		// Get the profileid.
-		/////////////////////
 		if(!gpiValueForKey(input, "\\profileid\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 		iconnection->profileid = atoi(buffer);
 
 		// Send a login request.
-		////////////////////////
 		CHECK_RESULT(gpiSendLogin(connection, data));
 
 		// Update the operation's state.
-		////////////////////////////////
 		operation->state = GPI_LOGIN;
 
 		break;
 		
 	case GPI_LOGIN:
 		// This should be \lc\2.
-		////////////////////////
 		if(strncmp(input, "\\lc\\2", 5) != 0)
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 		// Get the sesskey.
-		///////////////////
 		if(!gpiValueForKey(input, "\\sesskey\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 		iconnection->sessKey = atoi(buffer);
 
 		// Get the userid.
-		//////////////////
 		if(!gpiValueForKey(input, "\\userid\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 		iconnection->userid = atoi(buffer);
 
 		// Get the profileid.
-		/////////////////////
 		if(!gpiValueForKey(input, "\\profileid\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 		iconnection->profileid = atoi(buffer);
 
 		// Get the uniquenick.
-		//////////////////////
 		if(!gpiValueForKey(input, "\\uniquenick\\", uniquenick, sizeof(uniquenick)))
 			uniquenick[0] = '\0';
 
 		// Get the loginticket.
-		//////////////////////
 		if(!gpiValueForKey(input, "\\lt\\", iconnection->loginTicket, sizeof(iconnection->loginTicket)))
 			iconnection->loginTicket[0] = '\0';
 
 
 		// Construct the user.
-		//////////////////////
 		if(iconnection->partnerID != GP_PARTNERID_GAMESPY)
 		{
 			sprintf(partnerBuffer, "%d@", iconnection->partnerID);
@@ -707,7 +608,6 @@ gpiProcessConnect(
 		}
 
 		// Construct the check.
-		///////////////////////
 		sprintf(buffer, "%s%s%s%s%s%s",
 			data->passwordHash,
 			"                                                ",
@@ -718,17 +618,14 @@ gpiProcessConnect(
 		GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), check);
 
 		// Get the proof.
-		/////////////////
 		if(!gpiValueForKey(input, "\\proof\\", buffer, sizeof(buffer)))
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexepected data was received from the server.");
 
 		// Check the server authentication.
-		///////////////////////////////////
 		if(memcmp(check, buffer, 32) != 0)
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_LOGIN_SERVER_AUTH_FAILED, "Could not authenticate server.");
 
 		// Add the local profile to the list.
-		/////////////////////////////////////
 		if(iconnection->infoCaching)
 		{
 			profile = gpiProfileListAdd(connection, iconnection->profileid);
@@ -737,11 +634,9 @@ gpiProcessConnect(
 		}
 
 		// Set the connect state.
-		/////////////////////////
 		iconnection->connectState = GPI_CONNECTED;
 
 		// Call the connect-response callback.
-		//////////////////////////////////////
 		callback = operation->callback;
 		if(callback.callback != NULL)
 		{
@@ -756,18 +651,16 @@ gpiProcessConnect(
 #ifndef GSI_UNICODE
 			strzcpy(arg->uniquenick, uniquenick, GP_UNIQUENICK_LEN);
 #else
-			UTF8ToUCS2StringLen(uniquenick, arg->uniquenick, GP_UNIQUENICK_LEN);
+			UTF8ToUCSStringLen(uniquenick, arg->uniquenick, GP_UNIQUENICK_LEN);
 #endif
 			
 			CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, 0));
 		}
 
 		// This operation is complete.
-		//////////////////////////////
 		gpiRemoveOperation(connection, operation);
 
 		// Get the local profile's info.
-		////////////////////////////////
 #if 0
 		gpiAddOperation(connection, GPI_GET_INFO, NULL, &operation, GP_NON_BLOCKING, NULL, NULL);
 		gpiSendGetInfo(connection, iconnection->profileid, operation->id);
@@ -775,9 +668,8 @@ gpiProcessConnect(
 
 
 #ifdef _PS3
-		// We just connected, so setup buddy sync && start NP init
-        // For future, we can limit syncs by setting flags to turn on/off here
-		//////////////////////////////////////////////////////////////////////
+		// We just connected, so setup buddy sync && start NP init.
+        // For future, we can limit syncs by setting flags to turn on/off here.
 		iconnection->npPerformBuddySync = gsi_true;
         iconnection->npPerformBlockSync = gsi_true;
 		iconnection->loginTime = current_time();
@@ -804,21 +696,17 @@ gpiCheckConnect(
 	int state;
 	
 	// Check if the connection is completed.
-	////////////////////////////////////////
 	CHECK_RESULT(gpiCheckSocketConnect(connection, iconnection->cmSocket, &state));
 	
 	// Check for a failed attempt.
-	//////////////////////////////
 	if(state == GPI_DISCONNECTED)
 		CallbackFatalError(connection, GP_SERVER_ERROR, GP_LOGIN_CONNECTION_FAILED, "The server has refused the connection.");
 
 	// Check if not finished connecting.
-	////////////////////////////////////
 	if(state == GPI_NOT_CONNECTED)
 		return GP_NO_ERROR;
 	
 	// We're now negotiating the connection.
-	////////////////////////////////////////
 	GS_ASSERT(state == GPI_CONNECTED);
 	iconnection->connectState = GPI_NEGOTIATING;
 
@@ -828,20 +716,16 @@ gpiCheckConnect(
 		int i;
 
 		// Version.
-		///////////
 		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, 0);
 
 		// Port.
-		////////
 		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, (GPI_CONNECTION_MANAGER_PORT >> 8) & 0xFF);
 		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, GPI_CONNECTION_MANAGER_PORT & 0xFF);
 
 		// Hostname length.
-		///////////////////
 		gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, (char)hostnameLen);
 
 		// Hostname.
-		////////////
 		for(i = 0; i < hostnameLen; i++)
 		{
 			gpiAppendCharToBuffer(connection, &iconnection->outputBuffer, GPConnectionManagerHostname[i]);
@@ -864,7 +748,6 @@ gpiDisconnectCleanupProfile(
 
     // Even if we cache buddy/block info, free it up to get rid of mem
     // leaks, just don't remove the profile until we save the cache.
-    //////////////////////////////////////////////////////////////////
 	if(profile->buddyStatus)
 	{
         profile->buddyOrBlockCache = gsi_true;
@@ -918,31 +801,25 @@ gpiDisconnect(
 	GPIBool connClosed;
 
 	// Check if we're already disconnected. 05.15.00
-	///////////////////////////////////////
 	if(iconnection->connectState == GPI_DISCONNECTED)
 		return;
 
 	// Skip most of this stuff if we never actually connected. 05.16.00
-	//////////////////////////////////////////////////////////
 	if(iconnection->connectState != GPI_NOT_CONNECTED)
 	{
 		// Are we connected?
-		////////////////////
 		if(tellServer && (iconnection->connectState == GPI_CONNECTED))
 		{
 			// Send the disconnect.
-			///////////////////////
 			gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\logout\\\\sesskey\\");
 			gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
 			gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
 		}
 
 		// Always flush remaining messages. 05.16.00
-		///////////////////////////////////
 		gpiSendFromBuffer(connection, iconnection->cmSocket, &iconnection->outputBuffer, &connClosed, GPITrue, "CM");
 
 		// Cleanup the connection.
-		//////////////////////////
 		if(iconnection->cmSocket != INVALID_SOCKET)
 		{
 			shutdown(iconnection->cmSocket, 2);
@@ -951,16 +828,14 @@ gpiDisconnect(
 		}
 
 		// We're disconnected.
-		//////////////////////
 		iconnection->connectState = GPI_DISCONNECTED;
 
 		// Don't keep the userid/profileid.
-		///////////////////////////////////
 		iconnection->userid = 0;
 		iconnection->profileid = 0;
 	}
 	
-	// should be shutdown regardless of gp connection to server
+	// Should be shutdown regardless of gp connection to server.
 	if(gsUdpEngineIsInitialized())
 	{
 		gsUdpEngineRemoveMsgHandler(iconnection->mHeader);
@@ -969,7 +844,6 @@ gpiDisconnect(
 	}
 
 	// freeclear all the memory.
-	///////////////////////
 	freeclear(iconnection->socketBuffer.buffer);
 	freeclear(iconnection->inputBuffer);
 	freeclear(iconnection->outputBuffer.buffer);
@@ -987,8 +861,11 @@ gpiDisconnect(
 	iconnection->peerList = NULL;
 	
 	// Cleanup buddies.
-	// This is not optimal - because we can't continue the mapping
-	// after freeing a profile, we need to start it all over again.
-	///////////////////////////////////////////////////////////////
 	while(!gpiProfileMap(connection, gpiDisconnectCleanupProfile, NULL))  { };
+
+#ifdef _PS3
+	// Destroy NP.
+	if (iconnection->npInitialized)
+		gpiDestroyNpBasic(connection);
+#endif
 }

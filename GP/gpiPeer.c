@@ -2,20 +2,19 @@
 // File:	gpiPeer.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "gpi.h"
 
 //FUNCTIONS
-///////////
 static GPResult
 gpiProcessPeerInitiatingConnection(
   GPConnection * connection,
@@ -39,18 +38,15 @@ gpiProcessPeerInitiatingConnection(
 	if (peer->state == GPI_PEER_DISCONNECTED || peer->state == GPI_PEER_NOT_CONNECTED)
 		return GP_NETWORK_ERROR;
 	// Check the state.
-	///////////////////
 	switch(peer->state)
 	{
 		case GPI_PEER_GETTING_SIG:
 			// Do nothing - we're waiting for getinfo to get the sig.
-			/////////////////////////////////////////////////////////
 			break;
 
 		case GPI_PEER_GOT_SIG:
 		{
 			// Start the connect.
-			/////////////////////
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_State, GSIDebugLevel_Verbose, "Got the peer signature for profileid: %d\n", peer->profile);
 			CHECK_RESULT(gpiPeerStartConnect(connection, peer));
 
@@ -59,7 +55,6 @@ gpiProcessPeerInitiatingConnection(
 		case GPI_PEER_CONNECTING:
 		{	
 			// Check if the connect finished.
-			/////////////////////////////////
 			gsUdpEngineGetPeerState(peer->ip, peer->port, &aPeerState);
 
 			if(aPeerState == GS_UDP_PEER_CONNECTED)
@@ -68,12 +63,10 @@ gpiProcessPeerInitiatingConnection(
 				GPIBool freePeerSig = GPITrue;
 
 				// Get the profile object.
-				//////////////////////////
 				if(!gpiGetProfile(connection, peer->profile, &pProfile))
 					Error(connection, GP_NETWORK_ERROR, "Error connecting to a peer.");
 
 				// Send the auth.
-				/////////////////
 				gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\auth\\");
 				gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\pid\\");
 				gpiAppendIntToBuffer(connection, &peer->outputBuffer, iconnection->profileid);
@@ -84,14 +77,12 @@ gpiProcessPeerInitiatingConnection(
 				gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\final\\");
 
 				// Are there any other peers still connecting?
-				//////////////////////////////////////////////
 				for(pcurr = iconnection->peerList ; pcurr != NULL ; pcurr = pcurr->pnext)
 					if((pcurr->profile == peer->profile) && (pcurr != peer))
 						if(pcurr->state <= GPI_PEER_CONNECTING)
 							freePeerSig = GPIFalse;
 
 				// freeclear it?
-				///////////
 				if(freePeerSig)
 				{
 					freeclear(pProfile->peerSig);
@@ -100,7 +91,6 @@ gpiProcessPeerInitiatingConnection(
 				}
 
 				// Update the state.
-				////////////////////
 				peer->state = GPI_PEER_WAITING;
 			}
 			
@@ -109,7 +99,6 @@ gpiProcessPeerInitiatingConnection(
 		case GPI_PEER_WAITING:
 		{
 			// Check for a final.
-			/////////////////////
 			if (peer->inputBuffer.buffer)
 				str = strstr(peer->inputBuffer.buffer, "\\final\\");
 			if(str != NULL)
@@ -118,38 +107,31 @@ gpiProcessPeerInitiatingConnection(
 				str += 7;
 
 				// Was it rejected?
-				///////////////////
 				if(strncmp(peer->inputBuffer.buffer, "\\anack\\", 7) == 0)
 				{
 					// Rejected.
-					////////////
 					peer->nackCount++;
 
 					// Is this more than once?
-					//////////////////////////
 					if(peer->nackCount > 1)
 					{
 						// we shouldn't reach this case unless there is a problem with 
 						// the server when getting a buddy's signature
 
 						// Give up already.
-						///////////////////
 						Error(connection, GP_NETWORK_ERROR, "Error getting buddy authorization.");
 					}
 
 					// Try getting the latest sig.
-					//////////////////////////////
 					CHECK_RESULT(gpiPeerGetSig(connection, peer));
 				}
 				else if(strncmp(peer->inputBuffer.buffer, "\\aack\\", 6) != 0)
 				{
 					// Unknown message.
-					///////////////////
 					Error(connection, GP_NETWORK_ERROR, "Error parsing buddy message.");
 				}
 
 				// The connection has been established.
-				///////////////////////////////////////
 				peer->state = GPI_PEER_CONNECTED;
 				peer->inputBuffer.len = 0;
 			}
@@ -161,7 +143,6 @@ gpiProcessPeerInitiatingConnection(
 	}
 
 	// Send stuff that needs to be sent.
-	////////////////////////////////////
 	if(peer->outputBuffer.len > 0)
 	{
 		//result = gpiSendFromBuffer(connection, peer->sock, &peer->outputBuffer, &connClosed, GPITrue, "PR");
@@ -192,18 +173,15 @@ gpiProcessPeerAcceptingConnection(
 	char buffer[256];
 
 	// Check the state.
-	///////////////////
 	GS_ASSERT(peer->state == GPI_PEER_WAITING);
 	if (peer->state != GPI_PEER_WAITING)
 		return GP_NETWORK_ERROR;
 
 	// Read any pending info.
-	/////////////////////////
 	//CHECK_RESULT(gpiRecvToBuffer(connection, peer->sock, &peer->inputBuffer, &len, &connClosed, "PR"));
 	gsUdpEngineGetPeerState(peer->ip, peer->port, &aPeerState);
 
 	// Check for a closed connection.
-	/////////////////////////////////
 	if(aPeerState == GS_UDP_PEER_CLOSED)
 	{
 		peer->state = GPI_PEER_DISCONNECTED;
@@ -211,7 +189,6 @@ gpiProcessPeerAcceptingConnection(
 	}
 
 	// Check for a final.
-	/////////////////////
 	str = strstr(peer->inputBuffer.buffer, "\\final\\");
 	if(str != NULL)
 	{
@@ -219,11 +196,9 @@ gpiProcessPeerAcceptingConnection(
 		str += 7;
 
 		// Is it an auth?
-		/////////////////
 		if(strncmp(peer->inputBuffer.buffer, "\\auth\\", 6) == 0)
 		{
 			// Get the pid.
-			///////////////
 			if(!gpiValueForKey(peer->inputBuffer.buffer, "\\pid\\", intValue, sizeof(intValue)))
 			{
 				peer->state = GPI_PEER_DISCONNECTED;
@@ -232,7 +207,6 @@ gpiProcessPeerAcceptingConnection(
 			pid = atoi(intValue);
 
 			// Get the nick.
-			////////////////
 			if(!gpiValueForKey(peer->inputBuffer.buffer, "\\nick\\", nick, sizeof(nick)))
 			{
 				peer->state = GPI_PEER_DISCONNECTED;
@@ -240,7 +214,6 @@ gpiProcessPeerAcceptingConnection(
 			}
 
 			// Get the sig.
-			///////////////
 			if(!gpiValueForKey(peer->inputBuffer.buffer, "\\sig\\", sig, sizeof(sig)))
 			{
 				peer->state = GPI_PEER_DISCONNECTED;
@@ -248,7 +221,6 @@ gpiProcessPeerAcceptingConnection(
 			}
 
 			// Compute what the sig should be.
-			//////////////////////////////////
 			sprintf(buffer, "%s%d%d",
 				iconnection->password,
 				iconnection->profileid,
@@ -256,11 +228,9 @@ gpiProcessPeerAcceptingConnection(
 			GSMD5Digest((unsigned char *)buffer, (unsigned int)strlen(buffer), sigCheck);
 
 			// Check the sig.
-			/////////////////
 			if(strcmp(sig, sigCheck) != 0)
 			{
 				// Bad sig.
-				///////////
 				gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\anack\\");
 				gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\final\\");
 
@@ -270,7 +240,6 @@ gpiProcessPeerAcceptingConnection(
 			}
 
 			// Send an ack.
-			///////////////
 			gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\aack\\");
 			gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\final\\");
 			
@@ -280,13 +249,11 @@ gpiProcessPeerAcceptingConnection(
 		else
 		{
 			// Unrecognized command.
-			////////////////////////
 			peer->state = GPI_PEER_DISCONNECTED;
 			return GP_NO_ERROR;
 		}
 		
 		// Update the buffer length.
-		////////////////////////////
 		peer->inputBuffer.len = 0;
 	}
 
@@ -307,20 +274,16 @@ gpiPeerSendMessages(
 	if (!peer)
 		return GP_NETWORK_ERROR;
 	// Only send messages if there's nothing waiting in the output buffer.
-	//////////////////////////////////////////////////////////////////////
 	if(peer->outputBuffer.len)
 		return GP_NO_ERROR;
 
 	// Send outgoing messages.
-	//////////////////////////
 	while(ArrayLength(peer->messages))
 	{
 		// Get the first message.
-		/////////////////////////
 		message = (GPIMessage *)ArrayNth(peer->messages, 0);
 
 		// Send as much as possible.
-		////////////////////////////
 		//result = gpiSendFromBuffer(connection, peer->sock, &message->buffer, &connClosed, GPIFalse, "PR");
 		result = gpiSendBufferToPeer(connection, peer->ip, peer->port, &message->buffer, &connClosed, GPIFalse);
 		if(connClosed || (result != GP_NO_ERROR))
@@ -330,12 +293,10 @@ gpiPeerSendMessages(
 		}
 
 		// Did we not send it all?
-		//////////////////////////
 		if(message->buffer.pos != message->buffer.len)
 			break;
 
 		// Remove the message.
-		//////////////////////
 		ArrayDeleteAt(peer->messages, 0);
 	}
 
@@ -362,7 +323,6 @@ gpiProcessPeerConnected(
 	if (!peer)
 		return GP_NETWORK_ERROR;
 	// Send stuff.
-	//////////////
 	if(peer->outputBuffer.len)
 	{
 		//result = gpiSendFromBuffer(connection, peer->sock, &peer->outputBuffer, &connClosed, GPITrue, "PR");
@@ -375,7 +335,6 @@ gpiProcessPeerConnected(
 	}
 
 	// Send outgoing messages.
-	//////////////////////////
 	if(!peer->outputBuffer.len)
 	{
 		CHECK_RESULT(gpiPeerSendMessages(connection, peer));
@@ -384,23 +343,19 @@ gpiProcessPeerConnected(
 	}
 
 	// Read messages.
-	/////////////////
 	if(peer->inputBuffer.len > 0)
 	{
 		peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
 	}
 
 	// Grab the message header.
-	///////////////////////////
 	do
 	{
 		// Read a message.
-		//////////////////
 		CHECK_RESULT(gpiReadMessageFromBuffer(connection, &peer->inputBuffer, &buffer, &type, &messageLen));
 		if(buffer != NULL)
 		{
 			// Got a message!
-			/////////////////
 			switch(type)
 			{
 			case GPI_BM_MESSAGE:
@@ -416,7 +371,7 @@ gpiProcessPeerConnected(
 #ifndef GSI_UNICODE
 					arg->message = goastrdup(buffer);
 #else
-					arg->message = UTF8ToUCS2StringAlloc(buffer);
+					arg->message = UTF8ToUCSStringAlloc(buffer);
 #endif
 					arg->date = (unsigned int)time(NULL);
 					CHECK_RESULT(gpiAddCallback(connection, callback, arg, NULL, GPI_ADD_MESSAGE));
@@ -436,7 +391,7 @@ gpiProcessPeerConnected(
 #ifndef GSI_UNICODE
 					arg->message = goastrdup(buffer);
 #else
-					arg->message = UTF8ToUCS2StringAlloc(buffer);
+					arg->message = UTF8ToUCSStringAlloc(buffer);
 #endif
 					arg->date = (unsigned int)time(NULL);
 					CHECK_RESULT(gpiAddCallback(connection, callback, arg, NULL, GPI_ADD_MESSAGE));
@@ -445,7 +400,6 @@ gpiProcessPeerConnected(
 
 			case GPI_BM_PING:
 				// Send back a pong.
-				////////////////////
 				gpiSendBuddyMessage(connection, peer->profile, GPI_BM_PONG, "1", 0, NULL);
 
 				break;
@@ -453,7 +407,6 @@ gpiProcessPeerConnected(
 #ifndef NOFILE
 			case GPI_BM_PONG:
 				// Lets the transfers handle this.
-				//////////////////////////////////
 				gpiTransfersHandlePong(connection, peer->profile, peer);
 				break;
 #endif
@@ -463,7 +416,6 @@ gpiProcessPeerConnected(
 			case GPI_BM_KEYS_REPLY:
 				CHECK_RESULT(gpiBuddyHandleKeyReply(connection, peer, buffer));
 				// Let the keys request reply handler take care of this.
-				////////////////////////////////////////////////////////
 				break;
 			case GPI_BM_FILE_SEND_REQUEST:
 			case GPI_BM_FILE_SEND_REPLY:
@@ -475,7 +427,6 @@ gpiProcessPeerConnected(
 			case GPI_BM_FILE_TRANSFER_CANCEL:
 			case GPI_BM_FILE_TRANSFER_KEEPALIVE:
 				// Handle a transfer protocol message.
-				//////////////////////////////////////
 				gpiHandleTransferMessage(connection, peer, type, peer->inputBuffer.buffer, buffer, messageLen);
 
 
@@ -486,7 +437,6 @@ gpiProcessPeerConnected(
 			}
 
 			// Remove it from the buffer.
-			/////////////////////////////
 			gpiClipBufferToPosition(connection, &peer->inputBuffer);
 		}
 	}
@@ -549,13 +499,11 @@ gpiProcessPeer(
 	GPResult result = GP_NO_ERROR;
 	
 	// This state should never get out of initialization.
-	/////////////////////////////////////////////////////
 	GS_ASSERT(peer->state != GPI_PEER_NOT_CONNECTED);
 	if (peer->state == GPI_PEER_NOT_CONNECTED)
 		return GP_NETWORK_ERROR;
 
 	// If we're not connected yet.
-	//////////////////////////////
 	if(peer->state != GPI_PEER_CONNECTED)
 	{
 		if(peer->initiated)
@@ -565,7 +513,6 @@ gpiProcessPeer(
 	}
 
 	// If we're connected.
-	//////////////////////
 	if((result == GP_NO_ERROR) && (peer->state == GPI_PEER_CONNECTED))
 	{
 		result = gpiProcessPeerConnected(connection, peer);
@@ -583,7 +530,6 @@ gpiDestroyPeer(
 {
 #ifndef NOFILE
 	// Cleanup any transfers that use this peer.
-	////////////////////////////////////////////
 	gpiTransferPeerDestroyed(connection, peer);
 #endif
 
@@ -619,7 +565,6 @@ gpiRemovePeer(
 	if (iconnection->peerList == NULL)
 		return;
 	// Check if this is the first peer.
-	///////////////////////////////////
 	if(iconnection->peerList == peer)
 	{
 		iconnection->peerList = peer->pnext;
@@ -627,13 +572,11 @@ gpiRemovePeer(
 	else
 	{
 		// Find the previous peer.
-		//////////////////////////
 		for(pprev = iconnection->peerList ; pprev->pnext != peer ; pprev = pprev->pnext)
 		{
 			if(pprev->pnext == NULL)
 			{
 				// Can't find this peer in the list!
-				////////////////////////////////////
 				GS_FAIL();
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_HotError,
 					"Tried to remove peer not in list.");
@@ -644,20 +587,16 @@ gpiRemovePeer(
 	}
 
 	// Check for pending messages.
-	//////////////////////////////
 	while(ArrayLength(peer->messages))
 	{
 		// Get the next message.
-		////////////////////////
 		message = (GPIMessage *)ArrayNth(peer->messages, 0);
 
 		// Don't forward protocol messages.
-		///////////////////////////////////
 		if(message->type < 100)
 			gpiSendServerBuddyMessage(connection, peer->profile, message->type, message->buffer.buffer + message->start);
 
 		// Remove the message.
-		//////////////////////
 		ArrayDeleteAt(peer->messages, 0);
 	}
 
@@ -669,52 +608,18 @@ GPResult gpiProcessPeers(GPConnection *connection)
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GPIPeer * nextPeer;
 	GPIPeer * peer;
-	//SOCKET incoming;
 	GPResult result;
 
-	/*
-	// Check for incoming peer connections.
-	///////////////////////////////////////
-	if(iconnection->peerSocket != INVALID_SOCKET)
-	{
-		// Have to manually check if accept is possible since
-		// PS2 Insock only supports blocking sockets.
-		if (CanReceiveOnSocket(iconnection->peerSocket))
-		{
-			incoming = accept(iconnection->peerSocket, NULL, NULL);
-			if(incoming != INVALID_SOCKET)
-			{
-				// This is a new peer.
-				//////////////////////
-				peer = gpiAddPeer(connection, -1, GPIFalse);
-				if(peer)
-				{
-					peer->state = GPI_PEER_WAITING;
-					peer->sock = incoming;
-					SetSockBlocking(incoming, 0);
-					gpiSetPeerSocketSizes(peer->sock);
-				}
-				else
-				{
-					closesocket(incoming);
-				}
-			}
-		}
-	}
-	*/
 	gsUdpEngineThink();
 
 	// Go through the list of peers.
-	/////////////////////////////////
 	for(peer = iconnection->peerList ; peer != NULL ; peer = nextPeer)
 	{
 		// Store the next peer.
-		///////////////////////
 		nextPeer = peer->pnext;
 		if(peer->state == GPI_PEER_DISCONNECTED)
 		{
 			// Remove it.
-			/////////////
 			//gsDebug
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_Notice, "Peer disconnected, pid: %d", peer->profile);
 			gpiRemovePeer(connection, peer);
@@ -722,15 +627,12 @@ GPResult gpiProcessPeers(GPConnection *connection)
 		else
 		{
 			// Process the peer.
-			////////////////////
 			result = gpiProcessPeer(connection, peer);
 
 			// Check for a disconnection or a timeout.
-			//////////////////////////////////////////
 			if((peer->state == GPI_PEER_DISCONNECTED) || (result != GP_NO_ERROR) || (time(NULL) > peer->timeout))
 			{
 				// Remove it.
-				/////////////
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_Notice, "Peer disconnected, pid: %d", peer->profile);
 				gpiRemovePeer(connection, peer);
 			}
@@ -748,15 +650,12 @@ GPIPeer * gpiGetPeerByProfile(const GPConnection * connection,
 	GPIPeer * pcurr;
 
 	// Go through the list of peers.
-	////////////////////////////////
 	for(pcurr = iconnection->peerList ; pcurr != NULL ; pcurr  = pcurr->pnext)
 	{
 		// Check for a match.
-		/////////////////////
 		if(pcurr->profile == profileid)
 		{
 			// Got it.
-			//////////
 			return pcurr;
 		}
 	}
@@ -777,15 +676,12 @@ GPIPeer * gpiGetPeerByAddr(const GPConnection *connection,
 	if (!ip && !port)
 		return NULL;
 	// Go through the list of peers.
-	////////////////////////////////
 	for(pcurr = iconnection->peerList ; pcurr != NULL ; pcurr  = pcurr->pnext)
 	{
 		// Check for a match.
-		/////////////////////
 		if(pcurr->ip == ip && pcurr->port == port)
 		{
 			// Got it.
-			//////////
 			return pcurr;
 		}
 	}
@@ -823,7 +719,6 @@ gpiAddPeer(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// Create a new peer.
-	/////////////////////
 	peer = (GPIPeer *)gsimalloc(sizeof(GPIPeer));
 	if(peer == NULL)
 		return NULL;
@@ -851,15 +746,12 @@ gpiPeerGetSig(
 	GPIOperation * operation;
 
 	// Start a get info operation to get the sig.
-	/////////////////////////////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_GET_INFO, NULL, &operation, GP_NON_BLOCKING, NULL, NULL));
 
 	// Send the get info.
-	/////////////////////
 	CHECK_RESULT(gpiSendGetInfo(connection, peer->profile, operation->id));
 
 	// Set the state.
-	/////////////////
 	peer->state = GPI_PEER_GETTING_SIG;
 
 	return GP_NO_ERROR;
@@ -871,68 +763,19 @@ gpiPeerStartConnect(
   GPIPeer * peer
 )
 {
-	//int rcode;
-	//struct sockaddr_in address;
 	GPIProfile * profile;
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 	GSUdpErrorCode anError;
 
 	// Get the profile object.
-	//////////////////////////
 	if(!gpiGetProfile(connection, peer->profile, &profile))
 		Error(connection, GP_NETWORK_ERROR, "Error connecting to a peer.");
-
-	/*
-	// Create the socket.
-	/////////////////////
-	peer->sock = socket(AF_INET, SOCK_STREAM, 0);
-	if(peer->sock == INVALID_SOCKET)
-		CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error creating a socket.");
-
-	// Make it non-blocking.
-	////////////////////////
-	rcode = SetSockBlocking(peer->sock, 0);
-	if(rcode == 0)
-		CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error making a socket non-blocking.");
-
-	// Bind the socket.
-	///////////////////
-
-// BD: PS2 Insock has bug with binding to port 0
-// No sockets after the first will be able to bind
-
-	memset(&address, 0, sizeof(address));
-	address.sin_family = AF_INET;
-	rcode = bind(peer->sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
-	if (gsiSocketIsError(rcode))
-		CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error binding a socket.");
-
-	// Set the socket sizes.
-	////////////////////////
-	gpiSetPeerSocketSizes(peer->sock);
-	
-	// Connect the socket.
-	//////////////////////
-	memset(&address, 0, sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = profile->buddyStatus->ip;
-	address.sin_port = (gsi_u16)profile->buddyStatus->port;
-	rcode = connect(peer->sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
-	if (gsiSocketIsError(rcode))
-	{
-		int error = GOAGetLastError(peer->sock);
-		if((error != WSAEWOULDBLOCK) && (error != WSAEINPROGRESS) && (error != WSAETIMEDOUT) )
-		{
-			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error connecting a socket.");
-		}
-	}
-	*/
 
 	if (profile->buddyStatusInfo)
 	{
 		GSUdpPeerState aPeerState;
 		gsUdpEngineGetPeerState(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, &aPeerState);
-		if (aPeerState != GS_UDP_PEER_CONNECTED && aPeerState != GS_UDP_PEER_CONNECTING)
+		if (aPeerState != GS_UDP_PEER_CONNECTED || aPeerState != GS_UDP_PEER_CONNECTING)
 		{
 			anError = gsUdpEngineStartTalkingToPeer(profile->buddyStatusInfo->buddyIp , profile->buddyStatusInfo->buddyPort, 
 				iconnection->mHeader, GPI_PEER_TIMEOUT);
@@ -944,7 +787,6 @@ gpiPeerStartConnect(
 	}
 
 	// We're waiting for the connect to complete.
-	/////////////////////////////////////////////
 	peer->state = GPI_PEER_CONNECTING;
 
 	return GP_NO_ERROR;
@@ -970,19 +812,15 @@ gpiPeerAddMessage(
 		return GP_NETWORK_ERROR;
 
 	// Get the length.
-	//////////////////
 	len = (int)strlen(message);
 
 	// Clear the message.
-	/////////////////////
 	memset(&gpiMessage, 0, sizeof(GPIMessage));
 
 	// Copy the type.
-	/////////////////
 	gpiMessage.type = type;
 
 	// Copy the header to the buffer.
-	/////////////////////////////////
 	CHECK_RESULT(gpiAppendStringToBuffer(connection, &gpiMessage.buffer, "\\m\\"));
 	CHECK_RESULT(gpiAppendIntToBuffer(connection, &gpiMessage.buffer, type));
 	CHECK_RESULT(gpiAppendStringToBuffer(connection, &gpiMessage.buffer, "\\len\\"));
@@ -990,17 +828,14 @@ gpiPeerAddMessage(
 	CHECK_RESULT(gpiAppendStringToBuffer(connection, &gpiMessage.buffer, "\\msg\\\n"));
 
 	// Copy the message to the buffer.
-	//////////////////////////////////
 	gpiMessage.start = gpiMessage.buffer.len;
 	CHECK_RESULT(gpiAppendStringToBufferLen(connection, &gpiMessage.buffer, message, len));
 	CHECK_RESULT(gpiAppendCharToBuffer(connection, &gpiMessage.buffer, '\0'));
 
 	// Add it to the list.
-	//////////////////////
 	ArrayAppend(peer->messages, &gpiMessage);
 
 	// Reset the timeout.
-	/////////////////////
 	peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
 
 	return GP_NO_ERROR;
@@ -1026,7 +861,6 @@ gpiPeerStartTransferMessage(
 	tid.time = transferID->time;
 
 	// Start the message.
-	/////////////////////
 	sprintf(buffer, "\\m\\%d\\xfer\\%d %u %u", type, tid.profileid, tid.count, tid.time);
 
 	return gpiSendOrBufferString(connection, peer, buffer);
@@ -1046,7 +880,6 @@ gpiPeerFinishTransferMessage(
 		return GP_NETWORK_ERROR;
 
 	// Check the message.
-	/////////////////////
 	if(!message)
 		message = "";
 	
@@ -1054,17 +887,14 @@ gpiPeerFinishTransferMessage(
 		len = (int)strlen(message);
 
 	// Set the len and the message.
-	///////////////////////////////
 	sprintf(buffer, "\\len\\%d\\msg\\\n", len);
 	CHECK_RESULT(gpiSendOrBufferString(connection, peer, buffer));
 
 	// Copy the message to the buffer.
-	//////////////////////////////////
 	CHECK_RESULT(gpiSendOrBufferStringLenToPeer(connection, peer, message, len));
 	CHECK_RESULT(gpiSendOrBufferChar(connection, peer, '\0'));
 
 	// Reset the timeout.
-	/////////////////////
 	peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
 		
 	return GP_NO_ERROR;
@@ -1123,7 +953,6 @@ void gpiPeerMessageCallback(unsigned int ip, unsigned short port, unsigned char 
 	size = aPeer->inputBuffer.size;
 
 	// Check if the buffer needs to be resized.
-	///////////////////////////////////////////
 	if((int)messageLength > (size - writePos))
 	{
 		unsigned char *reallocedBuff;
@@ -1274,7 +1103,6 @@ void gpiPeerRemoveOp(GPIPeer *peer, GPIPeerOp *operation)
 			if(aPrevOp->next == NULL)
 			{
 				// Can't find this peer in the list!
-				////////////////////////////////////
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_HotError,
 					"Tried to remove peer operation not in list.");
 				return;

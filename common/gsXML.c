@@ -2,12 +2,14 @@
 // File:	gsXML.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsPlatform.h"
+#include "gsPlatformUtil.h"
 #include "gsMemory.h"
 #include "gsXML.h"
 #include "gsStringUtil.h"
@@ -123,14 +125,24 @@ static gsi_bool gsiXmlUtilGrowBuffer(GSIXmlStreamWriter * stream);
 #ifdef GSI_UNICODE
 static gsi_bool gsiXmlUtilWriteAsciiString(GSIXmlStreamWriter * stream, const gsi_char * str);
 #endif
-static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const unsigned short * str);
 
-
+#if defined(_UNIX) && defined(GSI_UNICODE)
+static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const gsi_u32 * str);
+#else
+static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const gsi_u16 * str);
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-static int gsUnicodeStringLen(const unsigned short * str)
+#if defined(_UNIX) && defined(GSI_UNICODE)
+static int gsUnicodeStringLen(const gsi_u32 * str)
 {
-	const unsigned short * end = str;
+	const gsi_u32 * end = str;
+#else
+	static int gsUnicodeStringLen(const gsi_u16 * str)
+	{
+		const gsi_u16 * end = str;
+#endif
+
 	while(*end++)
 		{}
 	return (end - str - 1);
@@ -1029,7 +1041,11 @@ gsi_bool gsXmlWriteAsciiStringElement(GSXmlStreamWriter stream, const char * nam
 #ifdef GSI_UNICODE
 	//if unicode, write as Ascii string, otherwise it is already in Ascii format
 	if ( gsi_is_false(gsXmlWriteOpenTag(stream, namespaceName, tag)) ||
-		 gsi_is_false(gsiXmlUtilWriteAsciiString(writer, value)) ||
+#ifndef ANDROID
+		 gsi_is_false(gsiXmlUtilWriteUnicodeString(writer, value)) ||
+#else
+		gsi_is_false(gsiXmlUtilWriteAsciiString(writer, value)) ||
+#endif
 		 gsi_is_false(gsXmlWriteCloseTag(stream, namespaceName, tag))
 		 )
 	{
@@ -1050,8 +1066,13 @@ gsi_bool gsXmlWriteAsciiStringElement(GSXmlStreamWriter stream, const char * nam
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+#if defined(_UNIX) && defined(GSI_UNICODE)
 gsi_bool gsXmlWriteUnicodeStringElement(GSXmlStreamWriter stream, const char * namespaceName, 
-										const char * tag, const unsigned short * value)
+										const char * tag, const gsi_u32 * value)
+#else
+gsi_bool gsXmlWriteUnicodeStringElement(GSXmlStreamWriter stream, const char * namespaceName,
+										const char * tag, const gsi_u16 * value)
+#endif
 {
 	GSIXmlStreamWriter * writer = (GSIXmlStreamWriter*)stream;
 	int i = 0;
@@ -1252,7 +1273,11 @@ gsi_bool gsXmlWriteAsciiStringElementNoNamespace(GSXmlStreamWriter stream, const
 #ifdef GSI_UNICODE
 	//if unicode, write as Ascii string, otherwise it is already in Ascii format
 	if ( gsi_is_false(gsXmlWriteOpenTagNoNamespace(stream, tag)) ||
+#ifndef ANDROID
+		gsi_is_false(gsiXmlUtilWriteUnicodeString(writer, value)) ||
+#else
 		gsi_is_false(gsiXmlUtilWriteAsciiString(writer, value)) ||
+#endif
 		gsi_is_false(gsXmlWriteCloseTagNoNamespace(stream, tag))
 		)
 	{
@@ -1617,7 +1642,7 @@ static gsi_bool gsiXmlUtilWriteAsciiString(GSIXmlStreamWriter * stream, const gs
 			return gsi_false; // OOM
 	}
 
-	UCS2ToAsciiString(str, &stream->mBuffer[stream->mLen]);
+	UCSToAsciiString(str, &stream->mBuffer[stream->mLen]);
 	stream->mLen += strLen;
 	return gsi_true;
 }
@@ -1625,7 +1650,11 @@ static gsi_bool gsiXmlUtilWriteAsciiString(GSIXmlStreamWriter * stream, const gs
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const unsigned short * str)
+#if defined(_UNIX) && defined(GSI_UNICODE)
+static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const gsi_u32 * str)
+#else
+static gsi_bool gsiXmlUtilWriteUnicodeString(GSIXmlStreamWriter * stream, const gsi_u16 * str)
+#endif
 {
 	int strLen = 0;
 	int pos = 0;
@@ -1784,7 +1813,6 @@ gsi_bool gsXmlMoveToSibling (GSXmlStreamReader stream, const char * matchtag)
 	GSIXmlStreamReader * reader = (GSIXmlStreamReader*)stream;
 	int i=0;
 
-	// Search root elements only
 	int curElemParent = -1;
 	GSIXmlElement * searchElem = NULL;
 	
@@ -1794,6 +1822,9 @@ gsi_bool gsXmlMoveToSibling (GSXmlStreamReader stream, const char * matchtag)
 		GSIXmlElement * curElem = (GSIXmlElement*)ArrayNth(reader->mElementArray, reader->mElemReadIndex);
 		curElemParent = curElem->mParentIndex;
 	}
+	else
+		// otherwise search root elements only
+		curElemParent = -1;
 
 	for (i=(reader->mElemReadIndex+1); i < ArrayLength(reader->mElementArray); i++)
 	{
@@ -1949,7 +1980,8 @@ gsi_bool gsXmlReadChildAsStringNT(GSXmlStreamReader stream, const char * matchta
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Same as readChildAsStringNT, but converts Ascii/UTF-8 to USC2
-gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * matchtag, unsigned short valueOut[], int maxLen)
+#ifdef GSI_UNICODE
+gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * matchtag, gsi_char valueOut[], int maxLen)
 {
 	const char * utf8Value = NULL;
 	int unicodeLen = 0;
@@ -1963,11 +1995,12 @@ gsi_bool gsXmlReadChildAsUnicodeStringNT(GSXmlStreamReader stream, const char * 
 	else
 	{
 		// Convert into destination buffer
-		unicodeLen = UTF8ToUCS2StringLen2(utf8Value, utf8Len, (unsigned short *)valueOut, maxLen);
+		unicodeLen = UTF8ToUCSStringLen2(utf8Value, utf8Len, (gsi_char *)valueOut, maxLen);
 		valueOut[GS_MIN(maxLen-1, unicodeLen)] = '\0';
 		return gsi_true;
 	}
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -2244,9 +2277,49 @@ gsi_bool gsXmlReadChildAsDateTimeElement    (GSXmlStreamReader stream, const cha
 				// timezone returned by PSP function is difference FROM set timezone (i.e PST - UTC = -8)
 				*valueOut += timezone;
 				*valueOut += (summertime == 1 ? 3600 : 0);
+#elif defined(_PSP2)
+				int result, timezone;
+				SceDateTime UTCtime;
+				SceDateTime Localtime;
+				SceUInt64 UTCtime64;
+				SceUInt64 Localtime64;
+
+				result = sceRtcGetCurrentClockUtc(&UTCtime);
+				if (result)
+				{
+					gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_HotError, "Error running PSP2 function: sceRtcGetCurrentClockUtc\n");
+					return gsi_false;
+				}
+
+				result = sceRtcConvertDateTimeToTime64_t(&UTCtime, &UTCtime64);
+				if (result)
+				{
+					gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_HotError, "Error running PSP2 function: sceRtcConvertDateTimeToTime64_t (UTC)\n");
+					return gsi_false;
+				}
+
+				result = sceRtcGetCurrentClockLocalTime(&Localtime);
+				if (result)
+				{
+					gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_HotError, "Error running PSP2 function: sceRtcGetCurrentClockLocalTime\n");
+					return gsi_false;
+				}
+
+				result = sceRtcConvertDateTimeToTime64_t(&Localtime, &Localtime64);
+				if (result)
+				{
+					gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_HotError, "Error running PSP2 function: sceRtcConvertDateTimeToTime64_t (Local Time)\n");
+					return gsi_false;
+				}
+
+				// Difference in seconds (ticks) (i.e. PST - UTC = -8)
+				timezone = Localtime64 - UTCtime64;
+
+				// Don't worry about daylight savings, should be adjusted when using sceRtcGetCurrentClockLocalTime function
+				*valueOut += timezone;
 
 #elif !defined(_NITRO) && !defined(_REVOLUTION)
-				// timezone returned by windows time.h function is difference FROM UTC (i.e UTC - PST = +8)
+				// timezone returned by time.h function is difference FROM UTC (i.e UTC - PST = +8)
 
 #ifdef _WIN32
 				*valueOut -= _timezone;

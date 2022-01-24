@@ -2,10 +2,11 @@
 // File:	ghttpCommon.h
 // SDK:		GameSpy HTTP SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed 
+// use or use in a  manner not expressly authorized by IGN or GameSpy 
+// Technology is prohibited.
 
 #ifndef _GHTTPCOMMON_H_
 #define _GHTTPCOMMON_H_
@@ -18,40 +19,33 @@ extern "C" {
 #include "ghttpConnection.h"
 
 // HTTP Line-terminator.
-////////////////////////
 #define CRLF    "\xD\xA"
 
 // HTTP URL Encoding 
-////////////////////////
 #define GHI_LEGAL_URLENCODED_CHARS      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_@-.*"
 #define GHI_DIGITS                      "0123456789ABCDEF"
 
 // Default HTTP port.
-/////////////////////
 #define GHI_DEFAULT_PORT                      80
 #define GHI_DEFAULT_SECURE_PORT               443
 #define GHI_DEFAULT_THROTTLE_BUFFER_SIZE      125
 #define GHI_DEFAULT_THROTTLE_TIME_DELAY       250
 
 // Proxy server.
-////////////////
 extern char * ghiProxyAddress;
 extern unsigned short ghiProxyPort;
 
 // Throttle settings.
-/////////////////////
 extern int ghiThrottleBufferSize;
 extern gsi_time ghiThrottleTimeDelay;
 
 // Our thread lock.
-///////////////////
 void ghiCreateLock(void);
 void ghiFreeLock(void);
 void ghiLock(void);
 void ghiUnlock(void);
 
 // Do logging.
-//////////////
 #ifdef HTTP_LOG
 void ghiLogToFile
 (
@@ -70,17 +64,15 @@ void ghiLogToFile
 
 
 // Possible results from ghiDoReceive.
-//////////////////////////////////////
 typedef enum
 {
-	GHIRecvData,         // Data was received.
-	GHINoData,           // No data was available.
-	GHIConnClosed,       // The connection was closed.
-	GHIError             // There was a socket error.
+	GHIRecvData,    // Data was received.
+	GHINoData,      // No data was available.
+	GHIConnClosed,	// The connection was closed.
+	GHIError        // There was a socket error.
 } GHIRecvResult;
 
 // Receive some data.
-/////////////////////
 GHIRecvResult ghiDoReceive
 (
 	GHIConnection * connection,
@@ -89,10 +81,9 @@ GHIRecvResult ghiDoReceive
 );
 
 // Do a send on the connection's socket.
-// Returns number of bytes sent (0 or more).
-// If error, returns  (-1).
-// If need termination sending for a while, returns  (-2).
-////////////////////////////////////////////
+// It will return the number of bytes sent as 0 or more.
+// If there's an error, it will return -1.
+// If the socket needs to pause for a while, it will return -2.
 int ghiDoSend
 (
 	GHIConnection * connection,
@@ -101,7 +92,6 @@ int ghiDoSend
 );
 
 // Results for ghtTrySendThenBuffer.
-////////////////////////////////////
 typedef enum
 {
 	GHITrySendError,     // There was an error sending.
@@ -109,9 +99,8 @@ typedef enum
 	GHITrySendBuffered   // Some or all of the data was buffered.
 } GHITrySendResult;
 
-// Sends whatever it can on the socket.
-// Buffers whatever can't be sent in the sendBuffer.
-////////////////////////////////////////////////////
+// This sends whatever it can on the socket.
+// It also buffers whatever can't be sent in the sendBuffer.
 GHITrySendResult ghiTrySendThenBuffer
 (
 	GHIConnection * connection,
@@ -120,14 +109,12 @@ GHITrySendResult ghiTrySendThenBuffer
 );
 
 // Set the proxy server
-////////////////////////
 GHTTPBool ghiSetProxy
 (
 	const char * server
 );
 
 // Set the proxy server for a specific request
-////////////////////////
 GHTTPBool ghiSetRequestProxy
 (
 	GHTTPRequest request,
@@ -135,7 +122,6 @@ GHTTPBool ghiSetRequestProxy
 );
 
 // Set the throttle settings.
-/////////////////////////////
 void ghiThrottleSettings
 (
 	int bufferSize,
@@ -143,7 +129,6 @@ void ghiThrottleSettings
 );
 
 // Decrypt data from the decode buffer into the receive buffer.
-///////////////////////////////////////////////////////////////
 GHTTPBool ghiDecryptReceivedData(struct GHIConnection * connection);
 
 

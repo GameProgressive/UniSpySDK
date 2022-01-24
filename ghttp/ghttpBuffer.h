@@ -2,10 +2,11 @@
 // File:	ghttpBuffer.h
 // SDK:		GameSpy HTTP SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed 
+// use or use in a  manner not expressly authorized by IGN or GameSpy 
+// Technology is prohibited.
 
 #ifndef _GHTTPBUFFER_H_
 #define _GHTTPBUFFER_H_
@@ -22,14 +23,14 @@ extern "C" {
 typedef struct GHIBuffer
 {
 	struct GHIConnection * connection;  // The connection.
-	char * data;         // The actual bytes of data.
-	int size;            // The number of bytes allocated for data.
-	int len;             // The number of actual data bytes filled in.
-	int pos;             // A marker to keep track of position.
-	int sizeIncrement;   // How much to increment the buffer by when needed.
-	GHTTPBool fixed;     // If true, don't resize the buffer.
-	GHTTPBool dontFree;  // Don't free the data when the buffer is cleaned up.
-	GHTTPBool readOnly;  // Read Only, write operations will fail
+	char * data;						// The actual bytes of data.
+	int size;							// The number of bytes allocated for data.
+	int len;							// The number of actual data bytes filled in.
+	int pos;							// A marker to keep track of position.
+	int sizeIncrement;					// How much to increment the buffer by when needed.
+	GHTTPBool fixed;					// If true, don't resize the buffer.
+	GHTTPBool dontFree;					// Don't free the data when the buffer is cleaned up.
+	GHTTPBool readOnly;					// Read Only, write operations will fail.
 } GHIBuffer;
 
 // Initializes a buffer and allocates the initial data bytes.
@@ -38,34 +39,34 @@ typedef struct GHIBuffer
 GHTTPBool ghiInitBuffer
 (
 	struct GHIConnection * connection,  // The connection.
-	GHIBuffer * buffer,  // The buffer to init.
-	int initialSize,     // The initial size of the buffer.
-	int sizeIncrement    // The size increment for the buffer.
+	GHIBuffer * buffer,					// The buffer to initialize.
+	int initialSize,					// The initial size of the buffer.
+	int sizeIncrement					// The size increment for the buffer.
 );
 
-// Initializes a fixed-size buffer.  This will not get resized.
+// Initializes a fixed-size buffer. This will not get resized.
 ///////////////////////////////////////////////////////////////
 GHTTPBool ghiInitFixedBuffer
 (
 	struct GHIConnection * connection,  // The connection.
-	GHIBuffer * buffer,  // The buffer to init.
-	char * userBuffer,   // The user-buffer to use.
-	int size             // The size of the buffer.
+	GHIBuffer * buffer,					// The buffer to initialize.
+	char * userBuffer,					// The user-buffer to use.
+	int size							// The size of the buffer.
 );
 
-// Initializes a read-only fixed-size buffer.  This will not get resized.
+// Initializes a read-only fixed-size buffer. This will not get resized.
 ///////////////////////////////////////////////////////////////
 GHTTPBool ghiInitReadOnlyBuffer
 (
 	struct GHIConnection * connection,  // The connection.
-	GHIBuffer * buffer,  // The buffer to init.
-	const char * userBuffer,   // The user-buffer to use.
-	int size             // The size of the buffer.
+	GHIBuffer * buffer,					// The buffer to initialize.
+	const char * userBuffer,			// The user-buffer to use.
+	int size							// The size of the buffer.
 );
 
-// Free's a buffer's allocated memory (does
-// not free the actual GHIBuffer structure).
-////////////////////////////////////////////
+// Free's a buffer's allocated memory (does not free the actual GHIBuffer 
+// structure).
+/////////////////////////////////////////////////////////////////////////
 void ghiFreeBuffer
 (
 	GHIBuffer * buffer
@@ -96,9 +97,8 @@ GHTTPBool ghiEncryptDataToBuffer
 
 // Appends a header to the buffer.
 // Both the name and value must be NUL-terminated.
-// The header will be added to the buffer as:
-// <name>: <value>\n
-//////////////////////////////////////////////////
+// The header will be added to the buffer as: <name>: <value>\n
+///////////////////////////////////////////////////////////////
 GHTTPBool ghiAppendHeaderToBuffer
 (
 	GHIBuffer * buffer,  // The buffer to append to.
@@ -117,12 +117,12 @@ GHTTPBool ghiAppendCharToBuffer
 // Read data from a buffer
 GHTTPBool ghiReadDataFromBuffer
 (
-	GHIBuffer * bufferIn,    // the GHIBuffer to read from
-	char        bufferOut[], // the raw buffer to write to
-	int *       len          // max number of bytes to append, becomes actual length written
+	GHIBuffer * bufferIn,    // The GHIBuffer to read from.
+	char        bufferOut[], // The raw buffer to write to.
+	int *       len          // Max number of bytes to append, becomes actual length written.
 );
 
-// Read a fixed number of bytes from a buffer
+// Read a fixed number of bytes from a buffer.
 GHTTPBool ghiReadDataFromBufferFixed
 (
 	GHIBuffer * bufferIn,
@@ -155,7 +155,7 @@ GHTTPBool ghiSendBufferedData
 );
 
 // Increases the size of a buffer.
-// This happens automatically when using the ghiAppend* functions
+// This happens automatically when using the ghiAppend* functions.
 GHTTPBool ghiResizeBuffer
 (
 	GHIBuffer * buffer,

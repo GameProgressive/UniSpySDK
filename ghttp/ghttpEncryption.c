@@ -2,10 +2,11 @@
 // File:	ghttpEncryption.c
 // SDK:		GameSpy HTTP SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed 
+// use or use in a  manner not expressly authorized by IGN or GameSpy 
+// Technology is prohibited.
 
 #include "ghttpCommon.h"
 #if defined(MATRIXSSL)
@@ -32,9 +33,9 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 	if(!connection)
 		return GHTTPFalse;
 	
-	// Translate default into the actual engine name
-	// We don't want to set the engine value to "default" because
-	//   we'd lose the ability to determine the engine name in other places
+	// Here we translate default into the actual engine name.
+	// We don't want to set the engine value to "default" because we'd lose the
+	// ability to determine the engine name in other places.
 	if (engine == GHTTPEncryptionEngine_Default)
 	{
 #if defined(OPENSSL)
@@ -50,33 +51,33 @@ GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionE
 #endif
 	}
 
-	// If the same engine has previously been set then we're done
+	// If the same engine has previously been set, we're done.
 	if (connection->encryptor.mEngine == engine)
 		return GHTTPTrue; 
 
-	// If a different engine has previously been set then we're screwed
+	// If a different engine has previously been set, then we won’t be able to connect.
 	if (connection->encryptor.mInterface != NULL &&
 		connection->encryptor.mEngine != engine)
 	{
 		return GHTTPFalse; 
 	}
 
-	// If the URL is HTTPS but the engine is specific as NONE then we can't connect
+	// If the URL is HTTPS, but the engine is specific as NONE, then we can't connect.
 	if((engine == GHTTPEncryptionEngine_None) && (strncmp(connection->URL, "https://", 8) == 0))
 		return GHTTPFalse;
 
-	// Initialize the engine
+	// Initialize the engine.
 	connection->encryptor.mEngine = engine;
 
 	if (engine == GHTTPEncryptionEngine_None)
 	{
 		connection->encryptor.mInterface = NULL;
-		return GHTTPTrue; // this is the default, just return
+		return GHTTPTrue; // This is the default, just return it.
 	}
 	else
 	{
-		// 02OCT07 BED: Design was changed to only allow one engine at a time
-		//              Assert that the specified engine is the one supported
+		// 02OCT07 BED: Design was changed to only allow one engine at a time.
+		//				Assert that the specified engine is the one supported.
 		if (engine != GHTTPEncryptionEngine_Default)
 		{
 			#if defined(OPENSSL)
@@ -545,13 +546,13 @@ GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(MATRIXSSL)
 
-// SSL requires a certificate validator
+// SSL requires a certificate validator.
 static int ghiSslCertValidator(struct sslCertInfo* theCertInfo, void* theUserData)
 {
-	// Taken from matrisSslExample
+	// Taken from matrisSslExample.
 	sslCertInfo_t	*next;
 /*
-	Make sure we are checking the last cert in the chain
+	Make sure we are checking the last cert in the chain.
 */
 	next = theCertInfo;
 	while (next->next != NULL) {
@@ -560,7 +561,7 @@ static int ghiSslCertValidator(struct sslCertInfo* theCertInfo, void* theUserDat
 	return next->verified;
 }
 
-// Init the engine
+// Initialize the engine.
 GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
 											  struct GHIEncryptor  * theEncryptor)
 {
@@ -584,29 +585,29 @@ GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
 	return GHIEncryptionResult_Success;
 }
 
-// Start the handshake process
+// Start the handshake process.
 GHIEncryptionResult ghiEncryptorSslInitFunc(struct GHIConnection * connection,
 											  struct GHIEncryptor  * theEncryptor)
 {
 	sslBuf_t helloWrapper;
 	
-	// Prepare the hello message
+	// Prepare the hello message.
 	helloWrapper.buf   = connection->sendBuffer.data;
 	helloWrapper.size  = connection->sendBuffer.size;
 	helloWrapper.start = connection->sendBuffer.data + connection->sendBuffer.pos;
-	helloWrapper.end   = helloWrapper.start; // start writing here
+	helloWrapper.end   = helloWrapper.start; // Start writing here.
 	
 	ecodeResult = matrixSslEncodeClientHello((ssl_t*)theEncryptor->mInterface, &helloWrapper, 0); // 0 = cipher
 	if (ecodeResult != 0) 
-		return GHIEncryptionResult_Error; // error!
+		return GHIEncryptionResult_Error; // There was an error.
 
-	// Adjust the sendBuffer to account for the new data
+	// Adjust the sendBuffer to account for the new data.
 	connection->sendBuffer.len += (int)(helloWrapper.end - helloWrapper.start);
 	connection->sendBuffer.encrypted = GHTTPTrue;
 	theEncryptor->mSessionStarted = GHTTPTrue;
 }
 
-// Destroy the engine
+// Destroy the engine.
 GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection,
 												 struct GHIEncryptor  * theEncryptor)
 {
@@ -614,8 +615,8 @@ GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection
 	return GHIEncryptionResult_Success;
 }
 
-// Encrypt some data
-//    -  theEncryptedLength is reduced by the length of data written to theEncryptedBuffer
+// Encrypt some data. theEncryptedLength is reduced by the length of data
+// written to theEncryptedBuffer.
 GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection,
 												 struct GHIEncryptor  * theEncryptor,
 												 const char * thePlainTextBuffer,
@@ -625,15 +626,15 @@ GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection
 {
 	int encodeResult = 0;
 
-	// SSL buffer wrapper
-	// Append to theDecryptedBuffer
+	// This is the SSL buffer wrapper.
+	// Append to theDecryptedBuffer.
 	sslBuf_t encryptedBuf;
-	encryptedBuf.buf   = theEncryptedBuffer;  // buf starts here
-	encryptedBuf.start = theEncryptedBuffer;  // readpos,  set to start
-	encryptedBuf.end   = theEncryptedBuffer;  // writepos, set to start
-	encryptedBuf.size  = *theEncryptedLength; // total size of buf
+	encryptedBuf.buf   = theEncryptedBuffer;  // buf starts here.
+	encryptedBuf.start = theEncryptedBuffer;  // readpos,  set to start.
+	encryptedBuf.end   = theEncryptedBuffer;  // writepos, set to start.
+	encryptedBuf.size  = *theEncryptedLength; // Total size of buf.
 	
-	// perform the encryption
+	// Perform the encryption.
 	encodeResult = matrixSslEncode(connection->encryptor.mInterface, 
 		(unsigned char*)thePlainTextBuffer, *thePlainTextLength, &encryptedBuf);
 
@@ -643,17 +644,17 @@ GHIEncryptionResult ghiEncryptorSslEncryptFunc(struct GHIConnection * connection
 		return GHIEncryptionResult_BufferTooSmall;
 	else
 	{
-		//*thePlainTextLength = *thePlainTextLength; // we always use the entire buffer
+		//*thePlainTextLength = *thePlainTextLength; // We always use the entire buffer.
 		*theEncryptedLength -= (int)(encryptedBuf.end - encryptedBuf.start);
 		return GHIEncryptionResult_Success;
 	}
 }
 
-// Decrypt some data
-//    -  During the handshaking process, this may result in data being appended to the send buffer
-//    -  Data may be left in the encrypted buffer
-//    -  theEncryptedLength becomes the length of data read from theEncryptedBuffer
-//    -  theDecryptedLength becomes the length of data written to theDecryptedBuffer
+// Decrypt some data.
+// During the handshaking process, this may result in data being appended to the send buffer.
+// Data may be left in the encrypted buffer.
+// theEncryptedLength becomes the length of data read from theEncryptedBuffer.
+// theDecryptedLength becomes the length of data written to theDecryptedBuffer.
 GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection,
 												 struct GHIEncryptor  * theEncryptor,
 												 const char * theEncryptedBuffer,
@@ -664,85 +665,86 @@ GHIEncryptionResult ghiEncryptorSslDecryptFunc(struct GHIConnection * connection
 	GHTTPBool decryptMore = GHTTPTrue;
 	int decodeResult = 0;
 
-	// SSL buffer wrappers
+	// SSL buffer wrappers.
 	sslBuf_t inBuf;
 	sslBuf_t decryptedBuf;
 	int encryptedStartSize = *theEncryptedLength;
 
-	// Read from theEncryptedBuffer - Have to cast away the "const"
+	// Read from theEncryptedBuffer; we have to cast away the "const".
 	inBuf.buf   = (unsigned char*)theEncryptedBuffer;  
 	inBuf.start = (unsigned char*)theEncryptedBuffer;
 	inBuf.end   = (unsigned char*)theEncryptedBuffer + *theEncryptedLength;
 	inBuf.size  = *theEncryptedLength;
 
-	// Append to theDecryptedBuffer
-	decryptedBuf.buf   = theDecryptedBuffer;  // buf starts here
-	decryptedBuf.start = theDecryptedBuffer;  // readpos,  set to start
-	decryptedBuf.end   = theDecryptedBuffer;  // writepos, set to start
-	decryptedBuf.size  = *theDecryptedLength; // total size of buf
+	// Append to theDecryptedBuffer.
+	decryptedBuf.buf   = theDecryptedBuffer;  // buf starts here.
+	decryptedBuf.start = theDecryptedBuffer;  // readpos, set to start.
+	decryptedBuf.end   = theDecryptedBuffer;  // writepos, set to start.
+	decryptedBuf.size  = *theDecryptedLength; // Total size of buf.
 	
-	// Perform the decode operation
-	//     - may require multiple tries
+	// Perform the decode operation; this may require multiple tries.
 	while(decryptMore != GHTTPFalse && ((inBuf.end-inBuf.start) > 0))
 	{
 		unsigned char error = 0;
 		unsigned char alertlevel = 0;
 		unsigned char alertdescription = 0;
 
-		// perform the decode, this will decode a single SSL message at a time
+		// Perform the decode, this will decode a single SSL message at a time.
 		decodeResult = matrixSslDecode(theEncryptor->mInterface, &inBuf, &decryptedBuf, 
 										&error, &alertlevel, &alertdescription);
 		switch(decodeResult)
 		{
 		case SSL_SUCCESS:          
-			// a message was handled internally by matrixssl
-			// No data is appeneded to the decrypted buffer
+			// A message was handled internally by matrixssl.
+			// No data is appeneded to the decrypted buffer.
 			if (matrixSslHandshakeIsComplete(theEncryptor->mInterface))
 				theEncryptor->mSessionEstablished = GHTTPTrue;
 			break;
 
 		case SSL_PROCESS_DATA:
 			// We've received app data, continue on.  
-			// App data was appended to the decrypted buffer
+			// App data was appended to the decrypted buffer.
 			break;
 
 		case SSL_SEND_RESPONSE:
 			{
-			// we must send an SSL response which has been written to decryptedBuf
-			// transfer this response to the connection's sendBuffer
+			// We must send an SSL response which has been written to
+			// decryptedBuf.
+			// Transfer this response to the connection's sendBuffer.
 			int responseSize = decryptedBuf.end - decryptedBuf.start;
 
-			// force disable-encryption
-			//   this may seem like a hack, but it's the best way to avoid
-			//   unnecessary data copies without modifying matrixSSL
+			// Force disable-encryption.
+			// This may seem like a hack, but it's the best way to avoid
+			// unnecessary data copies without modifying matrixSSL.
 			theEncryptor->mSessionEstablished = GHTTPFalse;
 			ghiTrySendThenBuffer(connection, decryptedBuf.start, responseSize);
 			theEncryptor->mSessionEstablished = GHTTPTrue;
 
-			// Remove the bytes from the decrypted buffer (we don't want to return them to the app)
+			// Remove the bytes from the decrypted buffer (we don't want to
+			// return them to the app).
 			decryptedBuf.end = decryptedBuf.start; // bug?
 			break;
 			}
 
 		case SSL_ERROR:            
-			// error decoding the data
+			// There was an error decoding the data.
 			decryptMore = GHTTPFalse;
 			break;
 
 		case SSL_ALERT:            
-			// server sent an alert
+			// The server sent an alert.
 			if (alertdescription == SSL_ALERT_CLOSE_NOTIFY)
 			decryptMore = GHTTPFalse;
 			break;
 
 		case SSL_PARTIAL:          
-			// need to read more data from the socket(inbuf incomplete)
+			// Need to read more data from the socket(inbuf incomplete).
 			decryptMore = GHTTPFalse;
 			break;
 
 		case SSL_FULL:             
 			{
-				// decodeBuffer is too small, need to increase size and try again
+				// decodeBuffer is too small, need to increase size and try again.
 				decryptMore = GHTTPFalse;
 				break;
 			}

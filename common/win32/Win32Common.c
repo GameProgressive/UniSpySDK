@@ -2,8 +2,11 @@
 // File:	Win32Common.c
 // SDK:		GameSpy Common
 //
-// Copyright Notice: This file is part of the GameSpy SDK designed and 
-// developed by GameSpy Industries. Copyright (c) 2009 GameSpy Industries, Inc.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "../gsCommon.h"
 #include "../gsMemory.h"

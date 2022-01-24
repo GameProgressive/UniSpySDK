@@ -1,7 +1,8 @@
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #if defined(_PS3)
 
@@ -76,6 +77,12 @@ void gsiInt64ToString(char theNumberStr[33], gsi_i64 theNumber)
 
 	sprintf(theNumberStr, "%lld", theNumber);
 }
+
+double gsiWStringToDouble(const wchar_t *inputString)
+{
+	return wcstod(inputString, NULL);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #endif // _PS3 only

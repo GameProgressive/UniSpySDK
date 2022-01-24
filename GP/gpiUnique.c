@@ -2,17 +2,16 @@
 // File:	gpiUnique.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include "gpi.h"
 
 //FUNCTIONS
-///////////
 static GPResult
 gpiSendRegisterUniqueNick(
   GPConnection * connection,
@@ -54,16 +53,13 @@ GPResult gpiRegisterUniqueNick(
 	GPResult result;
 
 	// Add the operation.
-	/////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_REGISTER_UNIQUENICK, NULL, &operation, blocking, callback, param));
 
 	// Send a request for info.
-	///////////////////////////
 	result = gpiSendRegisterUniqueNick(connection, uniquenick, cdkey, operation->id);
 	CHECK_RESULT(result);
 
 	// Process it if blocking.
-	//////////////////////////
 	if(blocking)
 	{
 		result = gpiProcess(connection, operation->id);
@@ -82,17 +78,14 @@ GPResult gpiProcessRegisterUniqueNick(
 	GPICallback callback;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPITrue))
 		return GP_SERVER_ERROR;
 
 	// This should be \rn\.
-	///////////////////////
 	if(strncmp(input, "\\rn\\", 4) != 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	// Call the callback.
-	/////////////////////
 	callback = operation->callback;
 	if(callback.callback != NULL)
 	{
@@ -107,14 +100,13 @@ GPResult gpiProcessRegisterUniqueNick(
 	}
 
 	// This operation is complete.
-	//////////////////////////////
 	gpiRemoveOperation(connection, operation);
 
 	return GP_NO_ERROR;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Registration of cdKey now offered separately from uniquenick
+// Registration of cdKey now offered separately from uniquenick.
 static GPResult
 gpiSendRegisterCdKey(
   GPConnection * connection,
@@ -128,7 +120,7 @@ gpiSendRegisterCdKey(
 
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
-	// Encrypt the cdkey (xor with random values)
+	// Encrypt the cdkey (xor with random values).
 	const int useAlternateEncoding = 1;
 	char cdkeyxor[GP_CDKEY_LEN];
 	char cdkeyenc[GP_CDKEYENC_LEN];
@@ -138,13 +130,13 @@ gpiSendRegisterCdKey(
 	Util_RandSeed((unsigned long)GP_XOR_SEED);
 	for (i=0; i < cdkeylen; i++)
 	{
-		// XOR each character with the next rand
+		// XOR each character with the next rand.
 		char aRand = (char)Util_RandInt(0, 0xFF);
 		cdkeyxor[i] = (char)(cdkey[i] ^ aRand);
 	}
 	cdkeyxor[i] = '\0';
 
-	// Base 64 it (printable chars only)
+	// Base 64 it (printable chars only).
 	B64Encode(cdkeyxor, cdkeyenc, (int)cdkeylen, useAlternateEncoding);
 
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\registercdkey\\\\sesskey\\");
@@ -173,16 +165,13 @@ GPResult gpiRegisterCdKey(
 	GPResult result;
 
 	// Add the operation.
-	/////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_REGISTER_CDKEY, NULL, &operation, blocking, callback, param));
 
 	// Send a request for info.
-	///////////////////////////
 	result = gpiSendRegisterCdKey(connection, cdkey, gameId, operation->id);
 	CHECK_RESULT(result);
 
 	// Process it if blocking.
-	//////////////////////////
 	if(blocking)
 	{
 		result = gpiProcess(connection, operation->id);
@@ -201,17 +190,14 @@ GPResult gpiProcessRegisterCdKey(
 	GPICallback callback;
 
 	// Check for an error.
-	//////////////////////
 	if(gpiCheckForError(connection, input, GPITrue))
 		return GP_SERVER_ERROR;
 
 	// This should be \rc\.
-	///////////////////////
 	if(strncmp(input, "\\rc\\", 4) != 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
 
 	// Call the callback.
-	/////////////////////
 	callback = operation->callback;
 	if(callback.callback != NULL)
 	{
@@ -226,7 +212,6 @@ GPResult gpiProcessRegisterCdKey(
 	}
 
 	// This operation is complete.
-	//////////////////////////////
 	gpiRemoveOperation(connection, operation);
 
 	return GP_NO_ERROR;

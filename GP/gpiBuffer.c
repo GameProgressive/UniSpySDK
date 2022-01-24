@@ -2,23 +2,21 @@
 // File:	gpiBuffer.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdlib.h>
 #include <string.h>
 #include "gpi.h"
 
 //DEFINES
-/////////
 #define GPI_DUMP_NET_TRAFFIC
 
 //FUNCTIONS
-///////////
 GPResult
 gpiAppendCharToBuffer(
   GPConnection * connection,
@@ -33,13 +31,11 @@ gpiAppendCharToBuffer(
 	GS_ASSERT(outputBuffer != NULL);
 
 	// Init locals.
-	///////////////
 	len = outputBuffer->len;
 	size = outputBuffer->size;
 	output = outputBuffer->buffer;
 
 	// Check if it needs to be resized.
-	///////////////////////////////////
 	if(size == len)
 	{
 		size += GPI_READ_SIZE;
@@ -49,12 +45,10 @@ gpiAppendCharToBuffer(
 	}
 
 	// Do the copy.
-	///////////////
 	output[len] = c;
 	output[len + 1] = '\0';
 
 	// Update the buffer info.
-	//////////////////////////
 	outputBuffer->len++;
 	outputBuffer->size = size;
 	outputBuffer->buffer = output;
@@ -82,13 +76,11 @@ gpiAppendStringToBufferLen(
 		return GP_NO_ERROR;
 
 	// Init locals.
-	///////////////
 	len = outputBuffer->len;
 	size = outputBuffer->size;
 	output = outputBuffer->buffer;
 
 	// Check if it needs to be resized.
-	///////////////////////////////////
 	if((size - len) < stringLen)
 	{
 		size += GS_MAX(GPI_READ_SIZE, stringLen);
@@ -98,12 +90,10 @@ gpiAppendStringToBufferLen(
 	}
 
 	// Do the copy.
-	///////////////
 	memcpy(&output[len], string, (unsigned int)stringLen);
 	output[len + stringLen] = '\0';
 
 	// Update the buffer info.
-	//////////////////////////
 	outputBuffer->len += stringLen;
 	outputBuffer->size = size;
 	outputBuffer->buffer = output;
@@ -184,7 +174,7 @@ gpiSendData(
 		rcode = GOAGetLastError(sock);
 		if((rcode != WSAEWOULDBLOCK) && (rcode != WSAEINPROGRESS) && (rcode != WSAETIMEDOUT) )
 		{
-			// handle peer connections specially
+			// Handle peer connections specially.
 			if((id[0] == 'P') && (id[1] == 'R'))
 				return GP_NETWORK_ERROR;
 			CallbackError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error sending on a socket.");
@@ -206,7 +196,7 @@ gpiSendData(
 		#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 		{
 			static int sendCount;
-			char *buf = (char *)gsimalloc((size_t)rcode + 1);
+			char *buf = (char *)gsimalloc((size_t)(rcode + 1));
 			memcpy(buf, buffer, (size_t)rcode);
 			buf[rcode] = '\0';
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump, "SENT%04d(%s): %s\n", sendCount++, id, buf);
@@ -262,12 +252,10 @@ gpiSendOrBufferStringLenToPeer(
 	total = 0;
 
 	// Check for nothing to send.
-	/////////////////////////////
 	if(stringLen == 0)
 		return GP_NO_ERROR;
 
 	// Only try to send if the buffer is empty and there are no messages.
-	/////////////////////////////////////////////////////////////////////
 	if(!(peer->outputBuffer.len - peer->outputBuffer.pos) && !ArrayLength(peer->messages))
 	{
 		if ((int)remaining <= (gsUdpEngineGetPeerOutBufferFreeSpace(peer->ip, peer->port) - GS_UDP_RELIABLE_MSG_HEADER - GS_UDP_MSG_HEADER_LEN))
@@ -292,7 +280,6 @@ gpiSendOrBufferStringLenToPeer(
 	}
 
 	// Buffer what wasn't sent.
-	///////////////////////////
 	if(remaining)
 		CHECK_RESULT(gpiAppendStringToBufferLen(connection, &peer->outputBuffer, &string[total], (int)remaining));
 
@@ -356,7 +343,6 @@ gpiRecvToBuffer(
 	GS_ASSERT(connClosed != NULL);
 
 	// Init locals.
-	///////////////
 	buffer = inputBuffer->buffer;
 	len = inputBuffer->len;
 	size = inputBuffer->size;
@@ -366,14 +352,13 @@ gpiRecvToBuffer(
 	do
 	{
 		// Check if the buffer needs to be resized.
-		///////////////////////////////////////////
 		if((len + GPI_READ_SIZE) > size)
 		{
 			size = (len + GPI_READ_SIZE);
 			buffer = (char *)gsirealloc(buffer, (size_t)size + 1);
 			if(buffer == NULL)
 				Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-			// in case recv fails and line below it calls Error macro with return in it.
+			// In case recv fails and line below it calls Error macro with return in it.
 			inputBuffer->buffer = buffer;
 			inputBuffer->size = size;
 		}
@@ -393,7 +378,6 @@ gpiRecvToBuffer(
 		else if(rcode == 0)
 		{
 			// Check for a closed connection.
-			/////////////////////////////////
 			closed = GPITrue;
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_Comment,
 				"RECVXXXX(%s): Connection closed\n", id);
@@ -403,7 +387,7 @@ gpiRecvToBuffer(
 			#if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
 			{
 				static int recvCount;
-				char *buf = (char *)gsimalloc((size_t)rcode + 1);
+				char *buf = (char *)gsimalloc((size_t)(rcode + 1));
 				memcpy(buf, &buffer[len], (size_t)rcode);
 				buf[rcode] = '\0';
 				gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_RawDump,
@@ -418,11 +402,9 @@ gpiRecvToBuffer(
 			}
 			#endif
 			// Update the buffer len.
-			/////////////////////////
 			len += rcode;
 
 			// Update the total.
-			////////////////////
 			total += rcode;
 		}
 
@@ -437,14 +419,13 @@ gpiRecvToBuffer(
 	}
 	
 	// Set output stuff.
-	////////////////////
 	inputBuffer->buffer = buffer;
 	inputBuffer->len = len;
 	inputBuffer->size = size;
 	*bytesRead = total;
 	*connClosed = closed;
 
-	GSI_UNUSED(id); // Resolves some CodeWarrior warnings
+	GSI_UNUSED(id); // Resolves some CodeWarrior warnings.
 
 	return GP_NO_ERROR;
 }
@@ -476,7 +457,6 @@ gpiSendFromBuffer(
 	total = 0;
 
 	// Check for nothing to send.
-	/////////////////////////////
 	if(remaining == 0)
 		return GP_NO_ERROR;
 
@@ -509,7 +489,6 @@ gpiSendFromBuffer(
 	GS_ASSERT(pos <= len);
 
 	// Set outputs.
-	///////////////
 	outputBuffer->len = len;
 	outputBuffer->pos = pos;
 	if(connClosed)
@@ -537,13 +516,12 @@ GPResult gpiSendBufferToPeer(GPConnection * connection, unsigned int ip, unsigne
 	remaining = (len - pos);
 
 	// Check for nothing to send.
-	/////////////////////////////
 	if(remaining == 0)
 		return GP_NO_ERROR;
 
-	// The length of the message remaining must be smaller than total buffer size minus 
-	// gt2 reliable msg header size minus the message header length in order to send 
-	// the message in one shot.
+	// The length of the message remaining must be smaller than total buffer 
+	// size minus gt2 reliable msg header size minus the message header length 
+	// in order to send the message in one shot.
 	if ((int)remaining <= (gsUdpEngineGetPeerOutBufferFreeSpace(ip, port) - GS_UDP_RELIABLE_MSG_HEADER - GS_UDP_MSG_HEADER_LEN))
 	{
 		gsUdpEngineSendMessage(ip, port, iconnection->mHeader, &buffer[pos], remaining, gsi_true);
@@ -580,7 +558,6 @@ GPResult gpiSendBufferToPeer(GPConnection * connection, unsigned int ip, unsigne
 		pos += total;
 	}
 	// Set outputs.
-	///////////////
 	outputBuffer->len = (int)len;
 	outputBuffer->pos = (int)pos;
 
@@ -607,63 +584,51 @@ gpiReadMessageFromBuffer(
 	char intValue[16];
 
 	// Default.
-	///////////
 	*message = NULL;
 
 	// Check for not enough data.
-	/////////////////////////////
 	if(inputBuffer->len < 5)
 		return GP_NO_ERROR;
 
 	// Find the end of the header.
-	//////////////////////////////
 	str = strchr(inputBuffer->buffer, '\n');
 	if(str != NULL)
 	{
 		// Check that this is the msg.
-		//////////////////////////////
 		if(strncmp(str - 5, "\\msg\\", 5) != 0)
 			return GP_NETWORK_ERROR;
 
 		// Cap the header.
-		//////////////////
 		*str = '\0';
 
 		// Read the header.
-		///////////////////
 		if(!gpiValueForKey(inputBuffer->buffer, "\\m\\", intValue, sizeof(intValue)))
 			return GP_NETWORK_ERROR;
 		*type = atoi(intValue);
 
 		// Get the length.
-		//////////////////
 		if(!gpiValueForKey(inputBuffer->buffer, "\\len\\", intValue, sizeof(intValue)))
 			return GP_NETWORK_ERROR;
 		len = atoi(intValue);
 		len++;
 
 		// Is the whole message available?
-		//////////////////////////////////
 		if(inputBuffer->len > ((str - inputBuffer->buffer) + len))
 		{
 			// Does it not end with a NUL?
-			//////////////////////////////
 			if(str[len] != '\0')
 				return GP_NETWORK_ERROR;
 
 			// Set the message stuff.
-			/////////////////////////
 			*message = &str[1];
 			*plen = (len - 1);
 
 			// Set the position to the end of the message.
-			//////////////////////////////////////////////
 			inputBuffer->pos = (int)((str - inputBuffer->buffer) + len + 1);
 		}
 		else
 		{
 			// Put the LF back.
-			///////////////////
 			*str = '\n';
 		}
 	}

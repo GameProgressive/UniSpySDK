@@ -17,15 +17,15 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#define SC_CREATEMATCHLESSSESSION_SOAPACTION "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateMatchlessSession\""
-#define SC_CREATESESSION_SOAPACTION "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateSession\""
-#define SC_SUBMITREPORT_SOAPACTION  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/competition/SubmitReport\""
-#define SC_SETINTENTION_SOAPACTION  "SOAPAction: \"" RS_HTTP_PROTOCOL_URL "gamespy.net/competition/SetReportIntention\""
+#define SC_CREATEMATCHLESSSESSION_SOAPACTION "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateMatchlessSession\""
+#define SC_CREATESESSION_SOAPACTION "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateSession\""
+#define SC_SUBMITREPORT_SOAPACTION  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/SubmitReport\""
+#define SC_SETINTENTION_SOAPACTION  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/SetReportIntention\""
 
 #define SC_SERVICE_NAMESPACE_COUNT     1
 const char * SC_SERVICE_NAMESPACES[SC_SERVICE_NAMESPACE_COUNT] =
 {
-	"gsc=\"" RS_HTTP_PROTOCOL_URL "gamespy.net/competition/\""
+	"gsc=\"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/\""
 };
 
 

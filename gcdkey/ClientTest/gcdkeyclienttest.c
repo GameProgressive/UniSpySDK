@@ -2,15 +2,16 @@
 // File:	gcdkeyclienttest.c
 // SDK:		GameSpy CD Key SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "../../common/gsCommon.h"
 #include "../gcdkeyc.h"
 
-#define DEFAULT_SERVER "127.0.0.1"	// Run gcdkeyserver app on local host
+#define DEFAULT_SERVER "127.0.0.1"	// Run the gcdkeyserver app on local host.
 #define DEFAULT_PORT 2000
 #define DEFAULT_KEY "8014-c119-a892-74d2"
 
@@ -31,7 +32,7 @@ int test_main(int argc, char **argv)
 
 	while(1)
 	{
-		//get the server IP and a CD Key
+		// Get the server IP and a CD Key.
 		printf("Server to connect to [%s]: ",DEFAULT_SERVER);
 		readstring(server);
 		if (server[0]==0 || server[0]=='\n')
@@ -45,13 +46,13 @@ int test_main(int argc, char **argv)
 		if (cdkey[0]==0 || cdkey[0]=='\n')
 			strcpy(cdkey,DEFAULT_KEY);
 
-		/* normally we would verify the CD Key (mathematically) at this point,
-		if (!ValidateKey(cdkey))
-			return;
-		*/
+		// Normally we would verify the CD Key (mathematically) at this point:
+		//if (!ValidateKey(cdkey))
+			//return;
+	
 
-		/* create a TCP socket to connect to the server, obviously you would
-		connect with whatever protocol your game uses (TCP/UDP/DPlay/etc) */
+		// Create a TCP socket to connect to the server; Obviously, you would
+		// connect with whatever protocol your game uses (TCP/UDP/DPlay/etc.).
 		SocketStartUp();
 		s = socket(AF_INET,SOCK_STREAM, IPPROTO_TCP);
 		memset(&saddr, 0, sizeof(saddr));
@@ -65,9 +66,9 @@ int test_main(int argc, char **argv)
 			continue;
 		}
 
-		/* Once we are connected, there is a "handshake" where the server sends
-		a "challenge" in the form "c:challenge", and we send a response in the
-		for "r:response". How you do this is again, completely up to you */
+		// Once we are connected, there is a "handshake" where the server sends
+		// a "challenge" in the form "c:challenge", and we send a response in the
+		// for "r:response". How you do this is completely up to you.
 		len = recv(s,data,BUFSIZE-1,0);
 		if (len <= 0)
 		{
@@ -77,15 +78,15 @@ int test_main(int argc, char **argv)
 		}
 		data[len] = 0;
 
-		// compute the response based on the challenge (which starts at data[2])
+		// Compute the response based on the challenge (which starts at data[2]).
 		gcd_compute_response(cdkey, data+2, response, CDResponseMethod_NEWAUTH);
 
-		// send the response back to the server
+		// Send the response back to the server.
 		printf("Got: %s\nSending: %s\n",data, response);
 		sprintf(data,"r:%s",response);
 		send(s,data,strlen(data),0);
 
-		// enter our main loop and wait for data
+		// Enter our main loop and wait for data.
 		while (1)
 		{
 			len = recv(s,data,BUFSIZE-1,0);
@@ -98,14 +99,14 @@ int test_main(int argc, char **argv)
 			}
 			data[len] = 0;
 			
-			// Keep a watch for reauthentication requests
-			//   In this case, the sample server sends "r:<challenge>"
-			//     and the client sample responds with "p:<response>"
-			// Your game should use it's own message types and headers.
+			// Watch for reauthentication requests. In this case, the sample 
+			// server sends "r:<challenge>" and the client sample responds 
+			// with "p:<response>". Your game should use its own message types 
+			// and headers.
 			if (data[0] == 'r' && data[1] == ':')
 			{
 				char hint[9];
-				memcpy(hint, data+2, 8); // 8 characters are a hint
+				memcpy(hint, data+2, 8); // 8 characters are a hint.
 				hint[8] = '\0';
 
 				printf("Got reauth: %s, %s\n",hint, data+10);

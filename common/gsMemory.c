@@ -2,10 +2,11 @@
 // File:	gsMemory.c
 // SDK:		GameSpy Common
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc.  All rights 
+// reserved. This software is made available only pursuant to certain license 
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 #include "gsPlatform.h"
 #include "gsPlatformUtil.h"
@@ -83,7 +84,7 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 	return realloc(ptr, size);
 }
 
-#if defined(_PS2) || defined(_PSP) || defined(_PS3)
+#if defined(_PS2) || defined(_PSP) || defined(_PSP2) || defined(_PS3)
 	static void* _gsi_memalign(size_t boundary, size_t size)
 	{
 		return memalign(boundary, size);
@@ -95,7 +96,7 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 	#endif
 	static void* __cdecl _gsi_memalign(size_t boundary, size_t size)
 	{
-		return  _aligned_malloc(size, boundary);
+		return  _aligned_malloc(size, (int)boundary);
 	}
 #elif defined (_NITRO) || defined(_REVOLUTION)
 
@@ -140,7 +141,7 @@ static MemManagerCallbacks memmanagercallbacks =
         &malloc,
         &free,
         &realloc,
-        #if defined(_PS2) || defined(_PSP) || defined(_PS3)
+        #if defined(_PS2) || defined(_PSP) || defined(_PSP2) || defined(_PS3)
             &memalign,		// a version already exists on this platform
         #else	
             &_gsi_memalign,	//wrote our own
@@ -667,6 +668,7 @@ void MEM_CHUNK_POOLSplitChunk(MEM_CHUNK_POOL *_this, MEM_CHUNK *header, gsi_bool
 			//               to use the full size of the chunk, not just the used portion
 			_this->MemUsed -= MEM_CHUNKChunkSizeGet(header);
 			//_this->MemUsed -= MEM_CHUNKMemUsedGet(header);		
+			GS_ASSERT(_this->MemUsed >= 0);
 		}
 	#endif
 
@@ -916,6 +918,7 @@ void MEM_CHUNK_POOLFreeChunk(MEM_CHUNK_POOL *_this,MEM_CHUNK *header)
 	#if (MEM_PROFILE)
 		GS_ASSERT(_this->MemUsed >= MEM_CHUNKMemUsedGet(header));
 		_this->MemUsed -= MEM_CHUNKMemUsedGet(header);
+		GS_ASSERT(_this->MemUsed >= 0);
 	#endif
 
 	while (next->next && (MEM_CHUNKIsFree(next->next)))

@@ -2,33 +2,29 @@
 // File:	gpiSearch.c
 // SDK:		GameSpy Presence and Messaging SDK
 //
-// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
-// This software is made available only pursuant to certain license terms offered
-// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
-// manner not expressly authorized by IGN or GameSpy is prohibited.
+// Copyright (c) 2012 GameSpy Technology & IGN Entertainment, Inc. All rights
+// reserved. This software is made available only pursuant to certain license
+// terms offered by IGN or its subsidiary GameSpy Industries, Inc. Unlicensed
+// use or use in a manner not expressly authorized by IGN or GameSpy Technology
+// is prohibited.
 
 //INCLUDES
-//////////
 #include <stdlib.h>
 #include <string.h>
 #include "gpi.h"
 
 //DEFINES
-/////////
 
 // Search Manager Address.
-//////////////////////////
 #define GPI_SEARCH_MANAGER_NAME        "gpsp." GSI_DOMAIN_NAME
 #define GPI_SEARCH_MANAGER_PORT        29901
 
 
 //GLOBALS
-/////////
 
 char GPSearchManagerHostname[64] = GPI_SEARCH_MANAGER_NAME;
 
 //FUNCTIONS
-///////////
 static GPResult
 gpiStartProfileSearch(
   GPConnection * connection,
@@ -41,47 +37,40 @@ gpiStartProfileSearch(
 	struct hostent * host;
 
 	// Initialize the buffer.
-	/////////////////////////
 	data->inputBuffer.size = 4096;
 	data->inputBuffer.buffer = (char *)gsimalloc((size_t)data->inputBuffer.size + 1);
 	if(data->inputBuffer.buffer == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 
 	// Create the socket.
-	/////////////////////
 	data->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(data->sock == INVALID_SOCKET)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error creating a socket.");
 
 	// Make it non-blocking.
-	////////////////////////
 	rcode = SetSockBlocking(data->sock,0);
 	if(rcode == 0)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error making a socket non-blocking.");
 
-	// Bind the socket.
-	///////////////////
-	/*
+	// Setup the address.
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
-	rcode = bind(data->sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
-	if (gsiSocketIsError(rcode))
-		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error binding a socket.");
-	*/
-	
-	// Get the server host.
-	///////////////////////
+#if GS_USE_REFLECTOR
+	address.sin_addr.s_addr = gsReflectorIP; 
+	address.sin_port = gsReflectorPort;
+	GSI_UNUSED(host);
+#else
+	// Get the server host and port.
+
 	host = gethostbyname(GPSearchManagerHostname);
 	if(host == NULL)
-		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve search mananger host name.");
+		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve search manager host name.");
+	address.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
+	address.sin_port = htons(GPI_SEARCH_MANAGER_PORT);
+#endif
 
 	// Connect the socket.
-	//////////////////////
-	memset(&address, 0, sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
-	assert(address.sin_addr.s_addr != 0);
-	address.sin_port = htons(GPI_SEARCH_MANAGER_PORT);
+	GS_ASSERT(address.sin_addr.s_addr != 0);
 	rcode = connect(data->sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in));
 	if (gsiSocketIsError(rcode))
 	{
@@ -93,7 +82,6 @@ gpiStartProfileSearch(
 	}
 
 	// We're waiting for the connect to complete.
-	/////////////////////////////////////////////
 	operation->state = GPI_CONNECTING;
 	data->searchStartTime = current_time();
 	return GP_NO_ERROR;
@@ -109,7 +97,6 @@ gpiInitSearchData(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	data = (GPISearchData *)gsimalloc(sizeof(GPISearchData));
 	if(data == NULL)
 		Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -147,19 +134,15 @@ gpiStartSearch(
 	GPIConnection * iconnection = (GPIConnection*)*connection;
 
 	// One more search.
-	///////////////////
 	iconnection->numSearches++;
 
 	// Create a new operation.
-	//////////////////////////
 	CHECK_RESULT(gpiAddOperation(connection, GPI_PROFILE_SEARCH, data, &operation, blocking, callback, param));
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartProfileSearch(connection, operation));
 
 	// Process it if blocking.
-	//////////////////////////
 	if(operation->blocking)
 		CHECK_RESULT(gpiProcess(connection, operation->id));
 
@@ -184,7 +167,6 @@ gpiProfileSearch(
 	GPISearchData * data;
 
 	// Error check.
-	///////////////
 	if((nick == NULL) || (*nick == '\0'))
 		if((email == NULL) || (*email == '\0'))
 			if((firstname == NULL) || (*firstname == '\0'))
@@ -194,11 +176,9 @@ gpiProfileSearch(
 							Error(connection, GP_PARAMETER_ERROR, "No search criteria.");
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_PROFILE));
 
 	// Fill in the data.
-	////////////////////
 	if(nick == NULL)
 		data->nick[0] = '\0';
 	else
@@ -226,7 +206,6 @@ gpiProfileSearch(
 	data->skip = skip;
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -246,16 +225,13 @@ gpiProfileSearchUniquenick(
 	GPISearchData * data;
 
 	// Error check.
-	///////////////
 	if((uniquenick == NULL) || (*uniquenick == '\0'))
 		Error(connection, GP_PARAMETER_ERROR, "No search criteria.");
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_PROFILE_UNIQUENICK));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->uniquenick, uniquenick, GP_UNIQUENICK_LEN);
 	if((namespaceIDs != NULL) && (numNamespaces > 0))
 	{
@@ -268,7 +244,6 @@ gpiProfileSearchUniquenick(
 	}
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -286,21 +261,17 @@ gpiIsValidEmail(
 	GPISearchData * data;
 
 	// Error check.
-	///////////////
 	if((email == NULL) || (*email == '\0') || (strlen(email) >= GP_EMAIL_LEN))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid e-mail.");
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_IS_VALID));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->email, email, GP_EMAIL_LEN);
 	_strlwr(data->email);
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -319,24 +290,20 @@ gpiGetUserNicks(
 	GPISearchData * data;
 
 	// Error check.
-	///////////////
 	if((email == NULL) || (*email == '\0') || (strlen(email) >= GP_EMAIL_LEN))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid e-mail.");
 	if((password == NULL) || (strlen(password) >= GP_PASSWORD_LEN))
 		Error(connection, GP_PARAMETER_ERROR, "Invalid password.");
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_NICKS));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->email, email, GP_EMAIL_LEN);
 	_strlwr(data->email);
 	strzcpy(data->password, password, GP_PASSWORD_LEN);
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -354,15 +321,12 @@ gpiFindPlayers(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_PLAYERS));
 
 	// Fill in the data.
-	////////////////////
 	data->productID = productID;
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -381,11 +345,9 @@ GPResult gpiCheckUser(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_CHECK));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->email, email, GP_EMAIL_LEN);
 	_strlwr(data->email);
 	strzcpy(data->nick, nick, GP_NICK_LEN);
@@ -393,7 +355,6 @@ GPResult gpiCheckUser(
 		strzcpy(data->password, password, GP_PASSWORD_LEN);
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -414,11 +375,9 @@ GPResult gpiNewUser(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_NEWUSER));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->email, email, GP_EMAIL_LEN);
 	strzcpy(data->nick, nick, GP_NICK_LEN);
 	strzcpy(data->password, password, GP_PASSWORD_LEN);
@@ -427,7 +386,6 @@ GPResult gpiNewUser(
 		strzcpy(data->cdkey, cdkey, GP_CDKEY_LEN);
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -443,11 +401,9 @@ GPResult gpiOthersBuddy(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_OTHERS_BUDDY));
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -486,15 +442,12 @@ GPResult gpiSuggestUniqueNick(
 	GPISearchData * data;
 
 	// Init the data.
-	/////////////////
 	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_SUGGEST_UNIQUE));
 
 	// Fill in the data.
-	////////////////////
 	strzcpy(data->uniquenick, desirednick, GP_UNIQUENICK_LEN);
 
 	// Start the search.
-	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -527,15 +480,13 @@ gpiProcessSearch(
 	GPProfileSearchMatch * match;
 	GPUniqueMatch *uniqueNickMatch;
 
-	//password encryption stuff
+	// Password encryption stuff.
 	char passwordenc[GP_PASSWORDENC_LEN];
 	
 	// Get a pointer to the data.
-	/////////////////////////////
 	data = (GPISearchData*)operation->data;
 
 	// Loop if blocking.
-	////////////////////
 	if(operation->blocking)
 		loop = GPITrue;
 	else
@@ -550,24 +501,19 @@ gpiProcessSearch(
 	do
 	{
 		// Send anything that needs to be sent.
-		///////////////////////////////////////
 		CHECK_RESULT(gpiSendFromBuffer(connection, data->sock, &data->outputBuffer, &connClosed, GPITrue, "SM"));
 
 		// Is it connecting?
-		////////////////////
 		if(operation->state == GPI_CONNECTING)
 		{
 			// Check the connect state.
-			///////////////////////////
 			CHECK_RESULT(gpiCheckSocketConnect(connection, data->sock, &state));
 			
 			// Check for a failed attempt.
-			//////////////////////////////
 			if(state == GPI_DISCONNECTED)
 				CallbackError(connection, GP_SERVER_ERROR, GP_SEARCH_CONNECTION_FAILED, "Could not connect to the search manager.");
 
 			// Check if finished connecting.
-			////////////////////////////////
 			if(state == GPI_CONNECTED)
 			{
 #if GS_USE_REFLECTOR
@@ -575,27 +521,22 @@ gpiProcessSearch(
 				int i;
 
 				// Version.
-				///////////
 				gpiAppendCharToBuffer(connection, &data->outputBuffer, 0);
 
 				// Port.
-				////////
 				gpiAppendCharToBuffer(connection, &data->outputBuffer, (GPI_SEARCH_MANAGER_PORT >> 8) & 0xFF);
 				gpiAppendCharToBuffer(connection, &data->outputBuffer, GPI_SEARCH_MANAGER_PORT & 0xFF);
 
 				// Hostname length.
-				///////////////////
 				gpiAppendCharToBuffer(connection, &data->outputBuffer, (char)hostnameLen);
 
 				// Hostname.
-				////////////
 				for(i = 0; i < hostnameLen; i++)
 				{
 					gpiAppendCharToBuffer(connection, &data->outputBuffer, GPSearchManagerHostname[i]);
 				}
 #endif
 				// Send a request based on type.
-				////////////////////////////////
 				if(data->type == GPI_SEARCH_PROFILE)
 				{
 					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\search\\");
@@ -792,16 +733,13 @@ gpiProcessSearch(
 				gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\final\\");
 
 				// Update the state.
-				////////////////////
 				operation->state = GPI_WAITING;
 			}
 		}
 		// Is it waiting?
-		/////////////////
 		else if(operation->state == GPI_WAITING)
 		{
 			// Read from the socket.
-			////////////////////////
 			result = gpiRecvToBuffer(connection, data->sock, &data->inputBuffer, &len, &connClosed, "SM");
 			if(result != GP_NO_ERROR)
 			{
@@ -815,19 +753,15 @@ gpiProcessSearch(
 				CallbackError(connection, GP_NETWORK_ERROR, GP_SEARCH_TIMED_OUT, "The search timed out");
 			}
 			// Is this the end of the response?
-			///////////////////////////////////
 			if(strstr(data->inputBuffer.buffer, "\\final\\") != NULL)
 			{
 				// Reset the index.
-				///////////////////
 				index = 0;
 
 				// This operation is finishing up.
-				//////////////////////////////////
 				operation->state = GPI_FINISHING;
 
 				// Check for an error.
-				//////////////////////
 				if(gpiCheckForError(connection, data->inputBuffer.buffer, GPITrue))
 				{
 					data->remove = GPITrue;
@@ -835,49 +769,40 @@ gpiProcessSearch(
 				}
 
 				// Process it based on type.
-				////////////////////////////
 				if((data->type == GPI_SEARCH_PROFILE) || (data->type == GPI_SEARCH_PROFILE_UNIQUENICK))
 				{
 					GPProfileSearchResponseArg arg;
 					// Start setting up the arg.
-					////////////////////////////
 					arg.result = GP_NO_ERROR;
 					arg.numMatches = 0;
 					arg.matches = NULL;
 					arg.more = GP_DONE;
 
 					// Parse the message.
-					/////////////////////
 					done = GPIFalse;
 					do
 					{
 						// Read the next key and value.
-						///////////////////////////////
 						CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 						// Is the list done?
-						////////////////////
 						if(strcmp(key, "bsrdone") == 0)
 						{
 							// Check for more.
-							//////////////////
 							CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 							if(strcmp(key, "more") == 0)
 							{
 								// Make sure there are actually more.
-								/////////////////////////////////////
 								if(strcmp(value, "0") != 0)
 									arg.more = GP_MORE;
 							}
 
 							// Done.
-							////////
 							done = GPITrue;
 						}
 						else if(strcmp(key, "bsr") == 0)
 						{
 							// Create a new match.
-							//////////////////////
 							arg.numMatches++;
 							arg.matches = (GPProfileSearchMatch *)gsirealloc(arg.matches, sizeof(GPProfileSearchMatch) * arg.numMatches);
 							if(arg.matches == NULL)
@@ -886,21 +811,17 @@ gpiProcessSearch(
 							memset(match, 0, sizeof(GPProfileSearchMatch));
 
 							// Get the profile id.
-							//////////////////////
 							match->profile = atoi(value);
 
 							// Read key/value pairs.
-							////////////////////////
 							doneParsingMatch = GPIFalse;
 							do
 							{
 								// Read the next key/value.
-								///////////////////////////
 								oldIndex = index;
 								CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 								// Set the field based on the key.
-								//////////////////////////////////
 #ifndef GSI_UNICODE
 								if(strcmp(key, "nick") == 0)
 									strzcpy(match->nick, value, GP_NICK_LEN);
@@ -921,17 +842,17 @@ gpiProcessSearch(
 								}
 #else
 								if(strcmp(key, "nick") == 0)
-									UTF8ToUCS2StringLen(value, match->nick, GP_NICK_LEN);
+									UTF8ToUCSStringLen(value, match->nick, GP_NICK_LEN);
 								else if(strcmp(key, "uniquenick") == 0)
-									UTF8ToUCS2StringLen(value, match->uniquenick, GP_UNIQUENICK_LEN);
+									UTF8ToUCSStringLen(value, match->uniquenick, GP_UNIQUENICK_LEN);
 								else if(strcmp(key, "namespaceid") == 0)
 									match->namespaceID = atoi(value);
 								else if(strcmp(key, "firstname") == 0)
-									UTF8ToUCS2StringLen(value, match->firstname, GP_FIRSTNAME_LEN);
+									UTF8ToUCSStringLen(value, match->firstname, GP_FIRSTNAME_LEN);
 								else if(strcmp(key, "lastname") == 0)
-									UTF8ToUCS2StringLen(value, match->lastname, GP_LASTNAME_LEN);
+									UTF8ToUCSStringLen(value, match->lastname, GP_LASTNAME_LEN);
 								else if(strcmp(key, "email") == 0)
-									UTF8ToUCS2StringLen(value, match->email, GP_EMAIL_LEN);
+									UTF8ToUCSStringLen(value, match->email, GP_EMAIL_LEN);
 								else if((strcmp(key, "bsr") == 0) || (strcmp(key, "bsrdone") == 0))
 								{
 									doneParsingMatch = GPITrue;
@@ -948,26 +869,21 @@ gpiProcessSearch(
 					} while(!done);
 
 					// Save the more state.
-					///////////////////////
 					more = (GPIBool)arg.more;
 
 					// Get the callback.
-					////////////////////
 					callback = operation->callback;
 
 
 					// Call the callback.
-					/////////////////////
 					if(callback.callback != NULL)
 						callback.callback(connection, &arg, callback.param);
 
 					// Start a new operation if they want more matches.
-					///////////////////////////////////////////////////
 					if((more == GP_MORE) && (arg.more == GP_MORE))
 						CHECK_RESULT(gpiProfileSearch(connection, data->nick, data->uniquenick, data->email, data->firstname, data->lastname, data->icquin, arg.numMatches + data->skip, (GPEnum)operation->blocking, operation->callback.callback, operation->callback.param));
 
 					// We're done.
-					//////////////
 					freeclear(arg.matches);
 				}
 				else if(data->type == GPI_SEARCH_IS_VALID)
@@ -982,7 +898,6 @@ gpiProcessSearch(
 							CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPIsValidEmailResponseArg *)gsimalloc(sizeof(GPIsValidEmailResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -990,7 +905,7 @@ gpiProcessSearch(
 #ifndef GSI_UNICODE
 						strzcpy(arg->email, data->email, GP_EMAIL_LEN);
 #else
-						UTF8ToUCS2String(data->email, arg->email);
+						UTF8ToUCSString(data->email, arg->email);
 #endif
 						if(value[0] == '0')
 							arg->isValid = GP_INVALID;
@@ -998,7 +913,6 @@ gpiProcessSearch(
 							arg->isValid = GP_VALID;
 
 						// Add the callback.
-						////////////////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, 0));
 					}
 				}
@@ -1010,15 +924,14 @@ gpiProcessSearch(
 						GPGetUserNicksResponseArg * arg;
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPGetUserNicksResponseArg *)gsimalloc(sizeof(GPGetUserNicksResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 						arg->result = GP_NO_ERROR;
 #ifndef GSI_UNICODE
-						strcpy(arg->email, data->email);
+						gsiSafeStrcpyA(arg->email, data->email, sizeof(arg->email));
 #else
-						UTF8ToUCS2String(data->email, arg->email);
+						UTF8ToUCSString(data->email, arg->email);
 #endif
 						arg->numNicks = 0;
 						arg->nicks = NULL;
@@ -1029,7 +942,6 @@ gpiProcessSearch(
 							CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
 
 						// Get the nicks.
-						/////////////////
 						done = GPIFalse;
 						do
 						{
@@ -1037,7 +949,6 @@ gpiProcessSearch(
 							if(strcmp(key, "nick") == 0)
 							{
 								// Add it.
-								//////////
 #ifndef GSI_UNICODE
 								tempPtr = gsirealloc(arg->nicks, sizeof(char *) * (arg->numNicks + 1));
 								if(tempPtr == NULL)
@@ -1058,7 +969,7 @@ gpiProcessSearch(
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								arg->nicks[arg->numNicks] = (gsi_char*)tempPtr;
-								UTF8ToUCS2StringLen(value, arg->nicks[arg->numNicks], GP_NICK_LEN);
+								UTF8ToUCSStringLen(value, arg->nicks[arg->numNicks], GP_NICK_LEN);
 								arg->numNicks++;
 #endif
 							}
@@ -1068,7 +979,6 @@ gpiProcessSearch(
 									continue;
 
 								// Add it.
-								//////////
 #ifndef GSI_UNICODE
 								tempPtr = gsirealloc(arg->uniquenicks, sizeof(char *) * arg->numNicks);
 								if(tempPtr == NULL)
@@ -1088,13 +998,12 @@ gpiProcessSearch(
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 								arg->uniquenicks[arg->numNicks - 1] = (gsi_char*)tempPtr;
-								UTF8ToUCS2StringLen(value, arg->uniquenicks[arg->numNicks - 1], GP_UNIQUENICK_LEN);
+								UTF8ToUCSStringLen(value, arg->uniquenicks[arg->numNicks - 1], GP_UNIQUENICK_LEN);
 #endif
 							}
 							else if(strcmp(key, "ndone") == 0)
 							{
 								// Done.
-								////////
 								done = GPITrue;
 							}
 							else
@@ -1105,7 +1014,6 @@ gpiProcessSearch(
 						while(!done);
 
 						// Do it.
-						/////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_NICKS));
 					}
 				}
@@ -1118,7 +1026,6 @@ gpiProcessSearch(
 						GPFindPlayerMatch * match2;
 						
 						// Start setting up the arg.
-						////////////////////////////
 						arg = (GPFindPlayersResponseArg *)gsimalloc(sizeof(GPFindPlayersResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1128,26 +1035,21 @@ gpiProcessSearch(
 						arg->matches = NULL;
 
 						// Parse the message.
-						/////////////////////
 						done = GPIFalse;
 						do
 						{
 							// Read the next key and value.
-							///////////////////////////////
 							CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 							// Is the list done?
-							////////////////////
 							if(strcmp(key, "psrdone") == 0)
 							{
 								// Done.
-								////////
 								done = GPITrue;
 							}
 							else if(strcmp(key, "psr") == 0)
 							{
 								// Create a new match.
-								//////////////////////
 								arg->numMatches++;
 								arg->matches = (GPFindPlayerMatch *)gsirealloc(arg->matches, sizeof(GPFindPlayerMatch) * arg->numMatches);
 								if(arg->matches == NULL)
@@ -1157,26 +1059,21 @@ gpiProcessSearch(
 								match2->status = GP_ONLINE;
 
 								// Get the profile id.
-								//////////////////////
 								match2->profile = atoi(value);
 
 								// 05.16.00
 								// Changed to be order independent, and ignore unrecognized keys.
-								/////////////////////////////////////////////////////////////////
 
 								// Read key/value pairs.
-								////////////////////////
 								doneParsingMatch = GPIFalse;
 								do
 								{
 									// Read the next key/value.
-									///////////////////////////
 									oldIndex = index;
 									CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 #ifndef GSI_UNICODE
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "status") == 0)
 										strzcpy(match2->statusString, value, GP_STATUS_STRING_LEN);
 									else if(strcmp(key, "nick") == 0)
@@ -1190,11 +1087,10 @@ gpiProcessSearch(
 									}
 #else
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "status") == 0)
-										UTF8ToUCS2StringLen(value, match2->statusString, GP_STATUS_STRING_LEN);
+										UTF8ToUCSStringLen(value, match2->statusString, GP_STATUS_STRING_LEN);
 									else if(strcmp(key, "nick") == 0)
-										UTF8ToUCS2StringLen(value, match2->nick, GP_NICK_LEN);
+										UTF8ToUCSStringLen(value, match2->nick, GP_NICK_LEN);
 									if(strcmp(key, "statuscode") == 0)
 										match2->status = (GPEnum)atoi(value);
 									else if((strcmp(key, "psr") == 0) || (strcmp(key, "psrdone") == 0))
@@ -1213,7 +1109,6 @@ gpiProcessSearch(
 						} while(!done);
 
 						// Do it.
-						/////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_PMATCH));
 					}
 				}
@@ -1242,7 +1137,6 @@ gpiProcessSearch(
 						}
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPCheckResponseArg *)gsimalloc(sizeof(GPCheckResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1250,7 +1144,6 @@ gpiProcessSearch(
 						arg->profile = pid;
 
 						// Add the callback.
-						////////////////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, 0));
 					}
 				}
@@ -1278,7 +1171,6 @@ gpiProcessSearch(
 							pid = atoi(value);
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPNewUserResponseArg *)gsimalloc(sizeof(GPNewUserResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1286,7 +1178,6 @@ gpiProcessSearch(
 						arg->profile = pid;
 
 						// Add the callback.
-						////////////////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, 0));
 					}
 				}
@@ -1298,7 +1189,6 @@ gpiProcessSearch(
 						GPGetReverseBuddiesResponseArg * arg;
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPGetReverseBuddiesResponseArg *)gsimalloc(sizeof(GPGetReverseBuddiesResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1311,26 +1201,21 @@ gpiProcessSearch(
 							CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
 
 						// Get the profiles.
-						/////////////////
 						done = GPIFalse;
 						do
 						{
 							// Read the next key and value.
-							///////////////////////////////
 							CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 							// Is the list done?
-							////////////////////
 							if(strcmp(key, "odone") == 0)
 							{
 								// Done.
-								////////
 								done = GPITrue;
 							}
 							else if(strcmp(key, "o") == 0)
 							{
 								// Add it.
-								//////////
 								tempPtr = gsirealloc(arg->profiles, sizeof(GPProfileSearchMatch) * (arg->numProfiles + 1));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1340,22 +1225,18 @@ gpiProcessSearch(
 								arg->numProfiles++;
 
 								// Get the profile id.
-								//////////////////////
 								match->profile = atoi(value);
 
 								// Read key/value pairs.
-								////////////////////////
 								doneParsingMatch = GPIFalse;
 								do
 								{
 									// Read the next key/value.
-									///////////////////////////
 									oldIndex = index;
 									CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 #ifndef GSI_UNICODE
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "nick") == 0)
 										strzcpy(match->nick, value, GP_NICK_LEN);
 									else if(strcmp(key, "uniquenick") == 0)
@@ -1373,17 +1254,16 @@ gpiProcessSearch(
 									}
 #else
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "nick") == 0)
-										UTF8ToUCS2StringLen(value, match->nick, GP_NICK_LEN);
+										UTF8ToUCSStringLen(value, match->nick, GP_NICK_LEN);
 									else if(strcmp(key, "uniquenick") == 0)
-										UTF8ToUCS2StringLen(value, match->uniquenick, GP_UNIQUENICK_LEN);
+										UTF8ToUCSStringLen(value, match->uniquenick, GP_UNIQUENICK_LEN);
 									else if(strcmp(key, "first") == 0)
-										UTF8ToUCS2StringLen(value, match->firstname, GP_FIRSTNAME_LEN);
+										UTF8ToUCSStringLen(value, match->firstname, GP_FIRSTNAME_LEN);
 									else if(strcmp(key, "last") == 0)
-										UTF8ToUCS2StringLen(value, match->lastname, GP_LASTNAME_LEN);
+										UTF8ToUCSStringLen(value, match->lastname, GP_LASTNAME_LEN);
 									else if(strcmp(key, "email") == 0)
-										UTF8ToUCS2StringLen(value, match->email, GP_EMAIL_LEN);
+										UTF8ToUCSStringLen(value, match->email, GP_EMAIL_LEN);
 									else if((strcmp(key, "o") == 0) || (strcmp(key, "odone") == 0))
 									{
 										doneParsingMatch = GPITrue;
@@ -1401,7 +1281,6 @@ gpiProcessSearch(
 						while(!done);
 
 						// Do it.
-						/////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_REVERSE_BUDDIES));
 					}
 				}
@@ -1413,7 +1292,6 @@ gpiProcessSearch(
 						GPGetReverseBuddiesListResponseArg * arg;
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPGetReverseBuddiesListResponseArg *)gsimalloc(sizeof(GPGetReverseBuddiesListResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1426,26 +1304,21 @@ gpiProcessSearch(
 							CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
 
 						// Get the profiles.
-						/////////////////
 						done = GPIFalse;
 						do
 						{
 							// Read the next key and value.
-							///////////////////////////////
 							CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 							// Is the list done?
-							////////////////////
 							if(strcmp(key, "oldone") == 0)
 							{
 								// Done.
-								////////
 								done = GPITrue;
 							}
 							else if(strcmp(key, "o") == 0)
 							{
-								// Add it.
-								//////////
+								// Add it
 								tempPtr = gsirealloc(arg->matches, sizeof(GPUniqueMatch) * (arg->numOfUniqueMatches + 1));
 								if(tempPtr == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1455,22 +1328,18 @@ gpiProcessSearch(
 								arg->numOfUniqueMatches++;
 
 								// Get the profile id.
-								//////////////////////
 								uniqueNickMatch->profile = atoi(value);
 
 								// Read key/value pairs.
-								////////////////////////
 								doneParsingMatch = GPIFalse;
 								do
 								{
 									// Read the next key/value.
-									///////////////////////////
 									oldIndex = index;
 									CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
 
 #ifndef GSI_UNICODE
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "uniquenick") == 0)
 										strzcpy(uniqueNickMatch->uniqueNick, value, GP_UNIQUENICK_LEN);
 									else if((strcmp(key, "o") == 0) || (strcmp(key, "oldone") == 0))
@@ -1480,9 +1349,8 @@ gpiProcessSearch(
 									}
 #else
 									// Set the field based on the key.
-									//////////////////////////////////
 									if(strcmp(key, "uniquenick") == 0)
-										UTF8ToUCS2StringLen(value, uniqueNickMatch->uniqueNick, GP_UNIQUENICK_LEN);
+										UTF8ToUCSStringLen(value, uniqueNickMatch->uniqueNick, GP_UNIQUENICK_LEN);
 									else if((strcmp(key, "o") == 0) || (strcmp(key, "oldone") == 0))
 									{
 										doneParsingMatch = GPITrue;
@@ -1500,7 +1368,6 @@ gpiProcessSearch(
 						while(!done);
 
 						// Do it.
-						/////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_REVERSE_BUDDIES_LIST));
 					}
 
@@ -1514,7 +1381,6 @@ gpiProcessSearch(
 						GPSuggestUniqueNickResponseArg * arg;
 
 						// Setup the arg.
-						/////////////////
 						arg = (GPSuggestUniqueNickResponseArg *)gsimalloc(sizeof(GPSuggestUniqueNickResponseArg));
 						if(arg == NULL)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
@@ -1528,13 +1394,11 @@ gpiProcessSearch(
 						arg->numSuggestedNicks = atoi(value);
 
 						// Allocate memory for the nick array.
-						//////////////////////////////////////
 						arg->suggestedNicks = (gsi_char **)gsimalloc(sizeof(gsi_char *) * arg->numSuggestedNicks);
 						if(!arg->suggestedNicks)
 							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 
 						// Get the nicks.
-						/////////////////
 						done = GPIFalse;
 						do
 						{
@@ -1542,7 +1406,6 @@ gpiProcessSearch(
 							if(strcmp(key, "nick") == 0)
 							{
 								// Add it.
-								//////////
 #ifndef GSI_UNICODE
 								arg->suggestedNicks[count] = (gsi_char *)gsimalloc(GP_UNIQUENICK_LEN);
 								if(arg->suggestedNicks[count] == NULL)
@@ -1552,19 +1415,17 @@ gpiProcessSearch(
 								arg->suggestedNicks[count] = (gsi_char*)gsimalloc(GP_UNIQUENICK_LEN * sizeof(gsi_char));
 								if(arg->suggestedNicks[count] == NULL)
 									Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-								UTF8ToUCS2StringLen(value, arg->suggestedNicks[count], GP_UNIQUENICK_LEN);
+								UTF8ToUCSStringLen(value, arg->suggestedNicks[count], GP_UNIQUENICK_LEN);
 #endif
 								count++;
 							}
 							else if(strcmp(key, "usdone") == 0)
 							{
 								// Check that the header matches the actual number of nicks.
-								////////////////////////////////////////////////////////////
 								GS_ASSERT(count == arg->numSuggestedNicks);
 								arg->numSuggestedNicks = count;
 
 								// Done.
-								////////
 								done = GPITrue;
 							}
 							else
@@ -1575,7 +1436,6 @@ gpiProcessSearch(
 						while(!done);
 
 						// Do it.
-						/////////
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_SUGGESTED_UNIQUE));
 					}
 				}
@@ -1585,11 +1445,9 @@ gpiProcessSearch(
 				}
 
 				// Flag the operation for removal.
-				//////////////////////////////////
 				data->remove = GPITrue;
 
 				// If we're looping, stop.
-				//////////////////////////
 				loop = GPIFalse;
 			}
 		}
@@ -1619,25 +1477,20 @@ gpiProcessSearches(
 	int i;
 
 	// Are there any searches?
-	//////////////////////////
 	if(iconnection->numSearches > 0)
 	{
 		// Alloc mem for a search list.
-		///////////////////////////////
 		searchList = (GPIOperation **)gsimalloc(sizeof(GPIOperation *) * iconnection->numSearches);
 		if(searchList == NULL)
 			Error(connection, GP_MEMORY_ERROR, "Out of memory.");
 
 		// Create the search list.
-		//////////////////////////
 		for(operation = &iconnection->operationList[0] ; operation != NULL ; operation = operation->pnext)
 		{
 			// Is this a search?
-			////////////////////
 			if((operation->type == GPI_PROFILE_SEARCH) && (operation->state != GPI_FINISHING))
 			{
 				// Is this search being processed already?
-				//////////////////////////////////////////
 				if(!((GPISearchData *)operation->data)->processing)
 				{
 					GS_ASSERT(num < iconnection->numSearches);
@@ -1648,7 +1501,6 @@ gpiProcessSearches(
 		}
 
 		// Process the searches.
-		////////////////////////
 		for(i = 0 ; i < num ; i++)
 		{
 			result = gpiProcessSearch(connection, searchList[i]);
@@ -1657,7 +1509,6 @@ gpiProcessSearches(
 		}
 
 		// Clear the processing flags, and remove searches that are done.
-		/////////////////////////////////////////////////////////////////
 		for(i = 0 ; i < num ; i++)
 		{
 			data = ((GPISearchData *)searchList[i]->data);
