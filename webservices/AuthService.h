@@ -16,9 +16,9 @@
 // ***** PUBLIC INTERFACE AT THE BOTTOM OF THE FILE
 
 #include "../common/gsCore.h"
-#include "../common/gsSoap.h"
 #include "../common/gsCrypt.h"
 #include "../common/gsLargeInt.h"
+#include "../ghttp/ghttpSoap.h"
 
 #if defined(__cplusplus)
 extern "C"

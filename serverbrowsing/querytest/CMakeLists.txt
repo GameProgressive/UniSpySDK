@@ -1,0 +1,3 @@
+add_executable(sbquerytest querytest.c)
+target_link_libraries(sbquerytest usserverbrowsing)
+set_target_properties(sbquerytest PROPERTIES FOLDER Tests)

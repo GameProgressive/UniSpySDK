@@ -1,0 +1,3 @@
+add_executable(brigadesTest brigadesTest.c)
+target_link_libraries(brigadesTest usbrigades)
+set_target_properties(brigadesTest PROPERTIES FOLDER Tests)

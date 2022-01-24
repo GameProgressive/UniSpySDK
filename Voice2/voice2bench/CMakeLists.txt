@@ -1,0 +1,4 @@
+add_executable(voicebench voice2bench.c)
+target_link_libraries(voicebench PRIVATE usvoice2 ${UNISPY_VOICE_PLATFORM_LIBRARIES} ${GSM_LIBRARIES})
+target_include_directories(voicebench BEFORE PRIVATE ${UNISPY_VOICE_PLATFORM_INCLUDES})
+set_target_properties(voicebench PROPERTIES FOLDER Tests)

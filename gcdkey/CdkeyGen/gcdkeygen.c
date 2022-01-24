@@ -75,9 +75,9 @@ void DoGenerateKeys()
 	short check;
 	FILE *f;
 
-	Util_RandSeed(time(NULL) ^ GetTickCount());
+	Util_RandSeed((unsigned long)(time(NULL) ^ GetTickCount()) );
 	printf("How many keys would you like? ");
-	gets(resp);
+	gets_s(resp, 128);
 
 	keyct = atoi(resp);
 
@@ -148,7 +148,7 @@ void DoValidateKeys()
 
 	for (;;) {
 		printf("Enter a CD Key to validate, or [ENTER] to quit: ");
-		gets(resp);
+		gets_s(resp, 128);
 		if (!resp[0])
 			return;
 		if (ValidateKey(resp))
@@ -164,7 +164,7 @@ int main(void)
 	char resp[10];
 	//display a menu
 	printf("What would you like to do?\n\t1. Generate CD Keys\n\t2. Validate a CD Key\n:");
-	gets(resp);
+	gets_s(resp, 10);
 	if (resp[0] == '1')
 		DoGenerateKeys();
 	else

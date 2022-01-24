@@ -1336,7 +1336,7 @@ bool Initialize(void)
 
 	// Seed the random number generator.
 	////////////////////////////////////
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 
 	// Perform the availability check
 	GSIStartAvailableCheck("gmtest");

@@ -1,14 +1,13 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rsnatneg
+add_library(usnatneg
     NATify.c
     natneg.c
+    NATify.h
+    natneg.h
+    nninternal.h
 )
 
-target_link_libraries(rsnatneg rscommon)
+target_link_libraries(usnatneg PUBLIC uscommon)
 
-if(RS_BUILD_TESTS)
-    add_executable(natnegtest simpletest/simpletest.c)
-    target_link_libraries(natnegtest rsnatneg)
-    target_compile_definitions(natnegtest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(simpletest)
 endif()

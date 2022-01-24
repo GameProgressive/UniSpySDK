@@ -1,17 +1,15 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rscdkey
+add_library(uscdkey
     gcdkeyc.c
     gcdkeys.c
+    gcdkeys.h
+    gcdkeyc.h
 )
 
-target_link_libraries(rscdkey rscommon)
+target_link_libraries(uscdkey PUBLIC uscommon)
 
-if(RS_BUILD_TESTS)
-    add_executable(keyclienttest ClientTest/gcdkeyclienttest.c)
-    target_link_libraries(keyclienttest rscdkey)
-    target_compile_definitions(keyclienttest PRIVATE test_main=main)
-    add_executable(keyservertest ServerTest/gcdkeyservertest.c)
-    target_link_libraries(keyservertest rscdkey rsqr2)
-    target_compile_definitions(keyservertest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(CdkeyGen)
+    add_subdirectory(ClientTest)
+    add_subdirectory(ServerTest)
+    add_subdirectory(ServerTestQR2)
 endif()

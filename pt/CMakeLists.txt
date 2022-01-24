@@ -1,13 +1,10 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rspt
+add_library(uspt
     ptMain.c
+    pt.h
 )
 
-target_link_libraries(rspt rscommon rshttp)
+target_link_libraries(uspt PUBLIC ushttp)
 
-if(RS_BUILD_TESTS)
-    add_executable(pttest pttestc/pttestc.c)
-    target_link_libraries(pttest rspt)
-    target_compile_definitions(pttest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(pttestc)
 endif()

@@ -15,7 +15,7 @@
 // All structures and SDK API functions are defined in this file.
 
 // Includes
-#include "../common/gsSoap.h"
+#include "../ghttp/ghttpSoap.h"
 #include "../common/gsCrypt.h"
 #include "../common/gsLargeInt.h"
 #include "../common/gsResultCodes.h"

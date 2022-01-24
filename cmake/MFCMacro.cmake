@@ -1,0 +1,17 @@
+macro(MFC_Stage1)
+    if (UNISPY_MSVC_STATIC)
+        set(CMAKE_MFC_FLAG 1)
+    else()
+        set(CMAKE_MFC_FLAG 2)
+    endif()
+endmacro()
+
+macro(MFC_Stage2 proj)
+    if (NOT UNISPY_MSVC_STATIC)
+        target_compile_definitions(${proj} PRIVATE _AFXDLL)
+    endif()
+
+    if (UNISPY_COMPILER_MSVC)
+        target_link_options(${proj} PRIVATE /SUBSYSTEM:WINDOWS)
+    endif()
+endmacro()

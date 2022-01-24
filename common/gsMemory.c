@@ -1721,13 +1721,13 @@ void gsMemMgrSelfText()
 {
 
 	
-	static MEM_CHUNK_POOL gChunkPool;
+	static MEM_CHUNK_POOL gChunkPool2;
 	int size	= 32 * 1024 * 1024;
 	int c= 0;
 	int i,j,k;
 
 	char *ptr	= (char *) ( ((gsi_uint)malloc(size-PTR_ALIGNMENT)+(PTR_ALIGNMENT-1))&~ (PTR_ALIGNMENT-1) )  ;
-	MEM_CHUNK_POOLCreate(&gChunkPool,"",ptr,size);
+	MEM_CHUNK_POOLCreate(&gChunkPool2,"",ptr,size);
 
 	while(1)
 	{
@@ -1740,9 +1740,9 @@ void gsMemMgrSelfText()
 			k = 32<< (Random(4));
 
 			if (c&1)
-				PtrTable[PtrTableCount] = MEM_CHUNK_POOLmalloc(&gChunkPool, j,k);
+				PtrTable[PtrTableCount] = MEM_CHUNK_POOLmalloc(&gChunkPool2, j,k);
 			else
-				PtrTable[PtrTableCount] = MEM_CHUNK_POOLmalloc_backwards(&gChunkPool, j,k);
+				PtrTable[PtrTableCount] = MEM_CHUNK_POOLmalloc_backwards(&gChunkPool2, j,k);
 
 			if(PtrTable[PtrTableCount])
 			{
@@ -1762,7 +1762,7 @@ void gsMemMgrSelfText()
 			MP_ASSERT(j < PtrTableCount);
 
 
-			MEM_CHUNK_POOLfree(&gChunkPool,PtrTable[j]);
+			MEM_CHUNK_POOLfree(&gChunkPool2,PtrTable[j]);
 
 			// swap with last.
 			PtrTableCount--;
@@ -1778,7 +1778,7 @@ void gsMemMgrSelfText()
 			// realloc
 			k = Random(1024) +1;
 			#if(1)
-				PtrTable[j] = MEM_CHUNK_POOLrealloc(&gChunkPool,PtrTable[j], k);
+				PtrTable[j] = MEM_CHUNK_POOLrealloc(&gChunkPool2,PtrTable[j], k);
 			#else
 				// skip
 				PtrTable[j] = PtrTable[j];
@@ -1797,7 +1797,7 @@ void gsMemMgrSelfText()
 			continue;	// skip count
 
 		c++;
-		MEM_CHUNK_POOLCheckValidity(&gChunkPool);
+		MEM_CHUNK_POOLCheckValidity(&gChunkPool2);
 	}
 
 }

@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rspeer
+add_library(uspeer
     peerAutoMatch.c
     peerCallbacks.c
     peerGlobalCallbacks.c
@@ -14,12 +12,30 @@ add_library(rspeer
     peerQR.c
     peerRooms.c
     peerSB.c
+    peer.h
+    peerAscii.h
+    peerAutoMatch.h
+    peerCallbacks.h
+    peerGlobalCallbacks.h
+    peerHost.h
+    peerKeys.h
+    peerMain.h
+    peerMangle.h
+    peerOperations.h
+    peerPing.h
+    peerPlayers.h
+    peerQR.h
+    peerRooms.h
+    peerSB.h
 )
 
-target_link_libraries(rspeer rscommon rsqr2 rschat rspinger rsserverbrowsing)
+target_link_libraries(uspeer PUBLIC usqr2 uschat uspinger usserverbrowsing)
 
-if(RS_BUILD_TESTS)
-    add_executable(peertest peerc/peerc.c)
-    target_link_libraries(peertest rspeer)
-    target_compile_definitions(peertest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(peerc)
+
+    if (UNISPY_WINDOWS)
+        add_subdirectory(PeerLobby)
+        add_subdirectory(PeerTest)
+    endif()
 endif()

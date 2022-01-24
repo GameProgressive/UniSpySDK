@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rsgt2
+add_library(usgt2
     gt2Auth.c
     gt2Buffer.c
     gt2Callback.c
@@ -11,13 +9,28 @@ add_library(rsgt2
     gt2Message.c
     gt2Socket.c
     gt2Utility.c
-    ../common/gsUdpEngine.c
+    gt2.h
+    gt2Auth.h
+    gt2Buffer.h
+    gt2Callback.h
+    gt2Connection.h
+    gt2Encode.h
+    gt2Filter.h
+    gt2Main.h
+    gt2Message.h
+    gt2Socket.h
+    gt2Utility.h
 )
 
-target_link_libraries(rsgt2 rscommon)
+target_link_libraries(usgt2 PUBLIC uscommon)
 
-if(RS_BUILD_TESTS)
-    add_executable(gt2test gt2testc/gt2testc.c)
-    target_link_libraries(gt2test rsgt2)
-    target_compile_definitions(gt2test PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(gt2hostmig)
+    add_subdirectory(gt2testc)
+    add_subdirectory(gt2nat)
+    add_subdirectory(gt2proxy)
+
+    if (UNISPY_WINDOWS)
+        add_subdirectory(gt2test)
+    endif()
 endif()

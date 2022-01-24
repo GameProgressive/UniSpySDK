@@ -434,7 +434,7 @@ void DoGameStuff(gsi_time totalTime)
 }
 
 
-int main(int argc, char **argp)
+int test_main(int argc, char **argp)
 {			
 	/* qr2_init parameters */
 	gsi_char  secret_key[9];         // your title's assigned secret key

@@ -144,13 +144,13 @@ static void RoomMessageCallback
 (
 	PEER peer,
 	RoomType roomType,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	const gsi_char * message,
 	MessageType messageType,
 	void * param
 )
 {
-	_tprintf(_T(" (%s) %s: %s\n"), RtoS[roomType], nick, message);
+	_tprintf(_T(" (%s) %s: %s\n"), RtoS[roomType], nick_, message);
 
 	GSI_UNUSED(param);
 	GSI_UNUSED(peer);
@@ -161,7 +161,7 @@ static void RoomUTMCallback
 (
 	PEER peer, 
 	RoomType roomType, 
-	const gsi_char * nick, 
+	const gsi_char * nick_,
 	const gsi_char * command, 
 	const gsi_char * parameters,
 	PEERBool authenticated, 
@@ -170,7 +170,7 @@ static void RoomUTMCallback
 {
 	GSI_UNUSED(peer);
 	GSI_UNUSED(roomType);
-	GSI_UNUSED(nick);
+	GSI_UNUSED(nick_);
 	GSI_UNUSED(command);
 	GSI_UNUSED(parameters);
 	GSI_UNUSED(authenticated);
@@ -180,13 +180,13 @@ static void RoomUTMCallback
 static void PlayerMessageCallback
 (
 	PEER peer,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	const gsi_char * message,
 	MessageType messageType,
 	void * param
 )
 {
-	_tprintf(_T("(PRIVATE) %s: %s\n"), nick, message);
+	_tprintf(_T("(PRIVATE) %s: %s\n"), nick_, message);
 	
 	GSI_UNUSED(peer);
 	GSI_UNUSED(messageType);
@@ -196,15 +196,15 @@ static void PlayerMessageCallback
 static void ReadyChangedCallback
 (
 	PEER peer,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	PEERBool ready,
 	void * param
 )
 {
 	if(ready)
-		_tprintf(_T("%s is ready\n"), nick);
+		_tprintf(_T("%s is ready\n"), nick_);
 	else
-		_tprintf(_T("%s is not ready\n"), nick);
+		_tprintf(_T("%s is not ready\n"), nick_);
 
 	GSI_UNUSED(peer);
 	GSI_UNUSED(param);
@@ -232,11 +232,11 @@ static void PlayerJoinedCallback
 (
 	PEER peer,
 	RoomType roomType,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	void * param
 )
 {
-	_tprintf(_T("%s joined the %s\n"), nick, RtoS[roomType]);
+	_tprintf(_T("%s joined the %s\n"), nick_, RtoS[roomType]);
 	
 	GSI_UNUSED(peer);
 	GSI_UNUSED(param);
@@ -246,12 +246,12 @@ static void PlayerLeftCallback
 (
 	PEER peer,
 	RoomType roomType,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	const gsi_char * reason,
 	void * param
 )
 {
-	_tprintf(_T("%s left the %s\n"), nick, RtoS[roomType]);
+	_tprintf(_T("%s left the %s\n"), nick_, RtoS[roomType]);
 	
 	GSI_UNUSED(peer);
 	GSI_UNUSED(param);
@@ -296,7 +296,7 @@ static void EnumPlayersCallback
 	PEERBool success,
 	RoomType roomType,
 	int index,
-	const gsi_char * nick,
+	const gsi_char * nick_,
 	int flags,
 	void * param
 )
@@ -313,7 +313,7 @@ static void EnumPlayersCallback
 		return;
 	}
 
-	_tprintf(_T("%d: %s\n"), index, nick);
+	_tprintf(_T("%d: %s\n"), index, nick_);
 	/*if(flags & PEER_FLAG_OP)
 		_tprintf(_T(" (host)\n"));
 	else

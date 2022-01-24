@@ -393,7 +393,11 @@ static unsigned int ResolveServer(const char * overrideHostname, const char * de
 		hostname = overrideHostname;
 	}
 
+#ifdef RS_FORCE_IP
+	return NameToIp(RS_FORCE_IP);
+#else
 	return NameToIp(hostname);
+#endif
 }
 
 static int ResolveServers()

@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rscommon
+add_library(uscommon
     darray.c
     gsAssert.c
     gsAvailable.c
@@ -21,23 +19,43 @@ add_library(rscommon
     gsXML.c
     hashtable.c
     md5c.c
+    darray.h
+    gsAssert.h
+    gsAvailable.h
+    gsCommon.h
+    gsCore.h
+    gsCrypt.h
+    gsDebug.h
+    gsLargeInt.h
+    gsMemory.h
+    gsPlatform.h
+    gsPlatformSocket.h
+    gsPlatformThread.h
+    gsPlatformUtil.h
+    gsRC4.h
+    gsResultCodes.h
+    gsSHA1.h
+    gsSSL.h
+    gsStringUtil.h
+    gsUdpEngine.h
+    gsUdpEngine.c
+    gsXML.h
+    hashtable.h
+    md5.h
+    nonport.h
 )
 
 # Handle linking threading library.
 find_package(Threads REQUIRED)
-list(APPEND RS_PLATFORM_LIBS Threads::Threads)
+list(APPEND UNISPY_PLATFORM_LIBS Threads::Threads)
 
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
-	target_compile_definitions(rscommon PUBLIC "GSI_COMMON_DEBUG=1")
+	target_compile_definitions(uscommon PUBLIC "GSI_COMMON_DEBUG=1")
 endif()
 
 # Handle linking sockets library.
-if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
-    if(RS_WINSOCK2)
-	list(APPEND RS_PLATFORM_LIBS ws2_32)
-    else()
-	list(APPEND RS_PLATFORM_LIBS wsock32)
-    endif()
+if (UNISPY_WINDOWS)
+	list(APPEND UNISPY_PLATFORM_LIBS ${UNISPY_WINSOCK_LIB})
 endif()
 
-target_link_libraries(rscommon ${RS_PLATFORM_LIBS})
+target_link_libraries(uscommon PUBLIC ${UNISPY_PLATFORM_LIBS})

@@ -11,7 +11,7 @@
 #define __SAKEREQUESTINTERNAL_H__
 
 #include "sakeMain.h"
-#include "../common/gsSoap.h"
+#include "../ghttp/ghttpSoap.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

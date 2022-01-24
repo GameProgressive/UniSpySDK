@@ -1,15 +1,9 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.16)
 
-project(retrospy VERSION 2.06 LANGUAGES C CXX)
+project(UniSpySDK VERSION 2.10 LANGUAGES C CXX)
 
-# Only interpret if() arguments as variables or keywords when unquoted.
-# CMake version 3.21.1+ warns when the policy is not set and uses OLD behavior.
-cmake_policy(SET CMP0054 NEW)
-
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-
-message(STATUS "CMake version: ${CMAKE_VERSION}.")
-message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}.")
 
 # Git.
 find_package(Git)
@@ -41,9 +35,6 @@ if (Git_FOUND)
         "Git using branch '${RS_GIT_BRANCH}', commit ${RS_GIT_COMMIT_HASH}/'${RS_GIT_COMMIT_SUBJECT}'.")
 endif()
 
-message(STATUS "${PROJECT_NAME} c compiler ${CMAKE_C_COMPILER_ID} at ${CMAKE_C_COMPILER}.")
-message(STATUS "${PROJECT_NAME} cxx compiler ${CMAKE_CXX_COMPILER_ID} at ${CMAKE_CXX_COMPILER}.")
-
 # Set default build to be release if no other specified.
 if (NOT CMAKE_CONFIGURATION_TYPES AND 
     NOT CMAKE_NO_BUILD_TYPE AND
@@ -53,48 +44,81 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND
 endif()
 
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
-option(RS_OPENSSL "Enable OpenSSL support" ON)
-option(RS_HTTPLOG "Enable HTTP logging" OFF)
-option(RS_SECURESECONNECT "Enable connecting to RetroSpy services with a secure protocol (HTTPS)" ON)
+option(UNISPY_OPENSSL "Enable OpenSSL support" ON)
+option(UNISPY_HTTPLOG "Enable HTTP logging" OFF)
+option(UNISPY_SECURESECONNECT "Enable connecting to RetroSpy services with a secure protocol (HTTPS)" ON)
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
-#option(RS_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
+#option(SDK_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
 
-if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
+if(WIN32 OR "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" OR MINGW OR CYGWIN)
+    include(MFCMacro)
+
+    option(UNISPY_MSVC_STATIC "Use MSVC static runtime" OFF)
+
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 
     # WinSock1 is deprecated, it's better to use WinSock2
-    option(RS_WINSOCK2 "Link against Windows Socket 2 instead of Windows Socket 1." ON)
+    option(UNISPY_WINSOCK2 "Link against Windows Socket 2 instead of Windows Socket 1." ON)
+
+    if(UNISPY_WINSOCK2)
+        add_definitions(-DGSI_WINSOCK2)
+        set(UNISPY_WINSOCK_LIB ws2_32)
+    else()
+        set(UNISPY_WINSOCK_LIB winsock32)
+    endif()
+
+    set(UNISPY_WINDOWS 1)
+endif()
+
+if (APPLE OR "${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+    set(UNISPY_MACOSX 1) # preparation for common refactor
+
+    if ("${CMAKE_SYSTEM_NAME}" MATCHES "iOS")
+        set(UNISPY_IPHONE 1) # preparation for common refactor
+    endif()
+endif()
+
+if (UNIX)
+    if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+        set(UNISPY_LINUX 1) # preparation for common refactor
+    endif()
 endif()
 
 # Do we optionally want to build the test executables?
-option(RS_BUILD_TESTS "Builds test executables." OFF)
+option(UNISPY_BUILD_TESTS "Builds test executables." "")
 
-if(RETROSPY_SERVER_NAME)
-    add_definitions(-DGSI_DOMAIN_NAME="${RETROSPY_SERVER_NAME}")
-    message(STATUS "RETROSPY server name is set to ${RETROSPY_SERVER_NAME}")
+if(UNISPY_DOMAIN_NAME)
+    add_definitions(-DGSI_DOMAIN_NAME="${UNISPY_DOMAIN_NAME}")
+    message(STATUS "Server name is set to ${UNISPY_DOMAIN_NAME}")
 endif()
 
-add_definitions(-DGS_PEER)
+add_definitions(-DGS_PEER -DRS_FORCE_IP="${RS_FORCE_IP}")
 
-if(RS_WINSOCK2)
-    add_definitions(-DGSI_WINSOCK2)
+if (DEFINED UNISPY_FORCE_IP)
+    add_definitions(-DUNISPY_FORCE_IP="${UNISPY_FORCE_IP}")
 endif()
 
-if(RS_SECURESECONNECT)
+if(UNISPY_SECURESECONNECT)
     add_definitions(-DRS_HTTPS)
 endif()
 
-#if (RS_MEM_MANAGED)
-add_definitions(-DGSI_MEM_MANAGED)
+#if (UNISPY_MEM_MANAGED)
+    add_definitions(-DGSI_MEM_MANAGED)
 #endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Clang, Apple Clang and GCC have stricter warning requirements.
-    add_compile_options(-Wall -Wno-unused-parameter)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(-Wall -Wno-unused-parameter -Wextra)
+    
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(UNISPY_COMPILER_CLANG 1)
+    else()
+        set(UNISPY_COMPILER_GCC 1)
+    endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR MSVC)
     # At least Ninja doesn't remove the /W3 flag when we add /W4|/Wall one, which
     # leads to compilation warnings.  Remove /W3 entirely, as /W4|/Wall be used.
     foreach(flag_var
@@ -110,6 +134,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Use almost max warning level (/W3 used by default).
     # Exclude C4100 (unreferenced formal parameter).
     add_compile_options("/W4;/wd4100")
+    set(UNISPY_COMPILER_MSVC 1)
 endif()
 
 #add_subdirectory(brigades)
@@ -130,4 +155,4 @@ add_subdirectory(sake) # depends on common and ghttp. test relies on GP and gt2 
 add_subdirectory(webservices)
 add_subdirectory(sc) # depends on common webservices ghttp
 add_subdirectory(Voice2)
-add_subdirectory(RetroSpy)
+add_subdirectory(sharedDll)

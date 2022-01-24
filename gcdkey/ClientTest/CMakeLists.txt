@@ -1,0 +1,3 @@
+add_executable(keyclienttest gcdkeyclienttest.c)
+target_link_libraries(keyclienttest uscdkey)
+set_target_properties(keyclienttest PROPERTIES FOLDER Tests)

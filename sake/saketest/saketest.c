@@ -10,7 +10,7 @@
 #include "../../common/gsCommon.h"
 #include "../../common/gsAvailable.h"
 #include "../../common/gsCore.h"
-#include "../../common/gsSoap.h"
+#include "../../ghttp/ghttpSoap.h"
 #include "../sake.h"
 #include "../../ghttp/ghttp.h"
 #include "../../GP/gp.h"

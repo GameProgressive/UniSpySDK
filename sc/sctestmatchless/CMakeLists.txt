@@ -1,0 +1,3 @@
+add_executable(sctestmatchless sctestmatchless.c)
+target_link_libraries(sctestmatchless ussc)
+set_target_properties(sctestmatchless PROPERTIES FOLDER Tests)

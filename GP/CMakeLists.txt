@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rsgp
+add_library(usgp
     gp.c
     gpi.c
     gpiBuddy.c
@@ -18,12 +16,31 @@ add_library(rsgp
     gpiTransfer.c
     gpiUnique.c
     gpiUtility.c
+    gp.h
+    gpi.h
+    gpiBuddy.h
+    gpiBuffer.h
+    gpiCallback.h
+    gpiConnect.h
+    gpiInfo.h
+    gpiKeys.h
+    gpiOperation.h
+    gpiPeer.h
+    gpiProfile.h
+    # gpiPS3.h
+    gpiSearch.h
+    gpiTransfer.h
+    gpiUnique.h
+    gpiUtility.h
 )
 
-target_link_libraries(rsgp rsgt2)
+target_link_libraries(usgp PUBLIC usgt2)
 
-if(RS_BUILD_TESTS)
-    add_executable(gptest gptestc/gptestc.c)
-    target_link_libraries(gptest rsgp)
-    target_compile_definitions(gptest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(gpstress)
+    add_subdirectory(gptestc)
+
+    if (UNISPY_WINDOWS)
+        add_subdirectory(gptest)
+    endif()
 endif()

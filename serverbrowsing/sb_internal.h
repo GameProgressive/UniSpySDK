@@ -425,9 +425,6 @@ void SBReleaseStr(SBServerList *slist,const char *str);
 HashTable SBRefStrHash(SBServerList *slist);
 void SBRefStrHashCleanup(SBServerList *slist);
 
-extern char *SBOverrideMasterServer;
-
-
 //query engine functions
 void SBQueryEngineInit(SBQueryEngine *engine, int maxupdates, int queryversion, SBBool lanBrowse, SBEngineCallbackFn callback, void *instance);
 void SBQueryEngineUpdateServer(SBQueryEngine *engine, SBServer server, int addfront, int querytype, SBBool usequerychallenge);

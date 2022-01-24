@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.0.0)
-
-add_library(rssake
+add_library(ussake
     sakeMain.c
     sakeRequest.c
     sakeRequestMisc.c
     sakeRequestModify.c
     sakeRequestRead.c
+    sake.h
+    sakeMain.h
+    sakeRequest.h
+    sakeRequestInternal.h
 )
 
-target_link_libraries(rssake rscommon rshttp)
+target_link_libraries(ussake PUBLIC ushttp)
 
-if(RS_BUILD_TESTS)
-    add_executable(saketest saketest/saketest.c)
-    target_link_libraries(saketest rssake rsgp rsgt2)
-    target_compile_definitions(saketest PRIVATE test_main=main)
+if(UNISPY_BUILD_TESTS)
+    add_subdirectory(saketest)
 endif()

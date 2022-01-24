@@ -1,0 +1,3 @@
+add_executable(keyservertest gcdkeyservertest.c)
+target_link_libraries(keyservertest uscdkey usqr2)
+set_target_properties(keyservertest PROPERTIES FOLDER Tests)

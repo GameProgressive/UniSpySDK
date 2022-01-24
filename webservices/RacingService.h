@@ -14,7 +14,7 @@
 //
 // ***** PUBLIC INTERFACE AT THE BOTTOM OF THE FILE
 
-#include "../common/gsSoap.h"
+#include "../ghttp/ghttpSoap.h"
 
 #if defined(__cplusplus)
 extern "C"

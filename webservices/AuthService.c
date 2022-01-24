@@ -1390,7 +1390,7 @@ static void wsiCreateUserAccountCallback(GHTTPResult theResult,
 
 	memset(&response, 0, sizeof(response));
 
-	if (theResult != X)
+	if (theResult != GHTTPSuccess)
 	{
 		response.mCreateUserAccountResult = WSCreateUserAccount_HttpError;
 	}
@@ -1423,7 +1423,6 @@ static void wsiCreateUserAccountCallback(GHTTPResult theResult,
 			else
 			{
 				GSMD5_CTX md5;
-				char buffer[20];
 
 				// peer privatekey modulus is same as peer public key modulus
 				memcpy(&response.mPrivateData.mPeerPrivateKey.modulus, &cert->mPeerPublicKey.modulus, sizeof(cert->mPeerPublicKey.modulus));
