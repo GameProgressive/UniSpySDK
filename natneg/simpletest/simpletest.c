@@ -297,8 +297,8 @@ int test_main(int argc, char **argp)
 			if (current_time() - lastsendtime > 2000)
 			{
 				int ret = sendto(sock, "woohoo!!", 8, 0, (struct sockaddr *)&otheraddr, sizeof(struct sockaddr_in));
-				int error = GOAGetLastError(sock);
-				printf("|Sending (%d:%d), remoteaddr: %s, remoteport: %d\n", ret, error, inet_ntoa(otheraddr.sin_addr), ntohs(otheraddr.sin_port));
+				int error2 = GOAGetLastError(sock);
+				printf("|Sending (%d:%d), remoteaddr: %s, remoteport: %d\n", ret, error2, inet_ntoa(otheraddr.sin_addr), ntohs(otheraddr.sin_port));
 				lastsendtime = current_time();
 			}			
 		}

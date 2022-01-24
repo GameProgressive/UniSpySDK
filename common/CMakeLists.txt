@@ -1,4 +1,4 @@
-add_library(uscommon
+set(COMMON_SRC
     darray.c
     gsAssert.c
     gsAvailable.c
@@ -44,6 +44,18 @@ add_library(uscommon
     md5.h
     nonport.h
 )
+
+if (UNISPY_WINDOWS)
+    list(APPEND COMMON_SRC win32/Win32Common.c)
+endif()
+if (UNISPY_MACOSX)
+    list(APPEND COMMON_SRC macosx/MacOSXCommon.c)
+endif()
+if (UNISPY_LINUX)
+    list(APPEND COMMON_SRC linux/LinuxCommon.c)
+endif()
+
+add_library(uscommon ${COMMON_SRC})
 
 # Handle linking threading library.
 find_package(Threads REQUIRED)

@@ -29,8 +29,6 @@ add_library(ushttp
     ghttpSoap.c
 )
 
-target_link_libraries(ushttp PUBLIC uscommon)
-
 if (UNISPY_HTTPLOG)
 	target_compile_definitions(ushttp PUBLIC HTTP_LOG=1)
 endif()
@@ -41,9 +39,11 @@ if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
 endif()
 
 if (OPENSSL_FOUND)
-    target_link_libraries(ushttp OpenSSL::SSL)
+    set(HTTP_OPENSSL_LIBS OpenSSL::SSL)
     target_compile_definitions(ushttp PRIVATE OPENSSL=1)
 endif()
+
+target_link_libraries(ushttp PUBLIC uscommon ${HTTP_OPENSSL_LIBS})
 
 if(UNISPY_BUILD_TESTS)
     add_subdirectory(ghttpc)

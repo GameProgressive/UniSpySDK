@@ -237,10 +237,9 @@ static void TestCodec(GVCodec codec, GVRate sampleRate, const char * name)
 	#ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
 		int test_main(int argc, char **argp);
 	#endif	
-int test_main(int argc, char **argp)
-#else
-int main(int argc, char **argp)
 #endif // _PS2
+
+int test_main(int argc, char** argp)
 {
 	printf("Testing codecs\n");
 

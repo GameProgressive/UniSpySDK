@@ -1,9 +1,8 @@
-#include <windows.h>
-#include <process.h>
-#include <conio.h>
-
 #define PINGER_UDP_PING_SIZE  64
 #include "../pinger.h"
+
+#include <process.h>
+#include <conio.h>
 
 void pinged(unsigned int IP,
 			unsigned short port,
