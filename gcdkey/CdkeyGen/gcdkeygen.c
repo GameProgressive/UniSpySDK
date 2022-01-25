@@ -24,6 +24,17 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdint.h>
+
+#ifndef _WIN32
+#define gets_s(x, y) gets(x)
+
+static uint32_t GetTickCount() {
+    struct timespec sp;
+    clock_gettime(CLOCK_MONOTONIC, &sp);
+    return sp.tv_nsec + (sp.tv_sec * 1000);
+}
+#endif
 
 #include "../../common/gsPlatform.h"
 
@@ -71,9 +82,9 @@ void DoGenerateKeys()
 	char hexstr[20];
 	int keyct;
 	unsigned int interval;
-	__int64 offset; 
-	__int64 base = MINKEYSEED;
-	__int64 seed;
+	int64_t offset;
+    int64_t base = MINKEYSEED;
+    int64_t seed;
 	short check;
 	FILE *f;
 
@@ -122,7 +133,7 @@ void DoGenerateKeys()
 
 int ValidateKey(char *key)
 {
-	__int64 seed;
+	int64_t seed;
 	char hexstr[20] = "0x";
 	int check;
 	short realcheck;

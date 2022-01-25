@@ -37,7 +37,7 @@ add_library(usgp
 target_link_libraries(usgp PUBLIC usgt2)
 
 if(UNISPY_BUILD_TESTS)
-    add_subdirectory(gpstress)
+    #add_subdirectory(gpstress) ##TODO
     add_subdirectory(gptestc)
 
     if (UNISPY_WINDOWS)

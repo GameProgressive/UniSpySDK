@@ -8,6 +8,7 @@
 
 #include	"config.h"
 
+#include <string.h>
 
 #ifdef	HAS_STDLIB_H
 #include	<stdlib.h>

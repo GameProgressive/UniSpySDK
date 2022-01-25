@@ -326,7 +326,7 @@ void ConnectAttemptCallback
 	GSI_UNUSED(socket);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 BOOL WINAPI CtrlHandler
 (
 	DWORD type
@@ -491,10 +491,11 @@ int main
 	/////////////////
 	printf("Listening on port %d\n", gt2GetLocalPort(Socket));
 
+#ifdef _WIN32
 	// For win32, setup a ctrl-c handler.
 	/////////////////////////////////////
 	SetConsoleCtrlHandler(CtrlHandler, TRUE);
-
+#endif
 	// We're starting.
 	//////////////////
 	startTime = time(NULL);
