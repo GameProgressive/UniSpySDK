@@ -1,8 +1,16 @@
 #define PINGER_UDP_PING_SIZE  64
 #include "../pinger.h"
 
+#ifdef _WIN32
 #include <process.h>
 #include <conio.h>
+#define s_addr S_un.S_addr
+#else
+#include <arpa/inet.h>
+#define getch getchar
+#define Sleep sleep
+#define _getpid getpid
+#endif
 
 void pinged(unsigned int IP,
 			unsigned short port,
@@ -12,7 +20,7 @@ void pinged(unsigned int IP,
 			void * param)
 {
 	IN_ADDR addr;
-	addr.S_un.S_addr = IP;
+	addr.s_addr = IP;
 
 	printf("PINGED!\n"
 	       "%s:%d %dms", inet_ntoa(addr), ntohs(port), ping);
@@ -31,8 +39,7 @@ void reply(unsigned int IP,
 		   void * param)
 {
 	IN_ADDR addr;
-	addr.S_un.S_addr = IP;
-
+    addr.s_addr = IP;
 	printf("REPLY!\n"
 	       "%s:%d %dms", inet_ntoa(addr), ntohs(port), ping);
 

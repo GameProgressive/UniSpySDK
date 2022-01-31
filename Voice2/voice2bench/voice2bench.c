@@ -185,8 +185,12 @@ static void TestCodec(GVCodec codec, GVRate sampleRate, const char * name)
 
 	printf("Testing %s\n", name);
 
-	//if(!Init(codec, sampleRate))
+#if defined(_WIN32) || defined(_PS2) || defined(_PSP)
 	if (!Init(codec))
+#else
+    if (!Init(codec, sampleRate))
+#endif
+
 	{
 		printf("Failed to init\n");
 		return;

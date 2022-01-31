@@ -16,6 +16,18 @@
 #include "../gp.h"
 #include "../../common/gsAvailable.h"
 
+#ifndef _WIN32
+#define MAX_PATH PATH_MAX
+#define OutputDebugString printf
+#endif
+
+#ifndef max
+#define max(a, b) (((a)>(b))?(a):(b))
+#endif
+#ifndef min
+#define min(a, b) (((a)<(b))?(a):(b))
+#endif
+
 /************
 ** DEFINES **
 ************/
@@ -1029,7 +1041,7 @@ void StartOp(Profile * profile)
 **********************/
 void ProcessProfile(Profile * profile)
 {
-	DWORD now = current_time();
+	unsigned int now = current_time();
 
 	// Is GP initialized?
 	/////////////////////
@@ -1331,7 +1343,7 @@ bool Initialize(void)
 {
 	int i;
 	Profile * profile;
-	DWORD now;
+	unsigned int now;
 	GSIACResult aResult = GSIACWaiting;
 
 	// Seed the random number generator.

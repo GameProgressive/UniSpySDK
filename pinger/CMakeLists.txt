@@ -5,6 +5,6 @@ add_library(uspinger
 
 target_link_libraries(uspinger PUBLIC uscommon)
 
-if (UNISPY_BUILD_TESTS)
+if (UNISPY_BUILD_TESTS AND UNISPY_WINDOWS)
     add_subdirectory(pingTest)
 endif()

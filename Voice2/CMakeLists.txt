@@ -76,6 +76,10 @@ if(UNIX AND NOT UNISPY_MACOSX)
     target_compile_definitions(usvoice2 PRIVATE -DGV_NO_DEFAULT_HARDWARE)
 endif()
 
+if (UNISPY_MACOSX)
+    target_link_libraries(usvoice2 PUBLIC "-framework Foundation -framework AudioToolbox -framework CoreAudio")
+endif()
+
 target_link_libraries(usvoice2 PUBLIC uscommon)
 
 if(UNISPY_BUILD_TESTS)
