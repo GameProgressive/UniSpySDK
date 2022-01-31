@@ -402,15 +402,15 @@ char * goastrdup(const char *src)
 	return res;
 }
 
-gsi_char * goawstrdup(const gsi_char *src)
+wchar_t* goawstrdup(const wchar_t*src)
 {
-	gsi_char *res;
+	wchar_t*res;
 	size_t len;
 
 	if(src == NULL)      
 		return NULL;
-	len = (wcslen((wchar_t*)src) + 1) * sizeof(gsi_char);
-	res = (gsi_char *)gsimalloc(len);
+	len = (wcslen((wchar_t*)src) + 1) * sizeof(wchar_t);
+	res = (wchar_t*)gsimalloc(len);
 	if(res != NULL)
 		memcpy(res, src, len);
 	return res;

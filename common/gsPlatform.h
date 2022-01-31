@@ -551,7 +551,7 @@ extern "C" {
 #endif
 
 char * goastrdup(const char *src);
-gsi_char * goawstrdup(const gsi_char *src);
+wchar_t* goawstrdup(const wchar_t*src);
 
 
 // ------ Cross Plat Alignment macros ------------

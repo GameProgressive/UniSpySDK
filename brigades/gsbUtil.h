@@ -11,7 +11,7 @@
 #define __GSB_UTIL_H__
 
 // This define is kept for compatibility purpouse.
-#define GSB_HTTP             RS_HTTP_PROTOCOL_URL
+#define GSB_HTTP             GSI_HTTP_PROTOCOL_URL
 
 #if defined(GSI_OPEN_DOMAIN_NAME)
 	#define GSB_SERVICE_URL_BASE "" GSI_OPEN_DOMAIN_NAME "/Brigades/"

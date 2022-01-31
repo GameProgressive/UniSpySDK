@@ -39,7 +39,11 @@ GSResult gsbiSetServiceUrl(GSBInternalInstance *theInstance)
 	
 	if (theInstance->mBaseServiceURL[0] == '\0')
 	{
+#ifndef UNISPY_FORCE_IP
 		charsWritten = snprintf(theInstance->mBaseServiceURL, GSB_SERVICE_MAX_URL_BASE_LEN, GSB_SERVICE_URL_BASE, __GSIACGamename);
+#else
+        charsWritten = snprintf(theInstance->mBaseServiceURL, GSB_SERVICE_MAX_URL_BASE_LEN, "%s/Brigades/", UNISPY_FORCE_IP);
+#endif
 		if (charsWritten < 0)
 		{
 			GSB_DEBUG_LOG(GSIDebugType_Memory, GSIDebugLevel_WarmError, "Could not write to Base URL string");
@@ -475,12 +479,19 @@ GS_THREAD_RETURN_TYPE gsbiUploadThreadFunc(void *arg)
 		GS_THREAD_RETURN_NEGATIVE;
 	}
 
+#ifdef UNISPY_FORCE_IP
+    _tsnprintf(uploadUrl,
+        sizeof(gsi_char) * GSB_SERVICE_MAX_URL_LEN,
+        _T("%s%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
+        GSI_HTTP_PROTOCOL_URL, UNISPY_FORCE_IP, GSB_UPLOAD_GID,
+        uploadData->mInstance->mCertificate.mProfileId);
+	#else
 	_tsnprintf(uploadUrl, 
 		       sizeof(gsi_char) * GSB_SERVICE_MAX_URL_LEN, 
 			   _T("%sbrigades.sake.%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-               RS_HTTP_PROTOCOL_URL, GSI_DOMAIN_NAME, GSB_UPLOAD_GID,
+        GSI_HTTP_PROTOCOL_URL, GSI_DOMAIN_NAME, GSB_UPLOAD_GID,
 			   uploadData->mInstance->mCertificate.mProfileId);
-
+#endif
 
 	aRequest = ghttpPostEx(uploadUrl, NULL, aPost, GHTTPFalse, GHTTPTrue, NULL, gsbiUploadCompletedCallback, uploadData);
     gsifree(uploadUrl);

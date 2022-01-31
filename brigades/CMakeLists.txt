@@ -10,7 +10,7 @@ add_library(usbrigades
     gsbUtil.h
 )
 
-target_link_libraries(usbrigades PUBLIC ushttp)
+target_link_libraries(usbrigades PUBLIC uswebservice)
 
 if (UNISPY_BUILD_TESTS)
     add_subdirectory(brigadesTest)

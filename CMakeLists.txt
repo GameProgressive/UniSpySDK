@@ -137,7 +137,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR MSVC)
     set(UNISPY_COMPILER_MSVC 1)
 endif()
 
-#add_subdirectory(brigades)
+add_subdirectory(brigades)
 add_subdirectory(common) # Most of the common stuff gets built into this.
 add_subdirectory(Chat)
 add_subdirectory(natneg)

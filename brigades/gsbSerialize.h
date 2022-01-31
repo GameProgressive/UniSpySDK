@@ -10,7 +10,7 @@
 #ifndef __GSBSERIALIZE_H__
 #define __GSBSERIALIZE_H__
 
-#include "../common/gsSoap.h"
+#include "../ghttp/ghttpSoap.h"
 #include "../common/gsCrypt.h"
 #include "../common/gsLargeInt.h"
 
