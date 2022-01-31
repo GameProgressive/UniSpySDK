@@ -23,6 +23,8 @@
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuthWithGameId"
 #define WS_AUTHSERVICE_LOGINPS3CERT      "LoginPs3CertWithGameId"
 #define WS_AUTHSERVICE_CREATEUSER        "CreateUserAccount"
+#define WS_AUTHSERVICE_LOGINFACEBOOK	 "LoginFacebook"
+
 #define WS_BUDDYSERVICE_GETLIST          "GetBuddyListWithNames"
 
 #define WS_AUTHSERVICE_LOGINPROFILE_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginProfileWithGameId\""
@@ -31,10 +33,14 @@
 #define WS_AUTHSERVICE_LOGINPS3CERT_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginPs3CertWithGameId\""
 #define WS_AUTHSERVICE_CREATEUSER_SOAP      "SOAPAction: \"http://gamespy.net/AuthService/CreateUserAccount\""
 #define WS_BUDDYSERVICE_GETLIST_SOAP        "SOAPAction: \"http://gamespy.net/BuddyService/GetBuddyListWithName\""
+#define WS_AUTHSERVICE_LOGINFACEBOOK_SOAP	"SOAPAction: \"http://gamespy.net/AuthService/LoginFacebook\""
 
 #define WS_AUTHSERVICE_PROTOVERSION      1
 
 #define WS_AUTHSERVICE_NAMESPACE         "ns1"
+
+#define WS_AUTHSERVICE_NAME				"AuthService.asmx"
+#define WS_BUDDYSERVICE_NAME			"BuddyService.asmx"
 
 #define WS_AUTHSERVICE_NAMESPACE_COUNT  1
 const char * WS_AUTHSERVICE_NAMESPACES[WS_AUTHSERVICE_NAMESPACE_COUNT] =
@@ -58,14 +64,16 @@ const char WS_AUTHSERVICE_SIGNATURE_KEY[] =
 	"B2FA37881176084C8F8B8756C4722CDC"
 	"57D2AD28ACD3AD85934FB48D6B2D2027";
 
-/*	"D589F4433FAB2855F85A4EB40E6311F0"
+/*			2007 RSA key (left for legacy things)
+ 	"D589F4433FAB2855F85A4EB40E6311F0"
 	"284C7882A72380938FD0C55CC1D65F7C"
 	"6EE79EDEF06C1AE5EDE139BDBBAB4219"
 	"B7D2A3F0AC3D3B23F59F580E0E89B9EC"
 	"787F2DD5A49788C633D5D3CE79438934"
 	"861EA68AE545D5BBCAAAD917CE9F5C7C"
 	"7D1452D9214F989861A7511097C35E60"
-	"A7273DECEA71CB5F8251653B26ACE781";*/
+	"A7273DECEA71CB5F8251653B26ACE781";
+*/
 
 
 
@@ -75,7 +83,8 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 // This is declared as an extern so it can be overriden when testing
 
 // Old API
-//#define WS_LOGIN_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/AuthService.asmx"
+//#define WS_LOGIN_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/WS_AUTHSERVICE_NAME"
+
 #define WS_LOGIN_SERVICE_URL_FORMAT GSI_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
 
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
@@ -87,24 +96,15 @@ typedef struct WSIRequestData
 {
 	union 
 	{
+		WSLoginFacebookCallback mLoginFacebookCallback;
+		WSGetBuddyListCallback mBuddyListCallback;
 		WSCreateUserAccountCallback mCreateUserAccountCallback;
 		WSLoginCallback mLoginCallback;
 		WSLoginSonyCertCallback mLoginSonyCertCallback;
 	} mUserCallback;
-	//void * mUserCallback;
 	void * mUserData;
+	GSSoapTask* mTask;
 } WSIRequestData;
-
-typedef struct WSIBuddyRequestData
-{
-	union
-	{
-		WSGetBuddyListCallback mBuddyListCallback;
-	} mUserCallback;
-	void * mUserData;
-	GSSoapTask * mTask;
-} WSIBuddyRequestData;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,7 +303,7 @@ WSLoginValue wsLoginProfile(int gameId,
 	WSIRequestData * requestData = NULL;
 	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable("AuthService.asmx"))
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return WSLogin_NoAvailabilityCheck;
 
 	GS_ASSERT(gameId >= 0);
@@ -327,6 +327,7 @@ WSLoginValue wsLoginProfile(int gameId,
 		return WSLogin_OutOfMemory;
 	requestData->mUserCallback.mLoginCallback = callback;
 	requestData->mUserData     = userData;
+	requestData->mTask = NULL;
 
 	// encrypt the password (includes safety padding and hash)
 	wsiLoginEncryptPassword(password, encryptedPassword);
@@ -334,7 +335,6 @@ WSLoginValue wsLoginProfile(int gameId,
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINPROFILE)) ||
@@ -359,9 +359,9 @@ WSLoginValue wsLoginProfile(int gameId,
 		strcat(buffer, "\r\nAccessKey: ");
 		strcat(buffer, authCreds);
 
-		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsiLoginProfileCallback, (void*)requestData);
-		if (aTask == NULL)
+		if (requestData->mTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
@@ -370,6 +370,7 @@ WSLoginValue wsLoginProfile(int gameId,
 	}
 	else
 	{
+		gsifree(requestData);
 		return WSLogin_OutOfMemory;
 	}
 	return 0;
@@ -494,7 +495,7 @@ WSLoginValue wsLoginUnique(int gameId,
 	WSIRequestData * requestData = NULL;
 	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable("AuthService.asmx"))
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return WSLogin_NoAvailabilityCheck;
 
 	GS_ASSERT(partnerCode >= 0);
@@ -515,7 +516,8 @@ WSLoginValue wsLoginUnique(int gameId,
 		return WSLogin_OutOfMemory;
 	requestData->mUserCallback.mLoginCallback = userCallback;
 	requestData->mUserData     = userData;
-	
+	requestData->mTask = NULL;
+
 	// encrypt the password (includes safety padding and hash)
 	wsiLoginEncryptPassword(password, encryptedPassword);
 
@@ -523,7 +525,6 @@ WSLoginValue wsLoginUnique(int gameId,
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINUNIQUE)) ||
@@ -547,9 +548,9 @@ WSLoginValue wsLoginUnique(int gameId,
 		strcat(buffer, "\r\nAccessKey: ");
 		strcat(buffer, authCreds);
 
-		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsLoginUniqueCallback, (void*)requestData);
-		if (aTask == NULL)
+		if (requestData->mTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
@@ -558,6 +559,7 @@ WSLoginValue wsLoginUnique(int gameId,
 	}
 	else
 	{
+		gsifree(requestData);
 		return WSLogin_OutOfMemory;
 	}
 
@@ -681,7 +683,7 @@ WSLoginValue wsLoginRemoteAuth(int gameId,
 	WSIRequestData * requestData = NULL;
 	//gsi_u8 encryptedChallenge[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable("AuthService.asmx"))
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return WSLogin_NoAvailabilityCheck;
 
 	GS_ASSERT(gameId >= 0);
@@ -691,9 +693,11 @@ WSLoginValue wsLoginRemoteAuth(int gameId,
 	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
 	if (requestData == NULL)
 		return WSLogin_OutOfMemory;
+
 	requestData->mUserCallback.mLoginCallback = userCallback;
 	requestData->mUserData     = userData;
-	
+	requestData->mTask = NULL;
+
 	// encrypt the password (includes safety padding and hash)
 	//wsiLoginEncryptPassword(partnerChallenge, encryptedChallenge);
 
@@ -701,7 +705,6 @@ WSLoginValue wsLoginRemoteAuth(int gameId,
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINREMOTEAUTH)) ||
@@ -726,9 +729,9 @@ WSLoginValue wsLoginRemoteAuth(int gameId,
 		strcat(buffer, "\r\nAccessKey: ");
 		strcat(buffer, authCreds);
 
-		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsLoginRemoteAuthCallback, (void*)requestData);
-		if (aTask == NULL)
+		if (requestData->mTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
@@ -737,6 +740,7 @@ WSLoginValue wsLoginRemoteAuth(int gameId,
 	}
 	else
 	{
+		gsifree(requestData);
 		return WSLogin_OutOfMemory;
 	}
 
@@ -852,7 +856,7 @@ WSLoginValue wsLoginSonyCert(int gameId,
 	GSXmlStreamWriter writer;
 	WSIRequestData * requestData = NULL;
 
-	if (!wsiServiceAvailable("AuthService.asmx"))
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return WSLogin_NoAvailabilityCheck;
 
 	GS_ASSERT(gameId >= 0);
@@ -871,12 +875,12 @@ WSLoginValue wsLoginSonyCert(int gameId,
 
 	requestData->mUserCallback.mLoginSonyCertCallback = userCallback;
 	requestData->mUserData     = userData;
+	requestData->mTask = NULL;
 	
 	// create the xml request
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINPS3CERT)) ||
@@ -899,9 +903,9 @@ WSLoginValue wsLoginSonyCert(int gameId,
 		strcat(buffer, "\r\nAccessKey: ");
 		strcat(buffer, authCreds);
 
-		aTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, buffer,
 			        writer, wsLoginSonyCertCallback, (void*)requestData);
-		if (aTask == NULL)
+		if (requestData->mTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
@@ -910,6 +914,7 @@ WSLoginValue wsLoginSonyCert(int gameId,
 	}
 	else
 	{
+		gsifree(requestData);
 		return WSLogin_OutOfMemory;
 	}
 
@@ -1309,7 +1314,7 @@ char* wsGetServiceUrl()
 		if (!wsAuthServiceURL[0])
 			snprintf(wsAuthServiceURL, sizeof(wsAuthServiceURL),
 				WS_LOGIN_SERVICE_URL_FORMAT,
-				__GSIACGamename, "AuthService.asmx");
+				__GSIACGamename, WS_AUTHSERVICE_NAME);
 
 		return wsAuthServiceURL;
 	}
@@ -1322,45 +1327,45 @@ const char* wsLoginValueString(int loginValue)
 {
 	switch (loginValue)
 	{
-	case 0:
+	case WSLogin_Success:
 		return "Login succeeded.";
-	case 1:
+	case WSLogin_ServerInitFailed:
 		return "Server init failed.";
-	case 2:
+	case WSLogin_UserNotFound:
 		return "User not found.";
-	case 3:
+	case WSLogin_InvalidPassword:
 		return "Invalid password.";
-	case 4:
+	case WSLogin_InvalidProfile:
 		return "Invalid profile.";
-	case 5:
+	case WSLogin_UniqueNickExpired:
 		return "Unique nick expired.";
-	case 6:
+	case WSLogin_DBError:
 		return "Database error.";
-	case 7:
+	case WSLogin_ServerError:
 		return "Server error.";
 
-	case 100:
+	case WSLogin_HttpError:
 		return "HTTP error.";
-	case 101:
-		return"Couldn't parse HTTP response.";
-	case 102:
+	case WSLogin_ParseError:
+		return "Couldn't parse HTTP response.";
+	case WSLogin_InvalidCertificate:
 		return "Login succeeded, but an invalid certificate was returned.";
-	case 103:
+	case WSLogin_LoginFailed:
 		return "Login failed.";
-	case 104:
+	case WSLogin_OutOfMemory:
 		return "Out of memory.";
-	case 105:
+	case WSLogin_InvalidParameters:
 		return "Invalid parameters.";
-	case 106:
+	case WSLogin_NoAvailabilityCheck:
 		return "Availability check not yet performed.";
-	case 107:
+	case WSLogin_Cancelled:
 		return "Login cancelled.";
 
 	default:
 		break;
 	}
 
-	return "An unknown error occurred.";
+	return "An unknown error occurred."; // WSLogin_UnknownError
 }
 
 void wsSetGameCredentials(const char* accessKey, const int gameId, const char* secretKey)
@@ -1391,8 +1396,171 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 #ifdef _IPHONE
 /*
 	wsSyncFacebook ...
-	wsLoginFacebook ...
 */
+static void wsLoginFacebookCallback(GHTTPResult theResult,
+	GSXmlStreamWriter theRequestXml,
+	GSXmlStreamReader theResponseXml,
+	void* theRequestData)
+{
+	WSIRequestData* requestData = (WSIRequestData*)theRequestData;
+
+	WSLoginFacebookResponse response;
+	memset(&response, 0, sizeof(response));
+
+	if (theResult == GHTTPRequestCancelled)
+	{
+		response.mLoginResult = WSLogin_Cancelled;
+		response.mErrorMsg = goastrdup("Login Request Cancelled");
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+		response.mLoginResult = WSLogin_HttpError;
+		response.mErrorMsg = goastrdup("HTTP Error");
+	}
+	else
+	{
+		// try to parse the soap
+		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "LoginFacebookResult")))
+		{
+			response.mLoginResult = WSLogin_ParseError;
+			response.mErrorMsg = goastrdup("Parse Error, couldn't read LoginFacebookResult");
+		}
+		else
+		{
+			int responseMsgLen = 0;
+			const char* responseMsg = NULL;
+
+			// prepare response structure
+			if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "responseCode", (int*)&response.mLoginResult)) ||
+				gsi_is_false(gsXmlReadAttributeAsString(theResponseXml, "responseMsg", &responseMsg, &responseMsgLen)))
+			{
+				// could not parse login response code
+				response.mLoginResult = WSLogin_ParseError;
+				response.mErrorMsg = goastrdup("Parse Error, couldn't read login response code");
+			}
+			else if (response.mLoginResult != WSLogin_Success)
+			{
+				// server reported an error into reponseCode
+				response.mErrorMsg = (char*)gsimalloc(responseMsgLen + 1);
+
+				if (response.mErrorMsg)
+				{
+					gsiSafeStrcpyA(response.mErrorMsg, responseMsg, responseMsgLen);
+				}
+				else
+				{
+					response.mErrorMsg = goastrdup("Out of memory");
+				}
+			}
+			else
+			{
+				const char* tokenStr = NULL;
+				const char* challengeStr = NULL;
+				int tokenLen = 0;
+				int challengeLen = 0;
+
+				// Check length of token+challenge, then read into memory
+				if (gsi_is_false(gsXmlReadChildAsString(theResponseXml, "authToken", &tokenStr, &tokenLen)) ||
+					gsi_is_false(gsXmlReadChildAsString(theResponseXml, "partnerChallenge", &challengeStr, &challengeLen)) ||
+					(tokenLen >= WS_LOGIN_AUTHTOKEN_LEN || challengeLen >= WS_LOGIN_PARTNERCHALLENGE_LEN))
+				{
+					response.mLoginResult = WSLogin_ParseError;
+					response.mErrorMsg = goastrdup("Parse Error, couldn't read token + challenge");
+				}
+				else
+				{
+					memcpy(response.mRemoteAuthToken, tokenStr, (gsi_u32)tokenLen);
+					memcpy(response.mPartnerChallenge, challengeStr, (gsi_u32)challengeLen);
+					response.mRemoteAuthToken[tokenLen] = '\0';
+					response.mPartnerChallenge[challengeLen] = '\0';
+					response.mErrorMsg = goastrdup("Success");
+					__isAuthenticated = gsi_true;
+				}
+			}
+		}
+	}
+
+	// trigger the user callback
+	if (requestData->mUserCallback.mLoginFacebookCallback != NULL)
+	{
+		requestData->mUserCallback.mLoginFacebookCallback(theResult, &response, requestData->mUserData);
+	}
+
+	gsifree(requestData);
+	gsifree(response.mErrorMsg);
+	GSI_UNUSED(theRequestXml);
+}
+
+GSTask*
+wsLoginFacebook(
+	int gameId,
+	const gsi_u64 uid,
+	const char* apiKey,
+	const char* sessionKey,
+	const char* sessionSecret,
+	WSLoginFacebookCallback callback,
+	void* userData
+)
+{
+	GSXmlStreamWriter writer;
+	WSIRequestData* requestData = NULL;
+	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
+
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
+		return NULL;
+
+	if (!callback)
+		return NULL;
+
+	// allocate the request values
+	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
+	if (requestData == NULL)
+		return NULL;
+
+	requestData->mUserCallback.mLoginFacebookCallback = callback;
+	requestData->mUserData = userData;
+	requestData->mTask = NULL;
+
+	// create the xml request
+	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
+	if (writer != NULL)
+	{
+		char buffer[1024];
+
+		if (gsi_is_false(gsXmlWriteOpenTag(writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINFACEBOOK)) ||
+			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
+			gsi_is_false(gsXmlWriteInt64Element(writer, WS_AUTHSERVICE_NAMESPACE, "uid", uid)) ||
+			gsi_is_false(gsXmlWriteStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "sessionKey", sessionKey)) ||
+			gsi_is_false(gsXmlWriteStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "sessionSecret", sessionSecret)) ||
+			gsi_is_false(gsXmlWriteCloseTag(writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINFACEBOOK)) ||
+			gsi_is_false(gsXmlCloseWriter(writer))
+			)
+		{
+			gsXmlFreeWriter(writer);
+			return NULL;
+		}
+
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_LOGINFACEBOOK_SOAP,
+			writer, wsLoginFacebookCallback, (void*)requestData);
+		if (requestData->mTask == NULL)
+		{
+			gsXmlFreeWriter(writer);
+			gsifree(requestData);
+			return NULL;
+		}
+	}
+	else
+	{
+		gsifree(requestData);
+		return NULL;
+	}
+
+	return requestData->mTask->mCoreTask;
+
+}
+
 #endif
 
 static void wsiCreateUserAccountCallback(GHTTPResult theResult,
@@ -1479,7 +1647,7 @@ static void wsGetBuddyListCallback(GHTTPResult theResult,
 {
 
 	WSGetBuddyListResponse response;
-	WSIBuddyRequestData * requestData = (WSIBuddyRequestData*)theRequestData;
+	WSIRequestData * requestData = (WSIRequestData*)theRequestData;
 	int i;
 
 	if (theResult == GHTTPRequestCancelled)
@@ -1515,7 +1683,11 @@ static void wsGetBuddyListCallback(GHTTPResult theResult,
 			else if (response.mResult != WSLogin_Success)
 			{
 				response.mErrorMsg = gsimalloc(responseMsgLen + 1);
-				gsiSafeStrcpyA(response.mErrorMsg, responseMsg, responseMsgLen + 1);
+
+				if (response.mErrorMsg)
+					gsiSafeStrcpyA(response.mErrorMsg, responseMsg, responseMsgLen + 1);
+				else
+					response.mErrorMsg = goastrdup("Out of memory");
 			}
 			else if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "numBuddies", &response.mNumBuddies)))
 			{
@@ -1608,7 +1780,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	WSIRequestData * requestData = NULL;
 	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
-	if (!wsiServiceAvailable("AuthService.asmx"))
+	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return WSCreateUserAccount_NoAvailabilityCheck;
 
 	GS_ASSERT(partnerCode >= 0);
@@ -1632,8 +1804,10 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
 	if (requestData == NULL)
 		return WSLogin_OutOfMemory;
+
 	requestData->mUserCallback.mCreateUserAccountCallback = userCallback;
 	requestData->mUserData     = userData;
+	requestData->mTask = NULL;
 
 	// encrypt the password (includes safety padding and hash)
 	wsiLoginEncryptPassword(password, encryptedPassword);
@@ -1642,7 +1816,6 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_CREATEUSER)) ||
@@ -1663,9 +1836,10 @@ WSCreateUserAccountValue wsCreateUserAccount(
 			return WSLogin_OutOfMemory;
 		}
 
-		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_CREATEUSER_SOAP,
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_CREATEUSER_SOAP,
 			        writer, wsiCreateUserAccountCallback, (void*)requestData);
-		if (aTask == NULL)
+
+		if (requestData->mTask == NULL)
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
@@ -1674,6 +1848,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	}
 	else
 	{
+		gsifree(requestData);
 		return WSCreateUserAccount_OutOfMemory;
 	}
 
@@ -1691,9 +1866,9 @@ wsGetBuddyList(
 )
 {
 	GSXmlStreamWriter writer;
-	WSIBuddyRequestData * requestData = NULL;
+	WSIRequestData * requestData = NULL;
 
-	if (!wsiServiceAvailable("BuddyService.asmx"))
+	if (!wsiServiceAvailable(WS_BUDDYSERVICE_NAME))
 		return NULL;
 	
 	GS_ASSERT(gameId >= 0);
@@ -1705,20 +1880,19 @@ wsGetBuddyList(
 		return NULL;
 	
 	// allocate the request values
-	requestData = (WSIBuddyRequestData*)gsimalloc(sizeof(WSIBuddyRequestData));
+	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
 	if (requestData == NULL)
-		return WSLogin_OutOfMemory;
+		return NULL;
+
 	requestData->mUserCallback.mBuddyListCallback = callback;
 	requestData->mUserData = userData;
+	requestData->mTask = NULL;
 
 	// create the xml request
 	writer = gsXmlCreateStreamWriter(WS_BUDDYSERVICE_NAMESPACES, WS_BUDDYSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		GSSoapTask * aTask = NULL;
 		char buffer[1024];
-
-		requestData->mTask = NULL;
 
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_GETLIST)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
@@ -1744,10 +1918,13 @@ wsGetBuddyList(
 			return NULL;
 		}
 
-		return requestData->mTask->mCoreTask;
 	}
 	else
 	{
+		gsifree(requestData);
 		return NULL;
 	}
+
+	return requestData->mTask->mCoreTask;
+
 }
