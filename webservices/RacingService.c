@@ -38,7 +38,7 @@ const char * WS_RACINGSERVICE_NAMESPACES[WS_RACINGSERVICE_NAMESPACE_COUNT] =
 };
 
 // This is declared as an extern so it can be overriden when testing.
-#define WS_RACING_SERVICE_URL_FORMAT   "http://%s.race.pubsvs." GSI_DOMAIN_NAME "/RaceService/NintendoRacingService.asmx"
+#define WS_RACING_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.race.pubsvs." GSI_DOMAIN_NAME "/RaceService/NintendoRacingService.asmx"
 char wsRacingServiceURL[WS_RACING_MAX_URL_LEN] = "";
 
 typedef struct WSIRequestData
@@ -64,7 +64,11 @@ static gsi_bool wsiServiceAvailable()
 	if (__GSIACResult == GSIACAvailable)
 	{
 		if (wsRacingServiceURL[0] == '\0')
+#ifdef UNISPY_FORCE_IP
+			strncpy(wsRacingServiceURL, UNISPY_FORCE_IP, sizeof(WS_RACING_MAX_URL_LEN));
+#else
 			snprintf(wsRacingServiceURL, WS_RACING_MAX_URL_LEN, WS_RACING_SERVICE_URL_FORMAT, __GSIACGamename);
+#endif
 		return gsi_true;
 	}
 	else

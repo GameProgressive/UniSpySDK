@@ -9,24 +9,28 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /////////// Old login system (no game id)
-/*#define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfile"
-#define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNick"
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuth"
-#define WS_AUTHSERVICE_LOGINPS3CERT		 "LoginPs3Cert"
-#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginProfile\""
-#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginUniqueNick\""
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginRemoteAuth\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/AuthService/LoginPs3Cert\""*/
+#define WS_AUTHSERVICE_LOGINPROFILE_OLD		 "LoginProfile"
+#define WS_AUTHSERVICE_LOGINUNIQUE_OLD		 "LoginUniqueNick"
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_OLD   "LoginRemoteAuth"
+#define WS_AUTHSERVICE_LOGINPS3CERT_OLD		 "LoginPs3Cert"
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP_OLD "SOAPAction: \"http://gamespy.net/AuthService/LoginProfile\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP_OLD  "SOAPAction: \"http://gamespy.net/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP_OLD "SOAPAction: \"http://gamespy.net/AuthService/LoginRemoteAuth\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP_OLD "SOAPAction: \"http://gamespy.net/AuthService/LoginPs3Cert\""
 
 #define WS_AUTHSERVICE_LOGINPROFILE		 "LoginProfileWithGameId"
 #define WS_AUTHSERVICE_LOGINUNIQUE		 "LoginUniqueNickWithGameId"
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH   "LoginRemoteAuthWithGameId"
 #define WS_AUTHSERVICE_LOGINPS3CERT      "LoginPs3CertWithGameId"
+#define WS_AUTHSERVICE_CREATEUSER        "CreateUserAccount"
+#define WS_BUDDYSERVICE_GETLIST          "GetBuddyListWithNames"
 
-#define WS_AUTHSERVICE_LOGINPROFILE_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginProfileWithGameId\""
-#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginUniqueNick\""
-#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginRemoteAuthWithGameId\""
-#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/LoginPs3CertWithGameId\""
+#define WS_AUTHSERVICE_LOGINPROFILE_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginProfileWithGameId\""
+#define WS_AUTHSERVICE_LOGINUNIQUE_SOAP     "SOAPAction: \"http://gamespy.net/AuthService/LoginUniqueNick\""
+#define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"http://gamespy.net/AuthService/LoginRemoteAuthWithGameId\""
+#define WS_AUTHSERVICE_LOGINPS3CERT_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginPs3CertWithGameId\""
+#define WS_AUTHSERVICE_CREATEUSER_SOAP      "SOAPAction: \"http://gamespy.net/AuthService/CreateUserAccount\""
+#define WS_BUDDYSERVICE_GETLIST_SOAP        "SOAPAction: \"http://gamespy.net/BuddyService/GetBuddyListWithName\""
 
 #define WS_AUTHSERVICE_PROTOVERSION      1
 
@@ -35,7 +39,13 @@
 #define WS_AUTHSERVICE_NAMESPACE_COUNT  1
 const char * WS_AUTHSERVICE_NAMESPACES[WS_AUTHSERVICE_NAMESPACE_COUNT] =
 {
-	WS_AUTHSERVICE_NAMESPACE "=\"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/AuthService/\""
+	WS_AUTHSERVICE_NAMESPACE "=\"http://gamespy.net/AuthService/\""
+};
+
+#define WS_BUDDYSERVICE_NAMESPACE_COUNT 1
+const char * WS_BUDDYSERVICE_NAMESPACES[WS_BUDDYSERVICE_NAMESPACE_COUNT] =
+{
+	WS_AUTHSERVICE_NAMESPACE "=\"http://gamespy.net/AuthService/\""
 };
 
 const char WS_AUTHSERVICE_SIGNATURE_KEY[] = 
@@ -77,13 +87,23 @@ typedef struct WSIRequestData
 {
 	union 
 	{
+		WSCreateUserAccountCallback mCreateUserAccountCallback;
 		WSLoginCallback mLoginCallback;
 		WSLoginSonyCertCallback mLoginSonyCertCallback;
-		WSCreateUserAccountCallback mCreateUserAccountCallback;
 	} mUserCallback;
 	//void * mUserCallback;
 	void * mUserData;
 } WSIRequestData;
+
+typedef struct WSIBuddyRequestData
+{
+	union
+	{
+		WSGetBuddyListCallback mBuddyListCallback;
+	} mUserCallback;
+	void * mUserData;
+	GSSoapTask * mTask;
+} WSIBuddyRequestData;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,8 +120,13 @@ static gsi_bool wsiServiceAvailable(const char* serviceName)
 {
 	if (__GSIACResult == GSIACAvailable)
 	{
+#ifndef UNISPY_FORCE_IP
 		if (wsAuthServiceURL[0] == '\0')
 			snprintf(wsAuthServiceURL, WS_LOGIN_MAX_URL_LEN, WS_LOGIN_SERVICE_URL_FORMAT, __GSIACGamename, serviceName);
+#else
+		gsiSafeStrcpyA(wsAuthServiceURL, UNISPY_FORCE_IP, WS_LOGIN_MAX_URL_LEN);
+#endif
+
 		return gsi_true;
 	}
 	else
@@ -377,8 +402,8 @@ static void wsLoginUniqueCallback(GHTTPResult theResult,
 	}
 	else if (gsiCoreGetAuthErrorCode())
 	{
-		int v5 = gsiCoreGetAuthErrorCode();
-		wsiAuthErrorToLoginResponse(v5, &response);
+		GSAuthErrorCode err = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginResponse(err, &response);
 	}
 	else
 	{
@@ -567,8 +592,8 @@ static void wsLoginRemoteAuthCallback(GHTTPResult theResult,
 	}
 	else if (gsiCoreGetAuthErrorCode())
 	{
-		int v5 = gsiCoreGetAuthErrorCode();
-		wsiAuthErrorToLoginResponse(v5, &response);
+		GSAuthErrorCode err = gsiCoreGetAuthErrorCode();
+		wsiAuthErrorToLoginResponse(err, &response);
 	}
 	else
 	{
@@ -1370,12 +1395,6 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 */
 #endif
 
-/*
-	wsGetBuddyList...
-
-	wsCreateUserAccount... (2012!)
-*/
-
 static void wsiCreateUserAccountCallback(GHTTPResult theResult,
 								   GSXmlStreamWriter theRequestXml,
 								   GSXmlStreamReader theResponseXml,
@@ -1451,4 +1470,284 @@ static void wsiCreateUserAccountCallback(GHTTPResult theResult,
 
 	gsifree(requestData);
 	GSI_UNUSED(theRequestXml);
+}
+
+static void wsGetBuddyListCallback(GHTTPResult theResult, 
+								   GSXmlStreamWriter theRequestXml,
+								   GSXmlStreamReader theResponseXml,
+								   void * theRequestData)
+{
+
+	WSGetBuddyListResponse response;
+	WSIBuddyRequestData * requestData = (WSIBuddyRequestData*)theRequestData;
+	int i;
+
+	if (theResult == GHTTPRequestCancelled)
+	{
+		response.mResult = WSLogin_Cancelled;
+		response.mErrorMsg = goastrdup("Login Request Cancelled");
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+		response.mResult = WSLogin_HttpError;
+		response.mErrorMsg = goastrdup("HTTP Error");
+	}
+	else if (theResult == GHTTPSuccess)
+	{
+		// try to parse the soap
+		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "GetBuddyListWithNamesResult")))
+		{
+   			response.mResult = WSLogin_ParseError;
+    		response.mErrorMsg = goastrdup("Parse Error, couldn't read GetBuddyListWithNamesResult");
+		}
+		else
+		{
+			int responseMsgLen = 0;
+			const char* responseMsg = NULL;
+
+			// prepare response structure
+			if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "responseCode", (int*)&response.mResult)) || gsi_is_false(gsXmlReadChildAsString(theResponseXml, "responseMsg", &responseMsg, &responseMsgLen)))
+			{
+				response.mResult = WSLogin_ParseError;
+				response.mErrorMsg = goastrdup("Parse Error, couldn't read buddy list response code");
+			}
+			else if (response.mResult != WSLogin_Success)
+			{
+				response.mErrorMsg = gsimalloc(responseMsgLen + 1);
+				gsiSafeStrcpyA(response.mErrorMsg, responseMsg, responseMsgLen + 1);
+			}
+			else if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "numBuddies", &response.mNumBuddies)))
+			{
+				response.mResult = WSLogin_ParseError;
+				response.mErrorMsg = goastrdup("Parse Error, couldn't read number of buddies returned");
+			}
+			else
+			{
+				if (response.mNumBuddies > 0)
+				{
+					if (gsi_is_false(gsXmlMoveToNext(theResponseXml, "buddies")))
+					{
+						response.mResult = WSLogin_ParseError;
+						response.mErrorMsg = goastrdup("Parse Error, couldn't read number of buddies returned");
+					}
+					else
+					{
+						response.mBuddyList = (Buddy*)gsimalloc(sizeof(Buddy) * response.mNumBuddies);
+
+						if (!response.mBuddyList) // Added by UniSpy! not present in the original sdk
+						{
+							response.mResult = WSLogin_OutOfMemory;
+							response.mErrorMsg = goastrdup("Out of memory");
+						}
+						else
+						{
+							const char* buddyName = NULL;
+							int buddyNameLen = 0;
+
+							for (i = 0; i < response.mNumBuddies; i++)
+							{
+								if (gsi_is_false(gsXmlMoveToNext(theResponseXml, "Buddy")) ||
+									gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "Profileid", &response.mBuddyList[i].mProfileid)) ||
+									gsi_is_false(gsXmlReadChildAsString(theResponseXml, "Name", &buddyName, &buddyNameLen)))
+								{
+									response.mResult = WSLogin_ParseError;
+									response.mErrorMsg = goastrdup("Parse Error, couldn't parse info from a Buddy returned");
+									break;
+								}
+
+								response.mBuddyList[i].mName = gsimalloc(buddyNameLen + 1);
+
+								if (!response.mBuddyList[i].mName)  // Added by UniSpy! not present in the original sdk
+								{
+									response.mResult = WSLogin_OutOfMemory;
+									response.mErrorMsg = goastrdup("Out of memory");
+									break;
+								}
+							}
+
+							response.mErrorMsg = goastrdup("Success");
+						}
+					}
+				}
+				else
+				{
+					response.mErrorMsg = goastrdup("Success");
+				}
+			}
+		}
+	}
+
+	if (requestData->mUserCallback.mBuddyListCallback)
+		requestData->mUserCallback.mBuddyListCallback(theResult, &response, requestData->mUserData);
+
+	gsifree(requestData);
+	gsifree(response.mErrorMsg);
+
+	if (response.mNumBuddies)
+	{
+		for (i = 0; i < response.mNumBuddies; i++)
+			gsifree(response.mBuddyList[i].mName);
+
+		gsifree(response.mBuddyList);
+	}
+}
+
+WSCreateUserAccountValue wsCreateUserAccount(
+	int								partnerCode, 
+	int								namespaceId, 
+	const gsi_char					* email, 
+	const gsi_char					* profileNick, 
+	const gsi_char					* uniqueNick, 
+	const gsi_char					* password, 
+	WSCreateUserAccountCallback		userCallback, 
+	void							* userData
+)
+{
+	GSXmlStreamWriter writer;
+	WSIRequestData * requestData = NULL;
+	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
+
+	if (!wsiServiceAvailable("AuthService.asmx"))
+		return WSCreateUserAccount_NoAvailabilityCheck;
+
+	GS_ASSERT(partnerCode >= 0);
+	GS_ASSERT(email != NULL);
+	GS_ASSERT(uniqueNick != NULL);
+	GS_ASSERT(password != NULL);
+
+	if (_tcslen(email) >= WS_LOGIN_EMAIL_LEN)
+		return WSCreateUserAccount_InvalidParameters;
+
+	if (_tcslen(profileNick) >= WS_LOGIN_NICK_LEN)
+		return WSCreateUserAccount_InvalidParameters;
+
+	if (_tcslen(uniqueNick) >= WS_LOGIN_UNIQUENICK_LEN)
+		return WSCreateUserAccount_InvalidParameters;
+
+	if (_tcslen(password) >= WS_LOGIN_PASSWORD_LEN)
+		return WSCreateUserAccount_InvalidParameters;
+
+	// allocate the request values
+	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
+	if (requestData == NULL)
+		return WSLogin_OutOfMemory;
+	requestData->mUserCallback.mCreateUserAccountCallback = userCallback;
+	requestData->mUserData     = userData;
+
+	// encrypt the password (includes safety padding and hash)
+	wsiLoginEncryptPassword(password, encryptedPassword);
+
+	// create the xml request
+	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
+	if (writer != NULL)
+	{
+		GSSoapTask * aTask = NULL;
+		char buffer[1024];
+
+		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_CREATEUSER)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "partnercode", (gsi_u32)partnerCode)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "namespaceid", (gsi_u32)namespaceId)) ||
+			gsi_is_false(gsXmlWriteAsciiStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "email", email)) ||
+			gsi_is_false(gsXmlWriteAsciiStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "profilenick", profileNick)) ||
+			gsi_is_false(gsXmlWriteAsciiStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "uniquenick", uniqueNick)) ||
+			gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, "password")) ||
+			gsi_is_false(gsXmlWriteHexBinaryElement(writer, WS_AUTHSERVICE_NAMESPACE, "Value", encryptedPassword, GS_CRYPT_RSA_BYTE_SIZE)) ||
+			gsi_is_false(gsXmlWriteCloseTag     (writer, WS_AUTHSERVICE_NAMESPACE, "password")) ||
+			gsi_is_false(gsXmlWriteCloseTag     (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_CREATEUSER)) ||
+			gsi_is_false(gsXmlCloseWriter       (writer))
+			)
+		{
+			gsXmlFreeWriter(writer);
+			return WSLogin_OutOfMemory;
+		}
+
+		aTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_CREATEUSER_SOAP,
+			        writer, wsiCreateUserAccountCallback, (void*)requestData);
+		if (aTask == NULL)
+		{
+			gsXmlFreeWriter(writer);
+			gsifree(requestData);
+			return WSLogin_OutOfMemory;
+		}
+	}
+	else
+	{
+		return WSCreateUserAccount_OutOfMemory;
+	}
+
+	return 0;
+}
+
+
+GSTask *
+wsGetBuddyList(
+    int gameId, 
+    const GSLoginCertificate * certificate,
+    const GSLoginPrivateData * privData, 
+    WSGetBuddyListCallback callback, 
+    void * userData
+)
+{
+	GSXmlStreamWriter writer;
+	WSIBuddyRequestData * requestData = NULL;
+
+	if (!wsiServiceAvailable("BuddyService.asmx"))
+		return NULL;
+	
+	GS_ASSERT(gameId >= 0);
+	GS_ASSERT(certificate != NULL);
+	GS_ASSERT(privData != NULL);
+	GS_ASSERT(callback != NULL);
+	
+	if (!callback)
+		return NULL;
+	
+	// allocate the request values
+	requestData = (WSIBuddyRequestData*)gsimalloc(sizeof(WSIBuddyRequestData));
+	if (requestData == NULL)
+		return WSLogin_OutOfMemory;
+	requestData->mUserCallback.mBuddyListCallback = callback;
+	requestData->mUserData = userData;
+
+	// create the xml request
+	writer = gsXmlCreateStreamWriter(WS_BUDDYSERVICE_NAMESPACES, WS_BUDDYSERVICE_NAMESPACE_COUNT);
+	if (writer != NULL)
+	{
+		GSSoapTask * aTask = NULL;
+		char buffer[1024];
+
+		requestData->mTask = NULL;
+
+		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_GETLIST)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
+			gsi_is_false(gsXmlWriteOpenTag     (writer, "ns1", "certificate")) ||
+            gsi_is_false(wsLoginCertWriteXML    (certificate, "ns1", writer)) ||
+			gsi_is_false(gsXmlWriteCloseTag     (writer, "ns1", "certificate")) ||
+            gsi_is_false(gsXmlWriteHexBinaryElement(writer, "ns1", "proof", privData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+			gsi_is_false(gsXmlWriteCloseTag     (writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_GETLIST)) ||
+			gsi_is_false(gsXmlCloseWriter       (writer))
+			)
+		{
+			gsXmlFreeWriter(writer);
+			return NULL;
+		}
+
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, WS_BUDDYSERVICE_GETLIST_SOAP,
+			        writer, wsGetBuddyListCallback, (void*)requestData);
+		if (requestData->mTask == NULL)
+		{
+			gsXmlFreeWriter(writer);
+			gsifree(requestData);
+			return NULL;
+		}
+
+		return requestData->mTask->mCoreTask;
+	}
+	else
+	{
+		return NULL;
+	}
 }

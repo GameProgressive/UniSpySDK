@@ -63,6 +63,10 @@ extern "C" {
 		#define UCSToUTF8StringAlloc	UCS2ToUTF8StringAlloc
 		#define IS_ASCII_UNICODE(a) (a & 0xFF00) == 0
 	#endif
+
+		#define gsiSafeStrcpy			gsiSafeStrcpyW
+#else
+		#define gsiSafeStrcpy			gsiSafeStrcpyA
 #endif // functions 
 
 ///////////////////////////////////////////////////////////////////////////////

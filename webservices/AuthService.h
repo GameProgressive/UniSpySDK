@@ -39,7 +39,7 @@ extern char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN];
 #define	WSLogin_NAMESPACE_SHARED_NONUNIQUE 0
 #define	WSLogin_NAMESPACE_SHARED_UNIQUE    1
 
-typedef enum WSCreateUserAccountValue{
+typedef enum WSCreateUserAccountValue {
 	// Login response code (mResponseCode):
 	//   -- GameSpy Devs: Must match server.
 	WSCreateUserAccount_Success = 0,
@@ -165,7 +165,7 @@ typedef struct GSLoginCertificatePrivate
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Create User Account callback format:
-typedef struct WSCreateUserAccountResponse{
+typedef struct WSCreateUserAccountResponse {
 	WSCreateUserAccountValue	mCreateUserAccountResult;	// SDK high-level result (e.g., LoginFailed).
 	WSCreateUserAccountValue	mResponseCode;				// Server's result code (e.g., BadPassword).
 	GSLoginCertificate			mCertificate;	// Show this to others (proves: "Bill is a valid user").
