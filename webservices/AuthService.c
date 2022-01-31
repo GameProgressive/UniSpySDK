@@ -26,14 +26,17 @@
 #define WS_AUTHSERVICE_LOGINFACEBOOK	 "LoginFacebook"
 
 #define WS_BUDDYSERVICE_GETLIST          "GetBuddyListWithNames"
+#define WS_BUDDYSERVICE_SYNCFACEBOOK	 "SyncFacebook"
 
 #define WS_AUTHSERVICE_LOGINPROFILE_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginProfileWithGameId\""
 #define WS_AUTHSERVICE_LOGINUNIQUE_SOAP     "SOAPAction: \"http://gamespy.net/AuthService/LoginUniqueNick\""
 #define WS_AUTHSERVICE_LOGINREMOTEAUTH_SOAP "SOAPAction: \"http://gamespy.net/AuthService/LoginRemoteAuthWithGameId\""
 #define WS_AUTHSERVICE_LOGINPS3CERT_SOAP    "SOAPAction: \"http://gamespy.net/AuthService/LoginPs3CertWithGameId\""
 #define WS_AUTHSERVICE_CREATEUSER_SOAP      "SOAPAction: \"http://gamespy.net/AuthService/CreateUserAccount\""
-#define WS_BUDDYSERVICE_GETLIST_SOAP        "SOAPAction: \"http://gamespy.net/BuddyService/GetBuddyListWithName\""
 #define WS_AUTHSERVICE_LOGINFACEBOOK_SOAP	"SOAPAction: \"http://gamespy.net/AuthService/LoginFacebook\""
+
+#define WS_BUDDYSERVICE_GETLIST_SOAP        "SOAPAction: \"http://gamespy.net/BuddyService/GetBuddyListWithName\""
+#define WS_BUDDYSERVICE_SYNCFACEBOOK_SOAP   "SOAPAction: \"http://gamespy.net/BuddyService/SyncFacebook\""
 
 #define WS_AUTHSERVICE_PROTOVERSION      1
 
@@ -96,6 +99,7 @@ typedef struct WSIRequestData
 {
 	union 
 	{
+		WSSyncFacebookCallback mSyncFacebookCallback;
 		WSLoginFacebookCallback mLoginFacebookCallback;
 		WSGetBuddyListCallback mBuddyListCallback;
 		WSCreateUserAccountCallback mCreateUserAccountCallback;
@@ -1391,12 +1395,230 @@ void wsSetGameCredentials(const char* accessKey, const int gameId, const char* s
 }
 
 /////////////////////////////////////////////////////////////
-// Missing functions from later : GameSpy SDK 2012
+// GameSpy 2012 SDK functions
 
-#ifdef _IPHONE
-/*
-	wsSyncFacebook ...
-*/
+#if _IPHONE
+static void wsSyncFacebookCallback(GHTTPResult theResult,
+	GSXmlStreamWriter theRequestXml,
+	GSXmlStreamReader theResponseXml,
+	void* theRequestData)
+{
+	WSIRequestData* requestData = (WSIRequestData*)theRequestData;
+
+	WSSyncFacebookResponse response;
+	int i;
+
+	memset(&response, 0, sizeof(response));
+
+	if (theResult == GHTTPRequestCancelled)
+	{
+		response.mResult = WSLogin_Cancelled;
+		response.mErrorMsg = goastrdup("Login Request Cancelled");
+	}
+	else if (theResult != GHTTPSuccess)
+	{
+		response.mResult = WSLogin_HttpError;
+		response.mErrorMsg = goastrdup("HTTP Error");
+	}
+	else
+	{
+		// try to parse the soap
+		if (gsi_is_false(gsXmlMoveToStart(theResponseXml)) ||
+			gsi_is_false(gsXmlMoveToNext(theResponseXml, "SyncFacebookResult")))
+		{
+			response.mResult = WSLogin_ParseError;
+			response.mErrorMsg = goastrdup("Parse Error, couldn't read SyncFacebookResult");
+		}
+		else
+		{
+			int responseMsgLen = 0;
+			const char* responseMsg = NULL;
+
+			// prepare response structure
+			if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "responseCode", (int*)&response.mResult)) ||
+				gsi_is_false(gsXmlReadAttributeAsString(theResponseXml, "responseMsg", &responseMsg, &responseMsgLen)))
+			{
+				// could not parse login response code
+				response.mResult = WSLogin_ParseError;
+				response.mErrorMsg = goastrdup("Parse Error, couldn't read login response code");
+			}
+			else if (response.mResult != WSLogin_Success)
+			{
+				// server reported an error into reponseCode
+				response.mErrorMsg = (char*)gsimalloc(responseMsgLen + 1);
+
+				if (response.mErrorMsg)
+				{
+					gsiSafeStrcpyA(response.mErrorMsg, responseMsg, responseMsgLen);
+				}
+				else
+				{
+					response.mErrorMsg = goastrdup("Out of memory");
+				}
+			}
+			else if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "numBuddies", &response.mNumBuddies)))
+			{
+				response.mResult = WSLogin_ParseError;
+				response.mErrorMsg = goastrdup("Parse Error, couldn't read number of buddies returned");
+			}
+			else
+			{
+				if (response.mNumBuddies > 0)
+				{
+					if (gsi_is_false(gsXmlMoveToNext(theResponseXml, "buddies")))
+					{
+						response.mResult = WSLogin_ParseError;
+						response.mErrorMsg = goastrdup("Parse Error, couldn't read number of buddies returned");
+					}
+					else
+					{
+						response.mBuddyList = (FacebookBuddy*)gsimalloc(sizeof(FacebookBuddy) * response.mNumBuddies);
+
+						if (!response.mBuddyList) // Added by UniSpy! not present in the original sdk
+						{
+							response.mResult = WSLogin_OutOfMemory;
+							response.mErrorMsg = goastrdup("Out of memory");
+						}
+						else
+						{
+							const char* buddyName = NULL;
+							int buddyNameLen = 0;
+
+							for (i = 0; i < response.mNumBuddies; i++)
+							{
+								if (gsi_is_false(gsXmlMoveToNext(theResponseXml, "FacebookBuddy")) ||
+									gsi_is_false(gsXmlReadChildAsInt(theResponseXml, "Profileid", &response.mBuddyList[i].mProfileid)) ||
+									gsi_is_false(gsXmlReadChildAsString(theResponseXml, "Name", &buddyName, &buddyNameLen)) ||
+									gsi_is_false(gsXmlReadChildAsInt64(theResponseXml, "Uid", (gsi_i64*) & response.mBuddyList[i].mUid)))
+								{
+									response.mResult = WSLogin_ParseError;
+									response.mErrorMsg = goastrdup("Parse Error, couldn't parse info from a FacebookBuddy returne");
+									break;
+								}
+
+								response.mBuddyList[i].mName = gsimalloc(buddyNameLen + 1);
+
+								if (!response.mBuddyList[i].mName)  // Added by UniSpy! not present in the original sdk
+								{
+									response.mResult = WSLogin_OutOfMemory;
+									response.mErrorMsg = goastrdup("Out of memory");
+									break;
+								}
+
+								gsiSafeStrcpyA(response.mBuddyList[i].mName, buddyName, buddyNameLen);
+							}
+
+							response.mErrorMsg = goastrdup("Success");
+						}
+					}
+				}
+				else
+				{
+					response.mErrorMsg = goastrdup("Success");
+				}
+			}
+		}
+	}
+
+	// trigger the user callback
+	if (requestData->mUserCallback.mSyncFacebookCallback != NULL)
+	{
+		requestData->mUserCallback.mSyncFacebookCallback(theResult, &response, requestData->mUserData);
+	}
+
+	gsifree(requestData);
+	gsifree(response.mErrorMsg);
+
+	if (response.mNumBuddies)
+	{
+		for (i = 0; i < response.mNumBuddies; i++)
+			gsifree(response.mBuddyList[i].mName);
+
+		gsifree(response.mBuddyList);
+	}
+
+	GSI_UNUSED(theRequestXml);
+}
+
+
+GSTask* wsSyncFacebook(
+	int gameId,
+	const GSLoginCertificate* certificate,
+	const GSLoginPrivateData* privData,
+	const char* apiKey,
+	const char* sessionKey,
+	const char* sessionSecret,
+	WSSyncFacebookCallback callback,
+	void* userData
+)
+{
+	GSXmlStreamWriter writer;
+	WSIRequestData* requestData = NULL;
+
+	if (!wsiServiceAvailable(WS_BUDDYSERVICE_NAME))
+		return NULL;
+
+	GS_ASSERT(gameId >= 0);
+	GS_ASSERT(certificate != NULL);
+	GS_ASSERT(privData != NULL);
+	GS_ASSERT(callback != NULL);
+	GS_ASSERT(apiKey != NULL);
+	GS_ASSERT(sessionKey != NULL);
+	GS_ASSERT(sessionSecret != NULL);
+
+	if (!callback)
+		return NULL;
+
+	// allocate the request values
+	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
+	if (requestData == NULL)
+		return NULL;
+
+	requestData->mUserCallback.mSyncFacebookCallback = callback;
+	requestData->mUserData = userData;
+	requestData->mTask = NULL;
+
+	// create the xml request
+	writer = gsXmlCreateStreamWriter(WS_BUDDYSERVICE_NAMESPACES, WS_BUDDYSERVICE_NAMESPACE_COUNT);
+	if (writer != NULL)
+	{
+		if (gsi_is_false(gsXmlWriteOpenTag(writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_SYNCFACEBOOK)) ||
+			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
+			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
+			gsi_is_false(gsXmlWriteOpenTag(writer, "ns1", "certificate")) ||
+			gsi_is_false(wsLoginCertWriteXML(certificate, "ns1", writer)) ||
+			gsi_is_false(gsXmlWriteCloseTag(writer, "ns1", "certificate")) ||
+			gsi_is_false(gsXmlWriteHexBinaryElement(writer, "ns1", "proof", (gsi_u8*)privData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+			gsi_is_false(gsXmlWriteStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "apiKey", apiKey)) ||
+			gsi_is_false(gsXmlWriteStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "sessionKey", sessionKey)) ||
+			gsi_is_false(gsXmlWriteStringElement(writer, WS_AUTHSERVICE_NAMESPACE, "sessionSecret", sessionSecret)) ||
+			gsi_is_false(gsXmlWriteCloseTag(writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_SYNCFACEBOOK)) ||
+			gsi_is_false(gsXmlCloseWriter(writer))
+			)
+		{
+			gsXmlFreeWriter(writer);
+			return NULL;
+		}
+
+		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, WS_BUDDYSERVICE_SYNCFACEBOOK_SOAP,
+			writer, wsSyncFacebookCallback, (void*)requestData);
+		if (requestData->mTask == NULL)
+		{
+			gsXmlFreeWriter(writer);
+			gsifree(requestData);
+			return NULL;
+		}
+
+	}
+	else
+	{
+		gsifree(requestData);
+		return NULL;
+	}
+
+	return requestData->mTask->mCoreTask;
+}
+
 static void wsLoginFacebookCallback(GHTTPResult theResult,
 	GSXmlStreamWriter theRequestXml,
 	GSXmlStreamReader theResponseXml,
@@ -1492,8 +1714,7 @@ static void wsLoginFacebookCallback(GHTTPResult theResult,
 	GSI_UNUSED(theRequestXml);
 }
 
-GSTask*
-wsLoginFacebook(
+GSTask* wsLoginFacebook(
 	int gameId,
 	const gsi_u64 uid,
 	const char* apiKey,
@@ -1505,7 +1726,6 @@ wsLoginFacebook(
 {
 	GSXmlStreamWriter writer;
 	WSIRequestData* requestData = NULL;
-	gsi_u8 encryptedPassword[GS_CRYPT_RSA_BYTE_SIZE];
 
 	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
 		return NULL;
@@ -1526,8 +1746,6 @@ wsLoginFacebook(
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		char buffer[1024];
-
 		if (gsi_is_false(gsXmlWriteOpenTag(writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_LOGINFACEBOOK)) ||
 			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
 			gsi_is_false(gsXmlWriteIntElement(writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
@@ -1650,6 +1868,8 @@ static void wsGetBuddyListCallback(GHTTPResult theResult,
 	WSIRequestData * requestData = (WSIRequestData*)theRequestData;
 	int i;
 
+	memset(&response, 0, sizeof(response));
+
 	if (theResult == GHTTPRequestCancelled)
 	{
 		response.mResult = WSLogin_Cancelled;
@@ -1736,6 +1956,8 @@ static void wsGetBuddyListCallback(GHTTPResult theResult,
 									response.mErrorMsg = goastrdup("Out of memory");
 									break;
 								}
+
+								gsiSafeStrcpyA(response.mBuddyList[i].mName, buddyName, buddyNameLen);
 							}
 
 							response.mErrorMsg = goastrdup("Success");
@@ -1816,8 +2038,6 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	writer = gsXmlCreateStreamWriter(WS_AUTHSERVICE_NAMESPACES, WS_AUTHSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		char buffer[1024];
-
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_AUTHSERVICE_CREATEUSER)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "partnercode", (gsi_u32)partnerCode)) ||
@@ -1856,8 +2076,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 }
 
 
-GSTask *
-wsGetBuddyList(
+GSTask * wsGetBuddyList(
     int gameId, 
     const GSLoginCertificate * certificate,
     const GSLoginPrivateData * privData, 
@@ -1892,15 +2111,13 @@ wsGetBuddyList(
 	writer = gsXmlCreateStreamWriter(WS_BUDDYSERVICE_NAMESPACES, WS_BUDDYSERVICE_NAMESPACE_COUNT);
 	if (writer != NULL)
 	{
-		char buffer[1024];
-
 		if (gsi_is_false(gsXmlWriteOpenTag      (writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_GETLIST)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "version", WS_AUTHSERVICE_PROTOVERSION)) ||
 			gsi_is_false(gsXmlWriteIntElement   (writer, WS_AUTHSERVICE_NAMESPACE, "gameid", gameId)) ||
 			gsi_is_false(gsXmlWriteOpenTag     (writer, "ns1", "certificate")) ||
             gsi_is_false(wsLoginCertWriteXML    (certificate, "ns1", writer)) ||
 			gsi_is_false(gsXmlWriteCloseTag     (writer, "ns1", "certificate")) ||
-            gsi_is_false(gsXmlWriteHexBinaryElement(writer, "ns1", "proof", privData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+            gsi_is_false(gsXmlWriteHexBinaryElement(writer, "ns1", "proof", (gsi_u8*)privData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
 			gsi_is_false(gsXmlWriteCloseTag     (writer, WS_AUTHSERVICE_NAMESPACE, WS_BUDDYSERVICE_GETLIST)) ||
 			gsi_is_false(gsXmlCloseWriter       (writer))
 			)
@@ -1926,5 +2143,4 @@ wsGetBuddyList(
 	}
 
 	return requestData->mTask->mCoreTask;
-
 }
