@@ -476,7 +476,13 @@ static CHAT chatConnectDoit(CILoginType loginType,
 		strzcpy(connection->authtoken, authtoken, MAX_AUTHTOKEN);
 	if(partnerchallenge)
 		strzcpy(connection->partnerchallenge, partnerchallenge, MAX_PARTNERCHALLENGE);
+
+#ifdef UNISPY_FORCE_IP
+	strzcpy(connection->server, UNISPY_FORCE_IP, MAX_SERVER);
+	#else
 	strzcpy(connection->server, serverAddress?serverAddress:CI_DEFAULT_SERVER_ADDRESS, MAX_SERVER);
+#endif
+
 	connection->port = port?port:CI_DEFUILT_SERVER_PORT;
 	connection->globalCallbacks = *callbacks;
 	connection->nextID = 1;

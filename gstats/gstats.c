@@ -112,7 +112,6 @@ void GetPersistDataValuesModifiedA(int localid, int profileid, persisttype_t typ
 /********
 DEFINES
 ********/
-//#define SSHOST "207.199.80.230"
 #define SSHOST "gamestats." GSI_DOMAIN_NAME
 #define SSPORT 29920
 
@@ -215,7 +214,9 @@ char *GenerateAuthW(const char* challenge, const unsigned short *password, char 
 int InitStatsAsync(int theGamePort, gsi_time theInitTimeout)
 {
 	struct sockaddr_in saddr;
+#ifndef UNISPY_FORCE_IP
 	char tempHostname[sizeof(gcd_gamename)/sizeof(gcd_gamename[0]) + 2 + sizeof(StatsServerHostname)/sizeof(StatsServerHostname[0])];
+#endif
 	int  ret;
 		
 	gameport = theGamePort;
@@ -240,6 +241,7 @@ int InitStatsAsync(int theGamePort, gsi_time theInitTimeout)
 
 	rcvlen = 0; //make sure ther receive buffer is cleared
 
+#ifndef UNISPY_FORCE_IP
 	if (inet_addr(StatsServerHostname) == INADDR_NONE)
 	{
 		strcpy(tempHostname, gcd_gamename);
@@ -250,6 +252,10 @@ int InitStatsAsync(int theGamePort, gsi_time theInitTimeout)
 	
 	if (get_sockaddrin(tempHostname,SSPORT,&saddr,NULL) == 0)
 		return GE_NODNS;
+#else
+	if (get_sockaddrin(UNISPY_FORCE_IP, SSPORT, &saddr, NULL) == 0)
+		return GE_NODNS;
+#endif
 
 #ifdef INSOCK
 	sock = socket ( AF_INET, SOCK_STREAM, 0 );

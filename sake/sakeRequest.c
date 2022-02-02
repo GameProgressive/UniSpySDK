@@ -14,7 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT] =
 {
-	"ns1=\"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake\""
+	"ns1=\"http://gamespy.net/sake\""
 };
 
 
@@ -270,9 +270,13 @@ static void SAKE_CALL sakeiExecuteRequest(SAKERequest request)
 	if(sakeiSoapUrl[0] == '\0')
 	{
 		int rcode;
+#ifndef UNISPY_FORCE_IP
 		rcode = snprintf(sakeiSoapUrl, SAKE_MAX_URL_LENGTH, SAKEI_SOAP_URL_FORMAT, request->mSake->mGameName);
 		GS_ASSERT(rcode >= 0);
 		GSI_UNUSED(rcode);
+#else
+		strncpy(sakeiSoapUrl, UNISPY_FORCE_IP, SAKE_MAX_URL_LENGTH);
+#endif
 	}
 	gsiExecuteSoap(sakeiSoapUrl, request->mInfo->mSoapAction, request->mSoapRequest, sakeiSoapCallback, request);
 }

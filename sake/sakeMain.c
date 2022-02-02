@@ -287,6 +287,7 @@ gsi_bool SAKE_CALL sakeGetFileDownloadURL(SAKE sake, int fileId, gsi_char url[SA
 	if(!sake || !url || !sake->mIsGameAuthenticated || !sake->mIsProfileAuthenticated)
 		return gsi_false;
 
+#ifndef UNISPY_FORCE_IP
 	if (gSakeDownloadUrlOverride[0] != '\0')
 	{
 		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), 
@@ -307,6 +308,15 @@ gsi_bool SAKE_CALL sakeGetFileDownloadURL(SAKE sake, int fileId, gsi_char url[SA
 		}
 		#endif
 	}
+#else
+
+#ifdef GSI_UNICODE
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%S?gameid=%d&pid=%d"), UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+#else
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+#endif
+
+#endif
 
 	if(rcode < 0)
 		return gsi_false;
@@ -343,6 +353,7 @@ gsi_bool SAKE_CALL sakeGetFileUploadURL(SAKE sake, gsi_char url[SAKE_MAX_URL_LEN
 	if(!sake || !url || !sake->mIsGameAuthenticated || !sake->mIsProfileAuthenticated)
 		return gsi_false;
 
+#ifndef UNISPY_FORCE_IP
 	if (gSakeUploadUrlOverride[0] != '\0')
 	{
 		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), 
@@ -363,6 +374,15 @@ gsi_bool SAKE_CALL sakeGetFileUploadURL(SAKE sake, gsi_char url[SAKE_MAX_URL_LEN
 		}
 		#endif
 	}
+#else
+	#ifdef GSI_UNICODE
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%S?gameid=%d&pid=%d"),
+			UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+	#else
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"),
+			UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+	#endif
+#endif
 
 	if(rcode < 0)
 		return gsi_false;

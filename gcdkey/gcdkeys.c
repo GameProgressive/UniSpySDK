@@ -138,7 +138,11 @@ int gcd_init(int gameid)
 			return ret;
 
 		if (gcd_hostname[0] == 0)
+#ifndef UNISPY_FORCE_IP
 			gsiSafeStrcpyA(gcd_hostname, defaulthost, sizeof(gcd_hostname));
+#else
+			gsiSafeStrcpyA(gcd_hostname, UNISPY_FORCE_IP, sizeof(gcd_hostname));
+#endif
 		get_sockaddrin(gcd_hostname,VAL_PORT,&valaddr,NULL);
 	}
 

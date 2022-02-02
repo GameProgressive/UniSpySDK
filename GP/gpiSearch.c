@@ -62,10 +62,15 @@ gpiStartProfileSearch(
 #else
 	// Get the server host and port.
 
+#ifndef UNISPY_FORCE_IP
 	host = gethostbyname(GPSearchManagerHostname);
 	if(host == NULL)
 		CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve search manager host name.");
 	address.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
+#else
+	address.sin_addr.s_addr = inet_addr(UNISPY_FORCE_IP);
+#endif
+
 	address.sin_port = htons(GPI_SEARCH_MANAGER_PORT);
 #endif
 

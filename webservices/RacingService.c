@@ -65,7 +65,7 @@ static gsi_bool wsiServiceAvailable()
 	{
 		if (wsRacingServiceURL[0] == '\0')
 #ifdef UNISPY_FORCE_IP
-			strncpy(wsRacingServiceURL, UNISPY_FORCE_IP, sizeof(WS_RACING_MAX_URL_LEN));
+			strncpy(wsRacingServiceURL, UNISPY_FORCE_IP, WS_RACING_MAX_URL_LEN);
 #else
 			snprintf(wsRacingServiceURL, WS_RACING_MAX_URL_LEN, WS_RACING_SERVICE_URL_FORMAT, __GSIACGamename);
 #endif

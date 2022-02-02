@@ -314,7 +314,11 @@ PTBool ptCheckForPatchA
 
 	// override hostname?
 	if (gPTAVercheckURL[0] == '\0')
+#ifdef UNISPY_FORCE_IP
+		sprintf(gPTAVercheckURL, "%s/motd/vercheck.asp", UNISPY_FORCE_IP);
+#else
 		sprintf(gPTAVercheckURL, PTA_DEFAULT_VERCHECK_URL);
+#endif
 
 	// Store some data.
 	///////////////////
@@ -385,7 +389,11 @@ PTBool ptTrackUsageA
 
 	// override hostname?
 	if (gPTAMOTDURL[0] == '\0')
+#ifndef UNISPY_FORCE_IP
 		sprintf(gPTAMOTDURL, PTA_DEFAULT_MOTD_URL);
+#else
+		sprintf(gPTAMOTDURL, "%s/motd/motd.asp", UNISPY_FORCE_IP);
+#endif
 
 	// Build the URL.
 	/////////////////
@@ -459,7 +467,11 @@ PTBool ptCreateCheckPatchTrackUsageReqA
 
 	// override hostname?
 	if (gPTAVercheckURL[0] == '\0')
+#ifdef UNISPY_FORCE_IP
+		sprintf(gPTAVercheckURL, "%s/motd/vercheck.asp", UNISPY_FORCE_IP);
+#else
 		sprintf(gPTAVercheckURL, PTA_DEFAULT_VERCHECK_URL);
+#endif
 
 	// Build the URL.
 	/////////////////
@@ -654,7 +666,11 @@ PTBool ptLookupFilePlanetInfo
 
 	// override hostname?
 	if (gPTAFilePlanetURL[0] == '\0')
+#ifdef UNISPY_FORCE_IP
+		sprintf(gPTAFilePlanetURL, "%s/dlfileraw.asp", UNISPY_FORCE_IP);
+#else
 		sprintf(gPTAFilePlanetURL, PTA_DEFAULT_FILEPLANET_URL);
+#endif
 
 	// Store some data.
 	///////////////////

@@ -30,7 +30,7 @@ extern "C" {
 	memset(dest, 0, sizeof(type)*num); }       /*zero*/
 
 #define SAKEI_FUNC_NAME_STRINGS(func) func,\
-	"SOAPAction: \"" GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake/" func "\"",\
+	"SOAPAction: \"http://gamespy.net/sake/" func "\"",\
 	func "Response",\
 	func "Result"
 

@@ -61,7 +61,11 @@ SCResult sciInterfaceCreate(SCInterface** theInterfaceOut)
 	if (__GSIACResult == GSIACAvailable)
 	{
 		if (scServiceURL[0] == '\0')
+#ifndef UNISPY_FORCE_IP
 			snprintf(scServiceURL, SC_SERVICE_MAX_URL_LEN, SC_SERVICE_URL_FORMAT, __GSIACGamename);
+#else
+			strncpy(scServiceURL,  UNISPY_FORCE_IP, SC_SERVICE_MAX_URL_LEN);
+#endif
 	}
 	else
 		return SCResult_NO_AVAILABILITY_CHECK;	

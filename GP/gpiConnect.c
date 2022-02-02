@@ -117,6 +117,10 @@ gpiStartConnect(
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	// Get the server host and port.
+
+#ifdef UNISPY_FORCE_IP
+	address.sin_addr.s_addr = inet_addr(UNISPY_FORCE_IP);
+#else
 	if (inet_addr(GPConnectionManagerHostname) == INADDR_NONE)
 	{
 		host = gethostbyname(GPConnectionManagerHostname);
@@ -128,6 +132,7 @@ gpiStartConnect(
 	{
 		address.sin_addr.s_addr = inet_addr(GPConnectionManagerHostname);
 	}
+#endif
 
 	// Connect the socket.
 	GS_ASSERT(address.sin_addr.s_addr != 0);

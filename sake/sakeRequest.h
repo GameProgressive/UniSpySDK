@@ -25,7 +25,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 #define GSI_SAKE_SERVICE_NAMESPACE_COUNT     1
 #define GSI_SAKE_SERVICE_NAMESPACE           "ns1"
-#define GSI_SAKE_SERVICE_NAMESPACE_URL       GSI_HTTP_PROTOCOL_URL GSI_DOMAIN_NAME "/sake"
+#define GSI_SAKE_SERVICE_NAMESPACE_URL       "http://gamespy.net/sake"
 extern const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT];
 
 
