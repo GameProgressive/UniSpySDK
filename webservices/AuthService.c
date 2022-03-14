@@ -88,7 +88,11 @@ const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
 // Old API
 //#define WS_LOGIN_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.auth.pubsvs." GSI_DOMAIN_NAME "/AuthService/WS_AUTHSERVICE_NAME"
 
+#ifdef UNISPY_FORCE_IP
+#define WS_LOGIN_SERVICE_URL_FORMAT GSI_HTTP_PROTOCOL_URL "%s/AuthService/%s"
+#else
 #define WS_LOGIN_SERVICE_URL_FORMAT GSI_HTTP_PROTOCOL_URL GSI_OPEN_DOMAIN_NAME "/AuthService/%s"
+#endif
 
 char wsAuthServiceURL[WS_LOGIN_MAX_URL_LEN] = "";
 char authCreds[92];
@@ -124,11 +128,11 @@ static gsi_bool wsiServiceAvailable(const char* serviceName)
 {
 	if (__GSIACResult == GSIACAvailable)
 	{
-#ifndef UNISPY_FORCE_IP
 		if (wsAuthServiceURL[0] == '\0')
+#ifndef UNISPY_FORCE_IP
 			snprintf(wsAuthServiceURL, WS_LOGIN_MAX_URL_LEN, WS_LOGIN_SERVICE_URL_FORMAT, __GSIACGamename, serviceName);
 #else
-		gsiSafeStrcpyA(wsAuthServiceURL, UNISPY_FORCE_IP, WS_LOGIN_MAX_URL_LEN);
+			snprintf(wsAuthServiceURL, WS_LOGIN_MAX_URL_LEN, WS_LOGIN_SERVICE_URL_FORMAT, UNISPY_FORCE_IP, serviceName);
 #endif
 
 		return gsi_true;

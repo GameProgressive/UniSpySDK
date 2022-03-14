@@ -441,11 +441,8 @@ static SBError ServerListConnect(SBServerList *slist)
 	struct   sockaddr_in masterSAddr;
 	int masterIndex;
 
-#ifndef UNISPY_FORCE_IP
 	struct hostent *hent;
 	char masterHostname[128];
-#endif
-	
 
 	masterIndex = StringHash(slist->queryforgamename, NUM_MASTER_SERVERS);
 	masterSAddr.sin_family = AF_INET;
@@ -453,6 +450,10 @@ static SBError ServerListConnect(SBServerList *slist)
 
 #ifndef UNISPY_FORCE_IP
 	sprintf(masterHostname, "%s.ms%d." GSI_DOMAIN_NAME, slist->queryforgamename, masterIndex);
+#else
+	sprintf(masterHostname, "%s", UNISPY_FORCE_IP);
+#endif
+
 	masterSAddr.sin_addr.s_addr = inet_addr(masterHostname);
 	if (masterSAddr.sin_addr.s_addr == INADDR_NONE)
 	{
@@ -461,9 +462,6 @@ static SBError ServerListConnect(SBServerList *slist)
 			return sbe_dnserror; 
 		memcpy(&masterSAddr.sin_addr.s_addr,hent->h_addr_list[0], sizeof(masterSAddr.sin_addr.s_addr));
 	}
-#else
-	masterSAddr.sin_addr.s_addr = inet_addr(UNISPY_FORCE_IP);
-#endif
 
 	if (slist->slsocket == INVALID_SOCKET)
 	{

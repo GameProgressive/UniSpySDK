@@ -311,9 +311,9 @@ gsi_bool SAKE_CALL sakeGetFileDownloadURL(SAKE sake, int fileId, gsi_char url[SA
 #else
 
 #ifdef GSI_UNICODE
-	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%S?gameid=%d&pid=%d"), UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S?gameid=%d&pid=%d"), GSI_HTTP_PROTOCOL_URL, UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
 #else
-	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s?gameid=%d&pid=%d"), GSI_HTTP_PROTOCOL_URL, UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
 #endif
 
 #endif

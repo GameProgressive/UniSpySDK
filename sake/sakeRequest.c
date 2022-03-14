@@ -20,7 +20,13 @@ const char * GSI_SAKE_SERVICE_NAMESPACES[GSI_SAKE_SERVICE_NAMESPACE_COUNT] =
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef UNISPY_FORCE_IP
+#define SAKEI_SOAP_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s/SakeStorageServer/StorageServer.asmx"
+#else
 #define SAKEI_SOAP_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.sake." GSI_DOMAIN_NAME "/SakeStorageServer/StorageServer.asmx"
+#endif
+
 char sakeiSoapUrl[SAKE_MAX_URL_LENGTH] = "";
 
 
@@ -272,11 +278,11 @@ static void SAKE_CALL sakeiExecuteRequest(SAKERequest request)
 		int rcode;
 #ifndef UNISPY_FORCE_IP
 		rcode = snprintf(sakeiSoapUrl, SAKE_MAX_URL_LENGTH, SAKEI_SOAP_URL_FORMAT, request->mSake->mGameName);
+#else
+		rcode = snprintf(sakeiSoapUrl, SAKE_MAX_URL_LENGTH, SAKEI_SOAP_URL_FORMAT, UNISPY_FORCE_IP);
+#endif
 		GS_ASSERT(rcode >= 0);
 		GSI_UNUSED(rcode);
-#else
-		strncpy(sakeiSoapUrl, UNISPY_FORCE_IP, SAKE_MAX_URL_LENGTH);
-#endif
 	}
 	gsiExecuteSoap(sakeiSoapUrl, request->mInfo->mSoapAction, request->mSoapRequest, sakeiSoapCallback, request);
 }

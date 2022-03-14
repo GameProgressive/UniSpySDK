@@ -119,20 +119,28 @@ gpiStartConnect(
 	// Get the server host and port.
 
 #ifdef UNISPY_FORCE_IP
-	address.sin_addr.s_addr = inet_addr(UNISPY_FORCE_IP);
+	if (inet_addr(UNISPY_FORCE_IP) == INADDR_NONE)
 #else
 	if (inet_addr(GPConnectionManagerHostname) == INADDR_NONE)
+#endif
 	{
+#ifdef UNISPY_FORCE_IP
+		host = gethostbyname(UNISPY_FORCE_IP);
+#else
 		host = gethostbyname(GPConnectionManagerHostname);
+#endif
 		if(host == NULL)
 			CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve connection manager host name.");
 		address.sin_addr.s_addr = *(unsigned int *)host->h_addr_list[0];
 	}
 	else
 	{
+#ifdef UNISPY_FORCE_IP
+		address.sin_addr.s_addr = inet_addr(UNISPY_FORCE_IP);
+#else
 		address.sin_addr.s_addr = inet_addr(GPConnectionManagerHostname);
-	}
 #endif
+	}
 
 	// Connect the socket.
 	GS_ASSERT(address.sin_addr.s_addr != 0);

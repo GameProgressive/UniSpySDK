@@ -48,7 +48,7 @@ option(UNISPY_OPENSSL "Enable OpenSSL support" ON)
 option(UNISPY_HTTPLOG "Enable HTTP logging" OFF)
 option(UNISPY_SECURESECONNECT "Enable connecting to GameSpy services with a secure protocol (HTTPS)" ON)
 option(UNISPY_ENABLE_FORCE_IP "Enable force ip" OFF)
-set(UNISPY_FORCE_IP "127.0.0.1" CACHE STRING "Force a custom IP to connect")
+set(UNISPY_FORCE_IP "localhost" CACHE STRING "Force a custom IP to connect")
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
 #option(SDK_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
