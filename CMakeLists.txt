@@ -46,7 +46,9 @@ endif()
 # Do we want OpenSSL support or integrated GameSpy SSLv3 engine support?
 option(UNISPY_OPENSSL "Enable OpenSSL support" ON)
 option(UNISPY_HTTPLOG "Enable HTTP logging" OFF)
-option(UNISPY_SECURESECONNECT "Enable connecting to RetroSpy services with a secure protocol (HTTPS)" ON)
+option(UNISPY_SECURESECONNECT "Enable connecting to GameSpy services with a secure protocol (HTTPS)" ON)
+option(UNISPY_ENABLE_FORCE_IP "Enable force ip" OFF)
+set(UNISPY_FORCE_IP "127.0.0.1" CACHE STRING "Force a custom IP to connect")
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
 #option(SDK_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
@@ -97,7 +99,7 @@ endif()
 
 add_definitions(-DGS_PEER -DRS_FORCE_IP="${RS_FORCE_IP}")
 
-if (DEFINED UNISPY_FORCE_IP)
+if (UNISPY_ENABLE_FORCE_IP)
     add_definitions(-DUNISPY_FORCE_IP="${UNISPY_FORCE_IP}")
 endif()
 
