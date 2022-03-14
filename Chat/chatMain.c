@@ -479,7 +479,7 @@ static CHAT chatConnectDoit(CILoginType loginType,
 
 #ifdef UNISPY_FORCE_IP
 	strzcpy(connection->server, UNISPY_FORCE_IP, MAX_SERVER);
-	#else
+#else
 	strzcpy(connection->server, serverAddress?serverAddress:CI_DEFAULT_SERVER_ADDRESS, MAX_SERVER);
 #endif
 
