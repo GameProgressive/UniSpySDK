@@ -51,7 +51,7 @@ option(UNISPY_ENABLE_FORCE_IP "Enable force ip" OFF)
 set(UNISPY_FORCE_IP "localhost" CACHE STRING "Force a custom IP to connect")
 
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
-#option(SDK_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
+option(UNISPY_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
 
 if(WIN32 OR "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" OR MINGW OR CYGWIN)
     include(MFCMacro)
@@ -107,9 +107,9 @@ if(UNISPY_SECURESECONNECT)
     add_definitions(-DUNISPY_USE_HTTPS)
 endif()
 
-#if (UNISPY_MEM_MANAGED)
+if (UNISPY_MEM_MANAGED)
     add_definitions(-DGSI_MEM_MANAGED)
-#endif()
+endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Clang, Apple Clang and GCC have stricter warning requirements.
