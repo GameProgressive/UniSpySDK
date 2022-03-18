@@ -1035,8 +1035,8 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 	cryptResult = gsCryptRSAVerifySignedHash(&sigkeypub, hash, 16, cert->mSignature, WS_LOGIN_SIGNATURE_LEN);
 	if (cryptResult == 0)
 		return gsi_true;
-	else
-		return gsi_false;
+
+    return gsi_false;
 }
 
 
