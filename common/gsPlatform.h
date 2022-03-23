@@ -345,7 +345,7 @@
 #include "macosx/macAutoreleasePool.h"
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
+///gsi_uint////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Define GameSpy types
 
@@ -357,6 +357,12 @@ typedef unsigned short    gsi_u16;
 typedef int               gsi_i32;
 typedef unsigned int      gsi_u32;
 typedef unsigned int      gsi_time;  // must be 32 bits
+
+#if defined(_WIN64) || defined(__mips64) || defined(__x86_64__) || defined(__ppc64__)
+typedef unsigned long long gsi_ptr;
+#else
+typedef unsigned int       gsi_ptr;
+#endif
 
 // Deprecated
 typedef gsi_i32           goa_int32;  // 2003.Oct.04 - typename deprecated

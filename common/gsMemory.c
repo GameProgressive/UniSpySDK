@@ -229,7 +229,7 @@ static	gsi_u32			MemTagStackIndex					= 0;
 
 
 #define MEM_IS_POWER_OF_2(x)	(((x) & ((x)-1)) == 0)	
-#define MEMALIGN_POWEROF2(x,a)	(((gsi_uint)(x)+(a-1)) &~ ( ((gsi_uint)(a)) -1))
+#define MEMALIGN_POWEROF2(x,a)	(((gsi_ptr)(x)+(a-1)) &~ ( ((gsi_uint)(a)) -1))
 
 #if(1)	// enable assert, otherwise this runs faster
 	#define MP_ASSERT(x)	GS_ASSERT(x)
@@ -338,7 +338,7 @@ gsi_u32		MEM_CHUNKTotalSizeGet(MEM_CHUNK *_this)
 	{ 
 		return PTR_ALIGNMENT + sizeof(MEM_CHUNK)/*Nub*/;	
 	}
-	return (gsi_uint) _this->next - (gsi_uint) _this;							
+	return (gsi_ptr) _this->next - (gsi_ptr) _this;
 }	
 
 /***************************************/
@@ -347,7 +347,7 @@ gsi_u32		MEM_CHUNKChunkSizeGet(MEM_CHUNK *_this)
 {	
 	if (!_this->next) 
 		return PTR_ALIGNMENT;/*Nub*/;							
-	return (gsi_uint) _this->next - (gsi_uint) _this - sizeof(MEM_CHUNK);	
+	return (gsi_ptr) _this->next - (gsi_ptr) _this - sizeof(MEM_CHUNK);
 }	
 
 gsi_u32		MEM_CHUNKMemUsedGet (MEM_CHUNK *_this)				
@@ -378,7 +378,7 @@ void	MEM_CHUNKMemTypeSet (MEM_CHUNK *_this,	char _MemType)
 
 void*	MEM_CHUNKMemPtrGet  (MEM_CHUNK *_this)				
 { 
-	return (void*)((gsi_uint) _this + sizeof(MEM_CHUNK));		
+	return (void*)((gsi_ptr) _this + sizeof(MEM_CHUNK));
 }
 
 /*inline */MEM_CHUNK *Ptr_To_MEM_CHUNK(void *ptr)	
@@ -447,7 +447,7 @@ void		MEM_CHUNK_POOLFillMemoryTable				(MEM_CHUNK_POOL *_this,	char *Table, cons
 gsi_bool		MEM_CHUNK_POOLItemIsInPoolMemory			(MEM_CHUNK_POOL *_this,	void *ptr)	
 { 
 	GS_ASSERT(MEM_CHUNK_POOLIsValid(_this));	
-	return (((gsi_uint)ptr >=  (gsi_uint)MEM_CHUNKMemPtrGet(_this->HeaderStart)) &&((gsi_uint)ptr <=  (gsi_uint)MEM_CHUNKMemPtrGet(_this->HeaderEnd)));
+	return (((gsi_ptr)ptr >=  (gsi_ptr)MEM_CHUNKMemPtrGet(_this->HeaderStart)) &&((gsi_ptr)ptr <=  (gsi_ptr)MEM_CHUNKMemPtrGet(_this->HeaderEnd)));
 }
 			
 
@@ -820,7 +820,7 @@ MEM_CHUNK *MEM_CHUNK_POOLAllocChunk(MEM_CHUNK_POOL *_this,size_t Size, gsi_i32 A
 		if (MemRemain >= 0 )
 		{
 			// are we aligned properly?
-			Ptr			= (gsi_uint)MEM_CHUNKMemPtrGet(header);
+			Ptr			= (gsi_ptr)MEM_CHUNKMemPtrGet(header);
 			AlignedPtr	= MEMALIGN_POWEROF2(Ptr,Alignment);
 			delta		= AlignedPtr - Ptr;
 			if (delta)
@@ -834,7 +834,7 @@ MEM_CHUNK *MEM_CHUNK_POOLAllocChunk(MEM_CHUNK_POOL *_this,size_t Size, gsi_i32 A
 				}
 
 				// move the chunk over so that the pointer is aligned.
-				alignedheader = Ptr_To_MEM_CHUNK((void*)(gsi_uint)AlignedPtr);
+				alignedheader = Ptr_To_MEM_CHUNK((void*)(gsi_ptr)AlignedPtr);
 				MEM_CHUNK_POOLChunkMove	(_this,header,alignedheader);
 				header		= alignedheader;
 				MemRemain  -= delta;
@@ -1146,12 +1146,12 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 	int	ChunksFreeLostCount ;
 	int i,type;
 	MEM_CHUNK *header	;
-	MEM_CHUNK *NextFree;	
+	//MEM_CHUNK *NextFree;
 	MEM_STATSClear(pS);
 
 	// check free chunk linked list
 	header		= _this->HeaderStart;
-	NextFree	= _this->pFirstFree;
+	//NextFree	= _this->pFirstFree;
 
 
 	
@@ -1192,7 +1192,7 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 			
 			// previous free chunk linked correctly to us, we aren't a lost chunk
 			MP_ASSERT(header == NextFree);						
-			NextFree	= header->NextFree;
+			//NextFree	= header->NextFree;
 
 			// calc overhead and waste (in this case, the same value...sizeof(MEM_CHUNK) header)
 			pS->MemWasted	+= MEM_CHUNKTotalSizeGet(header) - MEM_CHUNKChunkSizeGet(header);
@@ -1260,7 +1260,7 @@ void MEM_CHUNK_POOLCheckValidity(MEM_CHUNK_POOL *_this)
 void MEM_CHUNK_POOLFillMemoryTable(MEM_CHUNK_POOL *_this,char *Table, const int TableSize, gsi_u32 _HeapStart, gsi_u32 _HeapSize)
 //--------------------------------------------------------------------------
 {
-	int s,e,j;
+	unsigned int s, e, j;
 	gsi_u32 start_address;
 	gsi_u32 end_address	;
 	MEM_CHUNK	*pChunk = _this->HeaderStart;
@@ -1271,8 +1271,8 @@ void MEM_CHUNK_POOLFillMemoryTable(MEM_CHUNK_POOL *_this,char *Table, const int 
 	{
 		if (!MEM_CHUNKIsFree(pChunk))
 		{
-			start_address	=  (gsi_uint)pChunk;
-			end_address		= ((gsi_uint)pChunk->next)-1;
+			start_address	=  (gsi_ptr)pChunk;
+			end_address		= ((gsi_ptr)pChunk->next)-1;
 
 			// translate address into table positions
 			s=  ((start_address - _HeapStart) * (TableSize>>4)) / (_HeapSize>>4);
@@ -1729,7 +1729,7 @@ void gsMemMgrSelfText()
 	int c= 0;
 	int i,j,k;
 
-	char *ptr	= (char *) ( ((gsi_uint)malloc(size-PTR_ALIGNMENT)+(PTR_ALIGNMENT-1))&~ (PTR_ALIGNMENT-1) )  ;
+	char *ptr	= (char *) ( ((gsi_ptr)malloc(size-PTR_ALIGNMENT)+(PTR_ALIGNMENT-1))&~ (PTR_ALIGNMENT-1) )  ;
 	MEM_CHUNK_POOLCreate(&gChunkPool2,"",ptr,size);
 
 	while(1)

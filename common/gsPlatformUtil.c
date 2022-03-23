@@ -323,7 +323,9 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
     handle = NULL;
 
     if (!ip)
+    {
         ip = GSI_ERROR_RESOLVING_HOSTNAME;
+    }
 
 	return ip;
 }
