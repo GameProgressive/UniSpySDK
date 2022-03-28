@@ -175,6 +175,7 @@ static void wsiAuthErrorToLoginResponse(GSAuthErrorCode authError, WSLoginRespon
 // Converts an authentication error to webservice error (for Sony)
 static void wsiAuthErrorToLoginSonyCertResponse(GSAuthErrorCode authError, WSLoginSonyCertResponse* theResponse)
 {
+
 	if (authError == GSAuthErrorCode_InvalidGameID)
 	{
 		theResponse->mLoginResult = WSLogin_InvalidGameCredentials;
@@ -1037,8 +1038,8 @@ gsi_bool wsLoginCertIsValid(const GSLoginCertificate * cert)
 	cryptResult = gsCryptRSAVerifySignedHash(&sigkeypub, hash, 16, cert->mSignature, WS_LOGIN_SIGNATURE_LEN);
 	if (cryptResult == 0)
 		return gsi_true;
-	else
-		return gsi_false;
+
+    return gsi_false;
 }
 
 
@@ -1818,7 +1819,7 @@ static void wsiCreateUserAccountCallback(GHTTPResult theResult,
 			{
 				response.mCreateUserAccountResult = WSCreateUserAccount_ParseError;
 			}
-			else if (response.mResponseCode != WSLogin_Success)
+			else if (response.mResponseCode != WSCreateUserAccount_Success)
 			{
 				response.mCreateUserAccountResult = WSCreateUserAccount_ServerError;
 			}
@@ -2031,7 +2032,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 	// allocate the request values
 	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
 	if (requestData == NULL)
-		return WSLogin_OutOfMemory;
+		return WSCreateUserAccount_OutOfMemory;
 
 	requestData->mUserCallback.mCreateUserAccountCallback = userCallback;
 	requestData->mUserData     = userData;
@@ -2059,7 +2060,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 			)
 		{
 			gsXmlFreeWriter(writer);
-			return WSLogin_OutOfMemory;
+			return WSCreateUserAccount_OutOfMemory;
 		}
 
 		requestData->mTask = gsiExecuteSoap(wsAuthServiceURL, WS_AUTHSERVICE_CREATEUSER_SOAP,
@@ -2069,7 +2070,7 @@ WSCreateUserAccountValue wsCreateUserAccount(
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
-			return WSLogin_OutOfMemory;
+			return WSCreateUserAccount_OutOfMemory;
 		}
 	}
 	else

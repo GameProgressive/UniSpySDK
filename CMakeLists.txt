@@ -91,7 +91,7 @@ if (UNIX)
 endif()
 
 # Do we optionally want to build the test executables?
-option(UNISPY_BUILD_TESTS "Builds test executables." "")
+option(UNISPY_BUILD_TESTS "Builds test executables." OFF)
 
 if(UNISPY_DOMAIN_NAME)
     add_definitions(-DGSI_DOMAIN_NAME="${UNISPY_DOMAIN_NAME}")

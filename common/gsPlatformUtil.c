@@ -173,7 +173,7 @@ static void * gsiResolveHostnameThread(void * arg)
 	SocketStartUp();
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = PF_UNSPEC;
+	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 
 	// DNS lookup (works with pthreads)
@@ -182,7 +182,7 @@ static void * gsiResolveHostnameThread(void * arg)
 	if (!error)
 	{
 		// first convert to character string for debug output
-		ip = inet_ntoa((*(struct sockaddr_in*)result->ai_addr).sin_addr);
+		ip = inet_ntoa( ((struct sockaddr_in*)result->ai_addr)->sin_addr);
 
 		gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_State, GSIDebugLevel_Comment,
 			"Resolved host '%s' to ip '%s'\n", handle->hostname, ip);
@@ -318,8 +318,14 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 	// free resources
 	gsiCleanupThread(handle->threadID);
 	gsifree(handle->hostname);
+    handle->hostname = NULL;
 	gsifree(handle);
     handle = NULL;
+
+    if (!ip)
+    {
+        ip = GSI_ERROR_RESOLVING_HOSTNAME;
+    }
 
 	return ip;
 }
