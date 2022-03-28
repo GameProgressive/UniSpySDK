@@ -372,3 +372,4 @@ rvl_release/
 
 # CLion cmake gen directories
 cmake-build-*/
+.vscode
