@@ -79,9 +79,11 @@ const char WS_AUTHSERVICE_SIGNATURE_KEY[] =
 */
 
 
-
-const char WS_AUTHSERVICE_SIGNATURE_EXP[] =
-	"010001";
+#ifdef UNISPY_NO_RSA_CERT
+const char WS_AUTHSERVICE_SIGNATURE_EXP[] = "000001";
+#else
+const char WS_AUTHSERVICE_SIGNATURE_EXP[] = "010001";
+#endif
 
 // This is declared as an extern so it can be overriden when testing
 
