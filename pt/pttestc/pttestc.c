@@ -73,6 +73,36 @@ static void PatchCallback
 	GSI_UNUSED(param);
 }
 
+static void FilePlanetInfoCallback
+(
+	int fileID,
+	PTBool found,
+	const gsi_char * description,
+	const gsi_char * size,
+	int numMirrors,
+	const gsi_char ** mirrorNames,
+	const gsi_char ** mirrorURLs,
+	void * param
+)
+{
+	int i;
+
+	_tprintf(_T("fileID = %d\n"), fileID);
+	_tprintf(_T("found = %s\n"), BoolToString(found));
+	if(!found)
+		return;
+	_tprintf(_T("description = %s\n"), description);
+	_tprintf(_T("size = %s\n"), size);
+	_tprintf(_T("numMirrors = %d\n"), numMirrors);
+	for(i = 0 ; i < numMirrors ; i++)
+	{
+		_tprintf(_T("%2d: %s\n"), i + 1, mirrorNames[i]);
+		_tprintf(_T("    %s\n"), mirrorURLs[i]);
+	}
+	
+	GSI_UNUSED(param);
+}
+
 #ifdef __MWERKS__ // CodeWarrior will warn if not prototyped
 	int test_main(int argc, char **argv);
 #endif
@@ -111,6 +141,9 @@ int test_main(int argc, char **argv)
 
 	if(!ptCheckForPatch(GMTEST_PID, GMTEST_VID_1, 0, PatchCallback, PTFalse, NULL))
 		_tprintf(_T("Failed to check for patch\n"));
+
+	if(!ptLookupFilePlanetInfo(666, FilePlanetInfoCallback, PTFalse, NULL))
+		_tprintf(_T("Failed to lookup file planet info\n"));
 
 	start_time = current_time();
 	while((current_time() - start_time) < 20000)
