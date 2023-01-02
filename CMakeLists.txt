@@ -73,6 +73,10 @@ if(WIN32 OR "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" OR MINGW OR CYGWIN)
         set(UNISPY_WINSOCK_LIB winsock32)
     endif()
 
+    if(UNISPY_MSVC_STATIC)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+
     set(UNISPY_WINDOWS 1)
 endif()
 

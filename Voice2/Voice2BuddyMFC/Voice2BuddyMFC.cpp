@@ -5,7 +5,6 @@
 #include "Voice2BuddyMFC.h"
 #include "Voice2BuddyMFCDlg.h"
 
-#pragma comment(linker, "/NODEFAULTLIB:libcmtd.lib")
 #pragma comment(lib, "dsound.lib")
 #pragma comment(lib, "dxguid.lib")
 
