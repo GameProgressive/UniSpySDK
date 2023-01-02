@@ -1145,14 +1145,17 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 {
 	int	ChunksFreeLostCount ;
 	int i,type;
-	MEM_CHUNK *header	;
-	//MEM_CHUNK *NextFree;
+	MEM_CHUNK *header;
+#ifdef _DEBUG // release builds doesn't need this assert
+	MEM_CHUNK *NextFree;
+#endif
 	MEM_STATSClear(pS);
 
 	// check free chunk linked list
 	header		= _this->HeaderStart;
-	//NextFree	= _this->pFirstFree;
-
+#ifdef _DEBUG
+	NextFree	= _this->pFirstFree;
+#endif
 
 	
 	/***  Test validity of all chunks chain ***/
@@ -1190,9 +1193,11 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 			MP_ASSERT((header->next		== NULL) || (!MEM_CHUNKIsFree(header->next)));	// infinite loop or out of place
 			MP_ASSERT((header->prev		== NULL) || (!MEM_CHUNKIsFree(header->prev)));	// infinite loop or out of place
 			
+#ifdef _DEBUG
 			// previous free chunk linked correctly to us, we aren't a lost chunk
 			MP_ASSERT(header == NextFree);						
-			//NextFree	= header->NextFree;
+			NextFree	= header->NextFree;
+#endif
 
 			// calc overhead and waste (in this case, the same value...sizeof(MEM_CHUNK) header)
 			pS->MemWasted	+= MEM_CHUNKTotalSizeGet(header) - MEM_CHUNKChunkSizeGet(header);
