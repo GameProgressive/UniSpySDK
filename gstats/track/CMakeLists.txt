@@ -12,7 +12,7 @@ add_executable(track
     track.rc
 )
 
-target_link_libraries(track usstats)
+target_link_libraries(track usstats ushttp usgp)
 target_precompile_headers(track PRIVATE StdAfx.h)
 set_target_properties(track PROPERTIES FOLDER Tests)
 

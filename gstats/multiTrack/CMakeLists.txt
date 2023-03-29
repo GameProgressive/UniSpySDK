@@ -16,7 +16,7 @@ add_executable(multiTrack
     multiTrack.rc
 )
 
-target_link_libraries(multiTrack usstats)
+target_link_libraries(multiTrack usstats usgt2 ushttp usgp)
 target_precompile_headers(multiTrack PRIVATE StdAfx.h)
 set_target_properties(multiTrack PROPERTIES FOLDER Tests)
 

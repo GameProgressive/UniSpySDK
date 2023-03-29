@@ -8,7 +8,7 @@ add_library(usstats
 
 target_link_libraries(usstats PUBLIC uscommon)
 
-if(RS_BUILD_TESTS)
+if(UNISPY_BUILD_TESTS)
     add_subdirectory(statstest)
     add_subdirectory(persisttest)
     add_subdirectory(track)

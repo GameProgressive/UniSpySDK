@@ -10,7 +10,7 @@ add_executable(statstestmfc
     gp_stats.rc
 )
 
-target_link_libraries(statstestmfc usstats)
+target_link_libraries(statstestmfc usstats usgp ushttp)
 target_precompile_headers(statstestmfc PRIVATE StdAfx.h)
 set_target_properties(statstestmfc PROPERTIES FOLDER Tests)
 

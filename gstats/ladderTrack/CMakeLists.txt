@@ -16,7 +16,7 @@ add_executable(ladderTrack
     WaitingDlg.h
 )
 
-target_link_libraries(ladderTrack usstats)
+target_link_libraries(ladderTrack usstats usgt2 ushttp usgp)
 target_precompile_headers(ladderTrack PRIVATE StdAfx.h)
 set_target_properties(ladderTrack PROPERTIES FOLDER Tests)
 

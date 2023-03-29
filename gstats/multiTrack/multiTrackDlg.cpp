@@ -535,9 +535,9 @@ BOOL CMultiTrackDlg::SetupMatch()
 	}
 
 	CString url;
-	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "games/st_rank/web/playerratings.asp?pid=%d", m_loginDlg.m_profile);
+	url.Format(GSI_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "games/st_rank/web/playerratings.asp?pid=%d", m_loginDlg.m_profile);
 	ghttpGet(url, GHTTPFalse, PlayerRatingsPageCompleted, (void *)TRUE);
-	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_rank/web/playerratings.asp?pid=%d", m_remoteProfile);
+	url.Format(GSI_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_rank/web/playerratings.asp?pid=%d", m_remoteProfile);
 	ghttpGet(url, GHTTPFalse, PlayerRatingsPageCompleted, (void *)FALSE);
 
 	return result;

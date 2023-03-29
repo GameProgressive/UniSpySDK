@@ -448,9 +448,9 @@ GHTTPBool PlayerPositionPageCompleted
 void CLadderTrackDlg::UpdatePlayerPositions()
 {
 	CString url;
-	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_loginDlg.m_profile);
+	url.Format(GSI_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_loginDlg.m_profile);
 	ghttpGet(url, GHTTPFalse, PlayerPositionPageCompleted, (void *)TRUE);
-	url.Format(RS_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_remoteProfile);
+	url.Format(GSI_HTTP_PROTOCOL_URL "sdkdev." GSI_DOMAIN_NAME "/games/st_ladder/web/playerposition.asp?pid=%d", m_remoteProfile);
 	ghttpGet(url, GHTTPFalse, PlayerPositionPageCompleted, (void *)FALSE);
 }
 
