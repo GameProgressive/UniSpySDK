@@ -4,6 +4,7 @@ project(UniSpySDK VERSION 2.10 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+include(MFCMacro)
 
 # Git.
 find_package(Git)
@@ -55,8 +56,6 @@ set(UNISPY_FORCE_IP "localhost" CACHE STRING "Force a custom IP to connect")
 option(UNISPY_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
 
 if(WIN32 OR "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" OR MINGW OR CYGWIN)
-    include(MFCMacro)
-
     option(UNISPY_MSVC_STATIC "Use MSVC static runtime" OFF)
 
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
