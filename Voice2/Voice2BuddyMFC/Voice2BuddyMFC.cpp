@@ -5,9 +5,6 @@
 #include "Voice2BuddyMFC.h"
 #include "Voice2BuddyMFCDlg.h"
 
-#pragma comment(lib, "dsound.lib")
-#pragma comment(lib, "dxguid.lib")
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE

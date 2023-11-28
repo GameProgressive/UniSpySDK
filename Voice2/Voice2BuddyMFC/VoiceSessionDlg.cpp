@@ -183,8 +183,8 @@ void GT2ReceivedCallback(GT2Connection theConnection, unsigned char* theBuffer, 
 	VoicePacket* aVoicePacket = (VoicePacket*)theBuffer;
 
 	// Sanity check the packet
-	assert(theLength >= gVoicePacketHeaderSize);
-	assert(theLength == (gVoicePacketHeaderSize + aVoicePacket->mDataLength));
+	GS_ASSERT(theLength >= gVoicePacketHeaderSize);
+	GS_ASSERT(theLength == (gVoicePacketHeaderSize + aVoicePacket->mDataLength));
 
 	// Play the voice data
 	GVSource aSource = gt2GetRemoteIP(theConnection);

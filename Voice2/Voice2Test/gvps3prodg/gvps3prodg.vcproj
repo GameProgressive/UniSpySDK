@@ -1,131 +1,199 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="gvps3prodg"
 	ProjectGUID="{A089D0F3-E861-4309-89A4-A47A61401A3D}"
 	RootNamespace="GameApp"
-	Keyword="Win32Proj">
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="PS3 Debug|Win32"
 			OutputDirectory="PS3_PPU_Debug"
 			IntermediateDirectory="PS3_PPU_Debug"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
-			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;$(TargetPath)">
+			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="-g -Wall -fno-exceptions"
 				Optimization="2"
-				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\ppu\include\sn&quot;;&quot;$(SCE_PS3_ROOT)\target\ppu\include&quot;;C:\PS3\cell\target\ppu\include;C:\PS3\cell\target\ppu\include\network;&quot;c:\Gamespy\GOATools\builder\work\repository\GOA\Voice2\speex-1.0.5\include&quot;"
-				PreprocessorDefinitions="_GT2_ENDIAN_CONVERT_ENABLE;SN_TARGET_PS3;_DEBUG;__GCC__;_PS3;GSI_COMMON_DEBUG;UNIQUEID;GSI_MEM_MANAGED;GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN;GV_NO_DEFAULT_CODEC"
-				MinimalRebuild="FALSE"
+				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\ppu\include\sn&quot;;&quot;$(SCE_PS3_ROOT)\target\ppu\include&quot;;&quot;$(SCE_PS3_ROOT)\target\ppu\include\network&quot;;&quot;..\..\speex-1.2rc1\include&quot;;&quot;..\..\speex-1.2rc1\include\speex&quot;;&quot;..\..\speex-1.2rc1\libspeex&quot;"
+				PreprocessorDefinitions="_GT2_ENDIAN_CONVERT_ENABLE;SN_TARGET_PS3;_DEBUG;__GCC__;_PS3;GSI_COMMON_DEBUG;UNIQUEID;GSI_MEM_MANAGED;GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN;EXPORT="
+				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				WarningLevel="4"
-				WarnAsError="FALSE"
-				Detect64BitPortabilityProblems="FALSE"
+				WarnAsError="false"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 				CompileAs="0"
 				ForcedIncludeFiles=""
-				ForcedUsingFiles=""/>
+				ForcedUsingFiles=""
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysmodule_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libmic_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libresc_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnetctl_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libusbd_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm_cmd.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm_sys_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libPSGL.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libPSGLU.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libaudio_stub.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libmixer.a&quot;"
 				OutputFile="$(OutDir)/$(ProjectName).elf"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="C:\PS3\cell\target\ppu\lib\PSGL\RSX\debug;C:\PS3\cell\target\ppu\lib"
-				GenerateDebugInformation="FALSE"
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile=""
 				SubSystem="0"
-				TargetMachine="0"/>
+				TargetMachine="0"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="$(SCE_PS3_ROOT)\host-win32\bin\make_fself &quot;$(TargetPath)&quot; &quot;$(TargetDir)$(TargetName).self&quot;"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				CommandLine="$(SCE_PS3_ROOT)\host-win32\bin\make_fself &quot;$(TargetPath)&quot; &quot;$(TargetDir)$(TargetName).self&quot;"
+			/>
 		</Configuration>
 		<Configuration
 			Name="PS3 Release|Win32"
 			OutputDirectory="PS3_PPU_Release"
 			IntermediateDirectory="PS3_PPU_Release"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
-			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;$(TargetPath)">
+			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="-g -Wall -fno-exceptions"
 				Optimization="2"
 				AdditionalIncludeDirectories="&quot;$(SN_PS3_PATH)\ppu\include\sn&quot;;&quot;$(SCE_PS3_ROOT)\target\ppu\include&quot;;&quot;C:\PS3\cell\target\ppu\include&quot;;&quot;C:\PS3\cell\target\ppu\include\network&quot;"
 				PreprocessorDefinitions="_GT2_ENDIAN_CONVERT_ENABLE;SN_TARGET_PS3;NDEBUG;__GCC__;_PS3;GSI_COMMON_DEBUG;UNIQUEID;GSI_MEM_MANAGED"
-				MinimalRebuild="FALSE"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				WarningLevel="4"
-				WarnAsError="TRUE"
-				Detect64BitPortabilityProblems="FALSE"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 				CompileAs="0"
-				ForcedIncludeFiles=""/>
+				ForcedIncludeFiles=""
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="&quot;$(SCE_PS3_ROOT)\target\ppu\lib\libm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libio.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libpad.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnet.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libnetctl.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libusbd.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libkb.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libgcm.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\libsysutil.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\libcgc.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libPSGL.a&quot; &quot;$(SCE_PS3_ROOT)\target\ppu\lib\psgl\rsx\debug\libPSGLU.a&quot;"
 				OutputFile="$(OutDir)/$(ProjectName).elf"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="C:\PS3\cell\target\ppu\lib\PSGL\RSX\debug;C:\PS3\cell\target\ppu\lib"
-				GenerateDebugInformation="FALSE"
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile=""
 				SubSystem="0"
-				TargetMachine="0"/>
+				TargetMachine="0"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCWebDeploymentTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -133,306 +201,915 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="">
+			>
 			<File
-				RelativePath="..\Voice2Test.c">
+				RelativePath="..\Voice2Test.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="">
+			>
 		</Filter>
 		<Filter
 			Name="GsCommon"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\..\darray.c">
+				RelativePath="..\..\..\darray.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\darray.h">
+				RelativePath="..\..\..\darray.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsAssert.c">
+				RelativePath="..\..\..\common\gsAssert.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsAssert.h">
+				RelativePath="..\..\..\common\gsAssert.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsAvailable.c">
+				RelativePath="..\..\..\common\gsAvailable.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsAvailable.h">
+				RelativePath="..\..\..\common\gsAvailable.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsCommon.h">
+				RelativePath="..\..\..\common\gsCommon.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsDebug.c">
+				RelativePath="..\..\..\common\gsDebug.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsDebug.h">
+				RelativePath="..\..\..\common\gsDebug.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsMemory.c">
+				RelativePath="..\..\..\common\gsMemory.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsMemory.h">
+				RelativePath="..\..\..\common\gsMemory.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatform.c">
+				RelativePath="..\..\..\common\gsPlatform.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatform.h">
+				RelativePath="..\..\..\common\gsPlatform.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformSocket.c">
+				RelativePath="..\..\..\common\gsPlatformSocket.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformSocket.h">
+				RelativePath="..\..\..\common\gsPlatformSocket.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformThread.c">
+				RelativePath="..\..\..\common\gsPlatformThread.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformThread.h">
+				RelativePath="..\..\..\common\gsPlatformThread.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformUtil.c">
+				RelativePath="..\..\..\common\gsPlatformUtil.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsPlatformUtil.h">
+				RelativePath="..\..\..\common\gsPlatformUtil.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsStringUtil.c">
+				RelativePath="..\..\..\common\gsStringUtil.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\gsStringUtil.h">
+				RelativePath="..\..\..\common\gsStringUtil.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\ps3\ps3common.c">
+				RelativePath="..\..\..\common\ps3\ps3common.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="VoiceSDK"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\gv.h">
+				RelativePath="..\..\gv.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvCodec.c">
+				RelativePath="..\..\gvCodec.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvCodec.h">
+				RelativePath="..\..\gvCodec.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvCustomDevice.c">
+				RelativePath="..\..\gvCustomDevice.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvCustomDevice.h">
+				RelativePath="..\..\gvCustomDevice.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvDevice.c">
+				RelativePath="..\..\gvDevice.c"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvDevice.h">
+				RelativePath="..\..\gvDevice.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\gvDirectSound.c">
+				RelativePath="..\..\gvFrame.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvFrame.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvMain.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvMain.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvPS3Audio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvPS3Audio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvPS3Headset.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvPS3Headset.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvSource.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvSource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvSpeex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvSpeex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvUtil.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\gvUtil.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Speex1.2"
+			>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\bits.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvDirectSound.h">
-			</File>
-			<File
-				RelativePath="..\..\gvFrame.c">
-			</File>
-			<File
-				RelativePath="..\..\gvFrame.h">
-			</File>
-			<File
-				RelativePath="..\..\gvGSM.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\buffer.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvGSM.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\cb_search.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvLogitechPS2Codecs.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_10_16_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvLogitechPS2Codecs.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_10_32_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvMain.c">
-			</File>
-			<File
-				RelativePath="..\..\gvMain.h">
-			</File>
-			<File
-				RelativePath="..\..\gvOSXAudio.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_20_32_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvOSXAudio.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_5_256_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Audio.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_5_64_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Audio.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\exc_8_128_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Eyetoy.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\filterbank.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Eyetoy.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\filters.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Headset.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\gain_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Headset.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\gain_table_lbr.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Spu2.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\hexc_10_32_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS2Spu2.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\hexc_table.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPS3Audio.c">
-			</File>
-			<File
-				RelativePath="..\..\gvPS3Audio.h">
-			</File>
-			<File
-				RelativePath="..\..\gvPS3Headset.c">
-			</File>
-			<File
-				RelativePath="..\..\gvPS3Headset.h">
-			</File>
-			<File
-				RelativePath="..\..\gvPS3RingBuffer.c">
-			</File>
-			<File
-				RelativePath="..\..\gvPS3RingBuffer.h">
-			</File>
-			<File
-				RelativePath="..\..\gvPSPAudio.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\high_lsp_tables.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvPSPAudio.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\jitter.c"
+				>
 				<FileConfiguration
 					Name="PS3 Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					>
 					<Tool
-						Name="VCCustomBuildTool"/>
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvSource.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\lpc.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvSource.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\lsp.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvUtil.c">
+				RelativePath="..\..\speex-1.2rc1\libspeex\lsp_tables_nb.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\gvUtil.h">
+				RelativePath="..\..\speex-1.2rc1\libspeex\ltp.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\modes.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\modes_wb.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\nb_celp.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\quant_lsp.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\resample.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\sb_celp.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\scal.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\speex.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\speex_callbacks.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\speex_header.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\stereo.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\vbr.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\vq.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PS3 Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\speex-1.2rc1\libspeex\window.c"
+				>
+				<FileConfiguration
+					Name="PS3 Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="FIXED_POINT"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

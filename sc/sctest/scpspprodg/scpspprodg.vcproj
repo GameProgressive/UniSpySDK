@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="-g"
-				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a"
+				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a libssl_stub_weak.a &#x0A;libhttp_stub_weak.a np_stub_weak.a np_auth_stub_weak.a&#x0A; np_service_stub_weak.a libgu.a libgum.a display_stub.a ge_user_stub.a"
 				OutputFile="$(OutDir)/tempprx.obj"
 				AdditionalLibraryDirectories=""
 			/>
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="-G0 -Wl,-S -Wl,-Map,&quot;$(OutDir)/$(ProjectName).map&quot; -Wl,-sn-full-map"
-				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a"
+				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a libssl_stub_weak.a &#x0A;libhttp_stub_weak.a np_stub_weak.a np_auth_stub_weak.a&#x0A; np_service_stub_weak.a libgu.a libgum.a display_stub.a ge_user_stub.a"
 				OutputFile="$(OutDir)/tempprx.obj"
 				AdditionalLibraryDirectories=""
 			/>
@@ -213,7 +213,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="-g"
-				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a"
+				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a libssl_stub_weak.a &#x0A;libhttp_stub_weak.a np_stub_weak.a np_auth_stub_weak.a&#x0A; np_service_stub_weak.a libgu.a libgum.a display_stub.a ge_user_stub.a"
 				OutputFile="$(OutDir)/tempprx.obj"
 				AdditionalLibraryDirectories=""
 			/>
@@ -242,6 +242,158 @@
 				Name="VCPostBuildEventTool"
 				Description="Generating Debug PRX &quot;$(TargetDir)$(ProjectName).prx&quot;"
 				CommandLine="pspprxgen &quot;$(TargetPath)&quot; -r &quot;$(TargetDir)$(ProjectName).prx&quot;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Unicode Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;*.prx;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-g -O0"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="SN_TARGET_PSP_PRX;_DEBUG;_PSP;GSI_COMMON_DEBUG;GSI_UNICODE"
+				ProgramDataBaseFileName=""
+				WarningLevel="3"
+				CompileAs="0"
+				ForcedUsingFiles=""
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="-g"
+				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a libssl_stub_weak.a &#x0A;libhttp_stub_weak.a np_stub_weak.a np_auth_stub_weak.a&#x0A; np_service_stub_weak.a libgu.a libgum.a display_stub.a ge_user_stub.a"
+				OutputFile="$(OutDir)/tempprx.obj"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Generating Debug PRX &quot;$(TargetDir)$(ProjectName).prx&quot;"
+				CommandLine="pspprxgen &quot;$(TargetPath)&quot; -r &quot;$(TargetDir)$(ProjectName).prx&quot;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Unicode Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			DeleteExtensionsOnClean="*.obj;*.d;*.map;*.lst;*.pch;*.prx;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-O3"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="SN_TARGET_PSP_PRX;NDEBUG;_PSP;GSI_UNICODE"
+				ProgramDataBaseFileName=""
+				WarningLevel="4"
+				WarnAsError="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="-Wl,-S -Wl,-Map,&quot;$(OutDir)/$(ProjectName).map&quot; -Wl,-sn-full-map"
+				AdditionalDependencies="crt0_prx.o pspnet_stub_weak.a pspnet_inet_stub_weak.a pspnet_apctl_stub_weak.a; pspnet_ap_dialog_dummy_stub_weak.a rtc_stub.a utility_stub.a wlan_stub.a pspnet_resolver_stub_weak.a libssl_stub_weak.a &#x0A;libhttp_stub_weak.a np_stub_weak.a np_auth_stub_weak.a&#x0A; np_service_stub_weak.a libgu.a libgum.a display_stub.a ge_user_stub.a"
+				OutputFile="$(OutDir)/tempprx.obj"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Generating Release PRX &quot;$(TargetDir)$(ProjectName).prx&quot;"
+				CommandLine="pspprxgen &quot;$(TargetPath)&quot; -o &quot;$(TargetDir)$(ProjectName).prx&quot;"
 			/>
 		</Configuration>
 	</Configurations>

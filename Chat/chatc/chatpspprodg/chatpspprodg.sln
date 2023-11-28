@@ -1,6 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chatpspprodg", "chatpspprodg.vcproj", "{68B8E20D-AA73-48B7-8E3A-7568A80A556E}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
@@ -15,6 +19,8 @@ Global
 		PSP Debug Opt|Win32 = PSP Debug Opt|Win32
 		PSP Debug|Win32 = PSP Debug|Win32
 		PSP Release|Win32 = PSP Release|Win32
+		Unicode Debug|Win32 = Unicode Debug|Win32
+		Unicode Release|Win32 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.PSP Debug Opt|Win32.ActiveCfg = PSP Debug Opt|Win32
@@ -23,6 +29,10 @@ Global
 		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.PSP Debug|Win32.Build.0 = PSP Debug|Win32
 		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.PSP Release|Win32.ActiveCfg = PSP Release|Win32
 		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.PSP Release|Win32.Build.0 = PSP Release|Win32
+		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{68B8E20D-AA73-48B7-8E3A-7568A80A556E}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

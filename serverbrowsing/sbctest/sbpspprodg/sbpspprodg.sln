@@ -19,6 +19,8 @@ Global
 		PSP Debug Opt|Win32 = PSP Debug Opt|Win32
 		PSP Debug|Win32 = PSP Debug|Win32
 		PSP Release|Win32 = PSP Release|Win32
+		Unicode Debug|Win32 = Unicode Debug|Win32
+		Unicode Release|Win32 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.PSP Debug Opt|Win32.ActiveCfg = PSP Debug Opt|Win32
@@ -27,6 +29,10 @@ Global
 		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.PSP Debug|Win32.Build.0 = PSP Debug|Win32
 		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.PSP Release|Win32.ActiveCfg = PSP Release|Win32
 		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.PSP Release|Win32.Build.0 = PSP Release|Win32
+		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{962BDE0F-6BDA-4C68-AAB6-9B35F7F9A4E0}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
