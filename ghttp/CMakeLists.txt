@@ -33,10 +33,8 @@ if (UNISPY_HTTPLOG)
 	target_compile_definitions(ushttp PUBLIC HTTP_LOG=1)
 endif()
 
-# Extended log for HTTP
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-	target_compile_definitions(ushttp PUBLIC GHTTP_EXTENDEDERROR=1)
-endif()
+# Extended log for HTTP, this avoid using http errors as -1, which was done in previous SDK versions
+target_compile_definitions(ushttp PUBLIC GHTTP_EXTENDEDERROR=1)
 
 if (OPENSSL_FOUND)
     set(HTTP_OPENSSL_LIBS OpenSSL::SSL)

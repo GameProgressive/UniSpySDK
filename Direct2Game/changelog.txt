@@ -1,0 +1,42 @@
+Changelog for: GameSpy Direct to Game SDK
+--------------------------------------------------------
+
+DATE        VERSION  BY   TYPE     DESCRIPTION
+----------  -------  ---  -------  ---------------------------------------------------------
+06-25-2010  1.01.00  SN   FEATURE  Added Extensible Info for both catalogs and catalog items 
+02-09-2009  1.00.00  SN   RELEASE  Releasing to developer site
+02-09-2009  0.06.10  NAB  OTHER    Release preparation 
+02-09-2009  0.06.09  SN   FIX      Fixed issue with temp file being renamed
+                     SN   FIX      Reconfigured production environment URL
+                     SN   FIX      Fixed problem with parsing activation code
+02-09-2009  0.06.08  NAB  FIX      Fix for content updates and additional test functionality 
+02-06-2009  0.06.07  NAB  FIX/FEATURE  Submitted override manifest file path function and 
+                                   bug fix for memory leak and changes to eliminate 
+                                   the duplicate items in the merged lists. 
+02-05-2009  0.06.06  SN   FIX      Made some minor name changes to be consistent
+                     SN   FIX      Fixed a few issues mentioned
+02-03-2009  0.06.05  SN   FIX      Renamed the type for content updates to a more appropriate name.
+02-02-2009  0.06.04  SN   FIX      Removed requirement of cloning parts of a response in a callback
+                     SN   FIX      Made various bug fixes to cleanup functionality
+                     SN   FIX      Minor fixes to the test app made
+01-28-2009  0.06.03  NAB  FEATURE  sort by item id, externalid, file size and refactored sort algorithm.
+01-09-2009  0.06.02  NAB  OTHER	   Checking in changes in preparation of the release
+01-09-2009  0.06.01  NAB  FEATURE  Checking content updates, manifest and sorting. 
+11-25-2008  0.06.00  NAB  RELEASE  Releasing beta version to developer site 
+05-19-2008  0.05.02  SN   FEATURE  Added some caching functionality for d2gGetAllItems
+                     SN   FEATURE  Added d2gGetItemsByCategory
+                     SN   FEATURE  Added d2gFilterItemsByCategory for local lists
+                     SN   OTHER    Debug logging was added
+05-05-2008  0.05.01  SN   FIX      Added another error code needed for the D2G service
+04-07-2008  0.05.00  SN   RELEASE  Releasing to developer site
+04-07-2008  0.04.02  SN   FIX      Updated error codes to reflect backend
+03-27-2008  0.04.01  SN   FEATURE  Updated Place Order
+                     SN   FEATURE  Added Check Placed Order
+                     SN   FEATURE  Added Get Store Availiability
+                     SN   FEATURE  Added Get Wallet Admin URL
+                     SN   FEATURE  Updated test application to reflect changes in SDK
+03-27-2008  0.04.00  SN   RELEASE  Alpha 2 release
+03-27-2008  0.03.01  SN   FEATURE  Added data types for get order total, purchased items, and others
+                     SN   FEATURE  Modified interface to conform to new data types
+03-14-2008  0.03.00  SN   CREATE   Alpha SDK Implementation completed
+

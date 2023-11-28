@@ -19,4 +19,5 @@ target_link_libraries(UniSpySDK SHARED
     usserverbrowsing
     usvoice2
     uswebservices
+    usd2g
 )

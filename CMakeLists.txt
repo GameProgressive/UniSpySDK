@@ -164,5 +164,6 @@ add_subdirectory(pt) # depends on ghttp
 add_subdirectory(sake) # depends on common and ghttp. test relies on GP and gt2 for UDPEngine
 add_subdirectory(webservices)
 add_subdirectory(sc) # depends on common webservices ghttp
+add_subdirectory(Direct2Game)
 add_subdirectory(Voice2)
 add_subdirectory(sharedDll)

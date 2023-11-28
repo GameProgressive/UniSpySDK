@@ -1,0 +1,3 @@
+add_executable(Direct2GameTest d2gtest.c)
+target_link_libraries(Direct2GameTest usd2g)
+set_target_properties(Direct2GameTest PROPERTIES FOLDER Tests)
