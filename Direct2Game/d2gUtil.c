@@ -75,7 +75,7 @@ void d2giSetServiceUrl(D2GIInstance *theInstance,
 	{
         // allocate memory and initialize it
         theInstance->mServiceURLBase = gsimalloc(GS_D2G_MAX_BASE_URL_LEN);
-        snprintf(theInstance->mServiceURLBase, GS_D2G_MAX_BASE_URL_LEN, "%s.%s/commerce/1.1", __GSIACGamename, UNISPY_FORCE_IP);
+        snprintf(theInstance->mServiceURLBase, GS_D2G_MAX_BASE_URL_LEN, "%s/commerce/1.1", UNISPY_FORCE_IP);
 	}
 #else
     if (theInstance->mServiceURLBase == NULL)

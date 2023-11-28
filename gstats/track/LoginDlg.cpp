@@ -62,7 +62,7 @@ void CLoginDlg::OnOK()
 {
 	GPConnection connection;
 	HCURSOR hourglass;
-	HCURSOR lastCursor;
+	HCURSOR lastCursor = LoadCursor(NULL, IDC_ARROW);
 	GPResult result;
 
 	UpdateData();

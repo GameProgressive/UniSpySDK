@@ -18,13 +18,15 @@
 
 // This is declared as an extern so it can be overriden when testing
 #ifdef UNISPY_FORCE_IP
-#define SC_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s/CompetitionService/CompetitionService.asmx"
+#define SC_SERVICE_URL_FORMAT					 GSI_HTTP_PROTOCOL_URL "%s/CompetitionService/CompetitionService.asmx"
+#define SC_GAME_CONFIG_DATA_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s/AtlasDataServices/GameConfig.asmx"
 #else
-#define SC_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.comp.pubsvs." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx"
+#define SC_SERVICE_URL_FORMAT					 GSI_HTTP_PROTOCOL_URL "%s.comp.pubsvs." GSI_DOMAIN_NAME "/CompetitionService/CompetitionService.asmx"
+#define SC_GAME_CONFIG_DATA_SERVICE_URL_FORMAT   GSI_HTTP_PROTOCOL_URL "%s.comp.pubsvs." GSI_DOMAIN_NAME "/AtlasDataServices/GameConfig.asmx"
 #endif
 
 char scServiceURL[SC_SERVICE_MAX_URL_LEN] = "";
-
+char scGameConfigDataServiceURL[SC_SERVICE_MAX_URL_LEN] = "";
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,11 +68,22 @@ SCResult sciInterfaceCreate(SCInterface** theInterfaceOut)
 	if (__GSIACResult == GSIACAvailable)
 	{
 		if (scServiceURL[0] == '\0')
+		{
 #ifndef UNISPY_FORCE_IP
 			snprintf(scServiceURL, SC_SERVICE_MAX_URL_LEN, SC_SERVICE_URL_FORMAT, __GSIACGamename);
 #else
 			snprintf(scServiceURL, SC_SERVICE_MAX_URL_LEN, SC_SERVICE_URL_FORMAT, UNISPY_FORCE_IP);
 #endif
+		}
+
+		if (scGameConfigDataServiceURL[0] == '\0')
+		{
+#ifndef UNISPY_FORCE_IP
+			snprintf(scGameConfigDataServiceURL, SC_SERVICE_MAX_URL_LEN, SC_GAME_CONFIG_DATA_SERVICE_URL_FORMAT, __GSIACGamename);
+#else
+			snprintf(scGameConfigDataServiceURL, SC_SERVICE_MAX_URL_LEN, SC_GAME_CONFIG_DATA_SERVICE_URL_FORMAT, UNISPY_FORCE_IP);
+#endif
+		}
 	}
 	else
 		return SCResult_NO_AVAILABILITY_CHECK;	

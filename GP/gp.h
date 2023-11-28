@@ -2832,6 +2832,38 @@ GPResult gpInvitePlayer(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
+// gpGetProfileBuddyList
+// Summary
+//		Get the buddies for a profile.
+// Parameters
+//		connection	: [in] A GP connection object initialized with gpInitialize. 
+//		profile		: [in] The profile to get the buddy list for. 
+//		maxBuddies	: [in] The maximum number of buddies to return. If 0 is passed in, 
+//							all buddies will be returned. 
+//		blocking	: [in] GP_BLOCKING or GP_NON_BLOCKING 
+//		callback	: [in] A GP callback that will be passed a GPGetProfileBuddyListArg. 
+//		param		: [in] Pointer to user-defined data. This value will be passed unmodified 
+//							to the callback function. 
+// Returns 
+//      GPResult is described in the GP enums section.
+// Remarks
+//      This function returns a valid GPResult. Common return values are: <p>
+//		GP_NO_ERROR on success. <p>
+//		GP_PARAMETER_ERROR is returned if connection is NULL, profile is 0, callback is 
+//		NULL, or the connection is not connected. GP_MEMORY_ERROR is returned when an 
+//		allocation fails. <p> 
+//		GP_NETWORK_ERROR is returned when there is a problem connecting to the 
+//		Presence and Messaging backend.
+// See Also 
+//      GPGetProfileBuddyListArg
+GPResult gpGetProfileBuddyList(GPConnection* connection,
+	GPProfile profile,
+	int maxBuddies,
+	GPEnum blocking,
+	GPCallback callback,
+	void* param);
+
+///////////////////////////////////////////////////////////////////////////////
 // gpGetReverseBuddies
 // Summary
 //		Get profiles that have you on their buddy list.

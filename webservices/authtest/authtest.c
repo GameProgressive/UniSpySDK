@@ -13,7 +13,9 @@
 #include "../../GP/gp.h"
 #include "../AuthService.h"
 
-#if defined(_PS3)
+#if defined(_WIN32) && !defined(_XBOX) && defined(_DEBUG)
+#include <crtdbg.h>
+#elif defined(_PS3)
     #include <np.h>
 #elif defined(_PSP)
 	#include <np/np.h>
@@ -135,9 +137,9 @@ static gsi_bool isBackendAvailable()
 static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theResponse, void * theUserData)
 {
     if (httpResult != GHTTPSuccess)
-        printf("* %s * Failed on player login, HTTP error: %s (%d)\n", (char*)theUserData, ghttpResultString(httpResult), httpResult);
+        printf("* %s * Failed on player login, HTTP error: %d\n", (char*)theUserData, httpResult);
     else if (theResponse->mLoginResult != WSLogin_Success)
-		printf("* %s * Failed on player login, Login result: %s (%d)\n", (char*)theUserData, wsLoginValueString(theResponse->mLoginResult), theResponse->mLoginResult);
+        printf("* %s * Failed on player login, Login result: %d\n", (char*)theUserData, theResponse->mLoginResult);  
     else //Login worked!
     {
         _tprintf(_T("* %s * Player '%s' logged in.\n"), (char*)theUserData, theResponse->mCertificate.mUniqueNick);
@@ -685,7 +687,6 @@ static void printHelp()
     printf("Defaulting to use GameSpy Test Service ID: %s...\n\n", GAMESPY_DEFAULT_SERVICE_ID);
 }
 
-#ifndef _PS3
 
 ///////////////////////////////////////////////////////////////////////////////
 static void ConnectResponse(GPConnection * pconnection, GPConnectResponseArg * arg, void * param)

@@ -17,6 +17,7 @@ devsupport@gamespy.com
 INCLUDES
 ********/
 #include "../qr2.h"
+#include "../../natneg/natneg.h"
 
 /********
 DEFINES
@@ -499,6 +500,7 @@ int test_main(int argc, char **argp)
 	const int isNatNegSupported = 1; // set to '0' if you don't support Nat Negotiation
 	gsi_time  aStartTime = 0;        // for sample, so we don't run forever
 	void * userData = NULL;          // optional data that will be passed to the callback functions
+	unsigned long lastsendtime = 0;  // timer used with ACE to send data to connected clients every 2 seconds
 
 	// This is for debug output on these platforms.
 #if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined(_NITRO) || defined(_PSP2)

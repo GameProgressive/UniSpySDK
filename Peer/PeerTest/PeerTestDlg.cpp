@@ -17,6 +17,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define NET_PORT              55123
 #define VERBOSE 0
 
 /////////////////////////////////////////////////////////////////////////////

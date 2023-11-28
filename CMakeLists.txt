@@ -55,6 +55,12 @@ set(UNISPY_FORCE_IP "localhost" CACHE STRING "Force a custom IP to connect")
 # This is GameSpy built-in memory managed. I don't know if it needs to be disabled but a test requires it.
 option(UNISPY_MEM_MANAGED "Enable GameSpy built-in memory manager" ON)
 
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(UNISPY_ARCH x64)
+else()
+    set(UNISPY_ARCH x86)
+endif()
+
 if(WIN32 OR "${CMAKE_SYSTEM_NAME}" MATCHES "Windows" OR MINGW OR CYGWIN)
     option(UNISPY_MSVC_STATIC "Use MSVC static runtime" OFF)
 
