@@ -1,4 +1,11 @@
- #ifndef _HASHTABLE_H
+///////////////////////////////////////////////////////////////////////////////
+// File:	hashtable.h
+// SDK:		GameSpy Common
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2009 GameSpy Industries, Inc.
+
+#ifndef _HASHTABLE_H
 #define _HASHTABLE_H
 
 /* File: hashtable.h

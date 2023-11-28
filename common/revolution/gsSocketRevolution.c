@@ -191,6 +191,196 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
 	return rcode;
 }
 
+/**
+* DNS resolving function for Revolution
+*
+* support DNS caching - use 'gethostbyname("clear")' to clear cache
+*/
+struct hostent* gethostbyname( const char* name ){
+
+    typedef struct tagDNSHashMap{
+        SOHostEnt   entry;
+        char*       name;
+    }DNSHashMap;
+
+    // constatnt variables
+    const   int         DNSCACHESIZE = 31;      // max entries of DNS cache(must be prime)
+
+    // static variables
+    static  DNSHashMap**    dnscache = NULL;    // hash map of DNS cache
+
+    // local variables
+    u32 hash,i,len;
+    struct hostent* hostentry;
+
+
+    ASSERT( name != NULL );
+    ASSERT( strlen(name) > 0 );
+
+    //
+    // clear cache
+    //
+    if( strncmp( "clear", name, strlen("clear") ) == 0 ){
+
+        if( dnscache != NULL ){
+
+            for( i=0; i<DNSCACHESIZE; i++ ){
+
+                if( dnscache[i] != NULL ){
+
+                    int j;
+
+                    for( j=0; dnscache[i]->entry.h_addr_list[j]!=NULL; j++ )
+                        gsifree( dnscache[i]->entry.h_addr_list[j] );
+
+                    gsifree( dnscache[i]->entry.h_addr_list[j] );
+                    gsifree( dnscache[i]->entry.h_addr_list );
+                    gsifree( dnscache[i]->name );
+
+                }
+
+                gsifree( dnscache[i] );
+            }
+
+            gsifree( dnscache );
+            dnscache = NULL;
+        }
+
+        return NULL;
+
+    }
+
+    //
+    // setup hash map
+    //
+    if( dnscache == NULL ){
+
+        // this memory is never released 
+        dnscache = (DNSHashMap**)gsimalloc( DNSCACHESIZE * sizeof(DNSHashMap*) );
+        ASSERT( dnscache != NULL );
+        memset( dnscache, 0, DNSCACHESIZE * sizeof(DNSHashMap*) );
+
+    }
+
+    //
+    // calc hash
+    //
+    len = strlen( name );
+    hash = 0;
+
+    for( i=0; i<len; i++ ){
+
+        hash += (unsigned int)name[i] << ( 4 * ( i & 0x07 ) );
+
+    }  
+
+    hash %= DNSCACHESIZE;
+
+    //
+    // search in cache
+    //
+    for( i=0; i<DNSCACHESIZE/2; i++ ){
+
+        DNSHashMap* data = dnscache[ ( hash + i*i ) % DNSCACHESIZE ];
+
+        if( (data != NULL) && (strcmp( data->name, name ) == 0) ){
+
+            gsDebugFormat( GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Notice,
+                "[DNS cache] hit!! %s\n", name );
+
+            return &data->entry; 
+
+        }
+
+    }
+
+    //
+    // couldn't find in cache
+    // resolve DNS and store to the cache
+    //
+    if( dnscache[ hash ] != NULL ){
+
+        u32 newhash;
+
+        gsDebugFormat( GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Notice,
+            "[DNS cache] trying to rehash\n" );
+
+        // the entry is already ocupied try to rehash
+        for( i=1; i<DNSCACHESIZE/2; i++ ){
+
+            newhash = ( hash + i*i ) % DNSCACHESIZE;
+
+            if( dnscache[ newhash ] == NULL ){
+                hash = newhash;
+                break;
+            }
+
+        }
+
+        // if there are no free entry to cache it will not be cached
+        if( i == DNSCACHESIZE/2 ){
+
+            gsDebugFormat( GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Notice,
+                "[DNS cache] buffer is full %s\n", name );
+
+            return SOGetHostByName( name );
+
+        }
+
+    }
+
+    // resolve
+    hostentry = SOGetHostByName( name );
+
+    if( hostentry == NULL ){
+
+        gsDebugFormat( GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Notice,
+            "[DNS cache] query failed for %s\n", name );
+
+        return NULL;
+    }
+
+    // store to the cache
+    dnscache[ hash ] = (DNSHashMap*)gsimalloc( sizeof(DNSHashMap) );
+    ASSERT( dnscache[ hash ] != NULL );
+
+    {
+        ASSERT( hostentry->h_addrtype == AF_INET );
+
+        // count address list
+        for( i=0; hostentry->h_addr_list[i]!=NULL; i++ ){};
+
+        // copy hostent struct
+        dnscache[ hash ]->entry.h_addrtype    = AF_INET;
+        dnscache[ hash ]->entry.h_length      = hostentry->h_length;
+        dnscache[ hash ]->entry.h_name        = NULL; // NULL because it is useless
+        dnscache[ hash ]->entry.h_aliases     = NULL; // NULL because it is useless
+        dnscache[ hash ]->entry.h_addr_list   = (u8**)gsimalloc( sizeof(u8*) * (i + 1) ); 
+
+        for( i=0; hostentry->h_addr_list[i]!=NULL; i++ ){
+
+            dnscache[ hash ]->entry.h_addr_list[i] = (u8*)gsimalloc( hostentry->h_length );
+
+            memcpy( dnscache[ hash ]->entry.h_addr_list[i],
+                hostentry->h_addr_list[i],
+                hostentry->h_length );
+
+        }
+
+        dnscache[ hash ]->entry.h_addr_list[i] = NULL;
+
+    }
+
+    dnscache[ hash ]->name  = (char*)gsimalloc( strlen( name ) + 1 );
+    ASSERT( dnscache[ hash ]->name != NULL );
+    strcpy( dnscache[ hash ]->name, name ); 
+
+    gsDebugFormat( GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Notice,
+        "[DNS cache] query has been cached %s\n", name );
+
+    return hostentry; 
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

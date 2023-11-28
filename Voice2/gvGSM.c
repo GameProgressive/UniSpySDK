@@ -1,4 +1,6 @@
 #include "gvGSM.h"
+// This header below is a part of the GSM lossy codec
+// which can be found here: http://user.cs.tu-berlin.de/~jutta/toast.html
 #include <gsm.h>
 
 // these are standard for GSM

@@ -1019,7 +1019,13 @@ GPResult gpiAddToBlockedList(GPConnection * connection,
         }
     }
 
-    // Set profile as blocked if it wasn't already.
+	// Since we removed the status info to be consistent set 
+	// it to deleted locally from the local buddy list.
+	////////////////////////////////////////////////////////
+	gpiBuddyDeletedLocally(connection, profileid, gsi_true);
+
+    // Set profile as blocked if it wasn't already
+    //////////////////////////////////////////////
     if (!profile->blocked)
     {
         profile->blocked = gsi_true;

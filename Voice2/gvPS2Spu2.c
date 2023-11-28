@@ -87,7 +87,7 @@ static int DMA_EE_To_IOP(int dst, u_char *src, int size)
 	sceSifDmaData transData;
 	int did;
 
-	assert((((gsi_u32)src) & 0x3f) == 0); // assert 64 byte aligned
+	GS_ASSERT((((gsi_u32)src) & 0x3f) == 0); // assert 64 byte aligned
 		
 	if (size <= 0) {
 		return 0;
@@ -313,7 +313,7 @@ static int		EEStreamDataPush(const gsi_u16* data, int num8Khzsamples)
 		num8Khzsamples = remain48Khz/6;
 	}
 
-	assert(EEBUFFER_SAMPLE_COUNT >= num8Khzsamples*6);
+	GS_ASSERT(EEBUFFER_SAMPLE_COUNT >= num8Khzsamples*6);
 
 	AudioUpSample((gsi_i16*)&EEBuffer[gEEDataSampleCount],(const gsi_i16*)data,num8Khzsamples);
 
@@ -595,7 +595,7 @@ static GVBool gviPS2Spu2InitDevice(GVIDevice * device, int deviceIndex, GVDevice
 	// these are the buffers which the audio (SPU) will stream from on the IOP.
 	// they are double buffered, with one half being read while the other is dma'ed into from the EE
 	IOPBuffer		= (int)sceSifAllocIopHeap(IOP_BUFF_SIZE*2);
-	assert(IOPBuffer	);
+	GS_ASSERT(IOPBuffer	);
 
 	// Set interrupt to receive mid and end point in buffer
 	sceSdRemoteCallbackInit(5);

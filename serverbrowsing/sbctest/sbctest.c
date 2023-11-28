@@ -18,6 +18,7 @@ INCLUDES
 #endif
 #include "../sb_serverbrowsing.h"
 #include "../../qr2/qr2.h"
+#include "../../natneg/natneg.h"
 #include "../../common/gsAvailable.h"
 
 /********
@@ -40,6 +41,12 @@ DEFINES
 GLOBAL VARS
 ********/
 static gsi_bool UpdateFinished = gsi_false; // used to track status of server browser updates
+
+// vars used by ACE connection to accept/send responses over the wire once connected with QR2 host
+struct sockaddr_in otheraddr;
+SOCKET sock = INVALID_SOCKET;
+int connected = 0;
+
 
 /********
 DEBUG OUTPUT
@@ -84,6 +91,32 @@ static void AppDebug(const char* format, ...)
 #else
 	#define AppDebug _tprintf
 #endif
+
+// simple reader function that tries to read data off the socket
+static void tryread(SOCKET s)
+{
+    char buf[256];
+    int len;
+    struct sockaddr_in saddr;
+    socklen_t saddrlen = sizeof(saddr);
+    while (CanReceiveOnSocket(s))
+    {
+        len = recvfrom(s, buf, sizeof(buf) - 1, 0, (struct sockaddr *)&saddr, &saddrlen);
+
+        if (len < 0)
+        {
+            len = GOAGetLastError(s);
+            printf("|Got recv error: %d\n", len);
+            break;
+        }
+        buf[len] = 0;
+        if (memcmp(buf, NNMagicData, NATNEG_MAGIC_LEN) == 0)
+        {
+            NNProcessData(buf, len, &saddr);
+        } else
+            printf("|Got data (%s:%d): %s\n", inet_ntoa(saddr.sin_addr),ntohs(saddr.sin_port), buf);
+    }
+}
 
 /********
 PROTOTYPES - To prevent warnings on codewarrior strict compile
@@ -172,6 +205,36 @@ static void SBCallback(ServerBrowser sb, SBCallbackReason reason, SBServer serve
 	GSI_UNUSED(instance);
 }
 
+// callback triggered by ACE
+static void SBConnectCallback(ServerBrowser serverBrowser, SBConnectToServerState state, SOCKET gamesocket, struct sockaddr_in *remoteaddr, void *instance)
+{
+    struct sockaddr_in saddr;
+    socklen_t namelen = sizeof(saddr);
+    if (gamesocket != INVALID_SOCKET)
+    {
+        getsockname(gamesocket, (struct sockaddr *)&saddr, &namelen);
+        printf("|Local game socket: %d\n", ntohs(saddr.sin_port));
+    }    
+    
+    // success - we have connected to our QR2 host server
+    if (state == sbcs_succeeded)
+    {
+        printf("Connected to server, remoteaddr: %s, remoteport: %d\n", 
+            (remoteaddr == NULL) ? "" : inet_ntoa(remoteaddr->sin_addr), 
+            (remoteaddr == NULL) ? 0 : ntohs(remoteaddr->sin_port));
+
+        // copy off the socket and addr to send replies to the game host
+        connected = 1;
+        memcpy(&otheraddr, remoteaddr, sizeof(otheraddr));
+        sock = gamesocket;
+    }
+    else if (state == sbcs_failed)
+        AppDebug(_T("Failed to connect to server"));     
+    
+    GSI_UNUSED(serverBrowser);
+    GSI_UNUSED(instance);
+}
+
 int test_main(int argc, char **argp)
 {
 	ServerBrowser sb;  // server browser object initialized with ServerBrowserNew
@@ -204,6 +267,9 @@ int test_main(int argc, char **argp)
 	SBServer server; // used to hold each server when iterating through the server list
 	int totalServers; // keep track of the total number of servers in our server list
 	gsi_char * defaultString = _T(""); // default string for SBServerGet functions - returns if specified string key is not found
+    gsi_time startTime = 0; 
+    SBError error = sbe_noerror;
+    unsigned long lastsendtime = 0; // timer used with ACE to send data to connected clients every 2 seconds
 
   	// for debug output on these platforms
 #if defined (_PS3) || defined (_PS2) || defined (_PSP) || defined (_NITRO)
@@ -331,6 +397,46 @@ int test_main(int argc, char **argp)
 					msleep(10);
 				
 				serverFound = 1;
+
+                // try to connect to server using ServerBrowserConnectToServerWithSocket (ACE)
+                sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                error = ServerBrowserConnectToServerWithSocket(sb, server, sock, SBConnectCallback);
+                if (error)
+                {
+                    AppDebug(_T("Error found trying to connect to server with ACE\n"));
+                }
+                else
+                {
+                    // Enter a wait state while trying to connect - if connected, start sending messages!
+                    startTime = current_time();
+                    while ((current_time() - startTime) < 40000)
+                    {
+                        ServerBrowserThink(sb);
+
+                        // w00t we connected to our host - time to start trash talking every 2 seconds!
+                        if (connected)
+                        {
+                            if (current_time() - lastsendtime > 2000)
+                            {
+                                int ret = sendto(sock, "sup host!?", 10, 0, (struct sockaddr *)&otheraddr, sizeof(struct sockaddr_in));
+                                int error = GOAGetLastError(sock);
+                                printf("|Sending (%d:%d), remoteaddr: %s, remoteport: %d\n", ret, error, inet_ntoa(otheraddr.sin_addr), ntohs(otheraddr.sin_port));
+                                lastsendtime = current_time();
+                            }			
+                        }
+                        if (sock != INVALID_SOCKET)
+                            tryread(sock);
+                        msleep(10);
+                    }
+                }
+
+                // cleanup and close our ACE socket
+                if (sock != INVALID_SOCKET)
+                    closesocket(sock);
+
+                sock = INVALID_SOCKET;
+                SocketShutDown();
+
 				break;  // already found the qr2 sample server, no need to loop through the rest 
 			}
 		}

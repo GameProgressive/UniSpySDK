@@ -21,12 +21,6 @@ GPResult gpInitialize(
   int partnerID
 )
 {
-#if defined(_PS3)
-	// GP is no longer supported on PS3, as described here:
-    // http://docs.poweredbygamespy.com/wiki/GP_not_supported_on_PS3
-	return GP_PARAMETER_ERROR;
-#endif
-
 	// Check if the backend is available.
 	if(__GSIACResult != GSIACAvailable)
 		return GP_PARAMETER_ERROR;
@@ -159,8 +153,9 @@ GPResult gpConnectA(
 		return GP_NO_ERROR;
 	}
 
-	// Pass to internal SDK function.
-	return gpiConnect(connection, nick, "", email, password, "", "", "", firewall, GPIFalse, blocking, callback, param);
+	// Do it.
+	/////////
+	return gpiConnect(connection, nick, "", email, password, "", "", "", NULL, firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectW(
@@ -247,7 +242,7 @@ GPResult gpConnectNewUserA(
 	}
 
 	// Pass to internal SDK function.
-	return gpiConnect(connection, nick, uniquenick, email, password, "", "", cdkey, firewall, GPITrue, blocking, callback, param);
+	return gpiConnect(connection, nick, uniquenick, email, password, "", "", "", cdkey, firewall, GPITrue, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectNewUserW(
@@ -314,7 +309,7 @@ GPResult gpConnectUniqueNickA(
 	}
 
 	// Pass to internal SDK function.
-	return gpiConnect(connection, "", uniquenick, "", password, "", "", "", firewall, GPIFalse, blocking, callback, param);
+	return gpiConnect(connection, "", uniquenick, "", password, "", "", "", NULL, firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectUniqueNickW(
@@ -373,18 +368,18 @@ GPResult gpConnectPreAuthenticatedA
 	}
 
 	// Pass to internal SDK function.
-	return gpiConnect(connection, "", "", "", "", authtoken, partnerchallenge, "", firewall, GPIFalse, blocking, callback, param);
+	return gpiConnect(connection, "", "", "", "", authtoken, partnerchallenge, "", NULL, firewall, GPIFalse, blocking, callback, param);
 }
 #ifdef GSI_UNICODE
 GPResult gpConnectPreAuthenticatedW
 (
-  GPConnection * connection,
-  const unsigned short authtoken[GP_AUTHTOKEN_LEN],
-  const unsigned short partnerchallenge[GP_PARTNERCHALLENGE_LEN],
-  GPEnum firewall,
-  GPEnum blocking,
-  GPCallback callback,
-  void * param
+			  GPConnection * connection,
+			  const gsi_char authtoken[GP_AUTHTOKEN_LEN],
+			  const gsi_char partnerchallenge[GP_PARTNERCHALLENGE_LEN],
+			  GPEnum firewall,
+			  GPEnum blocking,
+			  GPCallback callback,
+			  void * param
 )
 {
 	char authtoken_A[GP_AUTHTOKEN_LEN];
@@ -394,6 +389,64 @@ GPResult gpConnectPreAuthenticatedW
 	UCS2ToAsciiString(partnerchallenge, partnerchallenge_A);
 
 	return gpConnectPreAuthenticatedA(connection, authtoken_A, partnerchallenge_A, firewall, blocking, callback, param);
+}
+#endif
+GPResult gpConnectLoginTicketA
+(
+	GPConnection* connection,
+	const char loginticket[GP_LOGIN_TICKET_LEN],
+	GPEnum firewall,
+	GPEnum blocking,
+	GPCallback callback,
+	void* param
+)
+{
+	GPIConnection* iconnection;
+
+	// Error check.
+	///////////////
+	if ((connection == NULL) || (*connection == NULL))
+		return GP_PARAMETER_ERROR;
+	if ((loginticket == NULL) || (loginticket[0] == '\0'))
+		return GP_PARAMETER_ERROR;
+
+	// Check for no callback.
+	/////////////////////////
+	if (callback == NULL)
+		Error(connection, GP_PARAMETER_ERROR, "No callback.");
+
+	// Check for simulation mode.
+	/////////////////////////////
+	iconnection = (GPIConnection*)*connection;
+	if (iconnection->simulation)
+	{
+		GPConnectResponseArg arg;
+		memset(&arg, 0, sizeof(arg));
+		callback(connection, &arg, param);
+		return GP_NO_ERROR;
+	}
+
+	// Do it.
+	/////////
+	return gpiConnect(connection, "", "", "", "", "", "", loginticket, NULL, firewall, GPIFalse, blocking, callback, param);
+}
+
+#ifdef GSI_UNICODE
+GPResult gpConnectLoginTicketW
+(
+	GPConnection* connection,
+	const gsi_char loginticket[GP_LOGIN_TICKET_LEN],
+	GPEnum firewall,
+	GPEnum blocking,
+	GPCallback callback,
+	void* param
+)
+{
+	char loginticket_A[GP_LOGIN_TICKET_LEN];
+
+	UCSToAsciiString(loginticket, loginticket_A);
+
+	return gpConnectLoginTicketA(connection, loginticket_A, firewall, blocking, callback, param);
 }
 #endif
 
@@ -1376,17 +1429,10 @@ GPResult gpSendBuddyRequestA(
 		if(reasonFixed[i] == '\\')
 			reasonFixed[i] = '/';
 
-	// Send the request.
-	////////////////////
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\addbuddy\\");
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
-	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\newprofileid\\");
-	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, profile);
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\reason\\");
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, reasonFixed);
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
-
+	// First mark this buddy as undeleted if deleted previously
+	gpiBuddyDeletedLocally(connection, profile, gsi_false);
+	
+	gpiSendAddBuddyRequest(connection, profile, reasonFixed, GPIFalse);
 	return GP_NO_ERROR;
 }
 #ifdef GSI_UNICODE
@@ -2779,6 +2825,68 @@ GPResult gpSetInvitableGames(
 
 	return GP_NO_ERROR;
 }
+#ifdef GSI_UNICODE
+GPResult gpInvitePlayerW(
+			  GPConnection * connection,
+			  GPProfile profile,
+			  int productID,
+			  const gsi_char location[GP_LOCATION_STRING_LEN]
+)
+{
+	char location_A[GP_LOCATION_STRING_LEN];
+	
+	UCSToAsciiString(location, location_A);
+	
+	return gpInvitePlayerA(connection, profile, productID, location_A);
+}
+#endif
+
+GPResult gpGetProfileBuddyList(
+	GPConnection* connection,
+	GPProfile profile,
+	int maxBuddies,
+	GPEnum blocking,
+	GPCallback callback,
+	void* param
+)
+{
+	GPIConnection* iconnection;
+
+	// Error check.
+	///////////////
+	if ((connection == NULL) || (*connection == NULL) || (profile == 0))
+		return GP_PARAMETER_ERROR;
+
+	// Check for no callback.
+	/////////////////////////
+	if (callback == NULL)
+		Error(connection, GP_PARAMETER_ERROR, "No callback.");
+
+	// Get the connection object.
+	/////////////////////////////
+	iconnection = (GPIConnection*)*connection;
+
+	// Check for disconnected.
+	//////////////////////////
+	if (iconnection->connectState == GPI_DISCONNECTED)
+		Error(connection, GP_PARAMETER_ERROR, "The connection has already been disconnected.");
+
+	// Check for simulation mode.
+	/////////////////////////////
+	if (iconnection->simulation)
+	{
+		GPGetProfileBuddyListArg arg;
+		memset(&arg, 0, sizeof(arg));
+		arg.profileQueried = profile;
+		callback(connection, &arg, param);
+		return GP_NO_ERROR;
+	}
+
+	// Start the request.
+	////////////////////
+	return gpiProfileBuddyList(connection, profile, maxBuddies, blocking, callback, param);
+}
+
 
 GPResult gpFindPlayers(
   GPConnection * connection,
@@ -2980,15 +3088,7 @@ GPResult gpRevokeBuddyAuthorization(
 	if(iconnection->connectState == GPI_DISCONNECTED)
 		Error(connection, GP_PARAMETER_ERROR, "The connection has already been disconnected.");
 
-	// Send the invite.
-	///////////////////
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\revoke\\");
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
-	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\profileid\\");
-	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, profile);
-	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
-
+	gpiRevokeBuddyAuthorization(connection, profile);
 	return GP_NO_ERROR;
 }
 

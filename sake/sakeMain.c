@@ -22,6 +22,12 @@
 gsi_char gSakeUploadUrlOverride[SAKE_MAX_URL_LENGTH];
 gsi_char gSakeDownloadUrlOverride[SAKE_MAX_URL_LENGTH];
 
+#define SAKEI_FILE_DOWNLOAD_PARAMS  GSI_HTTP_PROTOCOL_URL_UNI GS_USTR _T("?fileid=%d&gameid=%d&pid=%d")
+#define SAKEI_FILE_DOWNLOAD_URL     GSI_HTTP_PROTOCOL_URL_UNI GS_STR _T(".sake.%s/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d")
+
+#define SAKEI_FILE_UPLOAD_PARAMS    GSI_HTTP_PROTOCOL_URL_UNI GS_USTR _T("?gameid=%d&pid=%d")
+#define SAKEI_FILE_UPLOAD_URL       GSI_HTTP_PROTOCOL_URL_UNI GS_STR _T(".sake.%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d")
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -290,36 +296,21 @@ gsi_bool SAKE_CALL sakeGetFileDownloadURL(SAKE sake, int fileId, gsi_char url[SA
 #ifndef UNISPY_FORCE_IP
 	if (gSakeDownloadUrlOverride[0] != '\0')
 	{
-		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), 
-			gSakeDownloadUrlOverride, sake->mGameId, sake->mProfileId);
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_DOWNLOAD_PARAMS,
+			gSakeDownloadUrlOverride, fileId, sake->mGameId, sake->mProfileId);
 	}
 	else
 	{
-		#ifdef GSI_UNICODE
-		{
-			// use capital %S to convert the gamename to a wide string
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S.sake.%S/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
-				GSI_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
-		}
-		#else
-		{
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s.sake.%s/SakeFileServer/download.aspx?fileid=%d&gameid=%d&pid=%d"),
-				GSI_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
-		}
-		#endif
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_DOWNLOAD_URL,
+			sake->mGameName, GSI_DOMAIN_NAME, fileId, sake->mGameId, sake->mProfileId);
 	}
 #else
-
-#ifdef GSI_UNICODE
-	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S?gameid=%d&pid=%d"), GSI_HTTP_PROTOCOL_URL, UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
-#else
-	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s?gameid=%d&pid=%d"), GSI_HTTP_PROTOCOL_URL, UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
-#endif
-
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_DOWNLOAD_PARAMS, UNISPY_FORCE_IP, fileId, sake->mGameId, sake->mProfileId);
 #endif
 
 	if(rcode < 0)
 		return gsi_false;
+
 	return gsi_true;
 }
 
@@ -356,32 +347,17 @@ gsi_bool SAKE_CALL sakeGetFileUploadURL(SAKE sake, gsi_char url[SAKE_MAX_URL_LEN
 #ifndef UNISPY_FORCE_IP
 	if (gSakeUploadUrlOverride[0] != '\0')
 	{
-		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"), 
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_UPLOAD_PARAMS,
 			gSakeUploadUrlOverride, sake->mGameId, sake->mProfileId);
 	}
 	else
 	{
-		#ifdef GSI_UNICODE
-		{
-			// use capital %S to convert the gamename to a wide string
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%S.sake.%S/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-				GSI_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
-		}
-		#else
-		{
-			rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s%s.sake.%s/SakeFileServer/upload.aspx?gameid=%d&pid=%d"),
-				GSI_HTTP_PROTOCOL_URL, sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
-		}
-		#endif
+		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_UPLOAD_URL,
+			sake->mGameName, GSI_DOMAIN_NAME, sake->mGameId, sake->mProfileId);
 	}
 #else
-	#ifdef GSI_UNICODE
-		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%S?gameid=%d&pid=%d"),
-			UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
-	#else
-		rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, _T("%s?gameid=%d&pid=%d"),
-			UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
-	#endif
+	rcode = _tsnprintf(url, SAKE_MAX_URL_LENGTH, SAKEI_FILE_UPLOAD_PARAMS,
+		UNISPY_FORCE_IP, sake->mGameId, sake->mProfileId);
 #endif
 
 	if(rcode < 0)

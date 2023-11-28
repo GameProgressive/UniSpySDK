@@ -1,3 +1,14 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gvSource.c
+// SDK:		GameSpy Voice 2 SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2004-2009 GameSpy Industries, Inc.
+// ------------------------------------
+// Some code based on:
+//   "Skew Detection and Compensation for Internet Audio Applications"
+//   http://csperkins.org/publications/icme2000.pdf
+
 #include "gvSource.h"
 #include "gvCodec.h"
 #include "gvFrame.h"
@@ -98,7 +109,7 @@ void gviClearSourceList(GVISourceList sourceList)
 {
 	int i;
 
-	assert(sourceList);
+	GS_ASSERT(sourceList);
 
 	for(i = 0 ; i < GVI_MAX_SOURCES ; i++)
 		gviFreeSource(&sourceList[i]);
@@ -237,7 +248,7 @@ static void gviAddPacketToSource(GVISource * source, GVFrameStamp frameStamp, co
 	int i;
 
 	// the packet len should be a multiple of the encoded frame size
-	assert(!(len % GVIEncodedFrameSize));
+	GS_ASSERT(!(len % GVIEncodedFrameSize));
 
 	// calculate the number of frames in this packet
 	numFrames = (len / GVIEncodedFrameSize);
@@ -277,7 +288,7 @@ static void gviAddPacketToSource(GVISource * source, GVFrameStamp frameStamp, co
 		if(gviIsFrameStampGT(nextFrame->m_frameStamp, frameStamp))
 		{
 			// check that the packet's finish time doesn't cross over the next frame
-			assert(!gviIsFrameStampGT(packetFinishedTime, nextFrame->m_frameStamp));
+			GS_ASSERT(!gviIsFrameStampGT(packetFinishedTime, nextFrame->m_frameStamp));
 
 			// everything is good, break out so we can insert the new frames
 			break;

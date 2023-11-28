@@ -3,6 +3,8 @@ Changelog for: GameSpy Competition SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.06.00  RV   RELEASE  Released to Developer Site
+02-10-2009  1.05.00  SAH  RELEASE  Released to Developer Site
 12-12-2007  1.04.00  RMV  RELEASE  Released to Developer Site
 12-07-2007  1.03.01  SAH  OTHER    Fixed projects missing dependencies
 12-03-2007  1.03.00  SN   FEATURE  Added Int64 support for reports

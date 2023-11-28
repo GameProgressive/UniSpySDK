@@ -125,7 +125,7 @@ typedef enum {sl_lanbrowse, sl_disconnected, sl_connected, sl_mainlist} SBServer
 #define SEARCH_ANY_SUBSTRING	8
 
 //max number of keys for the basic key list
-#define MAX_QUERY_KEYS 20
+#define MAX_QUERY_KEYS 40
 
 //how long to search on the LAN
 #define SL_LAN_SEARCH_TIME 2000
@@ -442,7 +442,7 @@ void SBEngineHaltUpdates(SBQueryEngine *engine);
 SBError ServerBrowserBeginUpdate2(ServerBrowser sb, SBBool async, SBBool disconnectOnComplete, const unsigned char *basicFields, int numBasicFields, const char *serverFilter, int updateOptions, int maxServers);
 
 
-// Ascii versions of functions that should still be available in GSI_UNICODE mode
+// ASCII versions of functions that should still be available in GSI_UNICODE mode
 #ifdef GSI_UNICODE
 const char *SBServerGetStringValueA(SBServer server, const char *keyname, const char *def); // for peer SDK
 int SBServerGetIntValueA(SBServer server, const char *key, int idefault);

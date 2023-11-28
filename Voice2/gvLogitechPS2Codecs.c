@@ -84,7 +84,7 @@ void gviLGCodecEncode(GVByte * out, const GVSample * in)
 {
 	int destSize = GVILGCodecEncodedFrameSize;
 	lgCodecEncode(GVILGCodecHandle, in, GVILGCodecBytesPerFrame, out, &destSize);
-	assert(destSize == GVILGCodecEncodedFrameSize);
+	GS_ASSERT(destSize == GVILGCodecEncodedFrameSize);
 }
 
 void gviLGCodecDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
@@ -94,7 +94,7 @@ void gviLGCodecDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
 
 	destSize = GVILGCodecBytesPerFrame;
 	lgCodecDecode(GVILGCodecHandle, in, GVILGCodecEncodedFrameSize, GVILGCodecDecodeBuffer, &destSize);
-	assert(destSize == GVILGCodecBytesPerFrame);
+	GS_ASSERT(destSize == GVILGCodecBytesPerFrame);
 
 	for(i = 0 ; i < GVILGCodecSamplesPerFrame ; i++)
 		out[i] += GVILGCodecDecodeBuffer[i];
@@ -109,7 +109,7 @@ void gviLGCodecDecodeSet(GVSample * out, const GVByte * in, GVDecoderData data)
 
 	destSize = GVILGCodecBytesPerFrame;
 	lgCodecDecode(GVILGCodecHandle, in, GVILGCodecEncodedFrameSize, GVILGCodecDecodeBuffer, &destSize);
-	assert(destSize == GVILGCodecBytesPerFrame);
+	GS_ASSERT(destSize == GVILGCodecBytesPerFrame);
 
 	for(i = 0 ; i < GVILGCodecSamplesPerFrame ; i++)
 		out[i] = GVILGCodecDecodeBuffer[i];

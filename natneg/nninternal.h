@@ -23,17 +23,21 @@
 #define FINISHED_ERROR_DEADBEAT_PARTNER 1
 #define FINISHED_ERROR_INIT_PACKETS_TIMEDOUT 2
 
+#define PREINIT_RETRY_TIME 500
+#define PREINIT_RETRY_COUNT 10
+#define PREINITACK_RETRY_TIME 10000
+#define PREINITACK_RETRY_COUNT 12
 #define INIT_RETRY_TIME 500
 #define INIT_RETRY_COUNT 10
 #define NNINBUF_LEN 512
 #define PING_RETRY_TIME 700
 #define PING_RETRY_COUNT 7
-#define FINISHED_IDLE_TIME 5000
 #define PARTNER_WAIT_TIME 60000
-#define REPORT_RETRY_TIME 1000
-#define REPORT_RETRY_COUNT 5
+#define REPORT_RETRY_TIME 500
+#define REPORT_RETRY_COUNT 4
 
-#define NN_PROTVER 3
+#define NN_PROTVER 4
+//#define NN_PROTVER 3
 //#define NN_PROTVER 2
 
 #define NN_PT_GP  0
@@ -56,6 +60,13 @@
 #define NN_NATIFY_REQUEST 12
 #define NN_REPORT 13
 #define NN_REPORT_ACK 14
+#define NN_PREINIT 15
+#define NN_PREINIT_ACK 16
+
+#define NN_PREINIT_WAITING_FOR_CLIENT 0
+#define NN_PREINIT_WAITING_FOR_MATCHUP 1
+#define NN_PREINIT_READY 2
+
 
 #if !defined(_PS2) && !defined(_NITRO)
 # pragma pack(1)
@@ -93,6 +104,14 @@ typedef struct _ConnectPacket
 	unsigned char finished;
 } ConnectPacket;
 
+#define PREINITPACKET_SIZE			(BASEPACKET_SIZE + 6)
+typedef struct _PreinitPacket
+{
+	unsigned char clientindex;
+	unsigned char state;
+	int clientID;
+} PreinitPacket;
+
 #define BASEPACKET_SIZE				12
 #define BASEPACKET_TYPE_OFFSET		7
 typedef struct _NatNegPacket {
@@ -107,6 +126,7 @@ typedef struct _NatNegPacket {
 		InitPacket Init;
 		ConnectPacket Connect;
 		ReportPacket Report;
+		PreinitPacket Preinit;
 	} Packet;
 
 } NatNegPacket;

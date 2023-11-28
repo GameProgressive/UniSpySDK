@@ -3,6 +3,12 @@ Changelog for: GameSpy Voice SDK 2
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.10.00  RV   RELEASE  Released to Developer Site
+06-06-2009  2.09.00  SN   FIX      Modified use of PS3 mic library to simply open a mic device
+                     SN   FEATURE  Added automatic device reconnect detection to the Voice2Test application 
+02-10-2009  2.09.00  SAH  RELEASE  Released to Developer Site
+02-05-2009  2.08.02  SAH  OTHER    Added Unicode builds to Win32 projects, added libspeex project
+02-27-2007  2.08.01  SN   FIX      Fixed case where closing mic when freeing devices did not occur
 12-12-2007  2.08.00  RMV  RELEASE  Released to Developer Site
 12-12-2007  2.07.04  SAH  FIX      Fixed OSX to use mute bool in playing packets
 12-11-2007  2.07.03  SN   FIX      Fixed floating point precision for sample app

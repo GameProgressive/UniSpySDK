@@ -24,7 +24,7 @@ uint8_t auiLocalPriorities[8]={1,1,1,1,1,1,1,1};
 #define SEND_PACKETS          0
 #define CUSTOM_CODEC          0
 #define CUSTOM_CODEC_SAMPLES_PER_FRAME  100
-#define SHOW_TALKERS          0
+#define SHOW_TALKERS          1
 #define SHOW_VOLUME           0
 #define SHOW_FRAMESTAMPS      0
 #define CAPTURE_THRESHOLD     0.05
@@ -42,7 +42,7 @@ GVDevice playDevice;
 SOCKET sock = INVALID_SOCKET;
 SOCKADDR_IN sendAddr;
 SOCKADDR_IN localSource;
-
+gsi_bool unpluggedDevice = gsi_false;
 int SamplesPerFrame;
 int BytesPerFrame;
 int EncodedFrameSize;
@@ -127,11 +127,9 @@ static void HandleCapturedPacket(const GVByte * packet, int len, GVFrameStamp fr
 
 static void UnpluggedCallback(GVDevice device)
 {
-	printf("Halting - device unplugged\n");
-	while(CheckInput())
-		msleep(10);
-	exit(1);
-	
+	printf("UH OH! - device unplugged\n");
+	unpluggedDevice = gsi_true;
+	capDevice = playDevice = NULL;
 	GSI_UNUSED(device);
 }
 
@@ -239,7 +237,7 @@ static GVBool Initialize(const char * remoteIP)
 	gvSetCustomCodec(&customCodecInfo);
 #else
 	codec = CODEC;
-#if defined(_PS3) && defined(_WIN32)
+#if defined(_PS3) || defined(_WIN32)
 	gvSetSampleRate(GVRate_16KHz);
 #elif defined(_PSP)
 	gvSetSampleRate(GVRate_11KHz);
@@ -449,7 +447,121 @@ static GVBool PSPStartup(void)
 }
 #endif
 
-static void Startup(void)
+gsi_bool CheckDevicesPlugged()
+{
+	int num;
+	GVDeviceInfo devices[MAX_DEVICES];
+	GVDeviceInfo * info;
+	GVDevice device;
+	GVBool pd, cd, dpd, dcd;
+	GVDeviceType types;
+	const char * typesString;
+	int i;
+	GVBool result;
+	const char * hardwareType;
+
+	num = gvListDevices(devices, MAX_DEVICES, GV_CAPTURE_AND_PLAYBACK);
+	if (num == 0)
+		return gsi_false;
+	
+	printf("Found %d devices\n", num);
+
+	for(i = 0 ; i < num ; i++)
+	{
+		info = &devices[i];
+		pd = (info->m_deviceType & GV_PLAYBACK);
+		cd = (info->m_deviceType & GV_CAPTURE);
+		dpd = (info->m_defaultDevice & GV_PLAYBACK);
+		dcd = (info->m_defaultDevice & GV_CAPTURE);
+		if(info->m_hardwareType == GVHardwareDirectSound)
+			hardwareType = "DirectSound";
+		else if(info->m_hardwareType == GVHardwarePS2Spu2)
+			hardwareType = "SPU2";
+		else if(info->m_hardwareType == GVHardwarePS2Headset)
+			hardwareType = "Headset";
+		else if(info->m_hardwareType == GVHardwarePS2Microphone)
+			hardwareType = "Microphone";
+		else if(info->m_hardwareType == GVHardwarePS2Speakers)
+			hardwareType = "Speakers";
+		else if(info->m_hardwareType == GVHardwarePS2Eyetoy)
+			hardwareType = "Eyetoy";
+		else if(info->m_hardwareType == GVHardwarePS3Eyetoy)
+			hardwareType = "Eyetoy";
+		else if(info->m_hardwareType == GVHardwarePSPHeadset)
+			hardwareType = "Headset";
+		else if(info->m_hardwareType == GVHardwarePS3Headset)
+			hardwareType = "Headset";
+		else if(info->m_hardwareType == GVHardwareMacOSX)
+			hardwareType = "MacOS X";
+		else
+			hardwareType = "Unknown";
+
+		_tprintf(_T("%d: %s"),
+			i, info->m_name);
+		printf(" (%s)\n\tPlayback: %s\n\tCapture: %s\n",
+			hardwareType,
+			pd?(dpd?"Default":"Yes"):"No",
+			cd?(dcd?"Default":"Yes"):"No");
+
+#if defined(_PS2) || defined(_PS3)
+
+		if (!capDevice && cd)
+			dcd = cd;
+		if (!playDevice && pd)
+			dpd = pd;
+
+		if((pd && !playDevice) || (cd && !capDevice))
+#else
+		if(dpd || dcd)
+#endif
+		{ 
+			types = 0;
+			if(dpd && !playDevice)
+				types |= GV_PLAYBACK;
+			if(dcd && !capDevice)
+				types |= GV_CAPTURE;
+
+			if(types == GV_CAPTURE)
+				typesString = "capture";
+			else if(types == GV_PLAYBACK)
+				typesString = "playback";
+			else
+				typesString = "capture & playback";
+
+			printf("\tUsing Types: %s\n", typesString);
+
+			device = gvNewDevice(devices[i].m_id, types);
+			printf("\tCreation: %s\n", device?"succeeded":"failed");
+			if(!device)
+				continue;
+
+			gvSetUnpluggedCallback(device, UnpluggedCallback);
+
+			if(types & GV_CAPTURE)
+			{
+				capDevice = device;
+				gvSetCaptureThreshold(device, CAPTURE_THRESHOLD);
+#if CAPTURE_FILTER
+				gvSetFilter(capDevice, GV_CAPTURE, Filter);
+#endif
+				ListChannels(device, GV_CAPTURE);
+			}
+			if(types & GV_PLAYBACK)
+			{
+				playDevice = device;
+				ListChannels(device, GV_PLAYBACK);
+			}
+
+			result = gvStartDevice(device, types);
+			printf("\tStarting: %s\n", result?"succeeded":"failed");
+			if (result != GVFalse)
+				unpluggedDevice = gsi_false;
+		}
+	}
+	return gsi_true;
+}
+
+void Startup(void)
 {
 	int num;
 	GVDeviceInfo devices[MAX_DEVICES];
@@ -498,11 +610,13 @@ static void Startup(void)
 		else if(info->m_hardwareType == GVHardwarePS2Speakers)
 			hardwareType = "Speakers";
 		else if(info->m_hardwareType == GVHardwarePS2Eyetoy)
-			hardwareType = "Eyetoy";
+			hardwareType = "PS2 Eyetoy";
 		else if(info->m_hardwareType == GVHardwarePSPHeadset)
 			hardwareType = "Headset";
 		else if(info->m_hardwareType == GVHardwarePS3Headset)
 			hardwareType = "Headset";
+		else if(info->m_hardwareType == GVHardwarePS3Eyetoy)
+			hardwareType = "PS3 Eyetoy";
 		else if(info->m_hardwareType == GVHardwareMacOSX)
 			hardwareType = "MacOS X";
 		else
@@ -618,6 +732,12 @@ static void Think(void)
 
 	memset(packet, 0, sizeof(packet));
 
+	if ((!capDevice || !playDevice) && unpluggedDevice)
+	{
+		if (!CheckDevicesPlugged())
+			return;
+	}
+
 	// handle incoming packets
 	do
 	{
@@ -658,7 +778,7 @@ static void Think(void)
 	}
 }
 
-#if defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_UNIX)
 #include <sys/select.h>
 #include <termios.h>
 #include <curses.h>
@@ -668,7 +788,7 @@ int _kbhit(void)
     static const int STDIN = 0;
     static int initialized = 0;
     struct timeval timeout;
-    fd_set rdset;
+    struct fd_set rdset;
 
     if (initialized == 0)
 	{
@@ -742,16 +862,16 @@ static GVBool CheckInput(void)
 
 	int ret;
 	CellPadData PadData;
-	CellPadInfo PadInfo;
+	CellPadInfo2 PadInfo;
 
-	ret = cellPadGetInfo (&PadInfo);
+	ret = cellPadGetInfo2(&PadInfo);
 	if (ret != 0) 
 	{
 		printf ("Error obtaining cell pad info: (%08X)\n", ret);
 		return GVFalse;
 	}
 
-	if (PadInfo.status[0] == CELL_PAD_STATUS_DISCONNECTED) 
+	if (PadInfo.port_status[0] == CELL_PAD_STATUS_DISCONNECTED) 
 	{
 		if (controllerConnected)
 		{
@@ -768,7 +888,7 @@ static GVBool CheckInput(void)
 			controllerConnected = gsi_true;
 		}
 	}
-	ret = cellPadGetData (0, &PadData);
+	ret = cellPadGetData(0, &PadData);
 	if (PadData.len > 0)
 	{
 		if (PadData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_CROSS)
@@ -1001,7 +1121,7 @@ int test_main(int argc, char **argp)
 
 		ShowInfo();
 
-		msleep(1);
+		msleep(30);
 	}
 
 	Destroy();

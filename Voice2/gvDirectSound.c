@@ -119,7 +119,7 @@ GVBool gviHardwareStartup(HWND hWnd)
 		return GVFalse;
 
 	// init COM
-	assert(GVICleanupCOM == GVFalse);
+	GS_ASSERT(GVICleanupCOM == GVFalse);
 	result = CoInitialize(NULL);
 	if(SUCCEEDED(result))
 		GVICleanupCOM = GVTrue;

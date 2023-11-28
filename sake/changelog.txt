@@ -3,6 +3,15 @@ Changelog for: GameSpy SAKE SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.16.00  RV   RELEASE  Released to Developer Site
+12-28-2009  1.15.01  NAB  OTHER    Reverted download/upload content chnages for release prep.
+10-14-2009  1.15.00  NAB  FEATURE  Added test app functionality for secure sake server connection
+04-29-2009  1.15.00  NAB  FEATURE  Added API functionality for content management
+02-10-2009  1.14.00  SAH  RELEASE  Released to Developer Site
+01-30-2009  1.13.11  MWJ  OTHER    added platform macro for iPhone - _IPHONE
+10-21-2008  1.04.02  SAH  FIX      Fixed bug in URL creation of Unicode string on PS3
+            1.04.02  SAH  FIX      Fixed PS3 Project files
+06-06-2008  1.04.01  SN   FIX      Fixed cleaup code of records being released
 12-12-2007  1.04.00  RMV  RELEASE  Released to Developer Site
 12-11-2007  1.03.03  SN   FIX      Removed a check due to compiler warning
 11-16-2007  1.03.02  SAH  FIX      Fixed mem leak in saketest.c from invalid gsCore shutdown, added memleak check

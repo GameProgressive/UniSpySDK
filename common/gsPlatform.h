@@ -206,7 +206,7 @@
 	#include <nitroWiFi.h>
 	#include <extras.h>  // mwerks
     #include <limits.h>
-	#include <time.h> //NAB - check if this causes any issues. It does not exist in the Nitro branch
+	#include <time.h>
 	// Raw sockets are undefined on Nitro
 	#define SB_NO_ICMP_SUPPORT
 
@@ -336,8 +336,10 @@
 
 #if !defined(UNISPY_USE_HTTPS)
 	#define GSI_HTTP_PROTOCOL_URL "http://"
+	#define GSI_HTTP_PROTOCOL_URL_UNI _T("http://")
 #else
 	#define GSI_HTTP_PROTOCOL_URL "https://"
+	#define GSI_HTTP_PROTOCOL_URL_UNI _T("https://")
 #endif
 
 //---------- Mac autorelease pool for working with CoreFoundation types ----------------------

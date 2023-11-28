@@ -33,6 +33,7 @@ gpiConnect(
   const char password[GP_PASSWORD_LEN],
   const char authtoken[GP_AUTHTOKEN_LEN],
   const char partnerchallenge[GP_PARTNERCHALLENGE_LEN],
+  const char loginticket[GP_LOGIN_TICKET_LEN],
   const char cdkey[GP_CDKEY_LEN],
   GPEnum firewall,
   GPIBool newuser,
@@ -57,6 +58,12 @@ gpiProcessConnect(
 GPResult
 gpiCheckConnect(
   GPConnection * connection
+);
+
+GPResult
+gpiProcessRemoteAuthResponse(
+  GPConnection * connection,
+  const char * input
 );
 
 #endif

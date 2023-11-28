@@ -3,6 +3,10 @@ Changelog for: GameSpy Transport SDK 2
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.11.00  RV   RELEASE  Released to Developer Site
+02-10-2009  2.10.00  SAH  RELEASE  Released to Developer Site
+01-30-2009  2.09.02  MWJ  OTHER    added gsifopen - wrapper for fopen to handle restricted file systems (i.e. iPhone)
+02-27-2008  2.09.01  SN   FIX      Fixed case where message was truncated
 12-12-2007  2.09.00  RMV  RELEASE  Released to Developer Site
 12-07-2007  2.08.03  SAH  OTHER    Fixed VC6 projects missing dependencies
 12-07-2007  2.08.02  SN   FIX      Added check to sample app for PS3 maximum send size

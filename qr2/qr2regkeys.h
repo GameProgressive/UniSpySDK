@@ -81,10 +81,9 @@ void qr2_internal_key_list_free(); // call this at qr2 shutdown
 gsi_bool qr2_internal_is_master_only_key(const char * keyname);
 
 
-// Always define this for direct access.
-// Defined somewhere else.
-// void qr2_register_keyA(int keyid, const char *key);
-// void qr2_register_keyW(int keyid, const unsigned short *key);
+// Always define for direct access
+void qr2_register_keyA(int keyid, const char *key);
+void qr2_register_keyW(int keyid, const unsigned short *key);
 
 #ifdef __cplusplus
 }

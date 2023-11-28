@@ -39,7 +39,7 @@ GVBool gviSpeexInitialize(int quality, GVRate sampleRate)
 	if (issueSampleTaskEncodeInit(quality, sampleRate, &gSpeexTaskOutput,gviSpeexEncoderStateBuffer,SPEEX_ENCODER_STATE_BUFFER_SIZE) != 0)
 		return GVFalse;
 	
-	assert(gSpeexTaskOutput.mSpeexReturnCode == 0);
+	GS_ASSERT(gSpeexTaskOutput.mSpeexReturnCode == 0);
 	if (gSpeexTaskOutput.mSpeexInitialized != GVTrue)
 	{
 		return GVFalse;
@@ -152,10 +152,10 @@ void gviSpeexEncode(GVByte * out, const GVSample * in)
 	memset(gviSpeexEncodedBuffer, 0, GVI_SPEEX_ENCODED_BUFFER);
 	immediateReturn = issueSampleTaskEncode((short *)in, gviSpeexSamplesPerFrame, gviSpeexEncodedFrameSize, (char *)gviSpeexEncodedBuffer, 
 		GVI_SPEEX_ENCODED_BUFFER, &gSpeexTaskOutput,gviSpeexEncoderStateBuffer,SPEEX_ENCODER_STATE_BUFFER_SIZE);
-	assert(immediateReturn == 0);
-	assert(gSpeexTaskOutput.mSpeexReturnCode == 0);
+	GS_ASSERT(immediateReturn == 0);
+	GS_ASSERT(gSpeexTaskOutput.mSpeexReturnCode == 0);
 	memcpy(out, gviSpeexEncodedBuffer, gviSpeexEncodedFrameSize);
-	assert(gSpeexTaskOutput.mSpeexOutBufferSize == gviSpeexEncodedFrameSize);	
+	GS_ASSERT(gSpeexTaskOutput.mSpeexOutBufferSize == gviSpeexEncodedFrameSize);	
 }
 
 void gviSpeexDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
@@ -169,7 +169,7 @@ void gviSpeexDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
 
 	// decode it
 	rcode = speex_decode((void *)data, &gviSpeexBits, gviSpeexBuffer);
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 
 	// convert the output from floats
 	for(i = 0 ; i < gviSpeexSamplesPerFrame ; i++)
@@ -185,8 +185,8 @@ void gviSpeexDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
 		gviSpeexEncodedFrameSize, gviSpeexDecodedBuffer, gviSpeexSamplesPerFrame, &gSpeexTaskOutput);
 	for (i = 0; i < gviSpeexSamplesPerFrame; i++)
 		out[i] = out[i] + (GVSample)gviSpeexDecodedBuffer[i];
-	assert(immediateReturn == 0);
-	assert(gSpeexTaskOutput.mSpeexReturnCode == 0);
+	GS_ASSERT(immediateReturn == 0);
+	GS_ASSERT(gSpeexTaskOutput.mSpeexReturnCode == 0);
 #endif
 }
 
@@ -202,7 +202,7 @@ void gviSpeexDecodeSet(GVSample * out, const GVByte * in, GVDecoderData data)
 	// decode it
 	rcode = speex_decode((void *)data, &gviSpeexBits, gviSpeexBuffer);
 
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 
 	// convert the output from floats
 	for(i = 0 ; i < gviSpeexSamplesPerFrame ; i++)
@@ -215,8 +215,8 @@ void gviSpeexDecodeSet(GVSample * out, const GVByte * in, GVDecoderData data)
 	memcpy(gviSpeexEncodedBuffer, in, gviSpeexEncodedFrameSize);
 	immediateReturn = issueSampleTaskDecodeSet(data, SPEEX_DECODER_STATE_BUFFER_SIZE, gviSpeexEncodedBuffer, GVI_SPEEX_ENCODED_BUFFER, 
 		gviSpeexEncodedFrameSize, out, gviSpeexSamplesPerFrame, &gSpeexTaskOutput);
-	assert(immediateReturn == 0);
-	assert(gSpeexTaskOutput.mSpeexReturnCode == 0);
+	GS_ASSERT(immediateReturn == 0);
+	GS_ASSERT(gSpeexTaskOutput.mSpeexReturnCode == 0);
 #endif
 }
 

@@ -3,6 +3,26 @@ Changelog for: GameSpy Common Code
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.08.00  RV   RELEASE  Released to Developer Site
+12-04-2009  2.07.05  RMV  OTHER    Updated MD5 and SHA1 types and functions to include 'GS'
+                                   Added closesocketsure internal function
+11-23-2009  2.07.04  JP3  FIX	   Updated _gsi_memalign for compatability with Nintendo platforms
+11-21-2009  2.07.03  RMV  FIX      Switched pointer address cast from u32 to intptr_t for 64 bit OS support
+06-17-2009  2.07.02  SN   FIX      Fixed errors an warnings in gsXmlReadAttributeAsBool
+04-20-2009  2.07.01  SAH  FIX      Added REVOLUTION to the NOFILE platform define check
+                     SAH  OTHER    Added REVOLUTION-specific gethostbyname which supports DNS caching
+                     SAH  OTHER    Added GS_NO_STANDARD_ALLOC to force no default linking of standard C memory funcs
+02-10-2009  2.07.00  SAH  RELEASE  Released to Developer Site
+02-09-2009  2.06.07  MWJ  OTHER    updated iPhone file system support
+01-30-2009  2.06.06  MWJ  OTHER    added gsifopen - wrapper for fopen to handle restricted file systems (i.e. iPhone)
+                     MWJ  OTHER    added platform macro for iPhone - _IPHONE
+                     MWJ  FIX      fix to avoid Mac OS and LINUX servers from regenerating crypt ID's
+01-30-2009	2.06.05  SAH  FIX      Removed references for __cdecl, replaced with GS_STATIC_CALLBACK define
+01-09-2009	2.06.04  NAB  OTHER    Added gsXml function to generate XML strings without namespaces for internal use.
+10-21-2008  2.06.03  SAH  OTHER    Added Wide-string character defines for use in printf, used in SakeFileServer URL construction
+05-21-2008  2.06.02  SN   FIX      Fixed implicit casts to make sure they actually are of the destination type
+01-16-2008  2.06.01  BED  FEATURE  Added gsResultCodes so SDKs can share return values
+                     BED  FEATURE  Added string utils to convert UTF8 to Unicode from non-null terminated XML strings
 12-12-2007  2.06.00  RMV  RELEASE  Released to Developer Site
 12-12-2007  2.05.14  SN   FIX      Fixed getlocalhost for revolution
 12-10-2007  2.05.13  SN   FIX      Added limits.h for PS2

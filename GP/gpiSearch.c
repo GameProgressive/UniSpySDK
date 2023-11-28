@@ -390,6 +390,34 @@ GPResult gpiNewUser(
 		strzcpy(data->cdkey, cdkey, GP_CDKEY_LEN);
 
 	// Start the search.
+	////////////////////
+	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
+
+	return GP_NO_ERROR;
+}
+
+GPResult gpiProfileBuddyList(
+  GPConnection * connection,
+  GPProfile profile,
+  int maxBuddies,
+  GPEnum blocking,
+  GPCallback callback,
+  void * param
+)
+{
+	GPISearchData * data;
+
+	// Init the data.
+	/////////////////
+	CHECK_RESULT(gpiInitSearchData(connection, &data, GPI_SEARCH_PROFILE_BUDDYLIST));
+
+	// Fill in the data.
+	////////////////////
+	data->profile = profile;
+	data->maxResults = maxBuddies;
+
+	// Start the search.
+	////////////////////
 	CHECK_RESULT(gpiStartSearch(connection, data, blocking, callback, param));
 
 	return GP_NO_ERROR;
@@ -726,6 +754,19 @@ gpiProcessSearch(
 					gpiAppendStringToBuffer(connection, &data->outputBuffer, data->uniquenick);
 					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\namespaceid\\");
 					gpiAppendIntToBuffer(connection, &data->outputBuffer, iconnection->namespaceID);
+				}
+				else if(data->type == GPI_SEARCH_PROFILE_BUDDYLIST)
+				{
+					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\profilelist\\");
+					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\sesskey\\");
+					gpiAppendIntToBuffer(connection, &data->outputBuffer, iconnection->sessKey);
+					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\profileid\\");
+					gpiAppendIntToBuffer(connection, &data->outputBuffer, iconnection->profileid);
+					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\searchprofileid\\");
+					gpiAppendIntToBuffer(connection, &data->outputBuffer, data->profile);
+					gpiAppendStringToBuffer(connection, &data->outputBuffer, "\\maxresults\\");
+					gpiAppendIntToBuffer(connection, &data->outputBuffer, data->maxResults);
+
 				}
 				else
 				{
@@ -1443,6 +1484,86 @@ gpiProcessSearch(
 						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_SUGGESTED_UNIQUE));
 					}
 				}
+
+				else if(data->type == GPI_SEARCH_PROFILE_BUDDYLIST)
+				{
+					callback = operation->callback;
+					if(callback.callback != NULL)
+					{
+						GPGetProfileBuddyListArg * arg;
+
+						// Setup the arg.
+						/////////////////
+						arg = (GPGetProfileBuddyListArg *)gsimalloc(sizeof(GPGetProfileBuddyListArg));
+						if(arg == NULL)
+							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
+
+						arg->result = GP_NO_ERROR;
+						arg->numProfiles = 0;
+						arg->profiles = NULL;
+						arg->hidden = GP_NOT_HIDDEN;
+						arg->profileQueried = ((GPISearchData*)operation->data)->profile;
+						CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
+						if(strcmp(key, "profilelist") != 0)
+							CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
+
+						// Get the profiles.
+						/////////////////
+						done = GPIFalse;
+						do
+						{
+							// Read the next key and value.
+							///////////////////////////////
+							CHECK_RESULT(gpiReadKeyAndValue(connection, data->inputBuffer.buffer, &index, key, value));
+
+							// Is the list done?
+							////////////////////
+							if(strcmp(key, "pldone") == 0)
+							{
+								// Done.
+								////////
+								done = GPITrue;
+							}
+							else if (strcmp(key, "hidden") == 0)
+							{
+								// We can't see this user's buddies.
+								////////////////////////////////////
+								arg->hidden= GP_HIDDEN;
+								done = GPITrue;
+							}
+							else if (strcmp(key, "count") == 0)
+							{
+								// How many entries are coming and allocate memory.
+								////////////////////////////////////////////////////
+								int count = atoi(value);
+								if (count > 0)
+								{
+									tempPtr = gsimalloc(sizeof(GPProfile) * count);
+									if(tempPtr == NULL)
+										Error(connection, GP_MEMORY_ERROR, "Out of memory.");
+									arg->profiles = (GPProfile *)tempPtr;
+								}
+							}
+							else if(strcmp(key, "o") == 0)
+							{
+								// Get the profile id.
+								//////////////////////
+								arg->profiles[arg->numProfiles] = atoi(value);
+								arg->numProfiles++;
+							}
+							else
+							{
+								CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Error reading from the search server.");
+							}
+						}
+						while(!done);
+
+						// Do it.
+						/////////
+						CHECK_RESULT(gpiAddCallback(connection, callback, arg, operation, GPI_ADD_PROFILE_BUDDY_LIST));
+					}
+				}
+
 				else
 				{
 					GS_FAIL();

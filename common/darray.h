@@ -1,18 +1,17 @@
 #ifndef _DARRAY_H
 #define _DARRAY_H
 
-/* File: darray.h
- * --------------
- * Defines the interface for the DynamicArray ADT.
- * The DArray allows the client to store any number of elements of any desired
- * base type and is appropriate for a wide variety of storage problems. It 
- * supports efficient element access, and appending/inserting/deleting elements
- * as well as optional sorting and searching. In all cases, the DArray imposes 
- * no upper bound on the number of elements and deals with all its own memory 
- * management. The client specifies the size (in bytes) of the elements that 
- * will be stored in the array when it is created. Thereafter the client and 
- * the DArray can refer to elements via (void*) ptrs.
- */
+
+///////////////////////////////////////////////////////////////////////////////
+// Defines the interface for the DynamicArray ADT.
+// The DArray allows the client to store any number of elements of any desired
+// base type and is appropriate for a wide variety of storage problems. It 
+// supports efficient element access, and appending/inserting/deleting elements
+// as well as optional sorting and searching. In all cases, the DArray imposes 
+// no upper bound on the number of elements and deals with all its own memory 
+// management. The client specifies the size (in bytes) of the elements that 
+// will be stored in the array when it is created. Thereafter the client and 
+// the DArray can refer to elements via (void*) ptrs.
 
 #ifdef __cplusplus
 extern "C" {

@@ -514,7 +514,7 @@ static OSStatus gviHardwareCaptureIOProc(AudioDeviceID inDevice,
 				if(!frame)
 				{
 					frame = gviPopFirstFrame(&data->m_capturedFrames);
-					assert(frame);
+					GS_ASSERT(frame);
 					if(!frame)
 						break;
 				}

@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gvSpeex.c
+// SDK:		GameSpy Voice 2 SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2004-2009 GameSpy Industries, Inc.
+
 #include "gvSpeex.h"
 #include <speex/speex.h>
 #include "gvCodec.h"
@@ -142,7 +149,7 @@ void gviSpeexEncode(GVByte * out, const GVSample * in)
 
 	// write the bits to the output
 	bytesWritten = speex_bits_write(&gviSpeexBits, (char *)out, gviSpeexEncodedFrameSize);
-	assert(bytesWritten == gviSpeexEncodedFrameSize);
+	GS_ASSERT(bytesWritten == gviSpeexEncodedFrameSize);
 }
 
 void gviSpeexDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
@@ -155,7 +162,7 @@ void gviSpeexDecodeAdd(GVSample * out, const GVByte * in, GVDecoderData data)
 
 	// decode it
 	rcode = speex_decode((void *)data, &gviSpeexBits, gviSpeexBuffer);
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 
 	// convert the output from floats
 	for(i = 0 ; i < gviSpeexSamplesPerFrame ; i++)
@@ -173,7 +180,7 @@ void gviSpeexDecodeSet(GVSample * out, const GVByte * in, GVDecoderData data)
 
 	// decode it
 	rcode = speex_decode((void *)data, &gviSpeexBits, gviSpeexBuffer);
-	assert(rcode == 0);
+	GS_ASSERT(rcode == 0);
 
 	// convert the output from floats
 	for(i = 0 ; i < gviSpeexSamplesPerFrame ; i++)

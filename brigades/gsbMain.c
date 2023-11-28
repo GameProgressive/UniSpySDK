@@ -1281,6 +1281,34 @@ GSResult gsbGetBrigadeHistory(GSBInstancePtr				theInstance,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+GSResult gsbGetBrigadeMatchHistory(GSBInstancePtr	theInstance, 
+                              gsi_u32				matchId, 
+                              GSBGetBrigadeMatchHistoryCallback callback, 
+                              void					*userData)
+{
+    GSBInternalInstance *instance = (GSBInternalInstance*)theInstance;
+    GSResult            result    = GS_SUCCESS;
+
+    GSB_ASSERT_CHECK_PARAM(instance, "theInstance is NULL.");
+    GSB_ASSERT_CHECK_PARAM(matchId,"Origination Profile Id is invalid");
+    GSB_ASSERT_CHECK_PARAM(callback, "callback is NULL.");
+    GSB_CHECKAVAIL();
+
+    // validate the filter here prior to sending to the service function
+    result = gsbiServiceGetBrigadeMatchHistory( instance,  matchId, callback,  userData);
+
+    GSI_UNUSED(userData);
+
+    if (GS_FAILED(result))
+    {
+        // TODO: better error handling/reporting
+        return result;
+    }
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 GSResult gsbUpdateMemberEmailAndNick( GSBInstancePtr theInstance, gsi_u32 brigadeId, GSBUpdateMemberEmailAndNickCallback callback, void *userData )
 {
     GSBInternalInstance *instance = (GSBInternalInstance*)theInstance;

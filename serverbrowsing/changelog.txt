@@ -3,6 +3,21 @@ Changelog for: GameSpy Server Browsing SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.09.00  RV   RELEASE  Released to Developer Site
+11-23-2009  2.08.04  RMV  FIX      Fixed implicit conversion errors in sbCrypt.c for Wii compiler
+08-14-2009  2.08.03  SAH  OTHER    Updated sbctest to connect to qr2csample using ACE if found during browsing
+08-13-2009  2.08.02  SN   OTHER    Modified name in internal parsing, and fixed documentation comments in main header
+08-12-2009  2.08.01  SAH  OTHER    Modified SDK to only use NN match queuing support for ACE-based connections
+                          FEATURE  Added ServerBrowserConnectToServerWithSocket (ACE functionality)
+02-10-2009  2.08.00  SAH  RELEASE  Released to Developer Site
+02-09-2009  2.07.07  MWJ  OTHER    Update macros for iPhone support
+01-30-2009  2.07.06  MWJ  OTHER    SOCK_RAW fails under OS X; use SOCK_DGRAM instead
+01-14-2009  2.07.05  RMV  FIX      Added SDK-side handling and debug logging for a ServerBrowserUpdate parameter error
+                          OTHER    Raised MAX_QUERY_KEYS since length is already limited by MAX_FIELD_LIST_LENGTH  
+10-10-2008  2.07.04  SAH  FIX      Fixed SBServerGetConnectionInfo to use public IP/port when direct connection is available
+06-16-2008  2.07.03  SN   FIX      Added some checks to for ACE to prevent Nat Negotiators from being shutdown
+04-22-2008  2.07.02  RMV  FIX      Added check for empty string in SBServerGetStringValue
+03-10-2008  2.07.01  RMV  OTHER    Increased MAX_FILTER_LEN to 511 to be consistent with corresponding gmaster define
 12-12-2007  2.07.00  RMV  RELEASE  Released to Developer Site
 12-11-2007  2.06.05  SAH  OTHER    Added NatNeg files to projects to remove compiler errors
 11-27-2007  2.06.03  SAH  CLEANUP  Moved extern "c" block below includes to prevent linker errors

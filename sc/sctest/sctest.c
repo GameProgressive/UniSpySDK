@@ -18,7 +18,9 @@
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// This sample simulates a stats implementation for a 2v2 game.
+// This sample does the following:
+// * Logs in using AuthService
+// * Simulates a stats implementation for a 2v2 game.
 //
 // For simplicity, all 4 players are run from one machine.  
 // 4 people use the auth service functions to login and get their certificates
@@ -108,7 +110,7 @@
 #define INVALID_PTR ((void*)0xdeadc0de)
 
 #define SCTEST_NUM_TEAMS   2
-#define SCTEST_NUM_PLAYERS 2
+#define SCTEST_NUM_PLAYERS 4
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,13 +221,16 @@ static gsi_bool isBackendAvailable()
 
 	if (aResult == GSIACUnavailable)
 	{
-		printf("Online Services for sctest are no longer available\r\n"); 
+		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Network, GSIDebugLevel_HotError, 
+			"Online Services for sctest are no longer available\r\n");
+
 		return gsi_false;
 	}
 
 	if (aResult == GSIACTemporarilyUnavailable)
 	{
-		printf("Online Services for sctest are temporarily down for maintenance\r\n"); 
+		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Network, GSIDebugLevel_HotError, 
+			"Online Services for sctest are temporarily down for maintenance\r\n");
 		return gsi_false;
 	}
 
@@ -234,13 +239,15 @@ static gsi_bool isBackendAvailable()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theResponse, void * theUserData)
+static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theResponse, void * userData)
 {
 	if (httpResult != GHTTPSuccess)
 	{
 		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 			"Failed on player login, HTTP error: %d\r\n", httpResult);
+#if defined(_WIN32) && defined(_UNIX)
 		getc(stdin);
+#endif
 		exit(0);
 	}
 	else if (theResponse->mLoginResult != WSLogin_Success)
@@ -248,13 +255,15 @@ static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theRespons
 		
 		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 			"Failed on player login, Login result: %d\r\n", theResponse->mLoginResult);
+#if defined(_WIN32) && defined(_UNIX)
 		getc(stdin);
+#endif
 		exit(0);
 	}
 	else
 	{
 		SamplePlayerData * newPlayer = NULL;
-		int playerIndex = (int)theUserData;
+		int playerIndex = *(int *)userData;
 		char playerNick[WS_LOGIN_NICK_LEN];
 
 		newPlayer = &gPlayerData[playerIndex];
@@ -278,7 +287,7 @@ static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theRespons
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-/*static void myPs3LoginCallback(GHTTPResult httpResult, WSLoginPs3CertResponse * theResponse, void * theUserData)
+/*static void myPs3LoginCallback(GHTTPResult httpResult, WSLoginPs3CertResponse * theResponse, void * userData)
 {
 	if (httpResult != GHTTPSuccess)
 	{
@@ -298,7 +307,7 @@ static void myLoginCallback(GHTTPResult httpResult, WSLoginResponse * theRespons
 	else
 	{
 		SamplePlayerData * newPlayer = NULL;
-		int playerIndex = (int)theUserData;
+		int playerIndex = (int)userData;
 		char playerNick[WS_LOGIN_NICK_LEN];
 
 		newPlayer = &gPlayerData[playerIndex];
@@ -314,33 +323,39 @@ static void myPlayerLogin(gsi_u8 logintype, const gsi_char * nick, const gsi_cha
 
 	if (logintype == SCTEST_LOGIN_PROFILE)
 	{
-		if (0 != wsLoginProfile(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, SCTEST_EMAIL, password, _T(""), myLoginCallback, (void*)localPlayerNumber))
+		if (0 != wsLoginProfile(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, SCTEST_EMAIL, password, _T(""), myLoginCallback, &localPlayerNumber))
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 				"Failed on wsLoginProfile\r\n");
+#if defined(_WIN32) && defined(_UNIX)
 			getc(stdin);
+#endif
 			exit(0);
 		}
 	}
 	else if (logintype == SCTEST_LOGIN_UNIQUE)
 	{
-		result = wsLoginUnique(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, password, _T(""), myLoginCallback, (void*)localPlayerNumber);
+		result = wsLoginUnique(SCTEST_GAME_ID, SCTEST_LOGIN_PARTNERCODE, SCTEST_LOGIN_NAMESPACE, nick, password, _T(""), myLoginCallback, &localPlayerNumber);
 		if (result != WSLogin_Success)
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 				"Failed on wsLoginUnique. Result: %d\r\n", result);
+#if defined(_WIN32) && defined(_UNIX)
 			getc(stdin);
+#endif
 			exit(0);
 		}
 	}
 	else if (logintype == SCTEST_LOGIN_REMOTEAUTH)
 	{
-		result = wsLoginRemoteAuth(SCTEST_GAME_ID, SCTEST_REMOTE_PARTNERCODE, SCTEST_REMOTE_NAMESPACEID, nick, password, myLoginCallback, (void*)localPlayerNumber);
+		result = wsLoginRemoteAuth(SCTEST_GAME_ID, SCTEST_REMOTE_PARTNERCODE, SCTEST_REMOTE_NAMESPACEID, nick, password, myLoginCallback, &localPlayerNumber);
 		if (result != WSLogin_Success)
 		{
 			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
 				"Failed on wsLoginUnique. Result: %d\r\n", result);
+#if defined(_WIN32) && defined(_UNIX)
 			getc(stdin);
+#endif
 			exit(0);
 		}
 	}
@@ -397,7 +412,7 @@ static void myRecordPlayerJoined(gsi_u32 theProfileId,
 	newPlayer->mShots = 0;
 
 	// Initialize obfuscation data
-	//   TODO: dervice obfuscation seed in a way that prevents copying between variables
+	//   TODO: service obfuscation seed in a way that prevents copying between variables
 	memcpy(newPlayer->mHiddenFrags,  gServerData.mObfuscationSeed, sizeof(newPlayer->mHiddenDeaths));
 	memcpy(newPlayer->mHiddenDeaths, gServerData.mObfuscationSeed, sizeof(newPlayer->mHiddenDeaths));
 	memcpy(newPlayer->mHiddenScore,  gServerData.mObfuscationSeed, sizeof(newPlayer->mHiddenDeaths));
@@ -521,20 +536,49 @@ static void myWaitForCallbacks(SCInterfacePtr theInterface, int howMany)
 	}
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// This will be triggered when scCheckBanList() has completed.
+static void checkBanListCallback(SCInterfacePtr theInterface,
+						  GHTTPResult httpResult,
+                          SCResult result,
+						  void * userData,
+						  int resultProfileId,
+						  int resultPlatformId,
+						  gsi_bool resultProfileBannedHost)
+{	
+	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, 
+		"CheckBanListCallback: httpResult = %d, result = %s\r\n", httpResult, SCResultStr[result]);
+	
+	if (httpResult == GHTTPSuccess && result == SCResult_NO_ERROR)
+	{
+		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Debug, "\r\n***\r\nHost with ProfileID=%d is%s a ranked server on PlatformID=%d\r\n***\r\n", resultProfileId, (resultProfileBannedHost == gsi_false) ? "" : " NOT", resultPlatformId);
+	}
+
+	gServerData.mWaitCount--; // one less request to wait for
+
+	GSI_UNUSED(resultProfileId);
+	GSI_UNUSED(resultPlatformId);
+	GSI_UNUSED(theInterface);
+	GSI_UNUSED(userData);
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // This will be triggered when scCreateSession() has completed.
 //    Expected to occur once per reported game session.
-void createSessionCallback(SCInterfacePtr theInterface,
-						   GHTTPResult theHttpResult,
-                           SCResult theResult,
-						   void * theUserData)
+static void createSessionCallback(SCInterfacePtr theInterface,
+						   GHTTPResult httpResult,
+                           SCResult result,
+						   void * userData)
 {	
 	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, 
-		"CreateSessionCallback: theHttpResult = %d, theResult = %s\r\n", theHttpResult, SCResultStr[theResult]);
+		"CreateSessionCallback: httpResult = %d, result = %s\r\n", httpResult, SCResultStr[result]);
 
 	
-	if (theHttpResult == GHTTPSuccess && theResult == SCResult_NO_ERROR)
+	if (httpResult == GHTTPSuccess && result == SCResult_NO_ERROR)
 	{
 		const char * sessionId    = scGetSessionId(theInterface);
 		const char * connectionId = scGetConnectionId(theInterface);
@@ -548,7 +592,7 @@ void createSessionCallback(SCInterfacePtr theInterface,
 	gServerData.mWaitCount--; // one less request to wait for
 
 	GSI_UNUSED(theInterface);
-	GSI_UNUSED(theUserData);
+	GSI_UNUSED(userData);
 }
 
 
@@ -556,17 +600,17 @@ void createSessionCallback(SCInterfacePtr theInterface,
 ///////////////////////////////////////////////////////////////////////////////
 // This will be triggered when scSetReportIntention() has completed.
 //    Expected to occur once per reported game session.
-void setReportIntentionCallback(SCInterfacePtr theInterface,
-								GHTTPResult theHttpResult,
-                                SCResult theResult,
-								void * theUserData)
+static void setReportIntentionCallback(SCInterfacePtr theInterface,
+								GHTTPResult httpResult,
+                                SCResult result,
+								void * userData)
 {
-	SamplePlayerData* thePlayer = (SamplePlayerData*)theUserData;
+	SamplePlayerData* thePlayer = (SamplePlayerData*)userData;
 
 	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, 
-		"SetReportIntentionCallback: theHttpResult = %d, theResult = %s\r\n", theHttpResult, SCResultStr[theResult]);	
+		"SetReportIntentionCallback: httpResult = %d, result = %s\r\n", httpResult, SCResultStr[result]);	
 	
-	if (theHttpResult == GHTTPSuccess && theResult == SCResult_NO_ERROR)
+	if (httpResult == GHTTPSuccess && result == SCResult_NO_ERROR)
 	{
 		const char * connectionId = scGetConnectionId(theInterface);
 		memcpy(thePlayer->mConnectionId, connectionId, SC_CONNECTION_GUID_SIZE);
@@ -576,7 +620,7 @@ void setReportIntentionCallback(SCInterfacePtr theInterface,
 	gServerData.mWaitCount--; // one less request to wait for
 
 	GSI_UNUSED(theInterface);
-	GSI_UNUSED(theUserData);
+	GSI_UNUSED(userData);
 }
 
 
@@ -584,20 +628,58 @@ void setReportIntentionCallback(SCInterfacePtr theInterface,
 ///////////////////////////////////////////////////////////////////////////////
 // This will be triggered when scSubmitReport() has completed
 //    Expected to occur once per call to scSetReportIntention
-void submitReportCallback(SCInterfacePtr theInterface, 
-						  GHTTPResult theHttpResult,
-						  SCResult theResult,
-						  void * theUserData)
+static void submitReportCallback(SCInterfacePtr theInterface, 
+						  GHTTPResult httpResult,
+						  SCResult result,
+						  void * userData)
 {
 	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, 
-		"SubmitReportCallback: theHttpResult = %d, theResult = %s\r\n", theHttpResult, SCResultStr[theResult]);
+		"SubmitReportCallback: httpResult = %d, result = %s\r\n", httpResult, SCResultStr[result]);
 	
 	gServerData.mWaitCount--; // one less request to wait for
 
-	GSI_UNUSED(theHttpResult);
-	GSI_UNUSED(theResult);
+	GSI_UNUSED(httpResult);
+	GSI_UNUSED(result);
 	GSI_UNUSED(theInterface);
-	GSI_UNUSED(theUserData);
+	GSI_UNUSED(userData);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Login must be performed regardless of stats submission or stats retrieval
+// or both
+static void RunLoginTests(gsi_u8 loginMethod)
+{
+	// Override service URLs for debugging?
+	//strcpy(wsAuthServiceURL, "http://*****/AuthService/AuthService.asmx");
+
+	////////////////////////////////////////////////
+	////////////////////////////////////////////////
+	// Obtain a certificate for each local player.
+	//    - For the sample, all player's are local.
+
+	// Switch up login modes as necessary for testing the Auth Service
+	if (loginMethod == SCTEST_LOGIN_REMOTEAUTH)
+	{
+		myPlayerLogin(SCTEST_LOGIN_REMOTEAUTH, SCTEST_TOKEN_1, SCTEST_CHALLENGE_1, 0);
+		myPlayerLogin(SCTEST_LOGIN_REMOTEAUTH, SCTEST_TOKEN_2, SCTEST_CHALLENGE_2, 1);
+	}
+	else if (loginMethod == SCTEST_LOGIN_UNIQUE)
+	{
+		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_1, SCTEST_PASSWORD, 0);
+		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_2, SCTEST_PASSWORD, 1);
+		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_3, SCTEST_PASSWORD, 2);
+		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_4, SCTEST_PASSWORD, 3);
+		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_5, SCTEST_PASSWORD, 4);
+		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_6, SCTEST_PASSWORD, 5);
+	}
+	else if (loginMethod == SCTEST_LOGIN_PROFILE)
+	{
+		myPlayerLogin(SCTEST_LOGIN_PROFILE, SCTEST_NICK_1, SCTEST_PASSWORD, 0);
+		myPlayerLogin(SCTEST_LOGIN_PROFILE, SCTEST_NICK_2, SCTEST_PASSWORD, 1);
+	}
 }
 
 
@@ -697,15 +779,262 @@ static gsi_bool CreateReportAndSubmit()
 	return gsi_true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// This runs all the tests
-static gsi_bool RunTests(gsi_u8 loginMethod, gsi_bool isLoginOnly)
-{	
-	//SCReportPtr     aReport = NULL;
+static void Cleanup()
+{
+	int i;
+	// cleanup code when exiting 
+	for (i = 0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		if (gPlayerData[i].mReport)
+		{	
+			scDestroyReport(gPlayerData[i].mReport);
+			gPlayerData[i].mReport= NULL;
+		}
+		if (gPlayerData[i].mStatsInterface)
+		{
+			scShutdown(gPlayerData[i].mStatsInterface);
+			gPlayerData[i].mStatsInterface = NULL;
+		}
+	}
+}
+
+static gsi_bool RunStatsSubmissionTests()
+{
 	SCResult        aResult = SCResult_NO_ERROR;
 	int i=0, k=0, j=0;
 
+	// Override service URLs for debugging?
+//strcpy(scServiceURL, "http://*********.gamespy.com/CompetitionService/CompetitionService.asmx");
+
+	// Initialize the SDK
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		aResult = scInitialize(SCTEST_GAME_ID, &gPlayerData[i].mStatsInterface);
+		if (aResult != SCResult_NO_ERROR)
+		{
+			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
+				"scInitialize returned %s\r\n", SCResultStr[aResult]);
+			Cleanup();
+			return gsi_false;
+		}
+	}
+
+	////////////////////////////////////////
+	////////////////////////////////////////
+	// Simulate peer-to-peer authentication
+	//    You can have the server validate each client.
+	//    You may have each client validate every other.
+	//    Certificates may also be used to exchange keys for encrypting game traffic.
+	//
+	//    Step1 - Trade certificates using unsecured game socket. (The sample doesn't do this)
+	//    Step2 - Verify certificate is authentic using wsLoginCertIsValid
+	//    Step3 - Verify that the guy who gave you the certificate actually owns it
+
+	// Step1 - skipped.
+	//       - The usual scenario is to have the host verify the client certificate when the player joins.
+
+	// Step2 - validate certificates
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		if (gsi_is_false(wsLoginCertIsValid(&gPlayerData[i].mCertificate)))
+		{
+			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
+				"Error validating certificate for player %d!\r\n", i);
+			Cleanup();
+			return gsi_false;
+		}
+	}
+
+	// Step3 - exchange keys
+	gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Debug, "Generating encryption keys\r\n");
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		for (k=i+1; k < SCTEST_NUM_PLAYERS; k++)
+		{
+			SCPeerKeyExchangeMsg exchangeMsg1;
+			SCPeerKeyExchangeMsg exchangeMsg2;
+
+			const char * plainTextMsg = "Hello Secure!";
+			char cipherMsg[32] = {'\0'};
+			int msgLen = (int)strlen(plainTextMsg);
+
+			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, "Creating session keys for player pair %d <-> %d\r\n", i, k);
+
+			// Each player should create a key for receiving data from the remote player
+			//     For extra security, we use a different encryption key for each channel
+			scPeerCipherInit(&gPlayerData[i].mCertificate, &gPlayerData[i].mPeerRecvCipher[k]); // 'i' to receive data from 'k'
+			scPeerCipherInit(&gPlayerData[k].mCertificate, &gPlayerData[k].mPeerRecvCipher[i]); // 'k' to receive data from 'i'
+
+			// Create a key exchange message for transmitting the key to the other player
+			scPeerCipherCreateKeyExchangeMsg(&gPlayerData[k].mCertificate, &gPlayerData[i].mPeerRecvCipher[k], exchangeMsg1); // from 'i', encrypted with 'k' public key
+			scPeerCipherCreateKeyExchangeMsg(&gPlayerData[i].mCertificate, &gPlayerData[k].mPeerRecvCipher[i], exchangeMsg2); // from 'k', encrypted with 'i' public key
+
+			// Send it (using game network layer)
+			//   - sample doesn't need to send b/c all player's are local
+
+			// Receiving player should parse the key out of it.
+			//   - decrypting the msg requires the local player's private data
+			scPeerCipherParseKeyExchangeMsg(&gPlayerData[k].mCertificate, &gPlayerData[k].mPrivateData, 
+				exchangeMsg1, &gPlayerData[k].mPeerSendCipher[i]); // 'k' to send data to 'i'
+			scPeerCipherParseKeyExchangeMsg(&gPlayerData[i].mCertificate, &gPlayerData[i].mPrivateData, 
+				exchangeMsg2, &gPlayerData[i].mPeerSendCipher[k]); // 'i' to send data to 'k'
+
+			// Now we can send secure data by using the (fast) encryption and decryption functions
+			//   - Encrypts and Decrypts in place
+			strcpy(cipherMsg, plainTextMsg);
+			scPeerCipherEncryptBufferIV(&gPlayerData[i].mPeerSendCipher[k], 1, (gsi_u8*)cipherMsg, (gsi_u32)msgLen); // 'i' sending to 'k'
+			scPeerCipherDecryptBufferIV(&gPlayerData[k].mPeerRecvCipher[i], 1, (gsi_u8*)cipherMsg, (gsi_u32)msgLen); // 'k' receiving from 'i'
+		}
+	} 	
+
+
+	////////////////////////////////////////
+	////////////////////////////////////////
+	// To display server/host rank status, clients should check each host in their server list.
+	// Note that is *not* what is being done in this sample - here we are checking each player's id for example's sake.
+	// In an actual game you would check each host, not each player.
+	// Future version of scCheckBanList() could take a list to reduce round-trips for this.
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		scCheckBanList(// ATLAS certificate/token data for the player who is checking host status:
+					   gPlayerData[i].mStatsInterface, &gPlayerData[i].mCertificate, &gPlayerData[i].mPrivateData, 
+
+					   // GSID profile-id of the host to check:
+					   // (In this simple example, the host is the first peer.)
+					   // (Checking the same ID each time is not interesting, so instead check each player's id)
+					   gPlayerData[i].mProfileId,
+					   
+					   // Platform identifier for the host to check:
+					   SCPlatform_PC, /* test PC */
+					   
+					   // Remote call parameters:
+					   checkBanListCallback, TIMEOUT_MS, NULL
+                       );
+
+		myWaitForCallbacks(gPlayerData[i].mStatsInterface, 1);	
+	}
+	////////////////////////////////////////
+	////////////////////////////////////////
+
+
+
+	////////////////////////////////////////
+	////////////////////////////////////////
+	// Host creates session
+	// Remember that everyone is on the same machine in this test program, so the 
+	// first player's login certificate and private data are 
+	// used to create a session
+
+	scCreateSession(gPlayerData[0].mStatsInterface, &gPlayerData[0].mCertificate, &gPlayerData[0].mPrivateData, createSessionCallback, TIMEOUT_MS, NULL);
+
+	myWaitForCallbacks(gPlayerData[0].mStatsInterface, 1);
+
+	// The host can now set his connection ID
+	strcpy((char *)gPlayerData[0].mConnectionId, scGetConnectionId(gPlayerData[0].mStatsInterface));
+
+	// In most cases the host also has the "authoritative" game view
+	// For this game
+	scSetReportIntention(gPlayerData[0].mStatsInterface, NULL, gsi_true, &gPlayerData[0].mCertificate, 
+		&gPlayerData[0].mPrivateData, setReportIntentionCallback, TIMEOUT_MS, &gPlayerData[0]);
+
+	myWaitForCallbacks(gPlayerData[0].mStatsInterface, 1);
+
+	for (j=1; j<SCTEST_NUM_PLAYERS; j++)
+	{
+		// The host would then send all other player's the Session ID generated when the session was created
+		// so that they can set their intentions, and retrieve the connection ID for report submissions
+		scSetSessionId(gPlayerData[j].mStatsInterface, (const unsigned char *)scGetSessionId(gPlayerData[0].mStatsInterface));
+
+		scSetReportIntention(gPlayerData[j].mStatsInterface, NULL, gsi_false, &gPlayerData[j].mCertificate, 
+			&gPlayerData[j].mPrivateData, setReportIntentionCallback, TIMEOUT_MS, &gPlayerData[j]);
+
+		// store each connection id for the other players
+		//strcpy((char *)gPlayerData[j].mConnectionId, scGetConnectionId(gPlayerData[j].mStatsInterface));
+
+		// *NOTE* this is simply meant to show HOW this process works, in truth the connection id
+		// here is overwritten because it's using the same interface so it will report 4 of the same
+		// player information. We need to upgrade the sample to communicate with other instances
+		// in order to report individual player data
+
+		myWaitForCallbacks(gPlayerData[j].mStatsInterface, 1);
+	}
+
+
+	////////////////////////////////////////
+	////////////////////////////////////////
+	// Game start
+	//    - Record some fake stats
+	//
+	srand(current_time());
+
+	// Server settings
+	gServerData.mHostName = _T("scTest");
+	gServerData.mMapName  = _T("scBigMap v2");
+	gServerData.mGameType = SCTEST_GAMETYPE_CTF;
+	gServerData.mCustomMap = 1;
+	gServerData.mRoundTime = 81.257f;
+	gServerData.mVersion  = _T("1.0en");
+	memset(gServerData.mObfuscationSeed, 0, sizeof(gServerData.mObfuscationSeed));
+
+	// Pretend everyone is joining now
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+	{
+		if ((i&1)==0) // even players on hero team, odd players on villans
+		{
+			myRecordPlayerJoined(gPlayerData[i].mProfileId, (gsi_u32)((i&1)==0 ? SCTEST_KEY_TEAM_ARENAID_HEROES : SCTEST_KEY_TEAM_ARENAID_VILLAINS));
+		}
+		else
+		{
+			myRecordPlayerJoined(gPlayerData[i].mProfileId, (gsi_u32)((i&1)==0 ? SCTEST_KEY_TEAM_ARENAID_HEROES : SCTEST_KEY_TEAM_ARENAID_VILLAINS));
+		}
+	}
+
+	// Record some events
+	for (i=0; i < 100; i++)
+	{
+		// Who did the shooting and who got shot?
+		gsi_u32 aShooterId = myGetRandomPlayerId(0);
+		gsi_u32 aShooteeId = myGetRandomPlayerId(aShooterId); // prevent shooter from suiciding
+
+		// How many bullets were fired?
+		int aRandomNumberOfShots = (int)((float)rand()/RAND_MAX)*20;
+		for (k=0; k < aRandomNumberOfShots; k++)
+			myRecordPlayerFiredGun(aShooterId); // (could do a bulk add also)
+
+		// 10 shots for the kill!
+		if (aRandomNumberOfShots >= 10)
+			myRecordPlayerFrag(aShooterId, aShooteeId);
+	}
+
+	// some random point values
+	for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+		myRecordPlayerScored(gPlayerData[i].mProfileId, (gsi_u32)myGetRandomInt(100));
+
+
+	if (!CreateReportAndSubmit())
+	{
+		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Debug, "Failed to Create or Submit one of the Reports\r\n");
+	}
+	////////////////////////////////////////
+	////////////////////////////////////////
+	// Game Over
+	//   exit
+	//     - or -
+	//   clear user data
+	//   goto start (for new map, round etc)
+
+	// cleanup code when exiting 
+	Cleanup();
+
+	return gsi_true;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// This runs all the tests
+static gsi_bool RunTests(gsi_u8 loginMethod, gsi_bool statsSubmission, gsi_bool statsRetrieval)
+{	
 	// Clear sample data
 	memset(&gServerData, 0, sizeof(gServerData));
 	memset(gPlayerData, 0, sizeof(gPlayerData));
@@ -713,247 +1042,24 @@ static gsi_bool RunTests(gsi_u8 loginMethod, gsi_bool isLoginOnly)
 	// Initialize SDK core/common objects for both the auth service and 
 	// the Competition SDK
 	gsCoreInitialize();
-
 	
-	// Override service URLs for debugging?
-	//strcpy(wsAuthServiceURL, "http://*****/AuthService/AuthService.asmx");
-	//strcpy(scServiceURL, "http://*****/CompetitionService/CompetitionService.asmx");
+	RunLoginTests(loginMethod);
 
-
-	////////////////////////////////////////////////
-	////////////////////////////////////////////////
-	// Obtain a certificate for each local player.
-	//    - For the sample, all player's are local.
-
-	// Switch up login modes as necessary for testing the authservice
-	if (loginMethod == SCTEST_LOGIN_REMOTEAUTH)
+	if (statsSubmission)
 	{
-		myPlayerLogin(SCTEST_LOGIN_REMOTEAUTH, SCTEST_TOKEN_1, SCTEST_CHALLENGE_1, 0);
-		myPlayerLogin(SCTEST_LOGIN_REMOTEAUTH, SCTEST_TOKEN_2, SCTEST_CHALLENGE_2, 1);
-	}
-	else if (loginMethod == SCTEST_LOGIN_UNIQUE)
-	{
-		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_1, SCTEST_PASSWORD, 0);
-		myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_2, SCTEST_PASSWORD, 1);
-		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_3, SCTEST_PASSWORD, 2);
-		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_4, SCTEST_PASSWORD, 3);
-		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_5, SCTEST_PASSWORD, 4);
-		//myPlayerLogin(SCTEST_LOGIN_UNIQUE, SCTEST_NICK_6, SCTEST_PASSWORD, 5);
-	}
-	else if (loginMethod == SCTEST_LOGIN_PROFILE)
-	{
-		myPlayerLogin(SCTEST_LOGIN_PROFILE, SCTEST_NICK_1, SCTEST_PASSWORD, 0);
-		myPlayerLogin(SCTEST_LOGIN_PROFILE, SCTEST_NICK_2, SCTEST_PASSWORD, 1);
-	}
-
-
-	if (!isLoginOnly)
-	{
-		// Initialize the SDK
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
+		if (!RunStatsSubmissionTests())
 		{
-			aResult = scInitialize(SCTEST_GAME_ID, &gPlayerData[i].mStatsInterface);
-			if (aResult != SCResult_NO_ERROR)
-			{
-				gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
-					"scInitialize returned %s\r\n", SCResultStr[aResult]);
-				
-				return gsi_false;
-			}
-		}
-
-
-		////////////////////////////////////////
-		////////////////////////////////////////
-		// Simulate peer-to-peer authentication
-		//    You can have the server validate each client.
-		//    You may have each client validate every other.
-		//    Certificates may also be used to exchange keys for encrypting game traffic.
-		//
-		//    Step1 - Trade certificates using unsecured game socket. (The sample doesn't do this)
-		//    Step2 - Verify certificate is authentic using wsLoginCertIsValid
-		//    Step3 - Verify that the guy who gave you the certificate actually owns it
-
-		// Step1 - skipped.
-		//       - The usual scenario is to have the host verify the client certificate when the player joins.
-
-		// Step2 - validate certificates
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
-		{
-			if (gsi_is_false(wsLoginCertIsValid(&gPlayerData[i].mCertificate)))
-			{
-				gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_HotError, 
-					"Error validating certificate for player %d!\r\n", i);
-				return gsi_false;
-			}
-		}
-
-		// Step3 - exchange keys
-		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Debug, "Generating encryption keys\r\n");
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
-		{
-			for (k=i+1; k < SCTEST_NUM_PLAYERS; k++)
-			{
-				SCPeerKeyExchangeMsg exchangeMsg1;
-				SCPeerKeyExchangeMsg exchangeMsg2;
-
-				const char * plainTextMsg = "Hello Secure!";
-				char cipherMsg[32] = {'\0'};
-				int msgLen = (int)strlen(plainTextMsg);
-
-				gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Notice, "Creating session keys for player pair %d <-> %d\r\n", i, k);
-
-				// Each player should create a key for receiving data from the remote player
-				//     For extra security, we use a different encryption key for each channel
-				scPeerCipherInit(&gPlayerData[i].mCertificate, &gPlayerData[i].mPeerRecvCipher[k]); // 'i' to receive data from 'k'
-				scPeerCipherInit(&gPlayerData[k].mCertificate, &gPlayerData[k].mPeerRecvCipher[i]); // 'k' to receive data from 'i'
-				
-				// Create a key exchange message for transmitting the key to the other player
-				scPeerCipherCreateKeyExchangeMsg(&gPlayerData[k].mCertificate, &gPlayerData[i].mPeerRecvCipher[k], exchangeMsg1); // from 'i', encrypted with 'k' public key
-				scPeerCipherCreateKeyExchangeMsg(&gPlayerData[i].mCertificate, &gPlayerData[k].mPeerRecvCipher[i], exchangeMsg2); // from 'k', encrypted with 'i' public key
-
-				// Send it (using game network layer)
-				//   - sample doesn't need to send b/c all player's are local
-
-				// Receiving player should parse the key out of it.
-				//   - decrypting the msg requires the local player's private data
-				scPeerCipherParseKeyExchangeMsg(&gPlayerData[k].mCertificate, &gPlayerData[k].mPrivateData, 
-					exchangeMsg1, &gPlayerData[k].mPeerSendCipher[i]); // 'k' to send data to 'i'
-				scPeerCipherParseKeyExchangeMsg(&gPlayerData[i].mCertificate, &gPlayerData[i].mPrivateData, 
-					exchangeMsg2, &gPlayerData[i].mPeerSendCipher[k]); // 'i' to send data to 'k'
-
-				// Now we can send secure data by using the (fast) encryption and decryption functions
-				//   - Encrypts and Decrypts in place
-				strcpy(cipherMsg, plainTextMsg);
-				scPeerCipherEncryptBufferIV(&gPlayerData[i].mPeerSendCipher[k], 1, (gsi_u8*)cipherMsg, (gsi_u32)msgLen); // 'i' sending to 'k'
-				scPeerCipherDecryptBufferIV(&gPlayerData[k].mPeerRecvCipher[i], 1, (gsi_u8*)cipherMsg, (gsi_u32)msgLen); // 'k' receiving from 'i'
-			}
-		} 	
-
-		////////////////////////////////////////
-		////////////////////////////////////////
-		// Host creates session
-		// Remember that everyone is on the same machine, so the 
-		// first player's login certificate and private data are 
-		// used to create a session
-
-		scCreateSession(gPlayerData[0].mStatsInterface, &gPlayerData[0].mCertificate, &gPlayerData[0].mPrivateData, createSessionCallback, TIMEOUT_MS, NULL);
-
-		myWaitForCallbacks(gPlayerData[0].mStatsInterface, 1);
-
-		// The host can now set his connection ID
-		strcpy((char *)gPlayerData[0].mConnectionId, scGetConnectionId(gPlayerData[0].mStatsInterface));
-		
-		// In most cases the host also has the "authoritative" game view
-		// For this game
-		scSetReportIntention(gPlayerData[0].mStatsInterface, NULL, gsi_true, &gPlayerData[0].mCertificate, 
-			&gPlayerData[0].mPrivateData, setReportIntentionCallback, TIMEOUT_MS, &gPlayerData[0]);
-
-		myWaitForCallbacks(gPlayerData[0].mStatsInterface, 1);
-
-		for (j=1; j<SCTEST_NUM_PLAYERS; j++)
-		{
-			// The host would then send all other player's the Session ID generated when the session was created
-			// so that they can set their intentions, and retrieve the connection ID for report submissions
-			scSetSessionId(gPlayerData[j].mStatsInterface, (const unsigned char *)scGetSessionId(gPlayerData[0].mStatsInterface));
-
-			scSetReportIntention(gPlayerData[j].mStatsInterface, NULL, gsi_false, &gPlayerData[j].mCertificate, 
-				&gPlayerData[j].mPrivateData, setReportIntentionCallback, TIMEOUT_MS, &gPlayerData[j]);
-
-			// store each connection id for the other players
-			//strcpy((char *)gPlayerData[j].mConnectionId, scGetConnectionId(gPlayerData[j].mStatsInterface));
-
-			// *NOTE* this is simply meant to show HOW this process works, in truth the connection id
-			// here is overwritten because it's using the same interface so it will report 4 of the same
-			// player information. We need to upgrade the sample to communicate with other instances
-			// in order to report individual player data
-
-			myWaitForCallbacks(gPlayerData[j].mStatsInterface, 1);
-		}
-
-
-		////////////////////////////////////////
-		////////////////////////////////////////
-		// Game start
-		//    - Record some fake stats
-		//
-		srand(current_time());
-
-		// Server settings
-		gServerData.mHostName = _T("scTest");
-		gServerData.mMapName  = _T("scBigMap v2");
-		gServerData.mGameType = SCTEST_GAMETYPE_CTF;
-		gServerData.mCustomMap = 1;
-		gServerData.mRoundTime = 81.257f;
-		gServerData.mVersion  = _T("1.0en");
-		memset(gServerData.mObfuscationSeed, 0, sizeof(gServerData.mObfuscationSeed));
-
-		// Pretend everyone is joining now
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
-		{
-			if ((i&1)==0) // even players on hero team, odd players on villans
-			{
-				myRecordPlayerJoined(gPlayerData[i].mProfileId, (gsi_u32)((i&1)==0 ? SCTEST_KEY_TEAM_ARENAID_HEROES : SCTEST_KEY_TEAM_ARENAID_VILLAINS));
-			}
-			else
-			{
-				myRecordPlayerJoined(gPlayerData[i].mProfileId, (gsi_u32)((i&1)==0 ? SCTEST_KEY_TEAM_ARENAID_HEROES : SCTEST_KEY_TEAM_ARENAID_VILLAINS));
-			}
-		}
-
-		// Record some events
-		for (i=0; i < 100; i++)
-		{
-			// Who did the shooting and who got shot?
-			gsi_u32 aShooterId = myGetRandomPlayerId(0);
-			gsi_u32 aShooteeId = myGetRandomPlayerId(aShooterId); // prevent shooter from suiciding
-
-			// How many bullets were fired?
-			int aRandomNumberOfShots = (int)((float)rand()/RAND_MAX)*20;
-			for (k=0; k < aRandomNumberOfShots; k++)
-				myRecordPlayerFiredGun(aShooterId); // (could do a bulk add also)
-
-			// 10 shots for the kill!
-			if (aRandomNumberOfShots >= 10)
-				myRecordPlayerFrag(aShooterId, aShooteeId);
-		}
-
-		// some random point values
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
-			myRecordPlayerScored(gPlayerData[i].mProfileId, (gsi_u32)myGetRandomInt(100));
-
-		
-		if (!CreateReportAndSubmit())
-		{
-			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_Debug, "Failed to Create or Submit one of the Reports\r\n");
-		}
-		////////////////////////////////////////
-		////////////////////////////////////////
-		// Game Over
-		//   exit
-		//     - or -
-		//   clear user data
-		//   goto start (for new map, round etc)
-		
-		// Cleanup
-		//scDestroyReport(aReport);
-		//aReport = NULL;
-
-		for (i=0; i < SCTEST_NUM_PLAYERS; i++)
-		{
-			if (gPlayerData[i].mReport)
-			{	
-				scDestroyReport(gPlayerData[i].mReport);
-				gPlayerData[i].mReport= NULL;
-			}
-			if (gPlayerData[i].mStatsInterface)
-			{
-				scShutdown(gPlayerData[i].mStatsInterface);
-				gPlayerData[i].mStatsInterface = NULL;
-			}
+			gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_WarmError, 
+				"RunStatsSubmissionTests failed (please check above for any errors)\r\n");
 		}
 	}
 
+	if (statsRetrieval)
+	{
+		gsDebugFormat(GSIDebugCat_App, GSIDebugType_Misc, GSIDebugLevel_WarmError, 
+			"Not implemented.\r\n");
+	}
+	
 	gsCoreShutdown();
 
 	// Wait for core shutdown 
@@ -980,7 +1086,7 @@ int test_main(int argc, char *argv[])
 
 	// Set debug output options
 	//gsSetDebugFile(stdout);
-	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Debug);
+	gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_Hardcore);
 
 	// enable Win32 C Runtime debugging 
 	#if defined(_WIN32) && !defined(_XBOX) && defined(_DEBUG)
@@ -993,10 +1099,6 @@ int test_main(int argc, char *argv[])
 	if (!isBackendAvailable())
 		return -1;
 
-
-	result = RunTests(SCTEST_LOGIN_UNIQUE, gsi_false);
-
-
 	// For Testing AuthService logins w/o submitting snapshots
 	//////////////////////////////////////////////////////////
 	/*gsSetDebugLevel(GSIDebugCat_All, GSIDebugType_All, GSIDebugLevel_None);
@@ -1005,6 +1107,7 @@ int test_main(int argc, char *argv[])
 	printf("=== Testing wsLoginRemoteAuth === \n");
 	result = RunTests(SCTEST_LOGIN_REMOTEAUTH, gsi_true);*/
 
+	result = RunTests(SCTEST_LOGIN_UNIQUE, gsi_true, gsi_false);
 
 #if defined(_WIN32) && !defined(_XBOX) && defined (_UNIX)
 	fflush(stderr);

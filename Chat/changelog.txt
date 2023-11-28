@@ -3,6 +3,12 @@ Changelog for: GameSpy Chat SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.17.00  RV   RELEASE  Released to Developer Site
+03-31-2009  1.16.02  SN   FIX      Added new return values for enum channels and enum channels with limit
+                     SN   FIX      Limited calls to enum channels and enum channels to one at a time
+03-31-2009  1.16.01  SN   FEATURE  Added listing with a maximum number of channels
+02-10-2009  1.16.00  SAH  RELEASE  Released to Developer Site
+01-30-2009  1.15.01  MWJ  OTHER    added gsifopen - wrapper for fopen to handle restricted file systems (i.e. iPhone)
 12-12-2007  1.15.00  RMV  RELEASE  Released to Developer Site
 08-06-2007  1.14.00  RMV  RELEASE  Released to Developer Site
 07-10-2007  1.13.01  RMV  FIX      Fixed chatc Project files to get rid of Unicode warnings and fixed other compiler warnings

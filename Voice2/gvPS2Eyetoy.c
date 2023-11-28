@@ -390,7 +390,7 @@ static GVBool gviPS2EyetoyCapturePacket(GVDevice device, GVByte * packet, int * 
 	if(numFrames < framesAvailable)
 	{
 		// if it got here, any pending frames should have already been handled
-		assert(data->m_captureBufferBytes < GVIBytesPerFrame);
+		GS_ASSERT(data->m_captureBufferBytes < GVIBytesPerFrame);
 
 		// setup the audio descriptor
 		audioDesc.Samples = (((u_char *)data->m_captureBuffer) + data->m_captureBufferBytes);

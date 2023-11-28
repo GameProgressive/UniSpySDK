@@ -191,7 +191,8 @@ SAKEStartRequestResult SAKE_CALL sakeiStartCreateRecordRequest(SAKERequest reque
 		SAKEI_FUNC_NAME_STRINGS("CreateRecord"),
 		sakeiCreateRecordValidateInput,
 		sakeiCreateRecordFillSoapRequest,
-		sakeiCreateRecordProcessSoapResponse
+		sakeiCreateRecordProcessSoapResponse,
+		NULL
 	};
 
 	return sakeiStartRequest(request, &info);
@@ -246,6 +247,7 @@ SAKEStartRequestResult SAKE_CALL sakeiStartUpdateRecordRequest(SAKERequest reque
 		SAKEI_FUNC_NAME_STRINGS("UpdateRecord"),
 		sakeiUpdateRecordValidateInput,
 		sakeiUpdateRecordFillSoapRequest,
+		NULL,
 		NULL
 	};
 
@@ -289,6 +291,7 @@ SAKEStartRequestResult SAKE_CALL sakeiStartDeleteRecordRequest(SAKERequest reque
 		SAKEI_FUNC_NAME_STRINGS("DeleteRecord"),
 		sakeiDeleteRecordValidateInput,
 		sakeiDeleteRecordFillSoapRequest,
+		NULL,
 		NULL
 	};
 

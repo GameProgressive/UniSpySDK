@@ -58,6 +58,10 @@ typedef enum _GPEnum
 	GP_INFO_CACHING_BUDDY_AND_BLOCK_ONLY	= 258, // 0x102, Recommended: Turns on caching of only buddy and 
 												   // blocked list profiles with gpEnable().
 
+#ifdef _PS3
+	GP_NP_SYNC = 259,  // 0x103,Turns on/off the NP to GP buddy sync   
+#endif
+
 	// Blocking settings for certain GP functions, such as gpConnect().
 	GP_BLOCKING 	= 1, // Tells the function call to stop and wait for a callback.
 	GP_NON_BLOCKING = 0, // Recommended: Tells the function call to return and continue processing, 
@@ -151,6 +155,13 @@ typedef enum _GPEnum
 	GP_MASK_EMAIL       = 32, // 0x20, Indicates that the profile's email field is visible.
 	GP_MASK_BUDDYLIST	= 64, // 0x40, Indicates that the profile's buddy list is visible.
 	GP_MASK_ALL         = -1, // 0xFFFFFFFF, Indicates that all of a profile's fields are visible.
+
+		// Hidden buddy list indicator returned by the gpGetProfileBuddyList() 
+	// callback in GPGetProfileBuddyListArg.hidden.
+	GP_HIDDEN = 1, // Indicates in GPGetProfileBuddyListArg.hidden that a 
+	// gpGetProfileBuddyList() call requested a profile that hides its buddies.
+	GP_NOT_HIDDEN = 0, // Indicates in GPGetProfileBuddyListArg.hidden that a 
+	// gpGetProfileBuddyList() call requested a profile that does NOT hide its buddies.
 
 	// Buddy statuses given by a gpGetBuddyStatus() call in GPBuddyStatus.status.
 	GP_OFFLINE  = 0, // Indicates in GPBuddyStatus.status that a gpGetBuddyStatus() call 
@@ -306,6 +317,8 @@ typedef enum _GPErrorCode
 	GP_LOGIN_SERVER_AUTH_FAILED		= 264, // 0x108, The server could not be authenticated.
 	GP_LOGIN_BAD_UNIQUENICK			= 265, // 0x109, The uniquenick provided was incorrect.
 	GP_LOGIN_BAD_PREAUTH			= 266, // 0x10A, There was an error validating the pre-authentication.
+	GP_LOGIN_BAD_LOGIN_TICKET		= 267, // 0x10B, The login ticket was unable to be validated.
+	GP_LOGIN_EXPIRED_LOGIN_TICKET	= 268, // 0x10C, The login ticket had expired and could not be used.
 
 	// Error codes that can occur while creating a new user.
 	GP_NEWUSER						= 512, // 0x200, There was an error creating a new user.
@@ -332,12 +345,20 @@ typedef enum _GPErrorCode
 	GP_ADDBUDDY_BAD_FROM			= 1537, // 0x601, The profile requesting to add a buddy is invalid.
 	GP_ADDBUDDY_BAD_NEW				= 1538, // 0x602, The profile requested is invalid.
 	GP_ADDBUDDY_ALREADY_BUDDY		= 1539, // 0x603, The profile requested is already a buddy.
-
+	GP_ADDBUDDY_IS_ON_BLOCKLIST = 1540,		// 0x604, The profile requested is on the local profile's block list.
+	//DOM-IGNORE-BEGIN 
+	GP_ADDBUDDY_IS_BLOCKING = 1541,			// 0x605, Reserved for future use.
+	//DOM-IGNORE-END
+	// 
 	// Error codes that can occur while being authorized to add someone to your buddy list.
 	GP_AUTHADD						= 1792, // 0x700, There was an error authorizing an add buddy request.
 	GP_AUTHADD_BAD_FROM				= 1793, // 0x701, The profile being authorized is invalid. 
 	GP_AUTHADD_BAD_SIG				= 1794, // 0x702, The signature for the authorization is invalid.
-
+	GP_AUTHADD_IS_ON_BLOCKLIST = 1795,		// 0x703, The profile requesting authorization is on a block list.
+	//DOM-IGNORE-BEGIN 
+	GP_AUTHADD_IS_BLOCKING = 1796,			// 0x704, Reserved for future use.
+	//DOM-IGNORE-END
+	// 
 	// Error codes that can occur with status messages.
 	GP_STATUS						= 2048, // 0x800, There was an error with the status string.
 
@@ -3742,9 +3763,101 @@ COMMON_API GPResult gpGetBuddyStatusInfoKeys(
 	GPCallback callback, 
 	void *userData
 );
-
+//DOM-IGNORE-END
 #endif
 
+#ifdef _PS3
+#include <np.h>
+#include <np\common.h>
+#include <sysutil/sysutil_common.h>
+///////////////////////////////////////////////////////////////////////////////
+// GPNpBasicCallback
+// Summary
+//		A generic NP Basic callback function type used to specify the callback supplied to 
+//		GP SDK with gpRegisterNpBasicEventCallback.
+// Parameters
+//		incomeEvent	: [in] Event type (SCE_NP_BASIC_EVENT_XXX)
+//		retCode		: [in] Error code
+//		reqId       : [in] Request ID 
+//		arg 		: [in] The user-data, if any, that was passed into the function
+//						   that triggered this callback event.
+// Remarks
+//		This callback notifies the developer to take action on an incoming NP Basic 
+//		event. Do not call sceNpBasicGetEvent within the function registered using
+//		gpRegisterNpBasicEventCallback - instead flag this event, and call sceNpBasicGetEvent
+//      from a separate event handling thread.  This restriction is in accordance with
+//		Sony Documentation.
+//		English Docs: https://ps3.scedev.net/docs/ps3-en/1
+// See Also
+//		gpRegisterNpBasicEventCallback
+typedef int (*GPNpBasicEventCallback)(int incomeEvent,
+									  int retCode, 
+									  uint32_t reqId, 
+									  void *arg);
+
+///////////////////////////////////////////////////////////////////////////////
+// gpRegisterNpBasicEventCallback
+// Summary
+//		Registers a developer specified callback to handle events for PS3 NP Basic
+// Parameters
+//		connection	: [in] A GP connection object initialized with gpInitialize. 
+//		callback	: [in] The developer-supplied Np Basic event handler. 
+//		param		: [in] Pointer to user-defined data. This value will be passed unmodified 
+//							to the callback function.  
+// Returns 
+//      This function returns GP_NO_ERROR on success. Otherwise a valid GPResult is returned.
+// Remarks
+//      This function sets the callback to call when there is a pending PS3 NP Basic event. 
+//		If no callback is set, then no alert will be given when a Basic event occurs. 
+//		<p>
+//		If this callback is registered, make a call to sceNpBasicGetEvent after receiving the 
+//      callback (but not within the callback) to clear the event from the queue. 
+//		Please refer to Sony PS3 NP Basic documentation for this function and SceNpBasicEventHandler.
+//      English Docs: https://ps3.scedev.net/docs/ps3-en/1
+GPResult gpRegisterNpBasicEventCallback(GPConnection *connection,
+										GPNpBasicEventCallback callback,
+										void *param);
+
+///////////////////////////////////////////////////////////////////////////////
+// gpSetNpCommunicationId
+// Summary
+//		Set the NP Communication ID in order to perform GP/NP Buddy Sync
+// Parameters
+//		connection	: [in] A GP connection object initialized with gpInitialize. 
+//		communicationId	: [in] The Sony-provided Communication ID (4 alphabetic characters and 5 
+//                             numerical characters). 
+// Returns 
+//      This function returns GP_NO_ERROR on success. Otherwise a valid GPResult is returned.
+// Remarks
+//      This must be called after initializing GP to set the Communication ID as per Sony requirement.
+//		Please refer to Sony PS3 NP documentation for the SceNpCommunicationId structure description.
+//      English Docs: https://ps3.scedev.net/docs/ps3-en/1
+GPResult gpSetNpCommunicationId(GPConnection *connection, 
+								const SceNpCommunicationId *communicationId);
+
+///////////////////////////////////////////////////////////////////////////////
+// gpRegisterNpBasicEventCallback
+// Summary
+//		Sets the slot number for GP to use when registering the cellSysutil callback
+// Parameters
+//		connection	: [in] A GP connection object initialized with gpInitialize. 
+//		slotNum 	: [in] Slot number for GPs cellSysutil callback (0-3); make sure this 
+//                      does not overlap with your own slot number passed to cellSysutilRegisterCallback.  
+// Returns 
+//      This function returns GP_NO_ERROR on success. Otherwise a valid GPResult is returned.
+// Remarks
+//      This function must be called before you connect GP (eg. gpConnect).
+//		Please refer to Sony PS3 documentation for info on the cellSysutilRegisterCallback
+//      function. English Docs: https://ps3.scedev.net/docs/ps3-en/1
+GPResult gpRegisterCellSysUtilCallbackSlot(GPConnection *connection, int slotNum);
+
+//DOM-IGNORE-BEGIN
+// just for testing!
+void gpiNpCellSysutilCallback(uint64_t status,
+							  uint64_t param,
+							  void * userdata);
+//DOM-IGNORE-END
+#endif
 
 #ifdef __cplusplus
 }

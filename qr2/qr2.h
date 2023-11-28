@@ -28,7 +28,7 @@
 #else
 #define qr2_init			qr2_initW
 #define qr2_init_socket		qr2_init_socketW
-#define qr2_parse_query		qr2_parse_queryA
+#define qr2_parse_query		qr2_parse_queryW
 #define qr2_buffer_add		qr2_buffer_addW
 #endif
 
@@ -374,9 +374,18 @@ COMMON_API void qr2_register_publicaddress_callback(qr2_t qrec, qr2_publicaddres
 //		qr2_init, qr2_clientconnectedcallback_t
 COMMON_API void qr2_register_clientconnected_callback(qr2_t qrec, qr2_clientconnectedcallback_t cccallback);
 
-//#if defined(QR2_IP_FILTER)
-void qr2_register_denyresponsetoip_callback(qr2_t qrec, qr2_denyqr2responsetoipcallback_t dertoipcallback);
-//#endif //#if defined(QR2_IP_FILTER)
+//////////////////////////////////////////////////////////////
+// qr2_register_hostregistered_callback
+// Summary
+//		Sets the function that will be called when the master server has
+//		 registered the game host as available for connections.
+// Parameters
+//		qrec		: [in] QR2 SDK initialized with qr2_init.
+//		hrcallback	: [in] Function to be called when the game host has
+//		 been registered.
+// See Also
+//		qr2_init, qr2_clientconnectedcallback_t
+COMMON_API void qr2_register_hostregistered_callback(qr2_t qrec, qr2_hostregisteredcallback_t hrcallback);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -700,6 +709,7 @@ struct qr2_implementation_s
 	qr2_clientmessagecallback_t cm_callback;
 	qr2_publicaddresscallback_t pa_callback;
 	qr2_clientconnectedcallback_t cc_callback;
+	qr2_hostregisteredcallback_t hr_callback;
 //#if defined(QR2_IP_FILTER)
 	qr2_denyqr2responsetoipcallback_t denyresp2_ip_callback;
 //#endif //#if defined(QR2_IP_FILTER)

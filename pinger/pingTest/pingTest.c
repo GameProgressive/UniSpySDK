@@ -53,7 +53,7 @@ void setData(unsigned int IP, unsigned short port, char * data, int len, void * 
 {
 	char buffer[32];
 	sprintf(buffer, "my pid is %d", _getpid());
-	assert((strlen(buffer) + 1) <= (unsigned)len);
+	GS_ASSERT((strlen(buffer) + 1) <= (unsigned int)len);
 	strcpy(data, buffer);
 }
 
@@ -79,7 +79,7 @@ int main(int argc, char * argv[])
 	unsigned int remoteIP;
 	char * remoteAddress;
 
-	assert(argc == 2);
+	GS_ASSERT(argc == 2);
 	remoteAddress = argv[1];
 
 	if(remoteAddress != NULL)
@@ -96,13 +96,13 @@ int main(int argc, char * argv[])
 			hostent = gethostbyname(remoteAddress);
 			if(hostent == NULL)
 			{
-				assert(0);
+				GS_FAIL();
 				return 0;
 			}
 
 			// Grab the IP.
 			///////////////
-			assert(remoteIP != 0);
+			GS_ASSERT(remoteIP != 0);
 			remoteIP = *(unsigned int *)hostent->h_addr_list[0];
 		}
 	}

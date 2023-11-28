@@ -3,6 +3,9 @@ Changelog for: GameSpy CDKey SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.10.00  RV   RELEASE  Released to Developer Site
+02-10-2009  1.09.00  SAH  RELEASE  Released to Developer Site
+02-04-2009  1.08.01  SAH  OTHER    Added Unicode projects
 12-12-2007  1.08.00  RMV  RELEASE  Released to Developer Site
 12-06-2007  1.07.01  SAH  OTHER    Added NatNeg to ServerTestQR2 projects to remove compiler errors     
 08-06-2007  1.07.00  RMV  RELEASE  Released to Developer Site

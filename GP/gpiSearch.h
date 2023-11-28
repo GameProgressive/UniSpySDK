@@ -135,6 +135,15 @@ GPResult gpiNewUser(
   void * param
 );
 
+GPResult gpiProfileBuddyList(
+  GPConnection * connection,
+  GPProfile profile,
+  int maxBuddies,
+  GPEnum blocking,
+  GPCallback callback,
+  void * param
+);
+
 GPResult gpiOthersBuddy(
   GPConnection * connection,
   GPEnum blocking,

@@ -5,6 +5,18 @@
 #include "touch.h"
 #include "backup.h"
 
+OSHeapHandle hHeap;
+u32 nHeapSize = 2 * 1024 * 1024;
+
+
+static u32 Heap_Print( void )
+{
+	u32 size;
+	size = OS_GetTotalAllocSize( OS_ARENA_MAIN, hHeap );
+	OS_TPrintf("***Heap:%d: max(%d)\n", size, nHeapSize);
+	return size;
+}
+
 static void Startup(void)
 {
 /* System */
@@ -59,8 +71,8 @@ static void Startup(void)
 /* Heap */
     {
 		u32 nHeapAdrs = 0;
-		u32 nHeapSize = 1 * 1024 * 1024;
-		OSHeapHandle hHeap;
+		//u32 nHeapSize = 1 * 1024 * 1024;
+		//OSHeapHandle hHeap;
 
 		OS_SetMainArenaLo(OS_InitAlloc(OS_ARENA_MAIN, OS_GetMainArenaLo(), OS_GetMainArenaHi(), 1));
 		nHeapAdrs = (u32)OS_AllocFromMainArenaLo(nHeapSize, 32);

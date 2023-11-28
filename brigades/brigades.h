@@ -707,6 +707,22 @@ typedef void (*GSBGetBrigadeHistoryCallback)(GSResult operationResult,
 											 GSBBrigadeHistoryList *brigadeHistoryList, 
 											 void *userData);
 
+// GSBGetBrigadeMatchHistoryCallback
+// Summary
+//		This typedef defines the callback function that you create to receive
+//		the reply status and brigadeHistoryList from the asynchronous call to 
+//		gsbGetBrigadeMatchHistory().
+// Parameters
+//		operationResult		: [in] Result from the operation
+//		resultSet			: [in] Set of result codes from the function call
+//		brigadeHistoryList	: [out] A pointer to the requested list of brigade 
+//									match history entries. (Memory allocated)							 
+//		userData			: [in] Data that was passed in to the function call
+//									and returned to the callback 
+typedef void (*GSBGetBrigadeMatchHistoryCallback)(GSResult operationResult, 
+												  GSResultSet *resultSet, 
+												  GSBBrigadeHistoryList *brigadeHistoryList, 
+												  void *userData);
 
 // GSBUploadLogoCompleteCallback
 // Summary
@@ -1911,6 +1927,35 @@ GSResult gsbGetBrigadeHistory(GSBInstancePtr				theInstance,
                               GSBBrigadeHistoryAccessLevel	historyAccessLevel,
                               GSBGetBrigadeHistoryCallback	callback, 
                               void							*userData);
+
+
+// gsbGetBrigadeMatchHistory
+// Summary
+//		Retrieve a list of activities for a specific 
+//		match for the member's current brigade
+// Parameters
+//		theInstance	: [in] The pointer to the Brigades SDK instance.
+//		matchId		: [in] The ID of the match
+//		callback	: [in] The developer callback 
+//		userData	: [in] A pointer to the developer's data
+// Returns
+//		GSResult - 
+//			GS_SUCCESS on success.
+// Remarks
+//		Every parameter is required except userData. 
+//		The parameter theInstance needs to be initialized.
+//		The callback will be called once the operation is complete.
+//
+//		The resultSet in the callback can contain one of these values:
+//			GSBResultCode_MatchIdNotFound,
+//			GSBResultCode_NoPermisionForAction
+//
+//		If matchId is set to zero, no search data will be retrieved.
+//
+GSResult gsbGetBrigadeMatchHistory(GSBInstancePtr						theInstance, 
+                                   gsi_u32								matchId, 
+                                   GSBGetBrigadeMatchHistoryCallback	callback, 
+                                   void									*userData);
 
 // gsbUpdateMemberEmailAndNick
 // Summary

@@ -152,7 +152,11 @@ void ServerBrowserFree(ServerBrowser sb)
 {
 	SBServerListCleanup(&sb->list);
 	SBEngineCleanup(&sb->engine);
-    NNFreeNegotiateList();
+    
+	// Only free negotiator list if we used ACE
+	if(sb->ConnectCallback)
+		NNFreeNegotiateList();
+	
 	gsifree(sb);
 }
 
@@ -164,6 +168,13 @@ SBError ServerBrowserBeginUpdate2(ServerBrowser sb, SBBool async, SBBool disconn
 	int i;
 	int keylen;
 	SBError err;
+
+	if(numBasicFields > MAX_QUERY_KEYS) 
+	{
+		gsDebugFormat(GSIDebugCat_SB, GSIDebugType_Misc, GSIDebugLevel_WarmError,
+			"numBasicFields passed to ServerBrowserUpdate is too high!\r\n");
+		return sbe_paramerror;
+	}
 
 	sb->disconnectFlag = disconnectOnComplete;
 	//clear this out in case it was already set
@@ -257,7 +268,7 @@ static SBError WaitForTriggerUpdate(ServerBrowser sb, SBBool viaMaster)
 	{
 		msleep(10);
 		err = ServerBrowserThink(sb);
-		if (viaMaster && sb->list.state == sl_disconnected) //we were supposed to get from master, and it's disconnected
+		if (viaMaster && sb->list.state == sb_disconnected) //we were supposed to get from master, and it's disconnected
 			break;		
 	}
 	return err;
@@ -311,40 +322,40 @@ static void NatNegCompletedCallback(NegotiateResult result, SOCKET gamesocket, s
 		sb->ConnectCallback(sb, sbcs_failed, INVALID_SOCKET, NULL, sb->instance);
 	}
 
-	sb->ConnectCallback = NULL;
-
 	GSI_UNUSED(remoteaddr);
 }
 
 SBError ServerBrowserConnectToServer(ServerBrowser sb, SBServer server, SBConnectToServerCallback callback)
 {
-	SBError sbError;
-	NegotiateError nnError;
-	int cookie;
+	return ServerBrowserConnectToServerWithSocket(sb, server, INVALID_SOCKET, callback);
+}
 
-	if((sb == NULL) || (server == NULL) || (callback == NULL))
-		return sbe_paramerror;
+SBError ServerBrowserConnectToServerWithSocket(ServerBrowser sb, SBServer server, SOCKET gamesocket, SBConnectToServerCallback callback)
+{
+    SBError sbError;
+    NegotiateError nnError;
+    int cookie;
 
-	if(sb->ConnectCallback != NULL)
-		return sbe_connecterror;
+    if((sb == NULL) || (server == NULL) || (callback == NULL))
+        return sbe_paramerror;
 
-	// for now, always do natneg
+    // for now, always do natneg
 
-	// send a cookie to the server
-	Util_RandSeed((unsigned long)current_time());
-	cookie = Util_RandInt(GSI_MIN_I32, GSI_MAX_I32);
-	sbError = ServerBrowserSendNatNegotiateCookieToServerA(sb, SBServerGetPublicAddress(server), SBServerGetPublicQueryPort(server), cookie);
-	if(sbError != sbe_noerror)
-		return sbError;
+    // send a cookie to the server
+    Util_RandSeed((unsigned long)current_time());
+    cookie = Util_RandInt(GSI_MIN_I32, GSI_MAX_I32);
+    sbError = ServerBrowserSendNatNegotiateCookieToServerA(sb, SBServerGetPublicAddress(server), SBServerGetPublicQueryPort(server), cookie);
+    if(sbError != sbe_noerror)
+        return sbError;
 
-	// start the nn
-	nnError = NNBeginNegotiation(cookie, 0, NatNegProgressCallback, NatNegCompletedCallback, sb);
-	if(nnError != ne_noerror)
-		return sbe_connecterror;
+    // start the nn
+    nnError = NNInternalBeginNegotiationWithSocket(gamesocket, cookie, 0, gsi_true, NatNegProgressCallback, NatNegCompletedCallback, sb);
+    if(nnError != ne_noerror)
+        return sbe_connecterror;
 
-	sb->ConnectCallback = callback;
+    sb->ConnectCallback = callback;
 
-	return sbe_noerror;
+    return sbe_noerror;
 }
 
 SBError ServerBrowserAuxUpdateIPA(ServerBrowser sb, const char *ip, unsigned short port, SBBool viaMaster, SBBool async, SBBool fullUpdate)

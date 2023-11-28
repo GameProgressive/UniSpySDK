@@ -135,45 +135,69 @@ SCResult SC_CALL scSetSessionId(const SCInterfacePtr theInterface, const gsi_u8 
 	return SCResult_NO_ERROR;
 }
 
+SCResult SC_CALL scCheckBanList(SCInterfacePtr             theInterface,
+							    const GSLoginCertificate * certificate,
+							    const GSLoginPrivateData * privateData,
+							    gsi_u32                    hostProfileId,
+								SCPlatform   			   hostPlatform,
+								SCCheckBanListCallback     callback,
+							    gsi_time                   timeoutMs,
+							    void *                     userData)
+{
+	SCInterface * anInterface = (SCInterface*)theInterface;
+	GS_ASSERT(theInterface != NULL);
+	GS_ASSERT(certificate != NULL || (certificate==NULL && privateData==NULL));
+	
+	if (!wsLoginCertIsValid(certificate))
+		return SCResult_INVALID_PARAMETERS;
+
+	return sciWsCheckBanList(hostProfileId, hostPlatform, &anInterface->mWebServices, anInterface->mGameId, certificate, privateData, callback, timeoutMs, userData);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // The certificate and private data may be NULL if the local client
 // is an unauthenticated dedicated server
 SCResult SC_CALL scCreateSession(SCInterfacePtr             theInterface,
-							     const GSLoginCertificate * theCertificate,
-							     const GSLoginPrivateData * thePrivateData,
-							     SCCreateSessionCallback    theCallback,
-							     gsi_time                   theTimeoutMs,
-								 void *                     theUserData)
+							     const GSLoginCertificate * certificate,
+							     const GSLoginPrivateData * privateData,
+							     SCCreateSessionCallback    callback,
+							     gsi_time                   timeoutMs,
+								 void *                     userData)
 {
 	SCInterface * anInterface = (SCInterface*)theInterface;
+	gsi_u16 platformId = SCPlatform_Unknown;
 	GS_ASSERT(theInterface != NULL);
-	GS_ASSERT(theCertificate != NULL || (theCertificate==NULL && thePrivateData==NULL));
+	GS_ASSERT(certificate != NULL || (certificate==NULL && privateData==NULL));
 	
-	if (!wsLoginCertIsValid(theCertificate))
+	if (!wsLoginCertIsValid(certificate))
 		return SCResult_INVALID_PARAMETERS;
 
-	return sciWsCreateSession(&anInterface->mWebServices, anInterface->mGameId, theCertificate, thePrivateData, theCallback, theTimeoutMs, theUserData);
+	platformId = sciGetPlatformId();
+
+	return sciWsCreateSession(&anInterface->mWebServices, anInterface->mGameId, platformId, certificate, privateData, callback, timeoutMs, userData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 SCResult SC_CALL scCreateMatchlessSession(SCInterfacePtr    theInterface,
-								 const GSLoginCertificate * theCertificate,
-								 const GSLoginPrivateData * thePrivateData,
-								 SCCreateSessionCallback    theCallback,
-								 gsi_time                   theTimeoutMs,
-								 void *                     theUserData)
+								 const GSLoginCertificate * certificate,
+								 const GSLoginPrivateData * privateData,
+								 SCCreateSessionCallback    callback,
+								 gsi_time                   timeoutMs,
+								 void *                     userData)
 {
 	SCInterface * anInterface = (SCInterface*)theInterface;
+	gsi_u16 platformId = SCPlatform_Unknown;
 	GS_ASSERT(theInterface != NULL);
-	GS_ASSERT(theCertificate != NULL || (theCertificate==NULL && thePrivateData==NULL));
+	GS_ASSERT(certificate != NULL || (certificate==NULL && privateData==NULL));
 
-	if (!wsLoginCertIsValid(theCertificate))
+	if (!wsLoginCertIsValid(certificate))
 		return SCResult_INVALID_PARAMETERS;
 
-	return sciWsCreateMatchlessSession(&anInterface->mWebServices, anInterface->mGameId, theCertificate, thePrivateData, theCallback, theTimeoutMs, theUserData);
+	platformId = sciGetPlatformId();
+
+	return sciWsCreateMatchlessSession(&anInterface->mWebServices, anInterface->mGameId, platformId, certificate, privateData, callback, timeoutMs, userData);
 }
 
 
@@ -239,11 +263,11 @@ SCResult SC_CALL scSetReportIntention(const SCInterfacePtr         theInterface,
 SCResult SC_CALL scSubmitReport(const SCInterfacePtr  theInterface,
 								const SCReportPtr      theReport,
 								gsi_bool              isAuthoritative,
-								const GSLoginCertificate * theCertificate,
-								const GSLoginPrivateData * thePrivateData,
-								SCSubmitReportCallback theCallback,
-								gsi_time               theTimeoutMs,
-								void *           theUserData)
+								const GSLoginCertificate * certificate,
+								const GSLoginPrivateData * privateData,
+								SCSubmitReportCallback callback,
+								gsi_time               timeoutMs,
+								void *           userData)
 {
 	SCInterface* anInterface = (SCInterface*)theInterface;
 	SCIReport *aReport = (SCIReport *)theReport;
@@ -280,7 +304,7 @@ SCResult SC_CALL scSubmitReport(const SCInterfacePtr  theInterface,
 	// Call web service
 	return sciWsSubmitReport(&anInterface->mWebServices, anInterface->mGameId,
 		(char *)anInterface->mSessionId, (char *)anInterface->mConnectionId, aReport, isAuthoritative,
-		theCertificate, thePrivateData, theCallback, theTimeoutMs, theUserData);
+		certificate, privateData, callback, timeoutMs, userData);
 
 }
 

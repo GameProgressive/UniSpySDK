@@ -372,7 +372,7 @@ static void ShowMenuScreen(void)
 
 void StartMenuScreen(MenuScreenConfiguration * configuration)
 {
-	assert(configuration != NULL);
+	GS_ASSERT(configuration != NULL);
 
 	// set the initial next screen
 	SetNextMenuScreen(configuration);

@@ -3,6 +3,24 @@ Changelog for: GameSpy Presence & Messaging SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.15.00  RV   RELEASE  Released to Developer Site
+08-31-2009  1.14.02  RMV  FEATURE  Implemented *full* sync from NP to GP lists including real-time updates
+03-20-2009  1.14.01  SAH  FIX      Fixed GP buddy sync to cleanup NP on in-game NP sign-out, or on gpDisconnect
+02-10-2009  1.14.00  SAH  RELEASE  Released to Developer Site
+01-30-2009  1.13.11  MWJ  OTHER    added gsifopen - wrapper for fopen to handle restricted file systems (i.e. iPhone)
+01-30-2009  1.13.10  SAH  FIX      Removed references for __cdecl, replaced with GS_STATIC_CALLBACK define
+01-29-2009	1.13.09	 MR	  OTHER	   Removed deprecated methods: gpSetInvitableGames and gpFindPlayers
+01-21-2009  1.13.08  NAB  FIX      Bug fix for Deleting a buddy (gpDeleteBuddy) around the same time the buddy changes his status (gpSetStatus)
+01-21-2009  1.13.07  SN   FEATURE  Added game id to register cd key function
+                     SN   FEATURE  Made necessary compatibility changes in SDK and backend
+                     SN   FIX      Fixed memory leak with udp engine not being properly shutdown
+                     SN   FIX      Fixed receive buffers memory leak when recv function fails
+01-14-2009  1.13.06  RMV  FIX      Added the '__cdecl' specifier to the appropriate functions to support the fastcall calling convention
+08-15-2008  1.13.05  SAH  FEATURE  Added auto retrieval of namespaceid/partnerid with gpConnectPreAuthenticate
+05-13-2008  1.13.04  MWJ  OTHER    Added error codes for "IsBlocking" on authadd and addbuddy
+04-14-2008  1.13.03  SN   FEATURE  Added gpGetProfileBuddyList to get buddies of buddy
+04-04-2008  1.13.02  SN   FIX      Moved UDP engine cleaup to gpDestroy
+02-27-2008  1.13.01  RMV  FIX      Added missing GP error enums
 12-12-2007  1.13.00  RMV  RELEASE  Released to Developer Site
 12-12-2007  1.12.15  RMV  OTHER    Updated gptest app to include block list functions and cleaned up buddy messaging
 12-05-2007  1.12.14  SN   OTHER    Added test for searching unique nickes across namespaces

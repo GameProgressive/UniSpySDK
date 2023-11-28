@@ -57,7 +57,7 @@ void gsiLeaveCriticalSection(GSICriticalSection *theCrit)
 	// We must be the owner? (assert?)
 	if (GetThreadId() != theCrit->mOwnerThread)
 	{
-		assert(GetThreadId() == theCrit->mOwnerThread);
+		GS_ASSERT(GetThreadId() == theCrit->mOwnerThread);
 		return;
 	}
 

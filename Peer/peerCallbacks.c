@@ -2580,13 +2580,15 @@ static void piRoomKeyChangedFree(void * params_)
 static void piRoomKeyChangedCall(PEER peer, piCallbackData * data)
 {
 	piRoomKeyChangedParams * params;
-	
+	PEER_CONNECTION;
 	GS_ASSERT(data);
 	GS_ASSERT(data->callback);
 	GS_ASSERT(data->params);
 	GS_ASSERT(data->type == PI_ROOM_KEY_CHANGED_CALLBACK);
 		
 	params = data->params;
+	if (!connection->inRoom[params->roomType])
+		return;
 #ifndef GSI_UNICODE
 	((peerRoomKeyChangedCallback)data->callback)(peer, params->roomType, params->nick, params->key, params->value, data->callbackParam);
 #else
@@ -2978,13 +2980,17 @@ static void piPlayerFlagsChangedFree(void * params_)
 static void piPlayerFlagsChangedCall(PEER peer, piCallbackData * data)
 {
 	piPlayerFlagsChangedParams * params;
-	
+	PEER_CONNECTION;
 	GS_ASSERT(data);
 	GS_ASSERT(data->callback);
 	GS_ASSERT(data->params);
 	GS_ASSERT(data->type == PI_PLAYER_FLAGS_CHANGED_CALLBACK);
 
 	params = data->params;
+
+	if (!connection->inRoom[params->roomType])
+		return;
+
 #ifndef GSI_UNICODE
 	((peerPlayerFlagsChangedCallback)data->callback)(peer, params->roomType, params->nick, params->oldFlags, params->newFlags, data->callbackParam);
 #else

@@ -215,6 +215,7 @@ typedef struct GSBIRequestData
         GSBSendMessageToMemberCallback       mSendMessageToMemberCallback;
         GSBGetBrigadesByProfileIdCallback    mGetBrigadesByProfileIdCallback;
         GSBGetBrigadeHistoryCallback         mGetBrigadeHistoryCallback;
+        GSBGetBrigadeMatchHistoryCallback    mGetBrigadeMatchHistoryCallback;
 		GSBGetPendingInvitesAndJoinsCallback mGetPendingInvitesAndJoinsCallback; 
         GSBPromoteToLeaderCallback           mPromoteToLeaderCallback;
         GSBUpdateMemberEmailAndNickCallback  mUpdateEmailAndNickCallback;
@@ -251,6 +252,7 @@ GSResult gsbiServiceSendMessageToBrigade(GSBInternalInstance *theInstance, gsi_u
 GSResult gsbiServiceSendMessageToMember(GSBInternalInstance *theInstance, gsi_u32 toProfileId, UCS2String message, GSBSendMessageToMemberCallback callback, void *userData);
 GSResult gsbiServiceGetBrigadesByProfileId(GSBInternalInstance *theInstance, gsi_u32 profileId, GSBGetBrigadesByProfileIdCallback callback, void *userData);
 GSResult gsbiServiceGetBrigadeHistory( GSBInternalInstance *theInstance,gsi_u32 brigadeId, gsi_u32 profileId, GSBBrigadeHistoryAccessLevel historyAccessLevel, GSBGetBrigadeHistoryCallback callback, void *userData);
+GSResult gsbiServiceGetBrigadeMatchHistory( GSBInternalInstance *theInstance, gsi_u32 matchId, GSBGetBrigadeMatchHistoryCallback callback, void *userData);
 GSResult gsbiServiceGetPendingInvitesAndJoins( GSBInternalInstance *theInstance, GSBGetPendingInvitesAndJoinsCallback callback, void *userData);
 GSResult gsbiServicePromoteToLeader(GSBInternalInstance *theInstance, gsi_u32 brigadeId, gsi_u32 memberId, GSBPromoteToLeaderCallback callback, void *userData);
 GSResult gsbiServiceUpdateMemberEmailAndNick(GSBInternalInstance *theInstance,  gsi_u32 brigadeId, GSBUpdateMemberEmailAndNickCallback callback, void *userData);

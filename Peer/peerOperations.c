@@ -1279,8 +1279,9 @@ static void piGetPlayerInfoCallbackA
 			piAddGetPlayerProfileIDCallback(peer, (PEERBool)success, nick, profileID, (peerGetPlayerProfileIDCallback)operation->callback, operation->callbackParam, operation->ID);
 		else if(operation->type == PI_GET_IP_OPERATION)
 			piAddGetPlayerIPCallback(peer, (PEERBool)success, nick, IP, (peerGetPlayerIPCallback)operation->callback, operation->callbackParam, operation->ID);
-		else
-			assert(0);
+		else {
+			GS_FAIL();
+		}	
 	}
 
 	// Remove the operation.
@@ -1817,30 +1818,7 @@ PEERBool piNewAutoMatchOperation
 	/////////////////
 	connection->autoMatchOperation = operation;
 
-	// Figure out which status to use.
-	//////////////////////////////////
-/*	if(connection->inRoom[StagingRoom])
-	{
-		if(connection->numPlayers[StagingRoom] <= 1)
-		{
-			if(connection->hosting)
-				status = PEERWaiting;
-			else
-				status = PEERStaging;
-		}
-		else if(connection->numPlayers[StagingRoom] >= connection->maxPlayers)
-		{
-			status = PEERReady;
-		}
-		else
-		{
-			status = PEERStaging;
-		}
-	}
-	else*/
-	{
-		status = PEERSearching;
-	}
+	status = PEERSearching;
 
 	// Set the status.
 	//////////////////

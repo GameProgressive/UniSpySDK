@@ -3358,6 +3358,121 @@ GSResult gsbiServiceGetBrigadeHistory( GSBInternalInstance *theInstance,
     return result;
 }
 
+
+static void gsbiGetBrigadeMatchHistoryCallback(GHTTPResult       httpResult,
+                                          GSXmlStreamWriter theRequestXml,
+                                          GSXmlStreamReader theResponseXml,
+                                          void              *theRequestData)
+{
+    GSResult result = GS_SUCCESS;
+    GSBIRequestData *requestData = (GSBIRequestData *)theRequestData;
+    GSResultSet *getBrigadeResultSet = NULL;
+    GSBBrigadeHistoryList  *historyList = NULL;
+
+    if (httpResult == GHTTPRequestCancelled)
+        result = GSB_ERROR(GSResultSection_Soap, GSResultCode_OperationCancelled);
+    else if (httpResult != GHTTPSuccess)
+        result = GSB_ERROR(GSResultSection_Soap, GSResultCode_HttpError);
+    else 
+    { 	    
+        // parse results first
+        result = gsbiParseResponseResult(theResponseXml, &getBrigadeResultSet, GSB_GETBRIGADEMATCHHISTORY);
+
+        if (GS_SUCCEEDED(result))
+        {
+            historyList = (GSBBrigadeHistoryList*) gsimalloc(sizeof(GSBBrigadeHistoryList));
+            if (historyList == NULL)
+            {
+                GSB_DEBUG_LOG(GSIDebugType_Memory, GSIDebugLevel_HotError, "Failed to allocate historyList");
+                result =  GSB_ERROR(GSResultSection_Memory, GSResultCode_OutOfMemory);
+            }
+            else
+            {
+                memset(historyList, 0, sizeof(GSBBrigadeHistoryList));
+
+                result = gsbiParseHistoryList(theResponseXml, historyList);
+                if (GS_FAILED(result))
+                {
+                    GSB_DEBUG_LOG(GSIDebugType_Misc, GSIDebugLevel_HotError, "Failed to parse historyList");
+                }
+            }
+        }
+    }
+
+    // trigger developer callback
+    requestData->mUserCallback.mGetBrigadeHistoryCallback(result, getBrigadeResultSet, historyList, requestData->mUserData);
+
+    gsifree(requestData);
+    gsResultCodesFreeResultSet(getBrigadeResultSet);
+    gsifree(getBrigadeResultSet);
+    GSI_UNUSED(theRequestXml);
+
+}
+
+GSResult gsbiServiceGetBrigadeMatchHistory( GSBInternalInstance *theInstance, 
+                                            gsi_u32 matchId, 
+                                            GSBGetBrigadeMatchHistoryCallback callback, 
+                                            void *userData)
+{
+    GSResult result = GS_SUCCESS;
+    GSXmlStreamWriter writer;
+    GSBIRequestData   *requestData = NULL;
+
+    gsbiSetServiceUrl(theInstance);
+    writer = gsXmlCreateStreamWriter(GSB_NAMESPACES, GSB_NAMESPACE_COUNT);
+    if (writer == NULL)
+    {
+        GSB_DEBUG_LOG(GSIDebugType_Misc, GSIDebugLevel_WarmError, 
+            "Failed on gsXmlCreateStreamWriter (assuming out of memory)");
+        return GSB_ERROR(GSResultSection_Memory, GSResultCode_OutOfMemory);
+    }
+    else
+    {
+        GSSoapTask * aTask = NULL;
+
+        // make a copy of the request callback and user param
+        requestData = (GSBIRequestData*)gsimalloc(sizeof(GSBIRequestData));
+        if (requestData == NULL)
+        {
+            gsXmlFreeWriter(writer);
+            GSB_DEBUG_LOG(GSIDebugType_Memory, GSIDebugLevel_WarmError,"Failed to allocate GSBIRequestData");
+            return GSB_ERROR(GSResultSection_Memory, GSResultCode_OutOfMemory);
+        }
+        memset(requestData, 0, sizeof(GSBIRequestData));
+        requestData->mInstance = theInstance;
+        requestData->mUserData = userData;
+        requestData->mUserCallback.mGetBrigadeMatchHistoryCallback = callback;
+
+        if (gsi_is_false(gsXmlWriteOpenTag(writer, GSB_NAMESPACE, GSB_GETBRIGADEMATCHHISTORY)) ||
+            gsi_is_false(gsXmlWriteOpenTag(writer, GSB_NAMESPACE, GSB_REQUEST_ELEMENT)) ||
+            gsi_is_false(gsbiStartBaseRequest(theInstance, writer)) ||
+            gsi_is_false(gsXmlWriteIntElement(writer, GSB_NAMESPACE, "MatchID", matchId)) ||
+            gsi_is_false(gsXmlWriteCloseTag  (writer, GSB_NAMESPACE, GSB_REQUEST_ELEMENT)) ||
+            gsi_is_false(gsXmlWriteCloseTag(writer, GSB_NAMESPACE, GSB_GETBRIGADEMATCHHISTORY)) ||
+            gsi_is_false(gsXmlCloseWriter(writer)))
+        {
+            GSB_DEBUG_LOG(GSIDebugType_Misc, GSIDebugLevel_WarmError, "Could not write request data");		
+            gsXmlFreeWriter(writer);
+            gsifree(requestData);
+            return GSB_ERROR(GSResultSection_Memory, GSResultCode_OutOfMemory);
+        }	
+
+        aTask = gsiExecuteSoap(theInstance->mServiceURL, 
+            GSB_GETBRIGADEMATCHHISTORY_SOAP,
+            writer, 
+            gsbiGetBrigadeMatchHistoryCallback, 
+            (void*)requestData);
+        if (aTask == NULL)
+        {
+            GSB_DEBUG_LOG(GSIDebugType_Misc, GSIDebugLevel_WarmError, "Failed on gsiExecuteSoap");
+            gsXmlFreeWriter(writer);
+            gsifree(requestData);
+            return GSB_ERROR(GSResultSection_Memory, GSResultCode_OutOfMemory);
+        }
+    }
+    return result;
+}
+
 static void gsbiServiceUpdateMemberEmailAndNickCallback( GHTTPResult       httpResult,
                                             GSXmlStreamWriter theRequestXml,
                                             GSXmlStreamReader theResponseXml,

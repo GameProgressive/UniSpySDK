@@ -205,6 +205,15 @@ typedef struct piConnection
 	PEERBool autoMatchSBFailed;
 	PEERBool autoMatchQRFailed;
 
+	unsigned int autoMatchDelay;
+	PEERAutoMatchStatus autoMatchNextStatus;
+	gsi_time amStartTime;
+	gsi_time peerReadyTime;
+	gsi_time joinRoomTime;
+	int hostInRoom;
+	PEERBool waitingForHostFlag;
+	PEERBool amCustomSocket;
+
 	// Misc.
 	////////
 	PEERBool disconnect;

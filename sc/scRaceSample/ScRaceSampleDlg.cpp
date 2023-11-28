@@ -601,7 +601,7 @@ BOOL CScRaceSampleDlg::SetupHosting()
 	/////////////////////////////////
 	rcode = m_waitingDlg.DoModal();
 
-	// If it was cancelled, try again.
+	// If it was canceled, try again.
 	//////////////////////////////////
 	if(rcode != IDOK)
 		Logout();

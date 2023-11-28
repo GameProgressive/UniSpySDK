@@ -196,10 +196,16 @@ static void Error(GPConnection * pconnection, GPErrorArg * arg, void * param)
 		printf( "GP ERROR\n");
 		printf( "-----\n");
 	}
+
+#ifdef GSI_UNICODE
+	_tprintf( _T("RESULT: %ls (%d)\n"), resultString, arg->result);
+	_tprintf( _T("ERROR CODE: %ls (0x%X)\n"), errorCodeString, arg->errorCode);
+	_tprintf( _T("ERROR STRING: %ls\n"), arg->errorString);
+#else
 	_tprintf( _T("RESULT: %s (%d)\n"), resultString, arg->result);
 	_tprintf( _T("ERROR CODE: %s (0x%X)\n"), errorCodeString, arg->errorCode);
 	_tprintf( _T("ERROR STRING: %s\n"), arg->errorString);
-	
+#endif
 	GSI_UNUSED(pconnection);
 	GSI_UNUSED(param);
 }
@@ -1046,6 +1052,17 @@ static void LoginAndAuthenticate(SAKE sake)
 	GPConnection connection;
 	char loginTicket[GP_LOGIN_TICKET_LEN];
 
+#ifdef _PS3
+	// set communication id to string provided by Sony
+	SceNpCommunicationId communication_id = 
+	{
+		{'N','P','X','S','0','0','0','0','5'},
+		'\0',
+		0,
+		0
+	};
+#endif
+
 	pconn = &connection;
 
 	// initialize GP
@@ -1062,6 +1079,15 @@ static void LoginAndAuthenticate(SAKE sake)
 	CHECK_GP_RESULT(gpSetCallback(pconn, GP_RECV_BUDDY_AUTH, (GPCallback)RecvBuddyAuth, NULL), "gpSetCallback failed");
 	CHECK_GP_RESULT(gpSetCallback(pconn, GP_RECV_BUDDY_REVOKE, (GPCallback)RecvBuddyRevoke, NULL), "gpSetCallback failed");
 
+#ifdef _PS3
+	// set the NP communication ID (provided by Sony)
+	CHECK_GP_RESULT(gpSetNpCommunicationId(pconn, &communication_id), "gpSetNpCommunicationId failed");  
+
+	// register the slot for GameSpy to use for the CellSysUtilCallback to prevent overlap
+	// (0 is fine if you do not use this callback)
+	CHECK_GP_RESULT(gpRegisterCellSysUtilCallbackSlot(pconn, 0), "gpRegisterCellSysUtilCallbackSlot failed");
+#endif
+
 	// connect to GP
 	printf("Connecting to GP...\n");
 	CHECK_GP_RESULT(gpConnect(pconn, NICKNAME, EMAIL, PASSWORD, GP_NO_FIREWALL, GP_BLOCKING, (GPCallback)ConnectResponse, NULL), "gpConnect failed");
@@ -1077,6 +1103,7 @@ static void LoginAndAuthenticate(SAKE sake)
 	printf("Authenticating with Sake\n");
 	sakeSetGame(sake, GAMENAME, GAMEID, SECRET_KEY);
 	sakeSetProfile(sake, profileid, loginTicket);
+    printf("Profile Id is %d \n", profileid);
 
 	// Disconnect from GP
 	gpDisconnect(pconn);

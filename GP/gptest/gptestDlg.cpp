@@ -893,13 +893,11 @@ void GetProfileBuddyListTestResponse(GPConnection * connection, void * arg_, voi
 		int i;
 		CString str;
 
-#if 0 // TODO
 		if (arg->hidden == GP_HIDDEN)
 		{
 			dlg->MessageBox("Buddy list is hidden.");
 			return;
 		}
-#endif
 
 		if (arg->numProfiles == 0)
 		{
@@ -2129,9 +2127,6 @@ void CGptestDlg::OnBuddyList()
         GPProfile profile = (GPProfile)m_results.GetItemData(index);
 
 		dlg->m_results.ResetContent();
-
-#if 0 // TODO
 		CHECK(gpGetProfileBuddyList(&m_connection, profile, 0, (GPEnum)m_blocking, GetProfileBuddyListTestResponse, NULL));
-#endif
 	}
 }

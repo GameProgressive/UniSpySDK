@@ -24,6 +24,7 @@ DEFINES
 // set some of the fixed server keys
 #define GAME_VERSION	_T("2.00")
 #define GAME_NAME		_T("gmtest")
+#define SECRET_KEY		_T("HA6zkS")
 #define MAX_PLAYERS		32
 #define MAX_TEAMS		2
 #define BASE_PORT		11111
@@ -102,6 +103,11 @@ gsi_char *constnames[MAX_PLAYERS]=
 };
 gamedata_t gamedata;  // to store all the server/player/teamkeys
 
+// vars used by ACE client connection to accept/send responses over the wire once connected
+int connected = 0;
+struct sockaddr_in otheraddr;
+SOCKET sock = INVALID_SOCKET;
+
 /********
 DEBUG OUTPUT
 ********/
@@ -147,6 +153,34 @@ DEBUG OUTPUT
 	#define AppDebug _tprintf
 #endif
 
+
+// simple reader function that tries to read data off the socket
+static void tryread(SOCKET s)
+{
+    char buf[256];
+    int len;
+    struct sockaddr_in saddr;
+    socklen_t saddrlen = sizeof(saddr);
+    while (CanReceiveOnSocket(s))
+    {
+        len = recvfrom(s, buf, sizeof(buf) - 1, 0, (struct sockaddr *)&saddr, &saddrlen);
+
+        if (len < 0)
+        {
+            len = GOAGetLastError(s);
+            printf("|Got recv error: %d\n", len);
+            break;
+        }
+        buf[len] = 0;
+        if (memcmp(buf, NNMagicData, NATNEG_MAGIC_LEN) == 0)
+        {
+            NNProcessData(buf, len, &saddr);
+        } else
+            printf("|Got data (%s:%d): %s\n", inet_ntoa(saddr.sin_addr),ntohs(saddr.sin_port), buf);
+    }
+}
+
+
 /********
 PROTOTYPES - To prevent warnings on codewarrior strict compile.
 ********/
@@ -159,6 +193,7 @@ void adderror_callback(qr2_error_t error, gsi_char *errmsg, void *userdata);
 void nn_callback(int cookie, void *userdata);
 void cm_callback(gsi_char *data, int len, void *userdata);
 void cc_callback(SOCKET gamesocket, struct sockaddr_in *remoteaddr, void *userdata);
+void hr_callback(void *userdata);
 void DoGameStuff(gsi_time totalTime);
 int  test_main(int argc, char **argp);
 
@@ -374,12 +409,32 @@ void cm_callback(gsi_char *data, int len, void *userdata)
 // called when a client has connected
 void cc_callback(SOCKET gamesocket, struct sockaddr_in *remoteaddr, void *userdata)
 {
-	AppDebug("Client connected from %s:%d\n", inet_ntoa(remoteaddr->sin_addr), ntohs(remoteaddr->sin_port));
-	GSI_UNUSED(gamesocket);
+    struct sockaddr_in saddr;
+    socklen_t namelen = sizeof(saddr);
+    if (gamesocket != INVALID_SOCKET)
+    {
+        getsockname(gamesocket, (struct sockaddr *)&saddr, &namelen);
+        printf("|Local game socket: %d\n", ntohs(saddr.sin_port));
+    }    
+
+    AppDebug(_T("Client connected from %s:%d\n"), inet_ntoa(remoteaddr->sin_addr), ntohs(remoteaddr->sin_port));
+
+    // copy off the socket and addr to send replies to the client
+    memcpy(&otheraddr, remoteaddr, sizeof(otheraddr));
+    sock = gamesocket;
+    connected = 1;
+	
 	GSI_UNUSED(userdata);
 }
 
-// Here we initialize the gamedata structure with bogus data.
+// called once the server is successfully listed on the backend
+void hr_callback(void *userdata)
+{
+	AppDebug(_T("Server successfully listed on backend...\n"));
+	GSI_UNUSED(userdata);
+}
+
+// initialize the gamedata structure with bogus data
 static void init_game(void)
 {
 	int i;
@@ -439,7 +494,6 @@ void DoGameStuff(gsi_time totalTime)
 int test_main(int argc, char **argp)
 {			
 	/* qr2_init parameters */
-	gsi_char  secret_key[9];         // your title's assigned secret key
 	gsi_char  ip[255];               // to manually set local IP
 	const int isPublic = 1;          // set to '0' for a LAN game
 	const int isNatNegSupported = 1; // set to '0' if you don't support Nat Negotiation
@@ -460,17 +514,7 @@ int test_main(int argc, char **argp)
 	#endif
 #endif
 
-	//set the secret key, in a semi-obfuscated manner
-	secret_key[0] = 'H';
-	secret_key[1] = 'A';
-	secret_key[2] = '6';
-	secret_key[3] = 'z';
-	secret_key[4] = 'k';
-	secret_key[5] = 'S';
-	secret_key[6] = '\0';
-
-	// Here we register our custom keys (you do not have to register the 
-	// reserved standard keys).
+	// register our custom keys (you do not have to register the reserved standard keys)
 	AppDebug(_T("Registering custom keys\n"));
 	qr2_register_key(GRAVITY_KEY, _T("gravity")    );
 	qr2_register_key(RANKINGON_KEY, _T("rankingon"));
@@ -489,16 +533,16 @@ int test_main(int argc, char **argp)
 		AsciiToUCS2String(argp[1], ip);
 #endif
 
-	AppDebug("Initializing SDK; server should show up on the master list within 6-10 sec.\n");
+	AppDebug(_T("Initializing SDK; server should show up on the master list within 6-10 sec.\n"));
 	//Call qr_init with the query port number and gamename, default IP address, and no user data
 	//Pass NULL for the qrec parameter (first parameter) as long as you're running a single game 
 	//server instance per process
 	//Reference gt2nat sample for qr2_init_socket implementation
-	if (qr2_init(NULL,argc>1?ip:NULL,BASE_PORT,GAME_NAME, secret_key, isPublic, isNatNegSupported,
+	if (qr2_init(NULL,argc>1?ip:NULL,BASE_PORT,GAME_NAME, SECRET_KEY, isPublic, isNatNegSupported,
 		serverkey_callback, playerkey_callback, teamkey_callback,
 		keylist_callback, count_callback, adderror_callback, userData) != e_qrnoerror)
 	{
-		printf("Error at qr2_init_socket() function!");
+		printf("Error starting query sockets\n");
 		return -1;
 	}
 
@@ -511,8 +555,11 @@ int test_main(int argc, char **argp)
 	// Set a function to be called when a client has connected
 	qr2_register_clientconnected_callback(NULL, cc_callback);
 
+	// callback informs us when we've successfully advertised to the backend, (e.g. tells us when a server is listed)
+	qr2_register_hostregistered_callback(NULL, hr_callback);
+
 	// Enter the main loop
-	AppDebug("Sample will quit after 60 seconds\n");
+	AppDebug(_T("Sample will quit after 60 seconds\n"));
 	aStartTime = current_time();
 	while ((current_time() - aStartTime) < 60000)
 	{
@@ -525,6 +572,25 @@ int test_main(int argc, char **argp)
 		// It should be called every 10-100 ms; quicker calls produce more 
 		// accurate ping measurements.
 		qr2_think(NULL);
+
+        // if connected with ACE
+        if (connected)
+        {
+            // every 2 seconds, fire off a message to the client
+            if (current_time() - lastsendtime > 2000)
+            {
+                int ret = sendto(sock, "sup client!?", 12, 0, (struct sockaddr *)&otheraddr, sizeof(struct sockaddr_in));
+                int error = GOAGetLastError(sock);
+                printf("|Sending (%d:%d), remoteaddr: %s, remoteport: %d\n", ret, error, inet_ntoa(otheraddr.sin_addr), ntohs(otheraddr.sin_port));
+                lastsendtime = current_time();
+            }			
+        }
+
+        // read from our returned socket if any clients have connected
+        if (sock != INVALID_SOCKET)
+            tryread(sock);
+        msleep(10);
+
 	}
 
 	AppDebug(_T("Shutting down - server will be removed from the master server list\n"));
@@ -532,6 +598,13 @@ int test_main(int argc, char **argp)
 	// server entry from the list).
 	qr2_shutdown(NULL);
 
+    // cleanup & close ACE socket
+    if (sock != INVALID_SOCKET)
+        closesocket(sock);
+
+    sock = INVALID_SOCKET;
+    SocketShutDown();
+	
 #ifdef GSI_UNICODE
 	// In Unicode mode we must perform additional cleanup.
 	qr2_internal_key_list_free();

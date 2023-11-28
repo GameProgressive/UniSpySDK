@@ -50,6 +50,27 @@ typedef int PTBool;
 // If a patch is available, and the fileID is not 0, then
 // ptLookupFilePlanetInfo can be used to find download sites.
 ///////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+// ptPatchCallback
+// Summary
+//		This callback gets called when a patch is being checked for with
+//		 either ptCheckForPatch 
+//		or ptCheckForPatchAndTrackUsage.
+// Parameters
+//		available	: [in] PTTrue if a newer version is available. If
+//		 PTFalse, ignore the other parameters.
+//		mandatory	: [in] If PTTrue, this patch has been marked as mandatory.
+//		versionName	: [in] A user-readable display name for the new version.
+//		fileID		: [in] A FilePlanet file ID for the patch. Can be 0.
+//		 Used to form a FilePlanet URL
+//		downloadURL	: [in] If not an empty string, contains a URL to
+//		 download the patch from.
+//		param		: [in] This is optional user-data that was passed to ptCheckForPatch.
+// Remarks
+//		If a patch is available, and the fileID is not 0, then
+//		 ptLookupFilePlanetInfo can be used 
+//		to find download sites.<p>
 typedef void (* ptPatchCallback)
 (
 	PTBool available,         // If PTTrue, a patch is available.
@@ -60,11 +81,31 @@ typedef void (* ptPatchCallback)
 	void * param              // User-data passed originally passed to the function.
 );
 
-// Check for a patch for the current version and particular
-// distribution of the product. If this function does not return
-// PTFalse, then the callback will be called with info on a
-// possible patch to a newer version.
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// ptCheckForPatch
+// Summary
+//		Determine whether a patch is available for the current version and
+//		 particular distribution of a product.
+// Parameters
+//		productID		: [in] Numeric ID assigned by GameSpy. This is NOT the game ID.
+//		versionUniqueID	: [in] Developer specified string to indentify
+//		 the current version. Typically "1.0" form.
+//		distributionID	: [in] Optional indentifier for distribution. This
+//		 is usually 0.
+//		callback		: [in] Function to be called when the operation completes.
+//		blocking		: [in] When set to PTTrue, this function will not
+//		 return until the operation has completed.
+//		instance		: [in] Pointer to user data. This is optional and
+//		 will be passed unmodified to the callback function.
+// Returns
+//		PTTrue is return if a query was sent. PTFalse means the operation
+//		 was aborted.
+// Remarks
+//		The ptCheckForPatch function sends a query to determine if a patch
+//		 is available for the current game 
+//		version and distribution. If this function does not return PTFalse,
+//		 then the callback 
+//		will be called with information on a possible patch to a newer version.<p>
 PTBool ptCheckForPatch
 (
 	int productID,                // The ID of this product.
@@ -75,9 +116,20 @@ PTBool ptCheckForPatch
 	void * param                  // User-data to pass to the callback.
 );
 
-// Used to track usage of a product, based on version and distribution.
-// If PTFalse is returned, there was an error tracking usage.
-///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// ptTrackUsage
+// Summary
+//		Track usage of a product, based on version and distribution.
+// Parameters
+//		userID			: [in] The GP userID of the user who is using the
+//		 product. Can be 0.
+//		productID		: [in] The ID of this product.
+//		versionUniqueID	: [in] A string uniquely identifying this version.
+//		distributionID	: [in] The distribution ID for this version. Can be 0.
+//		blocking		: [in] When set to PTTrue, this function will not
+//		 return until the operation has completed
+// Returns
+//		If PTFalse is returned, there was an error tracking usage.
 PTBool ptTrackUsage
 (
 	int userID,                   // The GP userID of the user who is using the product.  Can be 0.
@@ -87,9 +139,27 @@ PTBool ptTrackUsage
 	PTBool blocking
 );
 
-// This does the same thing as both ptCheckForPatch and
-// ptTrackUsage in one call.
-///////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// ptCheckForPatchAndTrackUsage
+// Summary
+//		Does the same thing as both ptCheckForPatch and ptTrackUsage, in one call.
+// Parameters
+//		userID			: [in] Numeric ID assigned by GameSpy. This is NOT the game ID.
+//		productID		: [in] Developer specified string to indentify the
+//		 current version. Typically "1.0" form.
+//		versionUniqueID	: [in] Developer specified string to indentify
+//		 the current version. Typically "1.0" form.
+//		distributionID	: [in] Optional indentifier for distribution. This
+//		 is usually 0.
+//		callback		: [in] Function to be called when the operation completes.
+//		blocking		: [in] When set to PTTrue, this function will not
+//		 return until the operation has completed.
+//		param			: [in] Pointer to user data. This is optional and
+//		 will be passed unmodified to the callback function.
+// Returns
+//		
+// See Also
+//		ptCheckForPatch, ptTrackUsage
 PTBool ptCheckForPatchAndTrackUsage
 (
 	int userID,                   // The GP userID of the user who is using the product.  Can be 0.

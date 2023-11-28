@@ -26,13 +26,30 @@ extern "C" {
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Web service result codes (must match definitions in StatsReceiver)
+// Web service result codes (must match definitions in CompetitionService)
 typedef enum
 {
-	SCWsResult_NO_ERROR = 0,
-	SCWsResult_REPORT_INVALID,
-	SCWsResult_SINGLE_ATTACHMENT_EXPECTED
-} SCWsResult;
+	// Competition system errors:
+	SCServiceResult_NO_ERROR = 0,
+	SCServiceResult_COULD_NOT_START,
+	SCServiceResult_COULD_NOT_JOIN,
+	SCServiceResult_COULD_NOT_LEAVE,
+
+	// Input validation errors:
+	SCServiceResult_PROFILE_ID_INVALID,
+	SCServiceResult_IP_INVALID,
+	SCServiceResult_ID_INVALID,
+	SCServiceResult_REPORT_INVALID,
+	SCServiceResult_AUTH_INVALID,
+
+	// System errors:
+	SCServiceResult_SERVER_ERROR,
+	SCServiceResult_DATABASE_ERROR,
+
+	// More input validation errors:
+	SCServiceResult_GAMEID_INVALID
+
+} SCServiceResult;
 
 	
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,84 +57,119 @@ typedef enum
 typedef struct
 {
 	SCInterfacePtr          mInterface;
-	SCCreateSessionCallback mCreateSessionCallback;
+
+	SCCheckBanListCallback  mCheckBanListCallback;
+	SCCreateSessionCallback  mCreateSessionCallback;
 	SCSetReportIntentionCallback   mSetReportIntentionCallback;
-	SCSubmitReportCallback  mSubmitReportDataCallback;
+	SCSubmitReportCallback   mSubmitReportDataCallback;
+
+	gsi_bool                mCheckBanListPending;
 	gsi_bool                mSetReportIntentionPending;
 	gsi_bool                mCreateSessionPending;
 	gsi_bool                mSubmitReportPending;
+//	gsi_bool                mGetStatsPending;
+//	gsi_bool                mGetLeaderboardPending;
+//	gsi_bool                mGetRanksPending;
+
+	void *                  mCheckBanListUserData;
 	void *                  mSetReportIntentionUserData;
 	void *                  mCreateSessionUserData;
 	void *                  mSubmitReportUserData;
+	void *                  mGetStatsUserData;
+	void *                  mGetLeaderboardUserData;
+	void *                  mGetRanksUserData;
+
 	gsi_u8*                 mSubmitReportData;
 	gsi_u32                 mSubmitReportLength;
 	gsi_bool                mInit;
+
 } SCWebServices;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsInit   (SCWebServices* theWebServices,
+SCResult sciWsInit   (SCWebServices* webServices,
                       SCInterfacePtr theInterface);
-void     sciWsDestroy(SCWebServices* theWebServices);
-void     sciWsThink  (SCWebServices* theWebServices);
+void     sciWsDestroy(SCWebServices* webServices);
+void     sciWsThink  (SCWebServices* webServices);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsCreateSession       (SCWebServices *    theWebServices,
-								   gsi_u32            theGameId,
-								   const GSLoginCertificate * theCertificate,
-								   const GSLoginPrivateData * thePrivateData,
-                                   SCCreateSessionCallback theCallback,
-                                   gsi_time           theTimeoutMs,
-								   void *       theUserData);
+SCResult sciWsCheckBanList        (gsi_u32            hostProfileId,
+								   SCPlatform         hostPlatform,
+                                   SCWebServices *    webServices,
+								   gsi_u32            gameId,
+								   const GSLoginCertificate * certificate,
+								   const GSLoginPrivateData * privateData,
+                                   SCCheckBanListCallback callback,
+                                   gsi_time           timeoutMs,
+								   void *       userData);
 
-SCResult sciWsCreateMatchlessSession(SCWebServices *    theWebServices,
-								   gsi_u32              theGameId,
-								   const GSLoginCertificate * theCertificate,
-								   const GSLoginPrivateData * thePrivateData,
-								   SCCreateSessionCallback theCallback,
-								   gsi_time     theTimeoutMs,
-								   void *       theUserData);
+void     sciWsCheckBanListCallback(GHTTPResult       httpResult,
+                                   GSXmlStreamWriter  requestData,
+                                   GSXmlStreamReader  responseData,
+                                   void*        userData);
 
-void     sciWsCreateSessionCallback(GHTTPResult       theHttpResult,
-                                   GSXmlStreamWriter  theRequestData,
-                                   GSXmlStreamReader  theResponseData,
-                                   void*        theUserData);
+SCResult sciWsCreateSession       (SCWebServices *    webServices,
+								   gsi_u32            gameId,
+								   gsi_u16            platformId,
+								   const GSLoginCertificate * certificate,
+								   const GSLoginPrivateData * privateData,
+                                   SCCreateSessionCallback callback,
+                                   gsi_time           timeoutMs,
+								   void *       userData);
 
-SCResult sciWsSetReportIntention  (SCWebServices*     theWebServices,
-								   gsi_u32            theGameId,
+SCResult sciWsCreateMatchlessSession(SCWebServices *    webServices,
+								   gsi_u32              gameId,
+								   gsi_u16              platformId,
+								   const GSLoginCertificate * certificate,
+								   const GSLoginPrivateData * privateData,
+								   SCCreateSessionCallback callback,
+								   gsi_time     timeoutMs,
+								   void *       userData);
+
+void     sciWsCreateSessionCallback(GHTTPResult       httpResult,
+                                   GSXmlStreamWriter  requestData,
+                                   GSXmlStreamReader  responseData,
+                                   void*        userData);
+
+SCResult sciWsSetReportIntention  (SCWebServices*     webServices,
+								   gsi_u32            gameId,
 								   const char *       theSessionId,
 								   const char *       theConnectionId,
 								   gsi_bool           isAuthoritative,
-								   const GSLoginCertificate * theCertificate,
-								   const GSLoginPrivateData * thePrivateData,
-                                   SCSetReportIntentionCallback theCallback,
-                                   gsi_time           theTimeoutMs,
-								   void *       theUserData);
+								   const GSLoginCertificate * certificate,
+								   const GSLoginPrivateData * privateData,
+                                   SCSetReportIntentionCallback callback,
+                                   gsi_time           timeoutMs,
+								   void *       userData);
 
-void     sciWsSetReportIntentionCallback(GHTTPResult  theHttpResult,
-                                   GSXmlStreamWriter  theRequestData,
-                                   GSXmlStreamReader  theResponseData,
-                                   void*        theUserData);
+void     sciWsSetReportIntentionCallback(GHTTPResult  httpResult,
+                                   GSXmlStreamWriter  requestData,
+                                   GSXmlStreamReader  responseData,
+                                   void*        userData);
 
-SCResult sciWsSubmitReport        (SCWebServices*     theWebServices,
-								   gsi_u32            theGameId,
+SCResult sciWsSubmitReport        (SCWebServices*     webServices,
+								   gsi_u32            gameId,
 								   const char *       theSessionId,
 								   const char *       theConnectionId,
 								   const SCIReport*   theReport,
 								   gsi_bool           isAuthoritative,
-                                   const GSLoginCertificate * theCertificate,
-								   const GSLoginPrivateData * thePrivateData,
-                                   SCSubmitReportCallback theCallback,
-                                   gsi_time           theTimeoutMs,
-								   void *       theUserData);
+                                   const GSLoginCertificate * certificate,
+								   const GSLoginPrivateData * privateData,
+                                   SCSubmitReportCallback callback,
+                                   gsi_time           timeoutMs,
+								   void *       userData);
 
-void     sciWsSubmitReportCallback(GHTTPResult        theHttpResult,
-                                   GSXmlStreamWriter  theRequestData,
-                                   GSXmlStreamReader  theResponseData,
-                                   void*        theUserData);
+void     sciWsSubmitReportCallback(GHTTPResult        httpResult,
+                                   GSXmlStreamWriter  requestData,
+                                   GSXmlStreamReader  responseData,
+                                   void*        userData);
+
+
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

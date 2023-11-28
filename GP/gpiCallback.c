@@ -179,6 +179,13 @@ gpiCallCallback(
 			freeclear(arg->values);
 		}
 	}
+	else if (data->type == GPI_ADD_PROFILE_BUDDY_LIST)
+	{
+		GPGetProfileBuddyListArg * arg = (GPGetProfileBuddyListArg *)data->arg;
+
+		if(arg->profiles)
+			freeclear(arg->profiles);
+	}
 	freeclear(data->arg);
 	freeclear(data);
 }

@@ -66,6 +66,7 @@ DEFINES
 #define PACKET_CLIENT_MESSAGE_ACK 0x07
 #define PACKET_KEEPALIVE          0x08
 #define PACKET_PREQUERY_IP_VERIFY 0x09
+#define PACKET_CLIENT_REGISTERED  0x0A
 
 	 
 #define MAX_LOCAL_IP 5
@@ -154,15 +155,6 @@ qr2_error_t qr2_init_socketA(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, cons
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
 		"qr2_init_socket()\r\n");
 
-#if 0 // NOTE: this is commented to avoid breaking things with old versions...
-	if(__isAuthenticated != gsi_true)
-	{
-		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_State, GSIDebugLevel_Warning,
-			"qr2_init_socketA(): User did not authenticate via AuthService!\n");
-		return e_qrnotauthenticated;
-	}
-#endif
-
 	if (qrec == NULL)
 	{
 		cr = &static_qr2_rec;		
@@ -196,6 +188,7 @@ qr2_error_t qr2_init_socketA(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, cons
 	cr->publicip = 0;
 	cr->publicport = 0;
 	cr->pa_callback = NULL;
+	cr->hr_callback = NULL;
 	cr->cc_callback = NULL;
 	cr->userstatechangerequested = 0;
 	cr->backendoptions = 0;
@@ -445,14 +438,14 @@ void qr2_register_clientconnected_callback(qr2_t qrec, qr2_clientconnectedcallba
 	qrec->cc_callback = cccallback;
 }
 
-void qr2_register_denyresponsetoip_callback(qr2_t qrec, qr2_denyqr2responsetoipcallback_t dertoipcallback)
+void qr2_register_hostregistered_callback(qr2_t qrec, qr2_hostregisteredcallback_t hrcallback)
 {
 	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
-		"qr2_register_denyresponsetoip_callback()\r\n");
+		"qr2_register_hostregistered_callback()\r\n");
 
 	if (qrec == NULL)
 		qrec = current_rec;
-	qrec->denyresp2_ip_callback = dertoipcallback;
+	qrec->hr_callback = hrcallback;
 }
 
 // qr2_think: Processes any waiting queries, and sends a heartbeat if needed.
@@ -608,7 +601,12 @@ void qr2_shutdown(qr2_t qrec)
 	{
 		SocketShutDown();
 	}
-	// Need to gsifree this, since it was dynamically allocated.
+
+	// We only free NatNeg Negotiator list if we used ACE.
+	if (qrec->cc_callback)
+		NNFreeNegotiateList();
+
+	// Need to gsifree it, it was dynamically allocated.
 	if (qrec != &static_qr2_rec) 
 	{
 		gsifree(qrec);
@@ -1349,7 +1347,7 @@ static void qr_process_client_message(qr2_t qrec, char *buf, int len)
 			}
 
 			// do the negotiation
-			error = NNBeginNegotiationWithSocket(qrec->hbsock, cookie, 1, NatNegProgressCallback, NatNegCompletedCallback, qrec);
+			error = NNInternalBeginNegotiationWithSocket(qrec->hbsock, cookie, 1, gsi_true, NatNegProgressCallback, NatNegCompletedCallback, qrec);
 			if(error != ne_noerror)
 			{
 				// We can ignore errors.
@@ -1712,8 +1710,17 @@ void qr2_parse_queryA(qr2_t qrec, char *query, int len, SOCKADDR *sender)
 	case PACKET_KEEPALIVE:
 		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_Comment,
 			"Processing keepalive packet\r\n");
-		return; // If we get a keep alive, ignore it and return (this is just 
-				// used to tell us the server knows about us).
+		return; //if we get a keep alive, ignore it and return (just used to tell us the server knows about us)
+
+	// NOTE: This does NOT mean the server browsing client.
+	// When this qr2 client is registered with the master server, it will 
+	// get this message from the master server.
+	case PACKET_CLIENT_REGISTERED:
+		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_Comment,
+			"Processing client packet\r\n");
+		if (qrec->hr_callback)
+			qrec->hr_callback(qrec->udata);
+		return;
 	default:
 		return; // Not a valid type.
 

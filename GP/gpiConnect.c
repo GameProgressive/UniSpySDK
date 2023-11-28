@@ -171,6 +171,7 @@ gpiConnect(
   const char password[GP_PASSWORD_LEN],
   const char authtoken[GP_AUTHTOKEN_LEN],
   const char partnerchallenge[GP_PARTNERCHALLENGE_LEN],
+  const char loginticket[GP_LOGIN_TICKET_LEN],
   const char cdkey[GP_CDKEY_LEN],
   GPEnum firewall,
   GPIBool newuser,
@@ -251,6 +252,11 @@ gpiConnect(
 		strzcpy(data->partnerchallenge, partnerchallenge, GP_PARTNERCHALLENGE_LEN);
 	}
 
+	// Store login ticket data.
+	///////////////////////////
+	if(loginticket[0])
+		strzcpy(data->loginticket, loginticket, GP_LOGIN_TICKET_LEN);
+
 	// Store cdkey if we have one.
 	if(cdkey)
 		strzcpy(data->cdkey, cdkey, GP_CDKEY_LEN);
@@ -317,6 +323,8 @@ gpiSendLogin(GPConnection * connection,
 
 	if(data->authtoken[0])
 		user = data->authtoken;
+	else if (data->loginticket[0])
+		user = data->loginticket;
 	else if(iconnection->uniquenick[0])
 	{
 		sprintf(userBuffer, "%s%s", partnerBuffer, iconnection->uniquenick);
@@ -358,6 +366,11 @@ gpiSendLogin(GPConnection * connection,
 	{
 		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\authtoken\\");
 		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, data->authtoken);
+	}
+	else if(data->loginticket[0])
+	{
+		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\lt\\");
+		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, data->loginticket);
 	}
 	else if(iconnection->uniquenick[0])
 	{
@@ -881,4 +894,34 @@ gpiDisconnect(
 	if (iconnection->npInitialized)
 		gpiDestroyNpBasic(connection);
 #endif
+}
+
+GPResult
+gpiProcessRemoteAuthResponse(
+  GPConnection * connection,
+  const char * input
+)
+{
+    char buffer[512];
+    GPIConnection * iconnection = (GPIConnection*)*connection;
+
+    // Check for an error.
+    //////////////////////
+    if(gpiCheckForError(connection, input, GPITrue))
+        return GP_SERVER_ERROR;
+
+    // Process Remote Auth Response msg - Format like:
+    /* ===============================================
+    \rar\namespaceid\%d\partnerid\%d\final\
+    =============================================== */
+
+    if(!gpiValueForKey(iconnection->inputBuffer, "\\namespaceid\\", buffer, sizeof(buffer)))
+        CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
+    iconnection->namespaceID = atoi(buffer);
+
+    if(!gpiValueForKey(iconnection->inputBuffer, "\\partnerid\\", buffer, sizeof(buffer)))
+        CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
+    iconnection->partnerID = atoi(buffer);
+
+    return GP_NO_ERROR;
 }

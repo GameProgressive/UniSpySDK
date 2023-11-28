@@ -47,6 +47,9 @@ GPResult gpiProcessRecvBuddyStatusInfo(GPConnection *connection,
 GPResult gpiProcessRecvBuddyList(GPConnection * connection, 
 								 const char * input);
 
+GPResult gpiProcessRecvAddBuddyResponse(GPConnection *connection, 
+										const char *input);
+
 GPResult gpiSendServerBuddyMessage(GPConnection * connection,
 								   int profileid,
 								   int type,
@@ -69,6 +72,15 @@ GPResult gpiBuddyHandleKeyReply(GPConnection *connection,
 GPResult gpiAuthBuddyRequest(GPConnection * connection,
 							 GPProfile profile);
 
+GPResult gpiSendAddBuddyRequest(GPConnection *connection, 
+								GPProfile profile, 
+								const char reason[GP_REASON_LEN],
+								GPIBool buddySync);
+
+GPResult gpiSendAuthBuddyRequest(GPConnection * connection,
+								 GPIProfile * profile,
+								 GPIBool autoSync);
+
 GPIBool gpiFixBuddyIndices(GPConnection * connection,
 						   GPIProfile * profile,
 						   void * data);
@@ -77,4 +89,10 @@ GPResult gpiDeleteBuddy(GPConnection * connection,
 						GPProfile profile,
 						GPIBool sendServerRequest);
 
+GPResult gpiBuddyDeletedLocally(GPConnection  *connection,
+								int	id,
+								gsi_bool isDeleted);
+
+void gpiRevokeBuddyAuthorization(GPConnection * connection,
+							GPProfile profile);
 #endif

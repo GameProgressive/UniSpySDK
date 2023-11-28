@@ -484,10 +484,15 @@ void piStopAutoMatchReporting
 	qr2_shutdown(connection->autoMatchReporting);
 	connection->autoMatchReporting = NULL;
 	
-	// This socket should have been cleared after qr2_shutdown
-	// but it's a copy of connection->autoMatchReporting->hbsock
-	// Thus it needs to be cleared if it hasn't been already
-	if (connection->autoMatchOperation->socket != INVALID_SOCKET)
+	// This socket should have been cleared after qr2_shutdown but it's a copy of 
+	// connection->autoMatchReporting->hbsock. Thus it needs to be cleared if it hasn't been already
+	// *unless* a custom socket was passed, eg with peerStartAutoMatchWithSocket (socketClose only gets
+	// set if it's our socket and not developer passed
+	if (connection->amCustomSocket == PEERFalse && connection->autoMatchOperation->socket != INVALID_SOCKET)
+	{
+		connection->autoMatchOperation->socket = INVALID_SOCKET;
+	}
+	else if (connection->amCustomSocket == PEERTrue && connection->autoMatchOperation->socketClose && connection->autoMatchOperation->socket != INVALID_SOCKET)
 	{
 		connection->autoMatchOperation->socket = INVALID_SOCKET;
 	}

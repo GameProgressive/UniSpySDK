@@ -504,6 +504,7 @@ static void piGetRoomKeysCallbackA
 )
 {
 	PEER peer = (PEER)param;
+	PEER_CONNECTION;
 
 	if(!user && success)
 	{
@@ -540,8 +541,16 @@ static void piGetRoomKeysCallbackA
 		if(!piRoomToType(peer, channel, &roomType))
 			return;
 
-		for(i = 0 ; i < num ; i++)
+		for(i = 0 ; i < num ; i++) 
+		{
 			piRoomKeyChanged(peer, roomType, user, keys[i], values[i]);
+			
+			// when automatching we need to verify that a host is in our room
+			if(peerIsAutoMatching(peer) && strchr(values[i], 'h')) 
+			{
+				connection->hostInRoom = 1;
+			}
+		}
 	}
 	
 	GSI_UNUSED(chat);

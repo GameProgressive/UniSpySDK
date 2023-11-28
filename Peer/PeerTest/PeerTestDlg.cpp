@@ -69,7 +69,8 @@ END_MESSAGE_MAP()
 // CPeerTestDlg dialog
 
 CPeerTestDlg::CPeerTestDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CPeerTestDlg::IDD, pParent)
+: CDialog(CPeerTestDlg::IDD, pParent),
+m_Socket(INVALID_SOCKET)
 {
 	//{{AFX_DATA_INIT(CPeerTestDlg)
 	m_blocking = FALSE;
@@ -1556,6 +1557,34 @@ void CPeerTestDlg::OnTimer(UINT nIDEvent)
 	{
 		if(m_peer)
 		{
+			if (m_Socket != INVALID_SOCKET)
+			{
+				// we want to now check if we have data
+				if (CanReceiveOnSocket(m_Socket) > 0)
+				{
+					char buffer[1500];
+					SOCKADDR_IN fromAddr;
+					socklen_t fromAddrLen;
+
+					fromAddrLen = sizeof(SOCKADDR_IN);
+
+					int rcode = recvfrom(m_Socket, buffer, sizeof(buffer), 0, (SOCKADDR *)&fromAddr, &fromAddrLen);
+					if (rcode == SOCKET_ERROR)
+					{
+						// error catch
+						int sockError = WSAGetLastError();
+						CString sockErrString;
+						sockErrString.Format("Socket error: %d\n", sockError);
+						OutputDebugString(sockErrString);
+					}
+					else 
+					{
+						if ((unsigned char)buffer[0] == QR_MAGIC_1 && (unsigned char)buffer[1] == QR_MAGIC_2)
+							peerParseQuery(m_peer, buffer, rcode, (sockaddr *)&fromAddr);
+					}					
+				}
+				
+			}
 			peerThink(m_peer);
 		}
 	}
@@ -2841,6 +2870,8 @@ void CPeerTestDlg::OnStartAutoMatch()
 {
 	if(m_peer)
 	{
+		SOCKADDR_IN localAddr; // used if we are calling peerStartAutoMatchWithSocket
+
 		UpdateData();
 		if(m_maxPlayers < 2)
 		{
@@ -2850,7 +2881,25 @@ void CPeerTestDlg::OnStartAutoMatch()
 
 		OutputDebugString(_T("AM Starting\n"));
 
-		peerStartAutoMatch(m_peer, m_maxPlayers, _T(""), AutoMatchStatusCallback, AutoMatchRateCallback, NULL, (PEERBool)m_blocking);
+		//peerStartAutoMatch(m_peer, m_maxPlayers, "", AutoMatchStatusCallback, AutoMatchRateCallback, NULL, (PEERBool)m_blocking);
+		
+		m_Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		if(m_Socket == INVALID_SOCKET)
+		{
+			MessageBox("Failed to create socket\n");
+			return;
+		}
+
+		// setup socket for calling peerStartAutoMatchWithSocket
+		memset(&localAddr, 0, sizeof(SOCKADDR_IN));
+		localAddr.sin_family = AF_INET;
+		localAddr.sin_port = htons(NET_PORT);
+		if(gsiSocketIsError(bind(m_Socket, (SOCKADDR *)&localAddr, sizeof(SOCKADDR_IN))))
+		{
+			MessageBox("Failed to bind socket\n");
+			return;
+		}
+		peerStartAutoMatchWithSocket(m_peer, m_maxPlayers, "", m_Socket, NET_PORT, AutoMatchStatusCallback, AutoMatchRateCallback, NULL, (PEERBool)m_blocking);
 	}
 }
 

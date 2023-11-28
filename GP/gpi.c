@@ -609,6 +609,12 @@ gpiEnable(
 		iconnection->infoCachingBuddyAndBlockOnly = GPITrue;
 		break;
 
+#ifdef _PS3
+	case GP_NP_SYNC:
+		iconnection->npSyncEnabled = GPITrue;
+		break;
+#endif
+
 	default:
 		Error(connection, GP_PARAMETER_ERROR, "Invalid state.");
 	}
@@ -659,6 +665,12 @@ gpiDisable(
 	{
 		iconnection->infoCachingBuddyAndBlockOnly = GPIFalse;
 	}
+#ifdef _PS3
+	else if(state == GP_NP_SYNC)
+	{
+		iconnection->npSyncEnabled = GPIFalse;
+	}
+#endif
 	else
 	{
 		Error(connection, GP_PARAMETER_ERROR, "Invalid state.");

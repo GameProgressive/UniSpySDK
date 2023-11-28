@@ -62,7 +62,8 @@ SAKEStartRequestResult SAKE_CALL sakeiStartRateRecordRequest(SAKERequest request
 		SAKEI_FUNC_NAME_STRINGS("RateRecord"),
 		sakeiRateRecordValidateInput,
 		sakeiRateRecordFillSoapRequest,
-		sakeiRateRecordProcessSoapResponse
+		sakeiRateRecordProcessSoapResponse,
+		NULL
 	};
 
 	return sakeiStartRequest(request, &info);
@@ -116,7 +117,8 @@ SAKEStartRequestResult SAKE_CALL sakeiStartGetRecordLimitRequest(SAKERequest req
 		SAKEI_FUNC_NAME_STRINGS("GetRecordLimit"),
 		sakeiGetRecordLimitValidateInput,
 		sakeiGetRecordLimitFillSoapRequest,
-		sakeiGetRecordLimitProcessSoapResponse
+		sakeiGetRecordLimitProcessSoapResponse,
+		NULL
 	};
 
 	return sakeiStartRequest(request, &info);
@@ -178,7 +180,8 @@ SAKEStartRequestResult SAKE_CALL sakeiStartGetRecordCountRequest(SAKERequest req
 		SAKEI_FUNC_NAME_STRINGS("GetRecordCount"),
 		sakeiGetRecordCountValidateInput,
 		sakeiGetRecordCountFillSoapRequest,
-		sakeiGetRecordCountProcessSoapResponse
+		sakeiGetRecordCountProcessSoapResponse,
+		NULL
 	};
 
 	return sakeiStartRequest(request, &info);

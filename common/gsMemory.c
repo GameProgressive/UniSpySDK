@@ -1281,11 +1281,11 @@ void MEM_CHUNK_POOLFillMemoryTable(MEM_CHUNK_POOL *_this,char *Table, const int 
 
 			// translate address into table positions
 			s=  ((start_address - _HeapStart) * (TableSize>>4)) / (_HeapSize>>4);
-			MP_ASSERT(s < TableSize);
+			MP_ASSERT(s < (unsigned int)TableSize);
 			MP_ASSERT(s >= 0);
 
 			e=	((  end_address - _HeapStart) * (TableSize>>4)) / (_HeapSize>>4);
-			MP_ASSERT(e < TableSize);
+			MP_ASSERT(e < (unsigned int)TableSize);
 			MP_ASSERT(e >= 0);
 
 			for ( j= s; j<= e; j++)

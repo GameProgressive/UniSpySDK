@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gvDevice.c
+// SDK:		GameSpy Voice 2 SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2004-2009 GameSpy Industries, Inc.
+
 #include "gvDevice.h"
 
 /***********
@@ -53,7 +60,7 @@ static int gviFindDeviceIndex(GVIDeviceList devices, GVIDevice * device)
 	int len;
 	int i;
 
-	assert(devices);
+	GS_ASSERT(devices);
 
 	len = ArrayLength(devices);
 	for(i = 0 ; i < len ; i++)
@@ -72,14 +79,14 @@ GVIDeviceList gviNewDeviceList(ArrayElementFreeFn elemFreeFn)
 
 void gviFreeDeviceList(GVIDeviceList devices)
 {
-	assert(devices);
+	GS_ASSERT(devices);
 
 	ArrayFree(devices);
 }
 
 void gviAppendDeviceToList(GVIDeviceList devices, GVIDevice * device)
 {
-	assert(devices);
+	GS_ASSERT(devices);
 
 	ArrayAppend(devices, &device);
 }
@@ -88,7 +95,7 @@ void gviDeleteDeviceFromList(GVIDeviceList devices, GVIDevice * device)
 {
 	int index;
 
-	assert(devices);
+	GS_ASSERT(devices);
 
 	// find the device
 	index = gviFindDeviceIndex(devices, device);
@@ -101,14 +108,14 @@ void gviDeleteDeviceFromList(GVIDeviceList devices, GVIDevice * device)
 
 int gviGetNumDevices(GVIDeviceList devices)
 {
-	assert(devices);
+	GS_ASSERT(devices);
 
 	return ArrayLength(devices);
 }
 
 GVIDevice * gviGetDevice(GVIDeviceList devices, int index)
 {
-	assert(devices);
+	GS_ASSERT(devices);
 
 	return *(GVIDevice **)ArrayNth(devices, index);
 }

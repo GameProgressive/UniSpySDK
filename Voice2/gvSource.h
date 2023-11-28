@@ -1,18 +1,19 @@
-/*
-GameSpy Voice2 SDK
-Dan "Mr. Pants" Schoenblum
-dan@gamespy.com
-
-Copyright 2004 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-http://gamespy.net
-*/
+///////////////////////////////////////////////////////////////////////////////
+// File:	gvSource.h
+// SDK:		GameSpy Voice 2 SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2004-2009 GameSpy Industries, Inc.
+// ------------------------------------
+// Some code based on:
+//   "Skew Detection and Compensation for Internet Audio Applications"
+//   http://csperkins.org/publications/icme2000.pdf
 
 #ifndef _GV_SOURCE_H_
 #define _GV_SOURCE_H_
 
 #include "gvMain.h"
+
 /************
 ** GLOBALS **
 ************/

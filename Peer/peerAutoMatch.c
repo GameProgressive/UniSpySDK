@@ -19,6 +19,16 @@
 #include "peerPlayers.h"
 #include "peerRooms.h"
 
+#if defined(_PS3)
+typedef void* amcallback_t;
+#elif defined(_PSP) || defined(_NITRO) || defined(_REVOLUTION)
+typedef int amcallback_t;
+#else
+typedef intptr_t amcallback_t;
+#endif
+
+#define PEER_AM_INTERVALS 11
+#define PEER_AM_INTERVAL_SIZE 20
 /**************
 ** FUNCTIONS **
 **************/
@@ -51,8 +61,10 @@ void piSetAutoMatchStatus(PEER peer, PEERAutoMatchStatus status)
 	// we need to create a room before we can really switch to PEERWaiting
 	if((status == PEERWaiting) && !connection->inRoom[StagingRoom])
 	{
-		if(!piCreateAutoMatchRoom(peer))
+		if(!piCreateAutoMatchRoom(peer)) 
+		{
 			piSetAutoMatchStatus(peer, connection->autoMatchSBFailed?PEERFailed:PEERSearching);
+		}
 		return;
 	}
 
@@ -60,10 +72,17 @@ void piSetAutoMatchStatus(PEER peer, PEERAutoMatchStatus status)
 	if(connection->autoMatchStatus != status)
 	{
 		// set the new status
-		connection->autoMatchStatus = status;
-		
-		// add the callback
-		piAddAutoMatchStatusCallback(peer);
+		connection->autoMatchStatus = status; 
+
+		// call the developer's status callback
+		if (status != PEERReady) {
+			// add the callback
+			piAddAutoMatchStatusCallback(peer);
+		}
+		else {
+			// set the ready time to current so that we can add the status callback after PEERREADYWAIT duration
+			connection->peerReadyTime = current_time();
+		}
 	}
 
 	// handle the status
@@ -123,8 +142,13 @@ void piSetAutoMatchStatus(PEER peer, PEERAutoMatchStatus status)
 		if(connection->hosting && !connection->autoMatchReporting)
 		{
 			if(!piStartAutoMatchReporting(peer))
-			{
-				piSetAutoMatchStatus(peer, PEERSearching);
+			{	
+				// revert back to searching *unless* we are waiting in a staging room to find out if
+				// there is a host
+				if (!connection->waitingForHostFlag) 
+				{
+					piSetAutoMatchStatus(peer, PEERSearching);
+				}
 				return;
 			}
 		}
@@ -166,7 +190,14 @@ void piStopAutoMatch(PEER peer)
 		
 		// cleanup
 		piSetAutoMatchStatus(peer, PEERFailed);
-
+		connection->autoMatchNextStatus = PEERFailed;
+		connection->autoMatchDelay = 0;
+		connection->peerReadyTime = 0;
+		connection->amStartTime = 0;
+		connection->joinRoomTime = 0;
+		connection->hostInRoom = 0;
+		connection->waitingForHostFlag = PEERFalse;
+		connection->amCustomSocket = PEERFalse;
 		// reset the inRoom flag
 		//connection->inRoom[StagingRoom] = inRoom;
 	}
@@ -182,8 +213,11 @@ static void piJoinAutoMatchRoomCallback
 )
 {
 	PEER_CONNECTION;
+	connection->waitingForHostFlag = PEERFalse; // only set this bool if we succeed in joining the room
+	connection->joinRoomTime = 0; // only set the join time if we succeed
 
 	// if we're the only one, or if there's no host, leave
+	// *note that we only have the 'op' flags at this point, which does not ensure the player is the host
 	if(success && ((connection->numPlayers[StagingRoom] <= 1) || !piCountRoomOps(peer, StagingRoom, connection->nick)))
 	{
 		piLeaveRoom(peer, StagingRoom, "");
@@ -193,17 +227,18 @@ static void piJoinAutoMatchRoomCallback
 	// check if it succeeded
 	if(success)
 	{
+		// we're waiting for the room key callback so we don't know yet whether a host is in the room
+		connection->waitingForHostFlag = PEERTrue; 
+		connection->joinRoomTime = current_time();
+
 		// we're now staging
 		piSetAutoMatchStatus(peer, PEERStaging);
-
-		// if we've got maxplayers, we're now Ready
-		if((connection->autoMatchStatus == PEERStaging) && (connection->numPlayers[StagingRoom] >= connection->maxPlayers))
-			piSetAutoMatchStatus(peer, PEERReady);
 	}
 
 	// if we were waiting, and this failed, restart waiting
-	if(!success && (connection->autoMatchStatus == PEERWaiting))
+	if(!success && (connection->autoMatchStatus == PEERWaiting)) {
 		piSetAutoMatchStatus(peer, PEERWaiting);
+	}
 		
 	GSI_UNUSED(result);
 	GSI_UNUSED(roomType);
@@ -218,6 +253,9 @@ PEERBool piJoinAutoMatchRoom(PEER peer, SBServer server)
 	char room[PI_ROOM_MAX_LEN];
 
 	PEER_CONNECTION;
+
+	// reset the hostInRoom identifier since we are joining a new room
+	connection->hostInRoom = 0;
 
 	// Get the public and private IPs and ports.
 	publicIP = SBServerGetPublicInetAddress(server);
@@ -243,28 +281,6 @@ PEERBool piJoinAutoMatchRoom(PEER peer, SBServer server)
 	return PEERTrue;
 }
 
-// GetChannelModeCallback used to get the channel modes 
-// and fix the modes: Limit and OpsObeyChannelLimit
-static void piAutoMatchGetChannelCallback(CHAT chat, CHATBool success, const gsi_char *channel, CHATChannelMode *mode, void *param)
-{
-	piConnection *connection = (piConnection *)param;
-	if (success)
-	{
-
-		mode->Limit = connection->maxPlayers;
-		mode->OpsObeyChannelLimit = CHATTrue;
-		
-		// Don't let ops bypass channel limit on the number of players in room
-		chatSetChannelMode(chat, channel, mode);
-	}
-	else
-	{
-		// handle the failure
-		connection->autoMatchQRFailed = PEERTrue;
-		piSetAutoMatchStatus((PEER *)&connection, connection->autoMatchSBFailed?PEERFailed:PEERSearching);
-	}
-}
-
 static void piCreateAutoMatchRoomCallback
 (
 	PEER peer,
@@ -280,14 +296,19 @@ static void piCreateAutoMatchRoomCallback
 
 	if(success)
 	{
+		CHATChannelMode modes;
 		// set the status based on the number of people in the room
+		modes.Limit = connection->maxPlayers;
+		modes.OpsObeyChannelLimit = CHATTrue;
+		modes.NoExternalMessages = CHATTrue;
+		modes.OnlyOpsChangeTopic = CHATTrue;
+		modes.Private = CHATTrue;
+
+		chatSetChannelMode(connection->chat, peerGetRoomChannel(peer, StagingRoom), &modes);
+
 		if(connection->numPlayers[StagingRoom] <= 1)
 		{
 			status = PEERWaiting;
-
-			// get the channel modes so we can set the limits on our staging channel
-			chatGetChannelMode(connection->chat, peerGetRoomChannel(peer, StagingRoom), piAutoMatchGetChannelCallback, 
-				(void *)connection, CHATFalse);
 		}
 		else if(connection->numPlayers[StagingRoom] >= connection->maxPlayers)
 		{
@@ -330,4 +351,162 @@ static PEERBool piCreateAutoMatchRoom(PEER peer)
 	}
 
 	return PEERTrue;
+}
+
+void piAutoMatchCheckWaitingForHostFlag(PEER peer)
+{
+	PEER_CONNECTION;
+
+	if (connection->waitingForHostFlag == PEERTrue) 
+	{
+		// if there is a host, then we can update our automatch status accordingly
+		if (connection->hostInRoom == 1)
+		{
+			connection->waitingForHostFlag = PEERFalse;
+			connection->joinRoomTime = 0; // reset join time
+ 
+			// reset next status since we've joined a server successfully
+			connection->autoMatchNextStatus = PEERFailed;
+			connection->autoMatchDelay = 0;
+
+			// if we've got maxplayers, we're now Ready
+			if((connection->autoMatchStatus == PEERStaging) && (connection->numPlayers[StagingRoom] >= connection->maxPlayers)) {	
+				piSetAutoMatchStatus(peer, PEERReady);
+			}
+
+			// reset the hostInRoom identifier
+			connection->hostInRoom = 0;
+		}
+		// if there is no host after a short while then we leave the room and continue automatching
+		else if (connection->joinRoomTime != 0 && current_time() - connection->joinRoomTime >= AMHOSTFLAGWAIT)
+		{
+			connection->waitingForHostFlag = PEERFalse;
+			connection->joinRoomTime = 0; // reset join time
+
+			piLeaveRoom(peer, StagingRoom, "");
+
+			// if we were waiting or staging and this failed, restart waiting
+			if(connection->autoMatchStatus == PEERWaiting || connection->autoMatchStatus == PEERStaging) {
+				piSetAutoMatchStatus(peer, PEERWaiting);
+			}
+		}
+		// else we're still waiting to receive the host flag
+	}
+}
+
+void piAutoMatchRestartThink(PEER peer)
+{
+	gsi_time now;
+	PEER_CONNECTION;
+
+	// reset the restart timer since we are in a success state
+	if (connection->autoMatchStatus == PEERReady || connection->autoMatchStatus == PEERComplete)
+	{
+		connection->amStartTime = current_time();
+		return;
+	}
+
+	// if we've been automatching for AMRESTARTTIME without success, restart the automatch process
+	now = current_time();
+	if (now - connection->amStartTime >= AMRESTARTTIME && connection->peerReadyTime == 0)
+	{
+		SOCKET socketForRestart;
+		unsigned short portForRestart;
+		int maxPlayersForRestart;
+		char * filterForRestart;
+
+		// intptr_t are only defined on certain platforms (handles 64-bit OSes)
+		amcallback_t  statusCBForRestart;
+		amcallback_t rateCBForRestart;
+		void * cbParamForRestart;
+
+		// store all the 'startAutoMatch' parameters before we stopAutomatch and clear them
+		maxPlayersForRestart = connection->maxPlayers;
+		filterForRestart = goastrdup(connection->autoMatchFilter);
+		statusCBForRestart = (amcallback_t)connection->autoMatchOperation->callback;
+		rateCBForRestart = (amcallback_t)connection->autoMatchOperation->callback2;
+		cbParamForRestart = connection->autoMatchOperation->callbackParam;
+
+		// preserve the socket/port if the SDK does not own it (eg. developer used 'withSocket')
+		if (connection->amCustomSocket == PEERTrue) 
+		{
+			socketForRestart = connection->autoMatchOperation->socket;
+			portForRestart = connection->autoMatchOperation->port;
+		}
+		else
+		{
+			socketForRestart = INVALID_SOCKET;
+			portForRestart = 0;
+		}
+
+		// stop automatch, then restart
+		piStopAutoMatch(peer);
+		peerStartAutoMatchWithSocket(peer, maxPlayersForRestart, filterForRestart, socketForRestart, portForRestart,
+			(peerAutoMatchStatusCallback)statusCBForRestart, (peerAutoMatchRateCallback)rateCBForRestart, cbParamForRestart, PEERFalse);
+	}
+}
+
+// check if we have remained in PEERReady status long enough to be considered stable and call the developer's callback
+void piAutoMatchReadyTimeThink(PEER peer)
+{	
+	gsi_time now;
+
+	PEER_CONNECTION;
+
+	// if the status has reverted out of PEERReady, reset the 'ready time'
+	if (connection->autoMatchStatus != PEERReady)
+	{
+		connection->peerReadyTime = 0;
+	}
+	else  
+	{
+		now = current_time();
+
+		// check if enough time has passed, if so, trigger developer's status callback
+		if((now - connection->peerReadyTime) >= PEERREADYWAIT)
+		{
+			piAddAutoMatchStatusCallback(peer);
+
+			// reset the 'ready time' since we called the status callback
+			connection->peerReadyTime = 0;
+		}
+	}
+}
+
+void piAutoMatchDelayThink(PEER peer)
+{	
+	PEER_CONNECTION;
+	if (connection->autoMatchDelay > 0 && connection->autoMatchNextStatus != PEERFailed)
+	{
+		connection->autoMatchDelay--;
+	}
+	else if (connection->autoMatchDelay ==  0 && connection->autoMatchNextStatus != PEERFailed)
+	{
+		// check to make sure we are not currently in the process of joining a room/server
+		if (!connection->rooms[StagingRoom][0]) {
+			// delay is complete, set 'next status'
+			piSetAutoMatchStatus(peer, connection->autoMatchNextStatus);
+		}
+		else 
+		{
+			if (connection->autoMatchStatus != PEERReady)
+			{
+				// don't set the next status yet, we are attempting to join a room
+				connection->autoMatchDelay = 5;
+			}
+			else 
+			{
+				connection->autoMatchNextStatus = PEERFailed; // don't set next status since we are in ready state
+			}
+
+			return;
+		}
+		connection->autoMatchNextStatus = PEERFailed;		
+	}
+}
+
+unsigned int piGetAutoMatchDelay()
+{
+	unsigned int randomeDelay = (unsigned int)(rand() % PEER_AM_INTERVALS * PEER_AM_INTERVAL_SIZE);
+	return randomeDelay;
 }

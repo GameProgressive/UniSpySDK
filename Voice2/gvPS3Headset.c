@@ -34,7 +34,7 @@
 #define GVI_PLAYBACK_NUM_BLOCKS     CELL_AUDIO_BLOCK_32
 #define GVI_PLAYBACK_BLOCK_SAMPLES  CELL_AUDIO_BLOCK_SAMPLES
 #define GVI_PLAYBACK_SAMPLE_RATE    48000 //Hz
-#define GVI_PS3_MIC_BUFFER_MS       1000
+#define GVI_PS3_MIC_BUFFER_MS       100
 #define GVI_LOCAL_TALK_MAX          10
 #define GVI_PLAYBACK_SAMPLE_FACTOR  (GVI_PLAYBACK_SAMPLE_RATE / gviGetSampleRate())
 #define GVI_NUM_CHANNELS            CELL_AUDIO_PORT_2CH
@@ -111,7 +111,7 @@ static void gviFreeArrayDevice(void * elem)
 	int result;
 
 	// turn off mic if its a capture device and if the mic port is open
-	if (data->m_capturing && cellMicIsOpen(data->m_deviceNum))
+	if (device->m_types & GV_CAPTURE && cellMicIsOpen(data->m_deviceNum))
 		result = cellMicClose(data->m_deviceNum);
 
 	// Destroy the callback and playback queues
@@ -125,7 +125,7 @@ static void gviFreeArrayDevice(void * elem)
 		sys_event_queue_destroy(data->m_captureCallbackQueue, 0);
 
 	// close audio port
-	if (data->m_playing)
+	if (device->m_types & GV_PLAYBACK)
 		cellAudioPortClose(data->m_playbackCellAudioPortNum);
 
 	// playback specific cleanup
@@ -217,7 +217,7 @@ void gviPS3HeadsetCleanup(void)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // process playback if there is any in the queue
-static GVBool gviPlaybackDeviceThink(GVIDevice * device)
+static void gviPlaybackDeviceThink(GVIDevice * device)
 {
 	GVIPS3HeadsetData * data = (GVIPS3HeadsetData *)device->m_data;
 	int remainingSamples;
@@ -232,17 +232,17 @@ static GVBool gviPlaybackDeviceThink(GVIDevice * device)
 
 	// don't do anything if we're not playing
 	if(!data->m_playing)
-		return GVTrue;
+		return;
 
 	// check the queue
 	result = sys_event_queue_receive(data->m_playbackQueue, &playbackQueueEvent, 1);
 	if(result == ETIMEDOUT)
 	{
-		return GVTrue;
+		return;
 	}
 	if(result != CELL_OK)
 	{
-		return GVFalse;
+		return;
 	}
 
 	totalSamples = (GVI_PLAYBACK_NUM_BLOCKS * GVI_PLAYBACK_BLOCK_SAMPLES);
@@ -297,7 +297,7 @@ static GVBool gviPlaybackDeviceThink(GVIDevice * device)
 		data->m_playbackClock++;
 	}
 
-	return GVTrue;
+	//return GVTrue;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,7 +306,7 @@ static GVBool gviPlaybackDeviceThink(GVIDevice * device)
 void gviPS3HeadsetThink(void)
 {
 	GVIDevice * device;
-	GVBool rcode;
+	int rcode;
 	int num;
 	int i;
 
@@ -324,8 +324,12 @@ void gviPS3HeadsetThink(void)
 		if(device->m_types & GV_PLAYBACK)
 		{
 			// let it think
-			rcode = gviPlaybackDeviceThink(device);
-
+			gviPlaybackDeviceThink(device);
+		}
+		if (device->m_types &  GV_CAPTURE)
+		{
+			GVIPS3HeadsetData *ps3HeadsetData = (GVIPS3HeadsetData *)device->m_data;
+			rcode = cellMicIsAttached(ps3HeadsetData->m_deviceNum);
 			// check if the device was unplugged
 			if(!rcode)
 				gviDeviceUnplugged(device);
@@ -365,6 +369,22 @@ int gviPS3HeadsetListDevices(GVDeviceInfo devices[], int maxDevices, GVDeviceTyp
 					devices[numDevices].m_defaultDevice = (GVDeviceType)0; 
 					_tcscpy(devices[numDevices].m_name, _T("Bluetooth Headset"));
 					devices[numDevices].m_hardwareType = GVHardwarePS3Headset;
+				}
+				else if (deviceType == CELLMIC_TYPE_EYETOY1)
+				{
+					devices[numDevices].m_id = index;
+					devices[numDevices].m_deviceType = GV_CAPTURE | GV_PLAYBACK;
+					devices[numDevices].m_defaultDevice = (GVDeviceType)0; 
+					_tcscpy(devices[numDevices].m_name, _T("EYETOY1"));
+					devices[numDevices].m_hardwareType = GVHardwarePS2Eyetoy;
+				}
+				else if (deviceType == CELLMIC_TYPE_EYETOY2)
+				{
+					devices[numDevices].m_id = index;
+					devices[numDevices].m_deviceType = GV_CAPTURE | GV_PLAYBACK;
+					devices[numDevices].m_defaultDevice = (GVDeviceType)0; 
+					_tcscpy(devices[numDevices].m_name, _T("EYETOY2"));
+					devices[numDevices].m_hardwareType = GVHardwarePS3Eyetoy;
 				}
 			}
 
@@ -476,7 +496,7 @@ GVBool gviPS3HeadsetInitMic(GVIPS3HeadsetData *data)
 		return GVFalse;
 	}
 
-	//install "MicIn" system-callback(with devnum == -1) to recv attach/detach event
+	//setup the microphone event queue to retrieve microphone states for data capture.
 	result = cellMicSetNotifyEventQueue(data->m_captureEventQueueKey);
 	if (result != CELL_OK)
 	{
@@ -495,8 +515,7 @@ GVBool gviPS3HeadsetInitMic(GVIPS3HeadsetData *data)
 	if (aMsg == CELLMIC_ATTACH && aDevNum == data->m_deviceNum)
 	{
 		// start with the default audio device
-		result = cellMicOpenEx(data->m_deviceNum, GVI_PLAYBACK_SAMPLE_RATE, 1, 
-			GV_SAMPLES_PER_SECOND, GVI_PS3_MIC_BUFFER_MS, CELLMIC_SIGTYPE_DSP);
+		result = cellMicOpen(data->m_deviceNum, GV_SAMPLES_PER_SECOND);
 
 		if (result != CELL_OK)
 		{
@@ -745,8 +764,7 @@ GVBool gviPS3HeadsetHandleMicAttach(GVIPS3HeadsetData *data)
 	int result;
 
 	// start with the default audio device
-	result = cellMicOpenEx(data->m_deviceNum, GVI_PLAYBACK_SAMPLE_RATE, 1, 
-		GV_SAMPLES_PER_SECOND, GVI_PS3_MIC_BUFFER_MS, CELLMIC_SIGTYPE_DSP);
+	result = cellMicOpen(data->m_deviceNum, GV_SAMPLES_PER_SECOND);
 
 	if (result != CELL_OK)
 	{

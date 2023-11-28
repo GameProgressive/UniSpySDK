@@ -3,6 +3,15 @@ Changelog for: GameSpy NAT Negotiation SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.11.00  RV   RELEASE  Released to Developer Site
+02-10-2009  2.10.00  SAH  RELEASE  Released to Developer Site
+08-12-2009  2.04.01  SAH  OTHER    Modified SDK to only use match queuing support for ACE-based connections
+02-10-2009  2.04.00  SAH  RELEASE  Released to Developer Site
+02-04-2009  2.03.03  SAH  OTHER    Added Unicode projects for Win32, fixed extraneous debug callback in simpletest
+01-28-2009  2.03.02  SAH  FIX	   Fixed match queuing support, decreased report timing for faster processing
+					 FM   OTHER	   Added more verbose debug statements, cleaned up state processing
+					 FM   FIX	   Removed delay between connection establishment and callback notification
+					 FM   FIX	   Put in Kiwada's DS IP fix in Natify code
 12-12-2007  2.03.01  DES  FEATURE  Support for match queuing
 12-12-2007  2.03.00  RMV  RELEASE  Released to Developer Site
 08-06-2007  2.02.00  RMV  RELEASE  Released to Developer Site

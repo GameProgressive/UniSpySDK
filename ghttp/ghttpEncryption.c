@@ -1584,9 +1584,80 @@ GHIEncryptionResult ghiEncryptorSslStartFunc(struct GHIConnection * connection,
 		    connection->socketError = result;
 			return GHIEncryptionResult_Error;
 		}
-		sslInterface->mConnected = GHTTPTrue;
+		else
+		{
+	        // we successfully enabled SSL 
+			// connect here
+			SOCKADDR_IN address;
+			
+			memset(&address, 0, sizeof(SOCKADDR_IN));
+			address.len = sizeof(SOCKADDR_IN);
+		    address.sin_family = AF_INET;
+		    
+		    if (connection->proxyOverrideServer)
+			    address.sin_port = htons(connection->proxyOverridePort);
+		    else if(ghiProxyAddress)
+			    address.sin_port = htons(ghiProxyPort);
+		    else
+			    address.sin_port = htons(connection->serverPort);
+		    address.sin_addr.s_addr = connection->serverIP;
+			
+			// Set the socket to blocking.
+		    //////////////////////////////////
+		    if (!SetSockBlocking(connection->socket, 1))
+		    {
+			    connection->completed = GHTTPTrue;
+			    connection->result = GHTTPSocketFailed;
+			    connection->socketError = GOAGetLastError(connection->socket);
+			   	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+	                    "%s(@%s:%d)return socket error %d\r\n",
+	                    __FILE__, __FUNCTION__, __LINE__ ,connection->socketError );
+
+                return GHIEncryptionResult_Error;
+	    	};
+		    
+			result = connect(connection->socket, (SOCKADDR *)&address, sizeof(address));
+		    if(gsiSocketIsError(result))
+		    {
+			  connection->completed = GHTTPTrue;
+			  connection->result = GHTTPConnectFailed;
+			  connection->socketError = GOAGetLastError(connection->socket);
+
+  			  gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+                    "%s(@%s:%d)return socket error %d\r\n",
+                    __FILE__, __FUNCTION__, __LINE__ ,connection->socketError );
+
+			  return GHIEncryptionResult_Error;
 		    }
 		    
+
+	        {
+	        	int writeFlag;
+	            int exceptFlag;
+	            // Check if the connect has completed.
+	            //////////////////////////////////////
+	            result = GSISocketSelect(   connection->socket, 
+	                                        NULL, 
+	                                        &writeFlag, 
+	                                        &exceptFlag);
+	            if((gsiSocketIsError(result)) || ((result == 1) && exceptFlag))
+	            {
+		            connection->completed = GHTTPTrue;
+		            connection->result = GHTTPConnectFailed;
+		            if(gsiSocketIsError(result))
+			            connection->socketError = GOAGetLastError(connection->socket);
+		            else
+			            connection->socketError = 0;
+		            gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+	                    "%s(@%s:%d)return socket error %d\r\n",
+	                    __FILE__, __FUNCTION__, __LINE__ ,connection->socketError );
+
+		            return GHIEncryptionResult_Error;
+	            }
+	        }
+		}
+		sslInterface->mConnected = GHTTPTrue;
+	}
 
 	GS_ASSERT(sslInterface->mConnected == GHTTPTrue);
     
@@ -1607,13 +1678,69 @@ GHIEncryptionResult ghiEncryptorSslEncryptSend(struct GHIConnection * connection
 												 int          thePlainTextLength,
 												 int *        theBytesSentOut)
 {
-    GS_FAIL();
+	gsTwlSslInterface* sslInterface = (gsTwlSslInterface*)theEncryptor->mInterface;
+	int result = 0;
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d)\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,"Sending: %s\r\n",thePlainTextBuffer );
+	result = send((int)connection->socket, thePlainTextBuffer, thePlainTextLength, 0);
+    if(gsiSocketIsError(result))
+	{
+	    int sockErr = GOAGetLastError(connection->socket);
+	    *theBytesSentOut = 0;
+		switch(sockErr)
+		{
+			case SOC_EINVAL:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Invalid processing, socket error %d\r\n",
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			case SOC_EMSGSIZE:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) The size is too large to be sent, socket error %d\r\n",
+					__FILE__, __FUNCTION__, __LINE__, sockErr );
+				break;
+			case SOC_ENETRESET:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Socket library is not initialized, socket error %d\r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			case SOC_ENOTCONN:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Not connected, socket error %d\r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			case SOC_EWOULDBLOCK:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Cannot execute until the requested operation is blocked, %d\r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			case 0:
+				// send 0 is fatal in write
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) No bytes sent, %d \r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			default:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Unknown Error, soctket error %d\r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+		}
 
+	    //connection->socketError = sockErr;
+		return GHIEncryptionResult_Error;
+	}
+	else
+	{
+		GS_ASSERT(result > 0);
+		*theBytesSentOut = result;	
+	}
 	GSI_UNUSED(connection);
-	GSI_UNUSED(theEncryptor);
-	GSI_UNUSED(thePlainTextBuffer);
-	GSI_UNUSED(thePlainTextLength);
-	GSI_UNUSED(theBytesSentOut);	
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+	"%s(@%s:%d)return success\r\n",
+	__FILE__, __FUNCTION__, __LINE__ );
 
 	return GHIEncryptionResult_Success;
 }
@@ -1624,12 +1751,60 @@ GHIEncryptionResult ghiEncryptorSslDecryptRecv(struct GHIConnection * connection
 												 char * theDecryptedBuffer,
 												 int *  theDecryptedLength)
 {
-    GS_FAIL();
+	gsTwlSslInterface* sslInterface = (gsTwlSslInterface*)theEncryptor->mInterface;
+	int result = 0;
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d)\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
+	
+	result = recv(connection->socket, theDecryptedBuffer, *theDecryptedLength, 0);
+    gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,"Result % d \n\tReceived: %s\r\n",result, theDecryptedBuffer );
+	if (result == 0)
+	{    
+		// receive 0 is not fatal
+		*theDecryptedLength = 0;
+	}
+	else if(gsiSocketIsError(result))
+	{
+	    int sockErr = GOAGetLastError(connection->socket);
+	    *theDecryptedLength = 0;
+		switch(sockErr)
+		{
+			case SOC_EINVAL:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Invalid processing, socket error %d\r\n", 
+					__FILE__, __FUNCTION__, __LINE__, sockErr);
+				break;
+			case SOC_ENETRESET:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Socket library is not initialized, socket error %d\r\n", sockErr);
+				break;
+			case SOC_ENOTCONN:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Not connected, socket error %d\r\n", sockErr);
+				break;
+			case SOC_EWOULDBLOCK:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Cannot execute until the requested operation is blocked, %d\r\n", sockErr);
+				break;
+			default:
+				gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+					"%s(@%s:%d):GameSpy SSL (TWL) Unknown Error, soctket error %d\r\n", sockErr);
+				break;
+		}
 
+	    //connection->socketError = sockErr;
+		return GHIEncryptionResult_Error;
+	}
+	else
+	{
+		GS_ASSERT(result > 0);
+		*theDecryptedLength = result;
+	}
 	GSI_UNUSED(connection);
-	GSI_UNUSED(theEncryptor);
-	GSI_UNUSED(theDecryptedBuffer);
-	GSI_UNUSED(theDecryptedLength);
+		gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d)return success\r\n",
+		__FILE__, __FUNCTION__, __LINE__ );
 
 	return GHIEncryptionResult_Success;
 }
@@ -1683,6 +1858,7 @@ GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection
 		gsTwlSslInterface* sslInterface = (gsTwlSslInterface *)theEncryptor->mInterface;
 		if (sslInterface != NULL)
 		{
+            SOC_EnableSsl(connection->socket, NULL);
             if (sslInterface->mId != NULL)
             {
                 gsifree(sslInterface->mId);
@@ -1695,6 +1871,10 @@ GHIEncryptionResult ghiEncryptorSslCleanupFunc(struct GHIConnection * connection
 		theEncryptor->mSessionEstablished = GHTTPFalse;
 	}
 
+	gsDebugFormat(GSIDebugCat_HTTP, GSIDebugType_Misc, GSIDebugLevel_Debug,
+		"%s(@%s:%d):GameSpy SSL (Twl) engine cleanup called\r\n", 
+		__FILE__, __FUNCTION__, __LINE__);
+	
 	GSI_UNUSED(connection);
 
 	return GHIEncryptionResult_Success;

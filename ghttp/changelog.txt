@@ -3,9 +3,17 @@ Changelog for: GameSpy HTTP SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  1.13.00  RV   RELEASE  Released to Developer Site
+12-18-2009  1.12.03  RMV  FIX      Fixed several cast errors in ghttpc thrown by the Linux compiler
+10-27-2009  1.12.02  DWM  FIX      Fixed a bug when ghttpPostAddString() was used under SSL with multiple HTTP POST arguments requiring URL-encoding.
+04-20-2009  1.12.01  SAH  OTHER    Changed buffer allocation to use heap for REVO/NITRO per Nintendo request
+02-10-2009  1.12.00  SAH  RELEASE  Released to Developer Site
+02-04-2009  1.11.04  SAH  FIX      Fixed some inconsistencies of using gsi_char for filename creation in ghttpSaveEx
+01-30-2009  1.11.03  MWJ  OTHER    added gsifopen - wrapper for fopen to handle restricted file systems (i.e. iPhone)
+06-02-2008  1.11.02  SN   FIX      Fixed case where content length with being miscalculated due to stale data.
+02-19-2007  1.11.01  SN   FIX      Added code to set send buffer size on Revolution
 12-12-2007  1.11.00  RMV  RELEASE  Released to Developer Site
-12-12-2007  1.10.05  RMV  FIX      Updated ghttpStreamEx call in ghttpc.c to use a URL requiring Nintendo certification, since it 
-                                   uses REVOEXSSL
+12-12-2007  1.10.05  RMV  FIX      Updated ghttpStreamEx call in ghttpc.c to use a URL requiring Nintendo certification, since it uses REVOEXSSL
 11-27-2007  1.10.04  SAH  FIX      Fixed bug where hostname lookup thread wasn't cancelled if request was
                      SAH  CLEANUP  Moved extern "c" block below includes to prevent linker errors
 11-12-2007  1.10.03  SAH  FIX      Incorporated Nintendo suggestions for Built-in RevoEX SSL Certification

@@ -840,7 +840,67 @@ static void RecvBuddyRevoke(GPConnection * pconnection, GPRecvBuddyMessageArg * 
     GSI_UNUSED(param);
 }
 
-#endif 
+///////////////////////////////////////////////////////////////////////////////
+static void RunBuddySyncTest()
+{
+    GPConnection conn;
+    gsi_time timer;
+
+#ifdef _PS3
+	// set communication id to string provided by Sony
+	SceNpCommunicationId communication_id = 
+	{
+		{'N','P','X','S','0','0','0','0','5'},
+		'\0',
+		0,
+		0
+	};
+#endif
+
+    // initialize GP
+    printf("Initializing GP to test PS3 Buddy Sync...\n");
+    CHECK_GP_RESULT(gpInitialize(&conn, 0, 0, 0), "gpInitialize failed");
+
+    // setup callbacks as No-ops for testing purposes
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_ERROR, (GPCallback)Error, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_BUDDY_REQUEST, (GPCallback)RecvBuddyRequest, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_BUDDY_STATUS, (GPCallback)RecvBuddyStatus, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_BUDDY_MESSAGE, (GPCallback)RecvBuddyMessage, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_GAME_INVITE,	(GPCallback)RecvGameInvite, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_TRANSFER_CALLBACK, (GPCallback)TransferCallback, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_BUDDY_AUTH, (GPCallback)RecvBuddyAuth, NULL), "gpSetCallback failed");
+    CHECK_GP_RESULT(gpSetCallback(&conn, GP_RECV_BUDDY_REVOKE, (GPCallback)RecvBuddyRevoke, NULL), "gpSetCallback failed");
+
+#ifdef _PS3
+	// set the NP communication ID (provided by Sony)
+	CHECK_GP_RESULT(gpSetNpCommunicationId(&conn, &communication_id), "gpSetNpCommunicationId failed");  
+
+	// register the slot for GameSpy to use for the CellSysUtilCallback to prevent overlap
+	// (0 is fine if you do not use this callback)
+	CHECK_GP_RESULT(gpRegisterCellSysUtilCallbackSlot(&conn, 0), "gpRegisterCellSysUtilCallbackSlot failed");
+#endif
+
+    // connect to GP
+    printf("Connecting to GP...\n");
+    CHECK_GP_RESULT(gpConnectPreAuthenticated(&conn, gRemoteAuthToken, gPartnerChallenge, GP_NO_FIREWALL, GP_BLOCKING, (GPCallback)ConnectResponse, NULL), "gpConnect failed");
+
+    // process while we wait for sync
+    printf("Connected, now wait %d seconds for sync to complete (on PS3)...\n", (BUDDYSYNC_DELAY/1000));
+    timer = current_time();
+    while ((current_time() - timer) < BUDDYSYNC_DELAY)
+    {
+        CHECK_GP_RESULT(gpProcess(&conn), "gpProcess failed");
+        msleep(20);
+    }
+
+    // Disconnect from GP
+    gpDisconnect(&conn);
+    printf("Disconnected from GP\n");
+
+    // Destroy GP
+    gpDestroy(&conn);
+    printf("Destroyed GP\n");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 void RunLoginTests(int argc, char *argv[])
@@ -911,6 +971,9 @@ void RunLoginTests(int argc, char *argv[])
     // free up ticket mem
     if (npTicket)
         gsifree(npTicket);
+
+    // Login to GP to test Buddy Sync
+    RunBuddySyncTest();
 }
 
 #endif //!_PS3

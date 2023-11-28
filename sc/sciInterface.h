@@ -34,6 +34,7 @@ typedef struct
 	GSCoreMgr *   mSdkCore;
 	gsi_u8        mSessionId[SC_SESSION_GUID_SIZE];
 	gsi_u8        mConnectionId[SC_CONNECTION_GUID_SIZE];
+	//SCStatsPtr    mStats;
 } SCInterface;
 
 

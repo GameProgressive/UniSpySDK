@@ -17,6 +17,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+#define SC_CHECKBANLIST_SOAPACTION  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/CheckProfileOnBanList\""
 #define SC_CREATEMATCHLESSSESSION_SOAPACTION "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateMatchlessSession\""
 #define SC_CREATESESSION_SOAPACTION "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/CreateSession\""
 #define SC_SUBMITREPORT_SOAPACTION  "SOAPAction: \"" GSI_HTTP_PROTOCOL_URL "gamespy.net/competition/SubmitReport\""
@@ -31,14 +32,14 @@ const char * SC_SERVICE_NAMESPACES[SC_SERVICE_NAMESPACE_COUNT] =
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsInit(SCWebServices* theWebServices,
+SCResult sciWsInit(SCWebServices* webServices,
                    SCInterfacePtr theInterface)
 {
 
 	
-	GS_ASSERT(theWebServices != NULL);
+	GS_ASSERT(webServices != NULL);
 	GS_ASSERT(theInterface != NULL);
-	GS_ASSERT(!theWebServices->mInit);
+	GS_ASSERT(!webServices->mInit);
 
 	// Check gsCore
 	if (gsCoreIsShutdown() != GSCore_IN_USE)
@@ -47,19 +48,19 @@ SCResult sciWsInit(SCWebServices* theWebServices,
 	}
 
 	// Initialize SCWebServices struct
-	theWebServices->mInterface                  = theInterface;
-	theWebServices->mCreateSessionCallback      = NULL;
-	theWebServices->mSetReportIntentionCallback = NULL;
-	theWebServices->mSubmitReportDataCallback   = NULL;
-	theWebServices->mCreateSessionUserData      = NULL;
-	theWebServices->mSetReportIntentionUserData = NULL;
-	theWebServices->mSubmitReportUserData       = NULL;
-	theWebServices->mCreateSessionPending       = gsi_false;
-	theWebServices->mSetReportIntentionPending  = gsi_false;
-	theWebServices->mSubmitReportPending        = gsi_false;
+	webServices->mInterface                  = theInterface;
+	webServices->mCreateSessionCallback      = NULL;
+	webServices->mSetReportIntentionCallback = NULL;
+	webServices->mSubmitReportDataCallback   = NULL;
+	webServices->mCreateSessionUserData      = NULL;
+	webServices->mSetReportIntentionUserData = NULL;
+	webServices->mSubmitReportUserData       = NULL;
+	webServices->mCreateSessionPending       = gsi_false;
+	webServices->mSetReportIntentionPending  = gsi_false;
+	webServices->mSubmitReportPending        = gsi_false;
 
 	// Now initialized
-	theWebServices->mInit = gsi_true;
+	webServices->mInit = gsi_true;
 
 	return SCResult_NO_ERROR;
 }
@@ -67,154 +68,286 @@ SCResult sciWsInit(SCWebServices* theWebServices,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void sciWsDestroy(SCWebServices* theWebServices)
+void sciWsDestroy(SCWebServices* webServices)
 {
-	GS_ASSERT(theWebServices != NULL);
-	GS_ASSERT(theWebServices->mInit);
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
 
 	// No longer initialized
-	theWebServices->mInit = gsi_false;
+	webServices->mInit = gsi_false;
 
 	// Destroy SCWebServices struct
-	theWebServices->mCreateSessionCallback      = NULL;
-	theWebServices->mSetReportIntentionCallback = NULL;
-	theWebServices->mSubmitReportDataCallback   = NULL;
-	theWebServices->mCreateSessionUserData      = NULL;
-	theWebServices->mSetReportIntentionUserData = NULL;
-	theWebServices->mSubmitReportUserData       = NULL;
-	theWebServices->mCreateSessionPending       = gsi_false;
-	theWebServices->mSetReportIntentionPending  = gsi_false;
-	theWebServices->mSubmitReportPending        = gsi_false;
-	theWebServices->mInterface = NULL;
+	webServices->mCreateSessionCallback      = NULL;
+	webServices->mSetReportIntentionCallback = NULL;
+	webServices->mSubmitReportDataCallback   = NULL;
+	webServices->mCreateSessionUserData      = NULL;
+	webServices->mSetReportIntentionUserData = NULL;
+	webServices->mSubmitReportUserData       = NULL;
+	webServices->mCreateSessionPending       = gsi_false;
+	webServices->mSetReportIntentionPending  = gsi_false;
+	webServices->mSubmitReportPending        = gsi_false;
+	webServices->mInterface = NULL;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void sciWsThink(SCWebServices* theWebServices)
+void sciWsThink(SCWebServices* webServices)
 {
-	GS_ASSERT(theWebServices != NULL);
-	GS_ASSERT(theWebServices->mInit);
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
 
 	gsCoreThink(0);
 
-	GSI_UNUSED(theWebServices);
+	GSI_UNUSED(webServices);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsCreateSession (SCWebServices * theWebServices,
-							 gsi_u32         theGameId,
-							 const GSLoginCertificate * theCertificate,
-							 const GSLoginPrivateData * thePrivateData,
-							 SCCreateSessionCallback theCallback,
-							 gsi_time        theTimeoutMs,
-							 void *          theUserData)
+SCResult sciWsCheckBanList  (gsi_u32         hostProfileId,
+							 SCPlatform      hostPlatform,
+                             SCWebServices * webServices,
+							 gsi_u32         gameId,
+							 const GSLoginCertificate * certificate,
+							 const GSLoginPrivateData * privateData,
+							 SCCheckBanListCallback callback,
+							 gsi_time        timeoutMs,
+							 void *          userData)
 {
-	GSXmlStreamWriter aRequest = NULL;
+	GSXmlStreamWriter request = NULL;
 
 	// Check parameters
-	GS_ASSERT(theWebServices != NULL);
-	GS_ASSERT(theWebServices->mInit);
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
 
 	// Check for pending request
-	if (theWebServices->mCreateSessionPending)
+	if (webServices->mCheckBanListCallback)
 		return SCResult_CALLBACK_PENDING;
 
 	// Create the XML message writer
-	aRequest = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
-	if (aRequest == NULL)
+	request = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
+	if (request == NULL)
 		return SCResult_OUT_OF_MEMORY;
 
 	// Fill in the request data
-	if (gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "CreateSession")) ||
-		gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(wsLoginCertWriteXML(theCertificate, "gsc", aRequest)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(gsXmlWriteHexBinaryElement(aRequest, "gsc", "proof", (const gsi_u8*)thePrivateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "gameid", (gsi_u32)theGameId)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "CreateSession")) ||
-		gsi_is_false(gsXmlCloseWriter(aRequest))
+	if (gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "CheckProfileOnBanList")) ||
+		gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "certificate")) ||
+		gsi_is_false(wsLoginCertWriteXML(certificate, "gsc", request)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "certificate")) ||
+		gsi_is_false(gsXmlWriteHexBinaryElement(request, "gsc", "Proof", (const gsi_u8*)privateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "GameId", (gsi_u32)gameId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "HostProfileId", (gsi_u32)hostProfileId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "HostPlatformId", (gsi_u32)hostPlatform)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "CheckProfileOnBanList")) ||
+		gsi_is_false(gsXmlCloseWriter(request))
 		)
 	{
-		gsXmlFreeWriter(aRequest);
+		gsXmlFreeWriter(request);
 		return SCResult_HTTP_ERROR;
 	}
 
 	// Set callback
-	theWebServices->mCreateSessionCallback = theCallback;
-	theWebServices->mCreateSessionUserData = theUserData;
-	theWebServices->mCreateSessionPending  = gsi_true;
+	webServices->mCheckBanListCallback = callback;
+	webServices->mCheckBanListUserData = userData;
+	webServices->mCheckBanListPending  = gsi_true;
+
+	// Execute soap call
+	gsiExecuteSoap(scGameConfigDataServiceURL, SC_CHECKBANLIST_SOAPACTION, request, sciWsCheckBanListCallback, webServices);
+
+	GSI_UNUSED(timeoutMs);
+	return SCResult_NO_ERROR;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void sciWsCheckBanListCallback(GHTTPResult httpResult,
+								GSXmlStreamWriter  requestData,
+								GSXmlStreamReader  responseData,
+								void*        userData)
+{
+	int profileId = 0;
+	gsi_bool profileBanned = gsi_false;
+	int platformId = -1;
+	SCResult aTranslatedResult     = SCResult_HTTP_ERROR;
+	SCWebServices* aWebServices    = (SCWebServices*)userData;
+	
+	GS_ASSERT(aWebServices != NULL);
+	GS_ASSERT(aWebServices->mCheckBanListPending);
+
+	// Check for shutdown
+	if (!aWebServices->mInit)
+		return;
+
+	if (httpResult == GHTTPSuccess)
+	{
+		int result = SCServiceResult_NO_ERROR;
+
+		// Make sure a basic User Config Response is there.
+		if (gsi_is_false(gsXmlMoveToStart(responseData)) 
+			|| gsi_is_false(gsXmlMoveToNext(responseData, "CheckProfileOnBanListResponse")) 
+			|| gsi_is_false(gsXmlMoveToNext(responseData, "CheckProfileOnBanListResult")) 
+			|| gsi_is_false(gsXmlReadChildAsInt(responseData, "result", &result)) 
+			)
+		{
+			aTranslatedResult = SCResult_RESPONSE_INVALID;
+		}
+		else
+		{
+			// Read the User Config data.
+			if (result == SCServiceResult_NO_ERROR)
+			{
+				if(gsi_is_false(gsXmlMoveToNext(responseData, "UserConfig"))
+                || gsi_is_false(gsXmlReadAttributeAsInt(responseData, "ProfileID", &profileId))
+				|| gsi_is_false(gsXmlReadAttributeAsInt(responseData, "PlatformID", &platformId))
+				|| gsi_is_false(gsXmlReadAttributeAsBool(responseData, "IsBanned", &profileBanned))
+				)
+				{
+					aTranslatedResult = SCResult_RESPONSE_INVALID;
+				}
+
+				aTranslatedResult = SCResult_NO_ERROR;
+			}
+			else
+			{
+				aTranslatedResult = SCResult_UNKNOWN_RESPONSE;
+			}
+		}
+	}
+	else
+	{
+		aTranslatedResult = SCResult_HTTP_ERROR;
+	}
+
+	// Client callback
+	aWebServices->mCheckBanListPending = gsi_false;
+	if (aWebServices->mCheckBanListCallback != NULL)
+	{
+		aWebServices->mCheckBanListCallback(aWebServices->mInterface, httpResult, aTranslatedResult, aWebServices->mCheckBanListUserData, profileId, platformId, profileBanned);
+		aWebServices->mCheckBanListUserData = NULL;
+		aWebServices->mCheckBanListCallback = NULL;
+	}
+	GSI_UNUSED(requestData);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+SCResult sciWsCreateSession (SCWebServices * webServices,
+							 gsi_u32         gameId,
+  						     gsi_u16         platformId,
+							 const GSLoginCertificate * certificate,
+							 const GSLoginPrivateData * privateData,
+							 SCCreateSessionCallback callback,
+							 gsi_time        timeoutMs,
+							 void *          userData)
+{
+	GSXmlStreamWriter request = NULL;
+
+	// Check parameters
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
+
+	// Check for pending request
+	if (webServices->mCreateSessionPending)
+		return SCResult_CALLBACK_PENDING;
+
+	// Create the XML message writer
+	request = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
+	if (request == NULL)
+		return SCResult_OUT_OF_MEMORY;
+
+	// Fill in the request data
+	if (gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "CreateSession")) ||
+		gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "certificate")) ||
+		gsi_is_false(wsLoginCertWriteXML(certificate, "gsc", request)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "certificate")) ||
+		gsi_is_false(gsXmlWriteHexBinaryElement(request, "gsc", "proof", (const gsi_u8*)privateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "gameid", (gsi_u32)gameId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "platformid", (gsi_u16)platformId)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "CreateSession")) ||
+		gsi_is_false(gsXmlCloseWriter(request))
+		)
+	{
+		gsXmlFreeWriter(request);
+		return SCResult_HTTP_ERROR;
+	}
+
+	// Set callback
+	webServices->mCreateSessionCallback = callback;
+	webServices->mCreateSessionUserData = userData;
+	webServices->mCreateSessionPending  = gsi_true;
 
 	// Execute soap call
 	gsiExecuteSoap(scServiceURL, SC_CREATESESSION_SOAPACTION, 
-		aRequest, sciWsCreateSessionCallback, theWebServices);
-	GSI_UNUSED(theTimeoutMs);
+		request, sciWsCreateSessionCallback, webServices);
+	GSI_UNUSED(timeoutMs);
 	return SCResult_NO_ERROR;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsCreateMatchlessSession (SCWebServices * theWebServices,
-							          gsi_u32         theGameId,
-							          const GSLoginCertificate * theCertificate,
-							          const GSLoginPrivateData * thePrivateData,
-							          SCCreateSessionCallback theCallback,
-							          gsi_time        theTimeoutMs,
-							          void *          theUserData)
+SCResult sciWsCreateMatchlessSession (SCWebServices * webServices,
+							          gsi_u32         gameId,
+  								      gsi_u16         platformId,
+							          const GSLoginCertificate * certificate,
+							          const GSLoginPrivateData * privateData,
+							          SCCreateSessionCallback callback,
+							          gsi_time        timeoutMs,
+							          void *          userData)
 {
-	GSXmlStreamWriter aRequest = NULL;
+	GSXmlStreamWriter request = NULL;
 
 	// Check parameters
-	GS_ASSERT(theWebServices != NULL);
-	GS_ASSERT(theWebServices->mInit);
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
 
 	// Check for pending request
-	if (theWebServices->mCreateSessionPending)
+	if (webServices->mCreateSessionPending)
 		return SCResult_CALLBACK_PENDING;
 
 	// Create the XML message writer
-	aRequest = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
-	if (aRequest == NULL)
+	request = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
+	if (request == NULL)
 		return SCResult_OUT_OF_MEMORY;
 
 	// Fill in the request data
-	if (gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "CreateMatchlessSession")) ||
-		gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(wsLoginCertWriteXML(theCertificate, "gsc", aRequest)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(gsXmlWriteHexBinaryElement(aRequest, "gsc", "proof", (const gsi_u8*)thePrivateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "gameid", (gsi_u32)theGameId)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "CreateMatchlessSession")) ||
-		gsi_is_false(gsXmlCloseWriter(aRequest))
+	if (gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "CreateMatchlessSession")) ||
+		gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "certificate")) ||
+		gsi_is_false(wsLoginCertWriteXML(certificate, "gsc", request)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "certificate")) ||
+		gsi_is_false(gsXmlWriteHexBinaryElement(request, "gsc", "proof", (const gsi_u8*)privateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "gameid", (gsi_u32)gameId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "platformid", (gsi_u16)platformId)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "CreateMatchlessSession")) ||
+		gsi_is_false(gsXmlCloseWriter(request))
 		)
 	{
-		gsXmlFreeWriter(aRequest);
+		gsXmlFreeWriter(request);
 		return SCResult_HTTP_ERROR;
 	}
 
 	// Set callback
-	theWebServices->mCreateSessionCallback = theCallback;
-	theWebServices->mCreateSessionUserData = theUserData;
-	theWebServices->mCreateSessionPending  = gsi_true;
+	webServices->mCreateSessionCallback = callback;
+	webServices->mCreateSessionUserData = userData;
+	webServices->mCreateSessionPending  = gsi_true;
 
 	// Execute soap call
 	gsiExecuteSoap(scServiceURL, SC_CREATEMATCHLESSSESSION_SOAPACTION, 
-		aRequest, sciWsCreateSessionCallback, theWebServices);
-	GSI_UNUSED(theTimeoutMs);
+		request, sciWsCreateSessionCallback, webServices);
+	GSI_UNUSED(timeoutMs);
 	return SCResult_NO_ERROR;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void sciWsCreateSessionCallback(GHTTPResult theHttpResult,
-								GSXmlStreamWriter  theRequestData,
-								GSXmlStreamReader  theResponseData,
-								void*        theUserData)
+void sciWsCreateSessionCallback(GHTTPResult httpResult,
+								GSXmlStreamWriter  requestData,
+								GSXmlStreamReader  responseData,
+								void*        userData)
 {
 	SCResult aTranslatedResult     = SCResult_HTTP_ERROR;
-	SCWebServices* aWebServices    = (SCWebServices*)theUserData;
+	SCWebServices* aWebServices    = (SCWebServices*)userData;
 	
 	char csid[255];
 	char ccid[255];
@@ -228,43 +361,43 @@ void sciWsCreateSessionCallback(GHTTPResult theHttpResult,
 	if (!aWebServices->mInit)
 		return;
 
-	if (theHttpResult == GHTTPSuccess)
+	if (httpResult == GHTTPSuccess)
 	{
 		int createResult = 0;
 
 		// Parse through in a way that will work for either type of CreateSession response.
-		if (gsi_is_false(gsXmlMoveToStart(theResponseData)))
+		if (gsi_is_false(gsXmlMoveToStart(responseData)))
 		{
 			aTranslatedResult = SCResult_RESPONSE_INVALID;
 		}
-		else if(gsi_is_false(gsXmlMoveToNext(theResponseData, "CreateSessionResponse")))
+		else if(gsi_is_false(gsXmlMoveToNext(responseData, "CreateSessionResponse")))
 		{
-			if(gsi_is_false(gsXmlMoveToNext(theResponseData, "CreateMatchlessSessionResponse")))
+			if(gsi_is_false(gsXmlMoveToNext(responseData, "CreateMatchlessSessionResponse")))
 			{
 				aTranslatedResult = SCResult_RESPONSE_INVALID;
 			}
 		}
 		
-		if(gsi_is_false(gsXmlMoveToNext(theResponseData, "CreateSessionResult")))
+		if(gsi_is_false(gsXmlMoveToNext(responseData, "CreateSessionResult")))
 		{
-			if(gsi_is_false(gsXmlMoveToNext(theResponseData, "CreateMatchlessSessionResult")))
+			if(gsi_is_false(gsXmlMoveToNext(responseData, "CreateMatchlessSessionResult")))
 			{
 				aTranslatedResult = SCResult_RESPONSE_INVALID;
 			}
 		}
 
-		if(gsi_is_false(gsXmlReadChildAsInt(theResponseData, "result", &createResult)))
+		if(gsi_is_false(gsXmlReadChildAsInt(responseData, "result", &createResult)))
 		{
 			aTranslatedResult = SCResult_RESPONSE_INVALID;
 		}
 		else if(aTranslatedResult != SCResult_RESPONSE_INVALID)
 		{
 			// Parse server reported result
-			if (createResult == SCWsResult_NO_ERROR)
+			if (createResult == SCServiceResult_NO_ERROR)
 			{
 				// Read session and connection ID
-				if(gsi_is_false(gsXmlReadChildAsStringNT(theResponseData, "csid", csid, csidLen)) ||
-				   gsi_is_false(gsXmlReadChildAsStringNT(theResponseData, "ccid", ccid, ccidLen))
+				if(gsi_is_false(gsXmlReadChildAsStringNT(responseData, "csid", csid, csidLen)) ||
+				   gsi_is_false(gsXmlReadChildAsStringNT(responseData, "ccid", ccid, ccidLen))
 				   )
 				{
 					aTranslatedResult = SCResult_RESPONSE_INVALID;
@@ -278,11 +411,6 @@ void sciWsCreateSessionCallback(GHTTPResult theHttpResult,
 			}
 			else
 			{
-				// Server reported an error, handle it?
-
-				// TODO:
-				//   translate result into developer useable form
-				//   report result string as gsDebugFormat message for easier debugging
 				aTranslatedResult = SCResult_RESPONSE_INVALID;
 			}
 		}
@@ -296,83 +424,83 @@ void sciWsCreateSessionCallback(GHTTPResult theHttpResult,
 	aWebServices->mCreateSessionPending = gsi_false;
 	if (aWebServices->mCreateSessionCallback != NULL)
 	{
-		aWebServices->mCreateSessionCallback(aWebServices->mInterface, theHttpResult, aTranslatedResult, aWebServices->mCreateSessionUserData);
+		aWebServices->mCreateSessionCallback(aWebServices->mInterface, httpResult, aTranslatedResult, aWebServices->mCreateSessionUserData);
 		aWebServices->mCreateSessionUserData = NULL;
 		aWebServices->mCreateSessionCallback = NULL;
 	}
-	GSI_UNUSED(theRequestData);
+	GSI_UNUSED(requestData);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsSetReportIntention(SCWebServices* theWebServices,
-								 gsi_u32        theGameId,
+SCResult sciWsSetReportIntention(SCWebServices* webServices,
+								 gsi_u32        gameId,
 								 const char *   theSessionId,
 								 const char *   theConnectionId,
 								 gsi_bool       isAuthoritative,
-								 const GSLoginCertificate * theCertificate,
-								 const GSLoginPrivateData * thePrivateData,
-                                 SCSetReportIntentionCallback theCallback,
-                                 gsi_time       theTimeoutMs,
-								 void *         theUserData)
+								 const GSLoginCertificate * certificate,
+								 const GSLoginPrivateData * privateData,
+                                 SCSetReportIntentionCallback callback,
+                                 gsi_time       timeoutMs,
+								 void *         userData)
 {
-	GSXmlStreamWriter aRequest = NULL;
+	GSXmlStreamWriter request = NULL;
 
 	// Check parameters
-	GS_ASSERT(theWebServices != NULL);
-	GS_ASSERT(theWebServices->mInit);
+	GS_ASSERT(webServices != NULL);
+	GS_ASSERT(webServices->mInit);
 
 	// Check for pending request
-	if (theWebServices->mSetReportIntentionPending)
+	if (webServices->mSetReportIntentionPending)
 		return SCResult_CALLBACK_PENDING;
 
 	// Create the XML message writer
-	aRequest = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
-	if (aRequest == NULL)
+	request = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
+	if (request == NULL)
 		return SCResult_OUT_OF_MEMORY;
 
 	// Fill in the request data
-	if (gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "SetReportIntention")) ||
-		gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(wsLoginCertWriteXML(theCertificate, "gsc", aRequest)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(gsXmlWriteHexBinaryElement(aRequest, "gsc", "proof", (const gsi_u8*)thePrivateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
-		gsi_is_false(gsXmlWriteStringElement(aRequest, "gsc", "csid", theSessionId)) ||
-		gsi_is_false(gsXmlWriteStringElement(aRequest, "gsc", "ccid", theConnectionId)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "gameid", (gsi_u32)theGameId)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "authoritative", (gsi_u32)(gsi_is_true(isAuthoritative) ? 1:0))) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "SetReportIntention")) ||
-		gsi_is_false(gsXmlCloseWriter(aRequest))
+	if (gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "SetReportIntention")) ||
+		gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "certificate")) ||
+		gsi_is_false(wsLoginCertWriteXML(certificate, "gsc", request)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "certificate")) ||
+		gsi_is_false(gsXmlWriteHexBinaryElement(request, "gsc", "proof", (const gsi_u8*)privateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+		gsi_is_false(gsXmlWriteStringElement(request, "gsc", "csid", theSessionId)) ||
+		gsi_is_false(gsXmlWriteStringElement(request, "gsc", "ccid", theConnectionId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "gameid", (gsi_u32)gameId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "authoritative", (gsi_u32)(gsi_is_true(isAuthoritative) ? 1:0))) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "SetReportIntention")) ||
+		gsi_is_false(gsXmlCloseWriter(request))
 		)
 	{
-		gsXmlFreeWriter(aRequest);
+		gsXmlFreeWriter(request);
 		return SCResult_HTTP_ERROR;
 	}
 
 	// Set callback
-	theWebServices->mSetReportIntentionCallback = theCallback;
-	theWebServices->mSetReportIntentionUserData = theUserData;
-	theWebServices->mSetReportIntentionPending = gsi_true;
+	webServices->mSetReportIntentionCallback = callback;
+	webServices->mSetReportIntentionUserData = userData;
+	webServices->mSetReportIntentionPending = gsi_true;
 
 	// Execute soap call
 	gsiExecuteSoap(scServiceURL, SC_SETINTENTION_SOAPACTION, 
-		aRequest, sciWsSetReportIntentionCallback, theWebServices);
+		request, sciWsSetReportIntentionCallback, webServices);
 	
-	GSI_UNUSED(theTimeoutMs);
+	GSI_UNUSED(timeoutMs);
 	return SCResult_NO_ERROR;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void sciWsSetReportIntentionCallback(GHTTPResult theHttpResult,
-                                     GSXmlStreamWriter theRequestData,
-                                     GSXmlStreamReader theResponseData,
-                                     void*       theUserData)
+void sciWsSetReportIntentionCallback(GHTTPResult httpResult,
+                                     GSXmlStreamWriter requestData,
+                                     GSXmlStreamReader responseData,
+                                     void*       userData)
 {
 	SCResult aTranslatedResult     = SCResult_HTTP_ERROR;
-	SCWebServices* aWebServices    = (SCWebServices*)theUserData;
+	SCWebServices* aWebServices    = (SCWebServices*)userData;
 
 	char ccid[255];
 	int ccidLen = 255;
@@ -385,22 +513,22 @@ void sciWsSetReportIntentionCallback(GHTTPResult theHttpResult,
 	if (!aWebServices->mInit)
 		return;
 
-	if (theHttpResult == GHTTPSuccess)
+	if (httpResult == GHTTPSuccess)
 	{
 		int intentionResult = 0;
 
-		if (gsi_is_false(gsXmlMoveToStart(theResponseData)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseData, "SetReportIntentionResponse")) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseData, "SetReportIntentionResult")) ||
-			gsi_is_false(gsXmlReadChildAsInt(theResponseData, "result", &intentionResult)) ||
-  		    gsi_is_false(gsXmlReadChildAsStringNT(theResponseData, "ccid", ccid, ccidLen))
+		if (gsi_is_false(gsXmlMoveToStart(responseData)) ||
+			gsi_is_false(gsXmlMoveToNext(responseData, "SetReportIntentionResponse")) ||
+			gsi_is_false(gsXmlMoveToNext(responseData, "SetReportIntentionResult")) ||
+			gsi_is_false(gsXmlReadChildAsInt(responseData, "result", &intentionResult)) ||
+  		    gsi_is_false(gsXmlReadChildAsStringNT(responseData, "ccid", ccid, ccidLen))
 			)
 		{
 			aTranslatedResult = SCResult_RESPONSE_INVALID;
 		}
 		else
 		{
-			if (intentionResult == SCWsResult_NO_ERROR)
+			if (intentionResult == SCServiceResult_NO_ERROR)
 			{
 				aTranslatedResult = SCResult_NO_ERROR;
 				sciInterfaceSetConnectionId((SCInterface*)aWebServices->mInterface, ccid);
@@ -419,13 +547,13 @@ void sciWsSetReportIntentionCallback(GHTTPResult theHttpResult,
 	if (aWebServices->mSetReportIntentionCallback != NULL)
 	{
 		aWebServices->mSetReportIntentionCallback(aWebServices->mInterface,
-			                                      theHttpResult,
+			                                      httpResult,
 		                                          aTranslatedResult,
 												  aWebServices->mSetReportIntentionUserData);
 		aWebServices->mSetReportIntentionUserData = NULL;
 		aWebServices->mSetReportIntentionCallback = NULL;
 	}
-	GSI_UNUSED(theRequestData);
+	GSI_UNUSED(requestData);
 }
 
 
@@ -436,9 +564,9 @@ extern GHTTPBool ghiPostAddFileFromMemory(GHTTPPost post,const char * name,const
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Private GSSoapCustomFunc used by sciWsSubmitReport
-static void sciWsSubmitReportCustom(GHTTPPost thePost, void* theUserData)
+static void sciWsSubmitReportCustom(GHTTPPost thePost, void* userData)
 {
-	SCWebServices* aWebServices = (SCWebServices*)theUserData;
+	SCWebServices* aWebServices = (SCWebServices*)userData;
 
 	//Use internal method to get around unicode calls
 	ghiPostAddFileFromMemory(thePost, "report", (char *)aWebServices->mSubmitReportData,
@@ -448,87 +576,70 @@ static void sciWsSubmitReportCustom(GHTTPPost thePost, void* theUserData)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SCResult sciWsSubmitReport(SCWebServices* theWebServices,
-						   gsi_u32        theGameId,
+SCResult sciWsSubmitReport(SCWebServices* webServices,
+						   gsi_u32        gameId,
 						   const char *   theSessionId,
 						   const char *   theConnectionId,
 						   const SCIReport *    theReport,
 						   gsi_bool       isAuthoritative,
-						   const GSLoginCertificate * theCertificate,
-						   const GSLoginPrivateData * thePrivateData,
-                           SCSubmitReportCallback theCallback,
-                           gsi_time       theTimeoutMs,
-						   void *         theUserData)
+						   const GSLoginCertificate * certificate,
+						   const GSLoginPrivateData * privateData,
+                           SCSubmitReportCallback callback,
+                           gsi_time       timeoutMs,
+						   void *         userData)
 {
-	GSXmlStreamWriter aRequest = NULL;
-	//SCIReportHeader * aReportHeader = NULL;
-	//gsi_u32 aTotalSize = 0;
-
-	//SCReportStatus*   aStatus  = NULL;
+	GSXmlStreamWriter request = NULL;
 
 	// Check parameters
-	GS_ASSERT(theWebServices != NULL);
-	//GS_ASSERT(theReportData != NULL);
+	GS_ASSERT(webServices != NULL);
 
 	// Check for pending request
-	if (theWebServices->mSubmitReportPending)
+	if (webServices->mSubmitReportPending)
 	{
 		return SCResult_CALLBACK_PENDING;
 	}
-
-	// Get a pointer to the header
-	//aReportHeader = (SCIReportHeader*)theReport->mBuffer.mData;
 
 	// Check for complete report
 	if (theReport->mBuffer.mPos < sizeof(SCIReportHeader))
 		return SCResult_REPORT_INVALID;
 
-	// Check size (early check for easier debugging)
-	//aTotalSize = sizeof(SCIReportHeader);
-	//aTotalSize += htonl(aReportHeader->mPlayerDataLength);
-	//aTotalSize += htonl(aReportHeader->mTeamDataLength);
-	//aTotalSize += htonl(aReportHeader->mSessionDataLength);
-	// aTotalSize += auth info...
-	//if (theReport->mBuffer.mPos != aTotalSize)
-	//	return SCResult_REPORT_INVALID;
-	
 	// Create the XML message writer
-	aRequest = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
-	if (aRequest == NULL)
+	request = gsXmlCreateStreamWriter(SC_SERVICE_NAMESPACES, SC_SERVICE_NAMESPACE_COUNT);
+	if (request == NULL)
 		return SCResult_OUT_OF_MEMORY;
 
 	// Fill in the request data
-	if (gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "SubmitReport")) ||
-		gsi_is_false(gsXmlWriteOpenTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(wsLoginCertWriteXML(theCertificate, "gsc", aRequest)) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "certificate")) ||
-		gsi_is_false(gsXmlWriteHexBinaryElement(aRequest, "gsc", "proof", (const gsi_u8*)thePrivateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
-		gsi_is_false(gsXmlWriteStringElement(aRequest, "gsc", "csid", theSessionId)) ||
-		gsi_is_false(gsXmlWriteStringElement(aRequest, "gsc", "ccid", theConnectionId)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "gameid", (gsi_u32)theGameId)) ||
-		gsi_is_false(gsXmlWriteIntElement(aRequest, "gsc", "authoritative", (gsi_u32)(gsi_is_true(isAuthoritative) ? 1:0))) ||
-		gsi_is_false(gsXmlWriteCloseTag(aRequest, "gsc", "SubmitReport")) ||
-		gsi_is_false(gsXmlCloseWriter(aRequest))
+	if (gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "SubmitReport")) ||
+		gsi_is_false(gsXmlWriteOpenTag(request, "gsc", "certificate")) ||
+		gsi_is_false(wsLoginCertWriteXML(certificate, "gsc", request)) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "certificate")) ||
+		gsi_is_false(gsXmlWriteHexBinaryElement(request, "gsc", "proof", (const gsi_u8*)privateData->mKeyHash, GS_CRYPT_MD5_HASHSIZE)) ||
+		gsi_is_false(gsXmlWriteStringElement(request, "gsc", "csid", theSessionId)) ||
+		gsi_is_false(gsXmlWriteStringElement(request, "gsc", "ccid", theConnectionId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "gameid", (gsi_u32)gameId)) ||
+		gsi_is_false(gsXmlWriteIntElement(request, "gsc", "authoritative", (gsi_u32)(gsi_is_true(isAuthoritative) ? 1:0))) ||
+		gsi_is_false(gsXmlWriteCloseTag(request, "gsc", "SubmitReport")) ||
+		gsi_is_false(gsXmlCloseWriter(request))
 		)
 	{
-		gsXmlFreeWriter(aRequest);
+		gsXmlFreeWriter(request);
 		return SCResult_OUT_OF_MEMORY;
 	}
 	
 	// Get submission size
-	theWebServices->mSubmitReportData  = (gsi_u8*)theReport->mBuffer.mData;
-	theWebServices->mSubmitReportLength = theReport->mBuffer.mPos;
+	webServices->mSubmitReportData  = (gsi_u8*)theReport->mBuffer.mData;
+	webServices->mSubmitReportLength = theReport->mBuffer.mPos;
 
 	// Set callback
-	theWebServices->mSubmitReportDataCallback = theCallback;
-	theWebServices->mSubmitReportUserData     = theUserData;
-	theWebServices->mSubmitReportPending      = gsi_true;
+	webServices->mSubmitReportDataCallback = callback;
+	webServices->mSubmitReportUserData     = userData;
+	webServices->mSubmitReportPending      = gsi_true;
 
 	// Execute soap call
 	gsiExecuteSoapCustom(scServiceURL, SC_SUBMITREPORT_SOAPACTION, 
-		aRequest, sciWsSubmitReportCallback,sciWsSubmitReportCustom, theWebServices);
+		request, sciWsSubmitReportCallback,sciWsSubmitReportCustom, webServices);
 	
-	GSI_UNUSED(theTimeoutMs);
+	GSI_UNUSED(timeoutMs);
 	return SCResult_NO_ERROR;
 }
 
@@ -536,13 +647,13 @@ SCResult sciWsSubmitReport(SCWebServices* theWebServices,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void sciWsSubmitReportCallback(GHTTPResult       theHttpResult,
-                               GSXmlStreamWriter theRequestData,
-                               GSXmlStreamReader theResponseData,
-                               void*             theUserData)
+void sciWsSubmitReportCallback(GHTTPResult       httpResult,
+                               GSXmlStreamWriter requestData,
+                               GSXmlStreamReader responseData,
+                               void*             userData)
 {
 	SCResult aTranslatedResult     = SCResult_HTTP_ERROR;
-	SCWebServices* aWebServices    = (SCWebServices*)theUserData;
+	SCWebServices* aWebServices    = (SCWebServices*)userData;
 
 	GS_ASSERT(aWebServices != NULL);
 
@@ -552,14 +663,14 @@ void sciWsSubmitReportCallback(GHTTPResult       theHttpResult,
 
 	GS_ASSERT(aWebServices->mSubmitReportPending);
 
-	if (theHttpResult == GHTTPSuccess)
+	if (httpResult == GHTTPSuccess)
 	{
 		int submitResult = 0;
 
-		if (gsi_is_false(gsXmlMoveToStart(theResponseData)) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseData, "SubmitReportResponse")) ||
-			gsi_is_false(gsXmlMoveToNext(theResponseData, "SubmitReportResult")) ||
-			gsi_is_false(gsXmlReadChildAsInt(theResponseData, "result", &submitResult))
+		if (gsi_is_false(gsXmlMoveToStart(responseData)) ||
+			gsi_is_false(gsXmlMoveToNext(responseData, "SubmitReportResponse")) ||
+			gsi_is_false(gsXmlMoveToNext(responseData, "SubmitReportResult")) ||
+			gsi_is_false(gsXmlReadChildAsInt(responseData, "result", &submitResult))
 			)
 		{
 			aTranslatedResult = SCResult_RESPONSE_INVALID;
@@ -568,14 +679,11 @@ void sciWsSubmitReportCallback(GHTTPResult       theHttpResult,
 		{
 			switch (submitResult)
 			{
-			case SCWsResult_NO_ERROR:       
+			case SCServiceResult_NO_ERROR:       
 				aTranslatedResult = SCResult_NO_ERROR;          
 				break;
-			case SCWsResult_REPORT_INVALID: 
+			case SCServiceResult_REPORT_INVALID: 
 				aTranslatedResult = SCResult_REPORT_INVALID;    
-				break;
-			case SCWsResult_SINGLE_ATTACHMENT_EXPECTED: 
-				aTranslatedResult = SCResult_SUBMISSION_FAILED; 
 				break;
 			default:        
 				aTranslatedResult = SCResult_UNKNOWN_RESPONSE; 
@@ -593,13 +701,13 @@ void sciWsSubmitReportCallback(GHTTPResult       theHttpResult,
 	if (aWebServices->mSubmitReportDataCallback != NULL)
 	{
 		aWebServices->mSubmitReportDataCallback(aWebServices->mInterface,
-			                                theHttpResult,
+			                                httpResult,
 		                                    aTranslatedResult,
 											aWebServices->mSubmitReportUserData);
 		aWebServices->mSubmitReportUserData = NULL;
 		aWebServices->mSubmitReportDataCallback = NULL;
 	}
-	GSI_UNUSED(theRequestData);
+	GSI_UNUSED(requestData);
 }
 
 

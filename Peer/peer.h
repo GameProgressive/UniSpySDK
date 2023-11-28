@@ -30,21 +30,22 @@
 extern "C" {
 #endif
 
-/************
-** DEFINES **
-************/
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Constants
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
 // Defines for the msg param that's passed into peerListingGamesCallback().
-// PANTS-04.20.00-changed from PI_* to PEER_*
-// PANTS-09.26.02-added PEER_COMPLETE
-///////////////////////////////////////////////////////////////////////////
 #define PEER_ADD        0  // a server is being added
 #define PEER_UPDATE     1  // a server has been updated
 #define PEER_REMOVE     2  // a server has been removed
 #define PEER_CLEAR      3  // all the servers have been cleared
 #define PEER_COMPLETE   4  // the initial listing of servers is complete
 
-// Nick errors, for peerNickErrorCallback.
-//////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Nick errors, for peerNickErrorCallback().
 #define PEER_NICK_OK                0
 #define PEER_IN_USE                 1  // the nick is already being used
 #define PEER_INVALID                2  // the nick contains invalid characters
@@ -53,18 +54,21 @@ extern "C" {
 #define PEER_INVALID_UNIQUENICK     5  // the uniquenick to associate with the account is invalid or in use
 #define PEER_NICK_TOO_LONG          6  // the nick was too long 
 	
-// Possible values for the failureReason passed to the peerConnectCallback.
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Possible values for the failureReason passed to the 
+// peerConnectCallback().
 #define PEER_DISCONNECTED           0  // disconnected from, or unable to connect to, the server
 #define PEER_NICK_ERROR             1  // a nick error was either ignored or not handled
 #define PEER_LOGIN_FAILED           2  // the login info passed to peerConnectLogin was not valid
 
-// Maximum length of a room password, including the terminating NUL.
-////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Maximum length of a room password, including the 
+// terminating NULL.
 #define PEER_PASSWORD_LEN     24
 
-// Each player can have various flags set for each room they are in.
-////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Each player can have various flags set for each room they 
+// are in.
 #define PEER_FLAG_STAGING     0x01  // s
 #define PEER_FLAG_READY       0x02  // r
 #define PEER_FLAG_PLAYING     0x04  // g
@@ -73,8 +77,8 @@ extern "C" {
 #define PEER_FLAG_OP          0x20
 #define PEER_FLAG_VOICE       0x40
 
-// Bitfield reporting options for peerStartGame.
-////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+// Bitfield reporting options for peerStartGame().
 #define PEER_KEEP_REPORTING      0  // Continue reporting.
 #define PEER_STOP_REPORTING      1  // Stop reporting.  Cannot be used with other options.
 #define PEER_REPORT_INFO         2  // Continue reporting server keys (as if it were not playing).

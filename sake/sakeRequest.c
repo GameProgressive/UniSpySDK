@@ -232,10 +232,19 @@ static SAKEStartRequestResult SAKE_CALL sakeiSetupRequest(SAKERequest request)
 	// store a utility pointer to the info
 	info = request->mInfo;
 
-	// check the input
-	result = info->mValidateInputFunc(request);
-	if(result != SAKEStartRequestResult_SUCCESS)
-		return result;
+    if ((info->mValidateInputFunc != NULL) && (request->mInput != NULL))
+    {
+	    // check the input
+	    result = info->mValidateInputFunc(request);
+	    if(result != SAKEStartRequestResult_SUCCESS)
+        {		
+            if(info->mFreeDataFunc)
+            {
+                    info->mFreeDataFunc(request);
+            }
+		    return result;
+        }
+    }
 
 	// create the xml request stream
 	request->mSoapRequest = gsXmlCreateStreamWriter(GSI_SAKE_SERVICE_NAMESPACES, GSI_SAKE_SERVICE_NAMESPACE_COUNT);

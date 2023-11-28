@@ -33,6 +33,29 @@ int closesocket(SOCKET sock)
 	int rcode = SOC_Close(sock);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+
+int closesocketsure(SOCKET sock, gsi_bool *notInCloseSocket)
+{
+	int rcode = SOC_Close(sock);
+
+	if(rcode == 0)
+	{
+		*notInCloseSocket = !(*notInCloseSocket);
+		return *notInCloseSocket;
+	}
+	else if ( !SOC_IsReleased(sock))
+	{
+		return gsi_false;
+	}
+	else
+	{
+		// We cannot do anything but assume that socket will close
+		CheckRcode(rcode, NITRO_SOCKET_ERROR);
+		*notInCloseSocket = gsi_true;
+		return gsi_true;
+	}
+}
+
 int shutdown(SOCKET sock, int how)
 {
 	int rcode = SOC_Shutdown(sock, how);

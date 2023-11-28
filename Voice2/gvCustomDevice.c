@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gvCustomDevice.c
+// SDK:		GameSpy Voice 2 SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2004-2009 GameSpy Industries, Inc.
+
 #include "gvCustomDevice.h"
 #include "gvSource.h"
 #include "gvCodec.h"
@@ -121,7 +128,7 @@ static GVScalar gviCustomGetCaptureThreshold(GVIDevice * device)
 static int gviCustomGetAvailableCaptureBytes(GVDevice device)
 {
 	// not supported with custom devices
-	assert(0);
+	GS_ASSERT(0);
 	GSI_UNUSED(device);
 	return 0;
 }
@@ -129,7 +136,7 @@ static int gviCustomGetAvailableCaptureBytes(GVDevice device)
 static GVBool gviCustomCapturePacket(GVDevice device, GVByte * packet, int * len, GVFrameStamp * frameStamp, GVScalar * volume)
 {
 	// not supported with custom devices
-	assert(0);
+	GS_ASSERT(0);
 	GSI_UNUSED(device);
 	GSI_UNUSED(packet);
 	GSI_UNUSED(len);
@@ -232,12 +239,12 @@ GVBool gviGetCustomPlaybackAudio(GVIDevice * device, GVSample * audio, int numSa
 	int i;
 	GVBool result = GVFalse;
 
-	// don't do anythying if we're not playing
+	// don't do anything if we're not playing
 	if(!data->m_playbackStarted)
 		return GVFalse;
 
 	// the len must be a multiple of the frame size
-	assert(!(numSamples % GVISamplesPerFrame));
+	GS_ASSERT(!(numSamples % GVISamplesPerFrame));
 
 	// calc the number of frames
 	numFrames = (numSamples / GVISamplesPerFrame);
@@ -301,7 +308,7 @@ GVBool gviSetCustomCaptureAudio(GVDevice device, const GVSample * audio, int num
 		return GVFalse;
 
 	// the len must be a multiple of the frame size
-	assert(!(numSamples % GVISamplesPerFrame));
+	GS_ASSERT(!(numSamples % GVISamplesPerFrame));
 
 	// set the frameStamp
 	*frameStamp = data->m_captureClock;
@@ -316,7 +323,7 @@ GVBool gviSetCustomCaptureAudio(GVDevice device, const GVSample * audio, int num
 		numBytes = (int)(numSamples * GV_BYTES_PER_SAMPLE);
 
 		// make sure they have enough space in the packet buffer
-		assert(len >= numBytes);
+		GS_ASSERT(len >= numBytes);
 		if(len < numBytes)
 			return GVFalse;
 

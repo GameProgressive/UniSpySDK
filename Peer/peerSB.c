@@ -445,8 +445,16 @@ static int piSBAutoMatchGetServerRating(PEER peer, SBServer server)
 	PEER_CONNECTION;
 		
 	// ignore the local machine
-	if(connection->autoMatchReporting && piIsLocalServer(peer, server))
+	if(connection->autoMatchReporting && piIsLocalServer(peer, server)) 
+	{
 		return 0;
+	}
+	
+	// there is a possibility of us getting our own server even when we go back to searching
+	if(connection->autoMatchStatus == PEERSearching && piIsLocalServer(peer, server)) 
+	{
+		return 0;
+	}
 
 	// check if it got the keys.
 	if(!SBServerHasFullKeys(server)) 
@@ -568,7 +576,14 @@ static void piSBAutoMatchCheckPushedServer(PEER peer, SBServer server)
 		// no matches?
 		if(!count)
 		{
-			piSetAutoMatchStatus(peer, PEERWaiting);
+			// don't set the next status to PEERWaiting if we're already in PEERWaiting
+			if (connection->autoMatchNextStatus != PEERWaiting && connection->autoMatchStatus != PEERWaiting)
+			{
+				connection->autoMatchNextStatus = PEERWaiting;
+				connection->autoMatchDelay = piGetAutoMatchDelay();
+			}
+
+			//piSetAutoMatchStatus(peer, PEERWaiting);
 			return;
 		}
 			
@@ -678,7 +693,12 @@ static void piSBAutoMatchListCallback
 		if(!SBServerListCount(&connection->autoMatchList) ||
 			(0==connection->autoMatchEngine.querylist.count))
 		{
-			piSetAutoMatchStatus(peer, PEERWaiting);
+			if (connection->autoMatchStatus == PEERSearching)
+			{
+				connection->autoMatchDelay = piGetAutoMatchDelay();
+				connection->autoMatchNextStatus = PEERWaiting;
+			}
+			//piSetAutoMatchStatus(peer, PEERWaiting);
 		}
 		break;
 	case slc_queryerror:
@@ -784,7 +804,13 @@ static void piSBAutoMatchEngineCallback
 		// no matches?
 		if(!count)
 		{
-			piSetAutoMatchStatus(peer, PEERWaiting);
+			if (connection->autoMatchNextStatus != PEERWaiting)
+			{
+				connection->autoMatchNextStatus = PEERWaiting;
+				connection->autoMatchDelay = piGetAutoMatchDelay();
+			}
+
+			//piSetAutoMatchStatus(peer, PEERWaiting);
 			return;
 		}
 

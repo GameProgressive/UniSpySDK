@@ -3,6 +3,15 @@ Changelog for: GameSpy Query & Reporting 2 SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.09.00  RV   RELEASE  Released to Developer Site
+10-28-2009  2.08.03  DWM  FIX      Fixed an ACE memory deallocation bug in qr2_shutdown in qr2.c
+08-14-2009  2.08.02  SAH  OTHER    Updated qr2csample to talk back with sbctest (connection made using ACE)
+08-12-2009  2.08.01  SAH  OTHER    Modified SDK to only use NN match queuing support for ACE-based connections
+02-10-2009  2.08.00  SAH  RELEASE  Released to Developer Site
+02-09-2009  2.07.05  MWJ  OTHER    Update macros for iPhone support
+01-30-2009  2.07.04  MWJ  OTHER    clear (memset) sockaddr_in function function parameter
+06-16-2008  2.07.03  SN   FIX      Added some checks to for ACE to prevent Nat Negotiators from being shutdown
+02-11-2008  3.04.01  MWJ  FEATURE  Added a host registered callback
 12-12-2007  3.04.00  RMV  RELEASE  Released to Developer Site
 12-12-2007  3.03.07  DES  FIX      No longer overwrites the availability check if not needed.
 12-10-2007  3.03.06  SAH  OTHER    Updated Nitro project, fixed up compilation errors in sample

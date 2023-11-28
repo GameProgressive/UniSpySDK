@@ -114,7 +114,7 @@ int gviHardwareListDevices(GVDeviceInfo devices[], int maxDevices, GVDeviceType 
 
 	memset(&devices[0], 0, sizeof(GVDeviceInfo));
 	devices[0].m_id = 0;
-	strcpy(devices[0].m_name, _T("Headset Mic"));
+	_tcscpy(devices[0].m_name, _T("Headset Mic"));
 	devices[0].m_deviceType = GV_CAPTURE;
 	devices[0].m_defaultDevice = GV_CAPTURE;
 	devices[0].m_hardwareType = GVHardwarePSPHeadset;
@@ -348,8 +348,8 @@ static int gviPSPCaptureThread(SceSize args, void * argp)
 	GVIHardwareData * data = (GVIHardwareData *)device->m_data;
 	int rcode;
 
-	assert(device);
-	assert(args == sizeof(GVIDevice*));
+	GS_ASSERT(device);
+	GS_ASSERT(args == sizeof(GVIDevice*));
 
 	// loop until we're told to stop
 	while(!data->m_captureThreadStop)

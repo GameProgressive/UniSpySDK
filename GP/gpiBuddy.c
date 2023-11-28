@@ -30,10 +30,50 @@ GPResult gpiSendAuthBuddyRequest(GPConnection * connection,
 	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, profile->profileId);
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sig\\");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, profile->authSig);
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\autoSync\\");
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, autoSync ? "true" : "false");
 	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
 
 	return GP_NO_ERROR;
 }
+
+GPResult gpiSendAddBuddyRequest(GPConnection *connection, 
+								GPProfile profile,
+								const char reason[GP_REASON_LEN],
+								GPIBool buddySync)
+{
+	GPIConnection *iconnection = (GPIConnection *)*connection;
+	// Signature in the raw consists of from profile id, new profile id, 
+	char hashProfileInfo[10 + 10 + GP_PASSWORD_LEN];
+	char signature[33];
+
+	// Send the request.
+	////////////////////
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\addbuddy\\");
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
+	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\newprofileid\\");
+	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, profile);
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\reason\\");
+	if (reason)
+		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, reason);
+		
+	// Added a sync requested value that tells the backend to automatically add me and my friend 
+	// to each other's buddy lists. NOTE: a signature is required to do this!
+	if (buddySync)
+	{
+		memset(&hashProfileInfo, 0, sizeof(hashProfileInfo));
+		sprintf(hashProfileInfo, "%d%d", iconnection->profileid, profile);
+		GSMD5Digest((unsigned char*)hashProfileInfo, strlen(hashProfileInfo), signature);
+		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\syncrequested\\");
+		gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, signature);
+	}
+
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
+	return GP_NO_ERROR;
+}
+
+
 
 GPResult
 gpiProcessRecvBuddyMessage(
@@ -622,6 +662,41 @@ gpiProcessRecvBuddyList(
     return GP_NO_ERROR;
 }
 
+GPResult gpiProcessRecvAddBuddyResponse(GPConnection *connection, 
+										const char *input)
+{
+	char buffer[128];
+	int newProfile; // the profile that we're about to add.
+	GPIConnection * iconnection = (GPIConnection*)*connection;
+	GPIProfile *newProfileInfo;
+	// Check for an error.
+	//////////////////////
+	if(gpiCheckForError(connection, input, GPIFalse))
+	{
+		// Call the callbacks.
+		//////////////////////
+		CallbackError(connection, GP_SERVER_ERROR, iconnection->errorCode, iconnection->errorString);
+	}
+
+	// We don't need to make these fatal errors since they are for np buddy sync
+	if(!gpiValueForKey(input, "\\newprofileid\\", buffer, sizeof(buffer)))
+		CallbackError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
+	
+	newProfile = atoi(buffer);
+	if (!gpiGetProfile(connection, newProfile, &newProfileInfo))
+		CallbackError(connection, GP_MISC_ERROR, GP_PARSE, "There was an error looking for a profile.");
+
+	if(!gpiValueForKey(input, "\\confirmation\\", buffer, sizeof(buffer)))
+		CallbackError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
+	
+	freeclear(newProfileInfo->authSig);
+	newProfileInfo->authSig = goastrdup(buffer);
+	newProfileInfo->requestCount++;
+
+	return gpiSendAuthBuddyRequest(connection, newProfileInfo, GPITrue);
+}
+
+
 GPResult
 gpiSendServerBuddyMessage(
   GPConnection * connection,
@@ -1005,8 +1080,9 @@ GPResult gpiDeleteBuddy(GPConnection * connection,
 		}
 		freeclear(pProfile->buddyStatusInfo);
 
-		if(gpiCanFreeProfile(pProfile))
-			gpiRemoveProfile(connection, pProfile);
+//do not remove the deleted buddy from the list anymore
+// 		if(gpiCanFreeProfile(pProfile))
+//  			gpiRemoveProfile(connection, pProfile);
 		iconnection->profileList.numBuddies--;
 		GS_ASSERT(iconnection->profileList.numBuddies >= 0);
 #ifndef _PS2
@@ -1016,4 +1092,52 @@ GPResult gpiDeleteBuddy(GPConnection * connection,
 #endif
 	}
 	return GP_NO_ERROR;
+}
+
+GPResult
+gpiBuddyDeletedLocally
+(
+ GPConnection  *connection,
+ int			id,
+ gsi_bool		isDeleted
+ )
+{
+	// This function modifies the profile.deletedLocally flag
+	// for tracking a list buddies deleted for a session
+	//////////////////////////////////////////////////////////
+	GPIProfile * pProfile;
+
+	assert(id > 0);
+
+	if(id <= 0)
+	{
+		Error(connection, GP_PARAMETER_ERROR, "Invalid profile.");
+	}
+
+	// Check if this id is already in the list.
+	///////////////////////////////////////////
+	if(gpiGetProfile(connection, (GPProfile)id, &pProfile))
+	{
+		pProfile->deletedLocally = isDeleted;
+	}
+	return GP_NO_ERROR;
+}
+
+void gpiRevokeBuddyAuthorization(GPConnection * connection,
+							GPProfile profile)
+{
+	GPIConnection * iconnection = (GPIConnection*)*connection;
+	GS_ASSERT(iconnection);
+	if (iconnection == NULL)
+		return;
+
+	// Send the invite.
+	///////////////////
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\revoke\\");
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\sesskey\\");
+	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, iconnection->sessKey);
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\profileid\\");
+	gpiAppendIntToBuffer(connection, &iconnection->outputBuffer, profile);
+	gpiAppendStringToBuffer(connection, &iconnection->outputBuffer, "\\final\\");
+
 }

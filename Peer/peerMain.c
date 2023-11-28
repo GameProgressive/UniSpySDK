@@ -168,6 +168,14 @@ PEER peerInitialize
 	// Misc.
 	////////
 	connection->shutdown = PEERFalse;
+	connection->autoMatchNextStatus = PEERFailed;
+	connection->autoMatchDelay = 0;
+	connection->peerReadyTime = 0;
+	connection->amStartTime = 0;
+	connection->joinRoomTime = 0;
+	connection->hostInRoom = 0;
+	connection->waitingForHostFlag = PEERFalse;
+	connection->amCustomSocket = PEERFalse;
 
 	return peer;
 }
@@ -1023,6 +1031,23 @@ static void piThink
 	////////////////////////////////////////////////////////////////////////////////
 	if(connection->disconnect && (connection->callbackDepth == 0))
 		piDisconnect(peer);
+
+	if (peerIsAutoMatching(peer)) 
+	{
+		piAutoMatchDelayThink(peer);
+		
+		// if the ready time has been set we'll check if enough time has passed to trigger the developer's 
+		// status callback
+		if (connection->peerReadyTime != 0)
+			piAutoMatchReadyTimeThink(peer);
+
+		// if we've joined a room we need to wait until we can determine whether a host is in the room
+		piAutoMatchCheckWaitingForHostFlag(peer);
+
+		// check if we've been automatching unsuccesfully for too long, then restart automatch
+		// (in case we have somehow gotten into a stale state)
+		piAutoMatchRestartThink(peer);
+	}
 
 	// Let the callbacks think.
 	///////////////////////////
@@ -4319,6 +4344,14 @@ void peerStartAutoMatchWithSocketA
 	////////////////////////////////////
 	connection->autoMatchSBFailed = PEERFalse;
 	connection->autoMatchQRFailed = PEERFalse;
+
+	if (socket != INVALID_SOCKET)
+		connection->amCustomSocket = PEERTrue;
+	else
+		connection->amCustomSocket = PEERFalse;
+
+	// start our timer so that we can try resetting automatch if it's taking too long
+	connection->amStartTime = current_time();
 
 	// Start the AutoMatch.
 	///////////////////////

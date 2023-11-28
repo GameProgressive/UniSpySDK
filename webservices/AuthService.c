@@ -4,6 +4,13 @@
 #include "../common/gsXML.h"
 #include "../common/gsAvailable.h"
 #include "../common/md5.h"
+///////////////////////////////////////////////////////////////////////////////
+// File:	AuthService.c
+// SDK:		GameSpy Authentication Service SDK
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries. Copyright (c) 2008-2009 GameSpy Industries, Inc.
+
 #include "../common/gsSHA1.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +74,7 @@ const char WS_AUTHSERVICE_SIGNATURE_KEY[] =
 	"B2FA37881176084C8F8B8756C4722CDC"
 	"57D2AD28ACD3AD85934FB48D6B2D2027";
 
-/*			2007 RSA key (left for legacy things)
+/*	2007 RSA key (left for legacy)
  	"D589F4433FAB2855F85A4EB40E6311F0"
 	"284C7882A72380938FD0C55CC1D65F7C"
 	"6EE79EDEF06C1AE5EDE139BDBBAB4219"
@@ -115,6 +122,12 @@ typedef struct WSIRequestData
 	void * mUserData;
 	GSSoapTask* mTask;
 } WSIRequestData;
+
+//MACROS for debug printing
+#define GSAUTH_DP(t,l,m, ...)              gsDebugFormat(GSIDebugCat_AuthService, t, l, m, __VA_ARGS__) 
+#define GSAUTH_DP_FILE_FUNCTION_LINE(t, l) GSAUTH_DP(t, l, "%s(%d): In %s:\n", __FILE__, __LINE__, __FUNCTION__)
+// m is concatenated to format string
+#define GSAUTH_DEBUG_LOG(t, l, m, ... )    GSAUTH_DP(t, l, "%s(%d): In %s: "m"\n" , __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1081,7 +1094,7 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 	gsi_i32 intNB; // network byte order int
 	gsi_i32 lenoutSoFar = 0; // tracks bytes written to bufout
 	gsi_i32 lenTemp = 0; // for temp length of large ints
-
+	gsi_i32 skipBytes = 0; // used to adjust for different host byte order on PS3 
 
 	WRITE_NETWORK_INT(cert->mLength);
 	WRITE_NETWORK_INT(cert->mVersion);
@@ -1105,12 +1118,26 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 #endif
 
 	lenTemp = (gsi_i32)gsLargeIntGetByteLength(&cert->mPeerPublicKey.modulus); // size in bytes, no leading zeroes
+#ifdef _PS3
+	skipBytes = (lenTemp%4)==0 ? 0 : 4-(lenTemp%4);
+#endif
 	WRITE_NETWORK_INT(lenTemp); 
+#ifdef _PS3
+	WRITE_REV_BINARY( ((char*)cert->mPeerPublicKey.modulus.mData)+skipBytes, (unsigned int)lenTemp);
+#else
 	WRITE_REV_BINARY(cert->mPeerPublicKey.modulus.mData, (unsigned int)lenTemp);
+#endif
 
 	lenTemp = (gsi_i32)gsLargeIntGetByteLength(&cert->mPeerPublicKey.exponent); // size in bytes, no leading zeroes
+#ifdef _PS3
+	skipBytes = (lenTemp%4)==0 ? 0 : 4-(lenTemp%4);
+#endif
 	WRITE_NETWORK_INT(lenTemp);
+#ifdef _PS3
+	WRITE_REV_BINARY( ((char*)cert->mPeerPublicKey.exponent.mData)+skipBytes, (unsigned int)lenTemp);
+#else
 	WRITE_REV_BINARY(cert->mPeerPublicKey.exponent.mData, (unsigned int)lenTemp);
+#endif
 
 	WRITE_NETWORK_INT(WS_LOGIN_SERVERDATA_LEN); 
 	WRITE_BINARY(cert->mServerData, (unsigned int)WS_LOGIN_SERVERDATA_LEN); 
@@ -1119,6 +1146,7 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 	WRITE_BINARY(cert->mSignature, (unsigned int)WS_LOGIN_SERVERDATA_LEN); 
 
 	*lenout = (gsi_u32)lenoutSoFar;
+	GSI_UNUSED(skipBytes);
 	return gsi_true;
 }
 
@@ -1166,26 +1194,47 @@ gsi_bool wsLoginCertWriteBinary(const GSLoginCertificate * cert, char * bufout, 
 								  lenoutSoFar += l; \
 							 	  bufin += l; }
 
+// seperate conversion to account for different host byte order on PS3 
+#ifdef _PS3 
 #define READ_REV_BINARY_TO_INT(a,l) { \
-									  int i=(gsi_i32)l; \
-									  int index = 0; \
-									  char temp[4]; \
-									  const char * readPos = bufin+i-1; \
-									  memset(&a, 0, sizeof(a)); \
-									  if (lenoutSoFar + l > maxlen) \
-										  return gsi_false; \
-									  while(i > 0) \
+									int i=(gsi_i32)l; \
+									int index = 0; \
+									char temp[4]; \
+									int skipBytes = (i%4==0) ? 0 : 4-(i%4); \
+									const char * readPos = bufin+i-1; \
+									memset(&a, 0, sizeof(a)); \
+									if (lenoutSoFar + l > maxlen) \
+									return gsi_false; \
+									while(i > 0) \
 									  { \
 										  temp[index%4] = *readPos; \
 										  if (index%4 == 3) \
-											 memcpy(a+(index/4), temp, 4); \
+										  memcpy(a+(index/4), temp, 4); \
 										  else if (index == (gsi_i32)l-1) \
-										     memcpy(a+(index/4), temp, l); \
+										  memcpy(((char*)a+(index/4))+skipBytes, temp, l); \
 										  readPos--; index++; lenoutSoFar++; i--; \
-									  }; \
-									  bufin += l; }
-
-
+									}; \
+									bufin += l; }
+#else
+#define READ_REV_BINARY_TO_INT(a,l) { \
+									int i=(gsi_i32)l; \
+									int index = 0; \
+									char temp[4]; \
+									const char * readPos = bufin+i-1; \
+									memset(&a, 0, sizeof(a)); \
+									if (lenoutSoFar + l > maxlen) \
+									return gsi_false; \
+									while(i > 0) \
+									{ \
+										temp[index%4] = *readPos; \
+										if (index%4 == 3) \
+										memcpy(a+(index/4), temp, 4); \
+										else if (index == (gsi_i32)l-1) \
+										memcpy(a+(index/4), temp, l); \
+										readPos--; index++; lenoutSoFar++; i--; \
+									}; \
+									bufin += l; }
+#endif
 
 
 gsi_bool wsLoginCertReadBinary(GSLoginCertificate * certOut, char * bufin, unsigned int maxlen)
@@ -1735,15 +1784,24 @@ GSTask* wsLoginFacebook(
 	WSIRequestData* requestData = NULL;
 
 	if (!wsiServiceAvailable(WS_AUTHSERVICE_NAME))
+	{
+		GSAUTH_DEBUG_LOG(GSIDebugType_State, GSIDebugLevel_WarmError, "called without doing availability check.", NULL);
 		return NULL;
+	}
 
 	if (!callback)
+	{
+		GSAUTH_DEBUG_LOG(GSIDebugType_State, GSIDebugLevel_HotError, "user defined callback is NULL.", NULL);
 		return NULL;
+	}
 
 	// allocate the request values
 	requestData = (WSIRequestData*)gsimalloc(sizeof(WSIRequestData));
 	if (requestData == NULL)
+	{
+		GSAUTH_DEBUG_LOG(GSIDebugType_Memory, GSIDebugLevel_HotError, "unable to allocate memory for request.", NULL);
 		return NULL;
+	}
 
 	requestData->mUserCallback.mLoginFacebookCallback = callback;
 	requestData->mUserData = userData;
@@ -1764,6 +1822,8 @@ GSTask* wsLoginFacebook(
 			)
 		{
 			gsXmlFreeWriter(writer);
+			gsifree(requestData);
+			GSAUTH_DEBUG_LOG(GSIDebugType_State, GSIDebugLevel_HotError, "error creating soap request.", NULL);
 			return NULL;
 		}
 
@@ -1773,6 +1833,7 @@ GSTask* wsLoginFacebook(
 		{
 			gsXmlFreeWriter(writer);
 			gsifree(requestData);
+			GSAUTH_DEBUG_LOG(GSIDebugType_State, GSIDebugLevel_HotError, "error executing request.", NULL);
 			return NULL;
 		}
 	}

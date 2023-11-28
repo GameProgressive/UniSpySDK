@@ -3,6 +3,11 @@ Changelog for: GameSpy Shared Code (nonport,darray,md5,hashtable)
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+07-01-2010  2.12.00  JP3  RELEASE  Direct2Drive SDK updated to work with v1.1 web service
+01-22-2010  2.11.00  RV   RELEASE  Released to Developer Site
+02-10-2009  2.10.00  SAH  RELEASE  Released to Developer Site *Note, SDK Package version now separate from individual SDK versioning
+02-09-2009  2.06.02  MWJ  OTHER    Added directory for Xcode project
+01-26-2009  2.06.01  RMV  FIX      Updated the cert to binary conversion for PS3 to take into account the differing byte order
 12-12-2007  2.06.00  RMV  RELEASE  Released to Developer Site
 11-27-2007  2.05.01  SAH  CLEANUP  Removed extern "c" block in nonport.h to prevent linker errors
 08-06-2007  2.05.00  RMV  RELEASE  Released to Developer Site *Note - fixed version number to match other common changelog

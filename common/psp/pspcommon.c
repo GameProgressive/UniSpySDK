@@ -6,6 +6,18 @@
 #include <kernel.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctrlsvc.h>
+#include <pspnet.h>
+#include <pspnet_error.h>
+#include <pspnet_inet.h>
+#include <pspnet_resolver.h>
+#include <pspnet_apctl.h>
+#include <libhttp.h>
+#include <libhttps.h>
+#include <libssl.h>
+#include <utility/utility_common.h>
+#include <utility/utility_module.h>
+#include <utility/utility_netconf.h>
 
 /********  THIS FILE IS FOR USE BY THE GAMESPY SAMPLE APPLICATIONS ********/
 
@@ -30,6 +42,8 @@ SCE_MODULE_INFO(PspCommon, 0, 1, 1);
 #define SCE_APCTL_HANDLER_STACKSIZE (1024 * 1)
 #define SCE_APCTL_STACKSIZE (SCE_NET_APCTL_LEAST_STACK_SIZE + SCE_APCTL_HANDLER_STACKSIZE)
 #define SCE_APCTL_PRIO 40
+#define HTTP_POOLSIZE (30 * 1024U)
+#define SSL_POOLSIZE (150 * 1024U)
 
 #define AP_DIALOG_DUMMY_WAIT_TIME (1000 * 1000)
 
@@ -37,8 +51,8 @@ SCE_MODULE_INFO(PspCommon, 0, 1, 1);
 #define PSPNET_APDUMDLG_STARTED 0x40
 #define PSPNET_CONNECTED        0x20
 // If necessary, use this to select a specific router by SSID.
-#ifndef AUTO_SELECT_ROUTER 
-#define YOUR_WIRELESS_ROUTER_NAME "PubServ DLink"
+#ifndef AUTO_SELECT_ROUTER
+#define YOUR_WIRELESS_ROUTER_NAME "GST-PSN"
 #endif
 
 // function prototypes
@@ -55,6 +69,9 @@ static struct SceNetApDialogDummyParam gApDialogDummyParam;
 int sce_newlib_heap_kb_size = 1000; 
 SceUID gPspnetApDialogDummyModid = 0;
 int gPspnetApctlHandlerId = -1;
+
+// used for PSP graphics library initialization
+// static char disp_list[0x10000] __attribute((aligned(64)));
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,6 +150,51 @@ int gsiPspLoadRequiredModules()
 		return ret;
 	}
 
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_PARSE_URI);
+	if(ret < 0){
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_PARSE_URI) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_PARSE_HTTP);
+	if(ret < 0){
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_PARSE_HTTP) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_HTTP);
+	if(ret < 0){
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_HTTP) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_SSL);
+	if(ret < 0){
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NET_SSL) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
+	// load NP modules
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NP);
+	if(ret < 0)
+	{
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NP) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
+	ret = sceUtilityLoadModule(SCE_UTILITY_MODULE_NP_SERVICE);
+	if(ret < 0)
+	{
+		printf("sceUtilityLoadModule(SCE_UTILITY_MODULE_NP_SERVICE) failed. ret = 0x%x\n", ret);
+		gsiPspUnloadRequiredModules();
+		return ret;
+	}
+
 	ret = gsiPspLoadModule(PSPNET_AP_DIALOG_DUMMY_PRX);
 	if(ret < 0)
 	{
@@ -164,12 +226,50 @@ int gsiPspUnloadRequiredModules()
 	if (ret < 0) 
 	{
 		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_INET) failed. ret = 0x%x\n", ret);
+		return ret;
 	}
 
 	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_COMMON);
 	if (ret < 0) 
 	{
 		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_COMMON) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_PARSE_URI);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_PARSE_URI) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_PARSE_HTTP);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_PARSE_HTTP) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_HTTP);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_HTTP) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_SSL);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NET_SSL) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NP);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NP) failed. ret = 0x%x\n", ret);
+		return ret;
+	}
+	ret = sceUtilityUnloadModule(SCE_UTILITY_MODULE_NP_SERVICE);
+	if (ret < 0) 
+	{
+		printf("sceUtilityUnloadModule(SCE_UTILITY_MODULE_NP_SERVICE) failed. ret = 0x%x\n", ret);
+		return ret;
 	}
 	return ret;
 }
@@ -226,6 +326,12 @@ void gsiPspnetStop()
 	sceNetInetTerm();
 			
 	sceNetTerm();
+
+	sceSslEnd();
+
+	sceHttpEnd();
+
+	sceHttpsEnd();
 }
 
 // Error Handler used to stop network libraries in case of failure
@@ -298,6 +404,27 @@ int gsiPspStartNetworkModules()
 		return ret;
 	}
 	gPspnetApctlHandlerId = ret;
+
+	ret = sceSslInit(SSL_POOLSIZE);
+	if (ret < 0){
+		printf ("sceSslInit() returns 0x%x\n", ret);
+		gsiPspnetStop();
+		return ret;
+	}
+
+	ret = sceHttpInit(HTTP_POOLSIZE);
+	if (ret < 0){
+		printf("sceHttpInit() returns 0x%x\n", ret);
+		gsiPspnetStop();
+		return ret;
+	}
+
+	ret = sceHttpsInit(0, NULL, NULL, NULL);
+	if (ret < 0){
+		printf("sceHttpsInit() returns 0x%x\n", ret);
+		gsiPspnetStop();
+		return ret;
+	}
 
 	serviceToShutDown = serviceToShutDown | PSPNET_APCTLHDLR;
 	ret = sceNetApDialogDummyInit();

@@ -198,7 +198,7 @@ GVScalar gvGetCaptureThreshold(GVDevice device)
 void gvSetCaptureMode(GVDevice device, GVCaptureMode captureMode)
 {
 	//This only works with Capture devices.
-	assert(device->m_types & GV_CAPTURE);
+	GS_ASSERT(device->m_types & GV_CAPTURE);
 
 	//See if we are switching from Threshold to PTT.
 	if ((device->m_captureMode == GVCaptureModeThreshold) && (captureMode == GVCaptureModePushToTalk))

@@ -312,16 +312,27 @@ static void SAKE_CALL sakeiFreeOutputRecords(int numFields, int numRecords, SAKE
 
 	for(i = 0 ; i < numRecords ; i++)
 	{
-		//Check for binary data or unicode strings and free it if necessary
-		for (j = 0; j < numFields; j++)
-		{
-			if (records[i][j].mType == SAKEFieldType_BINARY_DATA && records[i][j].mValue.mBinaryData.mValue != NULL)
-				gsifree(records[i][j].mValue.mBinaryData.mValue);
-			if (records[i][j].mType == SAKEFieldType_UNICODE_STRING)
-				gsifree(records[i][j].mValue.mUnicodeString);
-		}
+ 		if (records[i])
+ 		{
+			//Check for binary data or unicode strings and free it if necessary
+			for (j = 0; j < numFields; j++)
+			{
+				if (records[i][j].mType == SAKEFieldType_BINARY_DATA && records[i][j].mValue.mBinaryData.mValue != NULL)
+				{
+					gsifree(records[i][j].mValue.mBinaryData.mValue);
+					//records[i][j].mValue.mBinaryData.mValue = NULL;
+				}
+				if (records[i][j].mType == SAKEFieldType_UNICODE_STRING)
+				{
+					gsifree(records[i][j].mValue.mUnicodeString);
+					//records[i][j].mValue.mUnicodeString = NULL;
+				}
+			}
 
-		gsifree(records[i]);
+			gsifree(records[i]);
+			records[i] = NULL;
+ 		}
+ 		
 	}
 	gsifree(records);
 }

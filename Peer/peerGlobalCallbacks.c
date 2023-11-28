@@ -623,8 +623,10 @@ static void piChannelUserJoinedA
 
 		// If we've got maxplayers, we're now Ready.
 		////////////////////////////////////////////
-		if((connection->autoMatchStatus == PEERStaging) && (connection->numPlayers[StagingRoom] >= connection->maxPlayers))
+		if((connection->autoMatchStatus == PEERStaging) && (connection->numPlayers[StagingRoom] >= connection->maxPlayers) && connection->waitingForHostFlag == PEERFalse) 	
+		{
 			piSetAutoMatchStatus(peer, PEERReady);
+		}
 	}
 	
 	GSI_UNUSED(chat);
@@ -683,7 +685,7 @@ static void piChannelUserPartedA
 
 		// Check if he was the host.
 		///////////////////////////////
-		if(!connection->hosting && piIsPlayerHost(player))
+		if(!connection->hosting && (piIsPlayerHost(player) || connection->numPlayers[StagingRoom] == 2))
 		{
 			status = PEERSearching;
 			newStatus = PEERTrue;

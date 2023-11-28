@@ -3,6 +3,24 @@ Changelog for: GameSpy Peer SDK
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+01-22-2010  2.09.00  RV   RELEASE  Released to Developer Site
+11-23-2009  2.08.06  JP3  FIX      Removed intptr_t for Nintendo platforms since it is not a supported type
+11-20-2009  2.08.05  RMV  FIX      Changed peer callbacks to be stored as intptr_t rather than int for 64 bit OS support
+11-20-2009  2.08.04  RMV  FIX      Updated filter parameter for auto match to a character pointer since it does not support unicode
+                                   Also updated a NULL cast for Linux compatibility
+11-17-2009  2.08.03  JP3  FIX      Updated peerc testapp to show group room fields, and added unicode compatibility for automatch filter.
+10-27-2009  2.08.02  RMV  FIX      Updated the automatch solution with several fixes to improve efficiency, prevent crashes,
+                                   eliminate bugs, and ensure it doesn't end up 'stuck' in a stale state     
+10-27-2009  2.08.01  RMV  OTHER    Updated Peer Test App to use Automatch with socket
+02-10-2009  2.08.00  SAH  RELEASE  Released to Developer Site
+01-29-2009  2.07.03  MR   OTHER    Removed the following:
+									- #define peerGetLocalIP peerGetPublicIP
+									- peerGetPlayerProfileID (Replaced with peerGetPlayerInfo)
+									- peerGetPlayerIP (Replaced with peerGetPlayerInfo)
+									- peerGetPlayerProfileIDCallback
+									- peerGetPlayerIPCallback
+09-09-2008  2.07.02  SAH  FIX      Fixed raced-condition bug in GetPlayerInfo
+06-13-2007  2.07.01  SN   OTHER    Added a workaround for the case where 2 players in automatching get into a race condition.
 12-12-2007  2.07.00  RMV  RELEASE  Released to Developer Site
 12-11-2007  2.06.03  SAH  OTHER    Added NatNeg to projects to remove compiler errors
 11-27-2007  2.06.01  SAH  CLEANUP  Moved extern "c" block below includes to prevent linker errors

@@ -59,15 +59,6 @@ typedef enum
 	SCIReportState_TEAMDATA
 } SCIReportState;
 
-typedef enum
-{
-	SCIKeyType_INT32,
-	SCIKeyType_INT16,
-	SCIKeyType_BYTE,
-	SCIKeyType_STRING,
-	SCIKeyType_FLOAT,
-	SCIKeyType_INT64
-} SCIKeyType;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

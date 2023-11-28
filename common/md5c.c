@@ -1,26 +1,30 @@
-/* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
- */
-
-/* Copyright (C) 1991, RSA Data Security, Inc. All rights reserved.
-
-   License to copy and use this software is granted provided that it
-   is identified as the "RSA Data Security, Inc. MD5 Message-Digest
-   Algorithm" in all material mentioning or referencing this software
-   or this function.
-
-   License is also granted to make and use derivative works provided
-   that such works are identified as "derived from the RSA Data
-   Security, Inc. MD5 Message-Digest Algorithm" in all material
-   mentioning or referencing the derived work.  
-                                                                    
-   RSA Data Security, Inc. makes no representations concerning either
-   the merchantability of this software or the suitability of this
-   software for any particular purpose. It is provided "as is"
-   without express or implied warranty of any kind.  
-                                                                    
-   These notices must be retained in any copies of any part of this
-   documentation and/or software.  
- */
+///////////////////////////////////////////////////////////////////////////////
+// File:	md5c.c
+// SDK:		GameSpy Common
+//
+// Copyright Notice: This file is part of the GameSpy SDK designed and 
+// developed by GameSpy Industries, derived from the RSA Data Security, Inc. 
+// MD5 Message-Digest Algorithm. Copyright (c) 1999-2009 GameSpy Industries, Inc.
+// ------------------------------------
+// Copyright (C) 1991, RSA Data Security, Inc. All rights reserved.
+//
+// License to copy and use this software is granted provided that it
+// is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+// Algorithm" in all material mentioning or referencing this software
+// or this function.
+//
+// License is also granted to make and use derivative works provided
+// that such works are identified as "derived from the RSA Data
+// Security, Inc. MD5 Message-Digest Algorithm" in all material
+// mentioning or referencing the derived work.  
+//                                                                  
+// RSA Data Security, Inc. makes no representations concerning either
+// the merchantability of this software or the suitability of this
+// software for any particular purpose. It is provided "as is"
+// without express or implied warranty of any kind.  
+//                                                                  
+// These notices must be retained in any copies of any part of this
+// documentation and/or software.  
 
 //#include "global.h"
 #include "md5.h"
@@ -31,8 +35,7 @@
 extern "C" {
 #endif
 
-#if !defined(_NITRO)
-
+#if !(defined(_NITRO) && SDK_VERSION_MAJOR < 5)
 /* Constants for MD5Transform routine.
  */
 #define S11 7

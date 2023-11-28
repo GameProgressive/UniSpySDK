@@ -305,10 +305,10 @@ PTBool ptCheckForPatchA
 
 	// Check the arguments.
 	///////////////////////
-	assert(versionUniqueID);
+	GS_ASSERT(versionUniqueID);
 	if(!versionUniqueID)
 		return PTFalse;
-	assert(callback);
+	GS_ASSERT(callback);
 	if(!callback)
 		return PTFalse;
 
@@ -337,7 +337,7 @@ PTBool ptCheckForPatchA
 		gPTAVercheckURL, productID, versionUniqueID, distributionID,
 		__GSIACGamename);
 	
-	assert(charsWritten >= 0);
+	GS_ASSERT(charsWritten >= 0);
 	if (charsWritten < 0)
 		return PTFalse;
 
@@ -383,7 +383,7 @@ PTBool ptTrackUsageA
 
 	// Check the arguments.
 	///////////////////////
-	assert(versionUniqueID);
+	GS_ASSERT(versionUniqueID);
 	if(!versionUniqueID)
 		return PTFalse;
 
@@ -401,7 +401,7 @@ PTBool ptTrackUsageA
 		"%s?userid=%d&productid=%d&versionuniqueid=%s&distid=%d&uniqueid=%s&gamename=%s",
 		gPTAMOTDURL, userID, productID, versionUniqueID,	distributionID,	GOAGetUniqueID(),
 		__GSIACGamename);
-	assert(charsWritten >= 0);
+	GS_ASSERT(charsWritten >= 0);
 	if (charsWritten < 0)
 		return PTFalse;
 	// Send the info.
@@ -449,10 +449,10 @@ PTBool ptCreateCheckPatchTrackUsageReqA
 
 	// Check the arguments.
 	///////////////////////
-	assert(versionUniqueID);
+	GS_ASSERT(versionUniqueID);
 	if(!versionUniqueID)
 		return PTFalse;
-	assert(callback);
+	GS_ASSERT(callback);
 	if(!callback)
 		return PTFalse;
 
@@ -480,7 +480,7 @@ PTBool ptCreateCheckPatchTrackUsageReqA
 		gPTAVercheckURL, userID, productID, versionUniqueID, distributionID,	GOAGetUniqueID(),
 		__GSIACGamename);
 
-	assert(charsWritten >= 0);
+	GS_ASSERT(charsWritten >= 0);
 	if (charsWritten < 0)
 		return PTFalse;
 

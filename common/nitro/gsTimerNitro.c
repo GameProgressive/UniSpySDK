@@ -9,7 +9,7 @@ time_t time(time_t *timer)
 {
 	time_t t;
 
-	assert(OS_IsTickAvailable() == TRUE);
+	GS_ASSERT(OS_IsTickAvailable() == TRUE);
 	t = (time_t)OS_TicksToSeconds(OS_GetTick());
 
 	if(timer)
