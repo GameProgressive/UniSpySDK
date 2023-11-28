@@ -1,3 +1,4 @@
+#include "../winerrordxgi.h"
 #include "../gv.h"
 #include "voicesample.h"
 #include <stdio.h>

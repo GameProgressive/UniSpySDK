@@ -1,5 +1,6 @@
 add_executable(voicetest Voice2Test.c)
 target_link_libraries(voicetest usvoice2 ${UNISPY_VOICE_PLATFORM_LIBRARIES})
 target_include_directories(voicetest BEFORE PRIVATE ${UNISPY_VOICE_PLATFORM_INCLUDES})
-target_compile_definitions(voicetest PRIVATE GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN).
+target_compile_definitions(voicetest PRIVATE GV_CUSTOM_SOURCE_TYPE=SOCKADDR_IN)
 set_target_properties(voicetest PROPERTIES FOLDER Tests)
+target_link_directories(voicetest PRIVATE ${UNISPY_VOICE_PLATFORM_LIBDIRS})
