@@ -188,7 +188,6 @@ static void wsiAuthErrorToLoginResponse(GSAuthErrorCode authError, WSLoginRespon
 // Converts an authentication error to webservice error (for Sony)
 static void wsiAuthErrorToLoginSonyCertResponse(GSAuthErrorCode authError, WSLoginSonyCertResponse* theResponse)
 {
-
 	if (authError == GSAuthErrorCode_InvalidGameID)
 	{
 		theResponse->mLoginResult = WSLogin_InvalidGameCredentials;

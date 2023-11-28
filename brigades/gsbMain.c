@@ -1205,7 +1205,7 @@ GSResult gsbSendMessageToMember(GSBInstancePtr	theInstance,
     GSB_ASSERT_CHECK_PARAM(message,     "Invalid Message");
     GSB_CHECKAVAIL();
 
-    messageSize = (gsi_u32) (wcslen(message) * sizeof(UCS2Char));
+    messageSize = (gsi_u32) (wcslen((const wchar_t*)message) * sizeof(UCS2Char));
     GSB_ASSERT_CHECK_PARAM( (messageSize <= GSB_SEND_MESSAGE_MAX_LEN), "Message too long");
     GSB_ASSERT_CHECK_PARAM(callback, "callback is NULL.");
     

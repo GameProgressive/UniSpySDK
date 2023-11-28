@@ -21,3 +21,9 @@ void gsiInt64ToString(char theNumberStr[33], gsi_i64 theNumber)
 
 	sprintf(theNumberStr, "%lld", theNumber);
 }
+
+
+double gsiWStringToDouble(const wchar_t *inputString)
+{
+	return wcstod(inputString, NULL);
+}

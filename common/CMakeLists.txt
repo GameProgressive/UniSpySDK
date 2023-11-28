@@ -70,4 +70,4 @@ if (UNISPY_WINDOWS)
 	list(APPEND UNISPY_PLATFORM_LIBS ${UNISPY_WINSOCK_LIB})
 endif()
 
-target_link_libraries(uscommon PUBLIC ${UNISPY_PLATFORM_LIBS})
+target_link_libraries(uscommon PUBLIC ${UNISPY_PLATFORM_LIBS} usgt2)

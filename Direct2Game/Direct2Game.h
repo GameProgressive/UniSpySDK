@@ -476,9 +476,6 @@ typedef struct D2GLoadCatalogItemsByCategoryResponse
 
 // Summary
 // The response message for Get User Credit Cards Request
-#ifndef _WIN32
-#warning "WARNING: D2GGetUserCreditCardsResponse Not supported"
-#endif
 typedef struct D2GGetUserCreditCardsResponse
 {
 	GHTTPResult           mHttpResult;	        // HTTP Result 
@@ -487,9 +484,6 @@ typedef struct D2GGetUserCreditCardsResponse
 
 // Summary
 // The response message for Get Order Total Request
-#ifndef _WIN32
-#warning "WARNING: D2GGetOrderTotalResponse Not supported"
-#endif
 typedef struct D2GGetOrderTotalResponse
 {
 	GHTTPResult   mHttpResult;    // HTTP Result 
@@ -498,9 +492,6 @@ typedef struct D2GGetOrderTotalResponse
 
 // Summary
 // The response message for Start Order Request
-#ifndef _WIN32
-#warning "WARNING: D2GStartOrderResponse Not supported"
-#endif
 typedef struct D2GStartOrderResponse
 {
 	GHTTPResult      mHttpResult;       // HTTP Result   
@@ -509,9 +500,6 @@ typedef struct D2GStartOrderResponse
 
 // Summary
 // The response message for Is Order Complete Request
-#ifndef _WIN32
-#warning "WARNING: D2GIsOrderCompleteResponse Not supported"
-#endif
 typedef struct D2GIsOrderCompleteResponse
 {
 	GHTTPResult      mHttpResult;       // HTTP Result 
@@ -520,9 +508,6 @@ typedef struct D2GIsOrderCompleteResponse
 
 // Summary
 // The response message for Get Purchase History Request.
-#ifndef _WIN32
-#warning "WARNING: D2GIsOrderCompleteResponse Not supported"
-#endif
 typedef struct D2GGetPurchaseHistoryResponse
 {
 	GHTTPResult       mHttpResult;	        // HTTP Result  
@@ -532,9 +517,6 @@ typedef struct D2GGetPurchaseHistoryResponse
 // Summary
 // The response message for Get Item Activation Request
 // Used as part of an DRM solution.
-#ifndef _WIN32
-#warning message("WARNING: D2GGetItemActivationResponse Not supported"
-#endif
 typedef struct D2GGetItemActivationResponse
 {
 	GHTTPResult mHttpResult;        // HTTP Result 
@@ -545,9 +527,6 @@ typedef struct D2GGetItemActivationResponse
 
 // Summary
 // The response message for Check Content Updates Request
-#ifndef _WIN32
-#warning "WARNING: D2GCheckContentUpdatesResponse Not supported"
-#endif
 typedef struct D2GCheckContentUpdatesResponse
 {
 	GHTTPResult     mHttpResult;    // HTTP Result 
@@ -791,9 +770,6 @@ typedef void(*D2GLoadExtraCatalogInfoCallback) (GSResult   result,
 //		 input to the 
 //  d2gGetOrderTotal request function.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GGetUserCreditCardsCallback Not supported"
-#endif
 typedef void(*D2GGetUserCreditCardsCallback) (GSResult  result, 
 	D2GGetUserCreditCardsResponse *response, 
 	void      *userData);
@@ -818,9 +794,6 @@ typedef void(*D2GGetUserCreditCardsCallback) (GSResult  result,
 //		 calling 
 //  d2gFreeOrderTotal after no longer needed.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GGetOrderTotalCallback Not supported"
-#endif
 typedef void(*D2GGetOrderTotalCallback) (GSResult   result, 
 	D2GGetOrderTotalResponse *response, 
 	void       *userData);
@@ -845,9 +818,6 @@ typedef void(*D2GGetOrderTotalCallback) (GSResult   result,
 //  to the d2gIsOrderComplete request,  and free it by calling
 //		 d2gFreeOrderPurchase 
 //  after no longer needed.
-#ifndef _WIN32
-#warning "WARNING: D2GStartOrderCallback Not supported"
-#endif
 typedef void(*D2GStartOrderCallback) (GSResult  result, 
 	D2GStartOrderResponse *response, 
 	void      *userData);
@@ -871,9 +841,6 @@ typedef void(*D2GStartOrderCallback) (GSResult  result,
 //		 purchased item(s) 
 //      as well as the Order Information.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GIsOrderCompleteCallback Not supported"
-#endif
 typedef void(*D2GIsOrderCompleteCallback)(GSResult  result, 
 	D2GIsOrderCompleteResponse *response, 
 	void      *userData);
@@ -897,9 +864,6 @@ typedef void(*D2GIsOrderCompleteCallback)(GSResult  result,
 //  a list of purchases, which contain the same information, returned as in
 //		 the D2GIsOrderCompleteCallback.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GGetPurchaseHistoryCallback Not supported"
-#endif
 typedef void(*D2GGetPurchaseHistoryCallback)(GSResult result, 
 	D2GGetPurchaseHistoryResponse  *response, 
 	void     *userData);
@@ -920,9 +884,6 @@ typedef void(*D2GGetPurchaseHistoryCallback)(GSResult result,
 //      GSResult - Enum indicating success (GS_SUCCESS) or a failure code. 
 //  Remarks
 //      This is part of an upcoming DRM functionality. 
-#ifndef _WIN32
-#warning "WARNING: D2GGetItemActivationDataCallback Not supported"
-#endif
 typedef void(*D2GGetItemActivationDataCallback) (GSResult result, 
 	D2GGetItemActivationResponse *response, 
 	void *userData);
@@ -944,9 +905,6 @@ typedef void(*D2GGetItemActivationDataCallback) (GSResult result,
 //		 purchased/downloaded content. The types of
 //  available updates are FORCED , MANDATORY and OPTIONAL.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GCheckContentUpdatesCallback Not supported"
-#endif
 typedef void(*D2GCheckContentUpdatesCallback) (GSResult result, 
 	D2GCheckContentUpdatesResponse *response, 
 	void *userData);
@@ -964,9 +922,6 @@ typedef void(*D2GCheckContentUpdatesCallback) (GSResult result,
 //  None.
 //  Remarks
 //  None.
-#ifndef _WIN32
-#warning "WARNING: D2GDownloadProgressCallback Not supported"
-#endif
 typedef void(*D2GDownloadProgressCallback)     (gsi_u32 bytesReceived, gsi_u32 bytesTotal, void *userData);
 
 //  Summary
@@ -987,9 +942,6 @@ typedef void(*D2GDownloadProgressCallback)     (gsi_u32 bytesReceived, gsi_u32 b
 //  If download completes successfully, ÅEFILENAME>ÅEis saved in the download
 //		 location.
 //
-#ifndef _WIN32
-#warning "WARNING: D2GDownloadCompleteCallback Not supported"
-#endif
 typedef void(*D2GDownloadCompleteCallback)     (GSResult result, gsi_char *saveFile, void *userData);
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1106,9 +1058,6 @@ GSResult d2gLoadCatalogItemsByCategory(D2GInstancePtr   theInstance,
 //      This function should be called  before calling d2gGetOrderTotal 
 //      since it needs the account information.
 //
-#ifndef _WIN32
-#warning "WARNING: d2gGetUserCreditCards Not supported"
-#endif
 GSResult d2gGetUserCreditCards(D2GInstancePtr  theInstance,	
 	D2GCatalogPtr   theCatalog,
 	gsi_bool        validOnly, 
@@ -1155,9 +1104,6 @@ GSResult d2gGetUserCreditCards(D2GInstancePtr  theInstance,
 //		 function 
 //      will send an Order Request to back-end to retrieve the OrderTotal. 
 //
-#ifndef _WIN32
-#warning "WARNING: d2gGetOrderTotal Not supported"
-#endif
 GSResult d2gGetOrderTotal(D2GInstancePtr  theInstance, 
 	D2GCatalogPtr   theCatalog,
 	gsi_u32         accountId, 
@@ -1183,9 +1129,6 @@ GSResult d2gGetOrderTotal(D2GInstancePtr  theInstance,
 //      GSResult - Integer built with enums indicating success (GS_SUCCESS) or
 //		 a failure code. 
 //
-#ifndef _WIN32
-#warning "WARNING: d2gStartOrder Not supported"
-#endif
 GSResult d2gStartOrder(D2GInstancePtr  theInstance,
 	D2GCatalogPtr   theCatalog, 
 	D2GOrderTotal   *orderTotal, 
@@ -1224,9 +1167,6 @@ GSResult d2gStartOrder(D2GInstancePtr  theInstance,
 //		 example is the credit
 //		card has expired, or is invalid.  The order validation result can
 //		 indicate that.
-#ifndef _WIN32
-#warning "WARNING: d2gIsOrderComplete Not supported"
-#endif
 GSResult d2gIsOrderComplete(D2GInstancePtr   theInstance,
 	D2GCatalogPtr    theCatalog, 
 	D2GOrderPurchase *orderPurchase, 
@@ -1246,9 +1186,6 @@ GSResult d2gIsOrderComplete(D2GInstancePtr   theInstance,
 //  Remarks
 //      The callback returns the list of items purchased for this game.
 //
-#ifndef _WIN32
-#warning "WARNING: d2gGetPurchaseHistory Not supported"
-#endif
 GSResult d2gGetPurchaseHistory(D2GInstancePtr  theInstance, 
 	D2GCatalogPtr   theCatalog,
 	D2GGetPurchaseHistoryCallback callback, 
@@ -1280,9 +1217,6 @@ GSResult d2gGetPurchaseHistory(D2GInstancePtr  theInstance,
 //      the download list retrieved either with d2gIsOrderComplete request or 
 //      d2gGetPurchaseHistory request.
 //
-#ifndef _WIN32
-#warning "WARNING: d2gStartDownloadFileById Not supported"
-#endif
 GSResult d2gStartDownloadFileById(D2GInstancePtr  theInstance, 
 	D2GCatalogPtr   theCatalog,
 	D2GFileId       fileId, 
@@ -1308,9 +1242,6 @@ GSResult d2gStartDownloadFileById(D2GInstancePtr  theInstance,
 //  Remarks
 //      This is part of an upcoming DRM functionality.
 //
-#ifndef _WIN32
-#warning "WARNING: d2gGetItemActivationData Not supported"
-#endif
 GSResult d2gGetItemActivationData(D2GInstancePtr theInstance, 
 	D2GCatalogPtr  theCatalog,
 	D2GGetItemActivationDataCallback callback, 
@@ -1334,9 +1265,6 @@ GSResult d2gGetItemActivationData(D2GInstancePtr theInstance,
 //  Remarks
 //      None.
 //
-#ifndef _WIN32
-#warning "WARNING: d2gCheckContentUpdates Not supported"
-#endif
 GSResult d2gCheckContentUpdates(D2GInstancePtr theInstance, 
 	D2GCatalogPtr  theCatalog,
 	gsi_bool       requiredOnly,

@@ -270,8 +270,11 @@ gsi_bool gsiCoreGetGameId(char gameId[GAMEID_LENGTH])
 }
 
 // set the "Error:" value from the response headers if there was one
-void gsiCoreSetAuthError(const char authError[AUTHERROR_LENGTH])
+void gsiCoreSetAuthError(const char* authError)
 {
+	if (strlen(authError) > AUTHERROR_LENGTH)
+		return;
+
 	GSCoreMgr* aCore = gsiGetStaticCore();
 	strcpy(aCore->authError, authError);
 }

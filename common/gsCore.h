@@ -143,7 +143,7 @@ void gsiCoreSetProfileId(const char profileId[PROFILEID_LENGTH]);
 gsi_bool gsiCoreGetProfileId(char profileId[PROFILEID_LENGTH]);
 void gsiCoreSetGameId(const char gameId[GAMEID_LENGTH]);
 gsi_bool gsiCoreGetGameId(char gameId[GAMEID_LENGTH]);
-void gsiCoreSetAuthError(const char authError[AUTHERROR_LENGTH]);
+void gsiCoreSetAuthError(const char* authError);
 gsi_bool gsiCoreGetAuthError(char authError[AUTHERROR_LENGTH]);
 void gsiCoreSetAuthErrorCode(GSAuthErrorCode authErrorCode);
 GSAuthErrorCode gsiCoreGetAuthErrorCode();

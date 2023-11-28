@@ -14,7 +14,13 @@
 #include "d2gServices.h"
 #include "d2gUtil.h"
 #include "../common/gsAvailable.h"
+
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
 #include <errno.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2221,7 +2227,12 @@ GSResult d2gSetManifestFilePath( D2GInstancePtr     theInstance,
         int failCode;
         D2GIInstance    *d2giInstance = (D2GIInstance *) theInstance;
         d2giInstance->mManifestFilePath = goastrdup(manifestFilePath);
+#ifdef _WIN32
         failCode = _mkdir(manifestFilePath);
+#else
+		failCode = mkdir(manifestFilePath, S_IRWXU | S_IRWXG);
+#endif
+
         if (failCode != EEXIST || failCode != 0)
         {
             gsifree(d2giInstance->mManifestFilePath);

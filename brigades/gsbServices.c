@@ -2506,7 +2506,7 @@ GSResult gsbiServiceSearchBrigades( GSBInternalInstance *theInstance, GSBSearchF
     {
 		GSSoapTask * aTask = NULL;
 		gsi_u32 i = 0;
-		gsi_bool SearchParamFound[GSBSearchFilterKey_Max] = {gsi_false} ;
+		//gsi_bool SearchParamFound[GSBSearchFilterKey_Max] = {gsi_false} ;
 
 		// make a copy of the request callback and user param
 		requestData = (GSBIRequestData*)gsimalloc(sizeof(GSBIRequestData));
@@ -2592,7 +2592,7 @@ GSResult gsbiServiceSearchBrigades( GSBInternalInstance *theInstance, GSBSearchF
                     return GSB_ERROR(GSResultSection_Memory, GSBResultCode_SearchCriteriaUnexpected);
                     break;
             }
-            SearchParamFound[filterList->mFilters[i].mKey] = gsi_true;
+            //SearchParamFound[filterList->mFilters[i].mKey] = gsi_true;
         }
 
         // Go through the search filter and validate each item in the filter

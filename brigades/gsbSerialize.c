@@ -1048,7 +1048,7 @@ GSResult gsbiParseBrigadeMember(GSXmlStreamReader    theResponseXml,
                                 GSBBrigadeMember     *brigadeMember)
 {
 
-    char *  tempStr = NULL;
+    const char *  tempStr = NULL;
     int     len = 0;
 
     if (gsi_is_false(gsXmlReadChildAsInt(theResponseXml, GSB_BRIGADEMEMBERID_ELEMENT, (int *)&brigadeMember->mBrigadeMemberId)))

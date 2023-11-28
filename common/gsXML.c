@@ -1438,7 +1438,7 @@ gsi_bool gsXmlWriteBase64BinaryElementNoNamespace(GSXmlStreamWriter stream, cons
 gsi_bool gsXmlWriteDateTimeElement(GSXmlStreamWriter stream, const char * namespaceName, const char * tag, time_t value)
 {
 	GSIXmlStreamWriter * writer = (GSIXmlStreamWriter*)stream;
-	char timeString[21];
+	char timeString[50];
 	struct tm *timePtr;
 
 	// convert the time to a string

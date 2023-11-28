@@ -635,7 +635,7 @@ void sampleTestAcceptJoinCallback(GSResult operationResult, GSResultSet *resultS
 void sampleTestAcceptJoin(GSBInstancePtr gsbInstance,gsi_u32 brigadeId, gsi_u32 profileId)
 {
 	wprintf(L"Testing: Accept Join\n");
-	gsbAnswerJoin(gsbInstance,brigadeId, profileId, TRUE, sampleTestAcceptJoinCallback, NULL);
+	gsbAnswerJoin(gsbInstance,brigadeId, profileId, gsi_true, sampleTestAcceptJoinCallback, NULL);
 	gNumOperations++;
 	processTasks();
 }
@@ -1748,7 +1748,7 @@ int testScenario_getPendingInvitesAndJoins()
 	// Leader needs to confirm Invite
 	loginAsLeader();
 
-	sampleTestAnswerJoin(gInstance, 165842, gTestPlayerProfileId, TRUE);
+	sampleTestAnswerJoin(gInstance, 165842, gTestPlayerProfileId, gsi_true);
 	sampleTestGetBrigadeMemberList(gInstance, 165842, GSBBrigadeMemberStatus_Max - 1);
 
 	return 1;
@@ -1788,11 +1788,7 @@ int testScenario_banMember()
 
 //////////////////////////////////////////////////////////////////////////
 int test_main(int argc, char *argv[])
-{	
-	static GSBBrigade		myBrigade;
-    static GSBBrigadeMember myMember;
-	static GSBRole			myRole;
-
+{
     
 //	GSBBrigadeLogo *blogo;
     GSI_UNUSED(argc);
@@ -1830,12 +1826,12 @@ int test_main(int argc, char *argv[])
 	sampleTestGetRoleEntitlementListByRoleId(gInstance, 165842,  637195);
 
 	// TEST - Leader rejects a request to join and accepts a request to join
-	testScenario_AnswerJoin(FALSE);
-	testScenario_AnswerJoin(TRUE);
+	testScenario_AnswerJoin(gsi_false);
+	testScenario_AnswerJoin(gsi_true);
 
 	// TEST - Leader invites member to brigade, and member either accepts or rejects invitiation
- 	testScenario_answerInvite(FALSE);
- 	testScenario_answerInvite(TRUE);
+ 	testScenario_answerInvite(gsi_false);
+ 	testScenario_answerInvite(gsi_true);
 
 	// TEST - Leader invites a member, but then decides to cancel that invite
 	testScenario_rescindInvite();
@@ -1851,7 +1847,7 @@ int test_main(int argc, char *argv[])
     sampleTestGetBrigadeHistory(gInstance, 165842, 0, GSBBrigadeHistoryAccessLevel_Member | GSBBrigadeHistoryAccessLevel_Leader | GSBBrigadeHistoryAccessLevel_Admin | GSBBrigadeHistoryAccessLevel_Public);
 
 	// TEST - Leaving a Brigade
-	testScenario_answerInvite(TRUE);
+	testScenario_answerInvite(gsi_true);
 
 	loginAsMember();
 	sampleTestLeaveBrigade(gInstance, 165842);
@@ -1902,7 +1898,7 @@ int test_main(int argc, char *argv[])
 // 	sampleTestDownloadBrigadeLogo(gInstance, "./Avatar2.jpg" ,&testBrigade->mLogoList.mLogos[0]);
 
     //TEST - Get History of a player in a brigade
-	testScenario_AnswerJoin(TRUE);
+	testScenario_AnswerJoin(gsi_true);
 	loginAsMember();
     sampleTestGetBrigadeHistory( gInstance, 165842, 191134465, GSBBrigadeHistoryAccessLevel_Member);
 
