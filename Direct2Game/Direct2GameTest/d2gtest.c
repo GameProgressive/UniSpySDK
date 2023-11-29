@@ -9,7 +9,7 @@
 #include "../../common/gsAvailable.h"
 #include "../../webservices/AuthService.h"
 #include "../Direct2Game.h"
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
