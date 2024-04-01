@@ -37,8 +37,8 @@
 #define SAMPLE_GAMEID			   0
 #define SAMPLE_PARTERCODE          0
 #define SAMPLE_NAMESPACEID         1
-#define LOCAL_PLAYER_UNIQUENICK    "D2GTest02"
-#define LOCAL_PLAYER_PASSWORD      "IGcash01"
+#define LOCAL_PLAYER_UNIQUENICK    "spyguy"
+#define LOCAL_PLAYER_PASSWORD      "0000"
 #define GAME_ID                    0
 #define GAME_CATALOG_REGION		  L"en"
 #define GAME_CATALOG_VERSION	      0 // stands for the default version
