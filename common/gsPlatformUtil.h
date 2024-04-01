@@ -40,15 +40,8 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle);
 ///////////////////////////////////////////////////////////////////////////////
 // Get rid of compiler warnings when parameters are never used
 // (Mainly used in sample apps and callback for platform switches)
-#if (defined(__MWERKS__) && !defined(_NITRO)) || defined(WIN32)
-	#define GSI_UNUSED(x) x
-#elif defined(_PS2) || defined(_NITRO) || defined(_PS3) || defined(_MACOSX) || defined (_IPHONE)
-	#define GSI_UNUSED(x) {void* y=&x;y=NULL;}
-#elif defined(_PSP)
-	#define GSI_UNUSED(x) (void)x;
-#elif defined(_LINUX)
-	#define GSI_UNUSED(x) (void)x
-#else
+
+#ifndef GSI_UNUSED
 	#define GSI_UNUSED(x)
 #endif
 
@@ -119,47 +112,17 @@ char * gsiSecondsToString(const time_t *timp);			//ctime
 // Misc utilities
 
 	
-#if defined(_NITRO) 
-	
-	#define gmtime(t)	gsiSecondsToDate(t)
-	#define ctime(t)	gsiSecondsToString(t)
-	#define mktime(t)	gsiDateToSeconds(t)	
-
-	#if defined(DWC_GAMESPYSDK_BUILD)
-		#define time(t) gsiTimeNitro(t)
-			time_t time(time_t *timer);
-			// string util (light but no float support)
-		#define sprintf     OS_SPrintf
-		#define snprintf    OS_SNPrintf
-		#define vsprintf    OS_VSPrintf
-		#define vsnprintf   OS_VSNPrintf
-		#define sscanf      STD_TSScanf
-	#endif
-#elif defined(_REVOLUTION)
-	time_t gsiTimeInSec(time_t *timer);
-	struct tm *gsiGetGmTime(time_t *theTime);
-	char *gsiCTime(time_t *theTime);
-	#define time(t) gsiTimeInSec(t)
-	#define gmtime(t) gsiGetGmTime(t)
-	#define ctime(t) gsiCTime(t)
-#else
+#ifndef GS_NO_TIME_H
 	#include <time.h>
 #endif
 
-
-	#ifndef SOMAXCONN
+#ifndef SOMAXCONN
 	#define SOMAXCONN 5
 #endif
 
 typedef const char * (* GetUniqueIDFunction)();
 
 extern GetUniqueIDFunction GOAGetUniqueID;
-
-// Prototypes so the compiler won't warn
-#ifdef _PS2
-extern int wprintf(const wchar_t*,...);
-#endif
-
 
 // 64-bit Integer reads and writes
 gsi_i64 gsiStringToInt64(const char *theNumberStr);
@@ -168,7 +131,6 @@ double gsiWStringToDouble(const wchar_t *inputString);
 
 //fopen wrapper - needed for restricted file systems (i.e. iPhone)
 FILE * gsifopen(const char *filename, const char *mode);
-
 
 #ifdef GS_USE_REFLECTOR
 

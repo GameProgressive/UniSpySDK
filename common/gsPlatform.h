@@ -10,71 +10,19 @@
 #ifndef __GSPLATFORM_H__
 #define __GSPLATFORM_H__
 
-// GameSpy platform definition and headers
-
-// Windows:          _WIN32
-// Xbox:             _WIN32 + _XBOX
-// Xbox360:          _WIN32 + _XBOX + _X360
-// MacOSX:           _MACOSX + _UNIX
-// iPhone:           _IPHONE + _UNIX
-// Linux:            _LINUX + _UNIX
-// Nintendo DS:      _NITRO
-// Nintendo Wii:     _REVOLUTION
-// PSP:              _PSP
-// PS3:              _PS3
-
-// PlayStation2:     _PS2
-//    w/ EENET:      EENET       (set by developer project)
-//    w/ INSOCK:     INSOCK      (set by developer project)
-//    w/ SNSYSTEMS:  SN_SYSTEMS  (set by developer project)
-//    Codewarrior:   __MWERKS__
-
+// Sample platform file:
+//     Platform specific inclusions
+//     Platform big endian? Define GSI_BIG_ENDIAN
+//     Limited platform with no file access? Define GS_NO_FILE
+//     Wireless define? Define GS_WIRELESS_DEVICE
+//     Is platform always 64bit? Define GSI_64BIT
+//     No threads? Define GSI_NO_THREADS
+//     64-bit typedefs (gsi_i64, gsi_u64)
+//
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-// Set the platform define
-#ifdef __mips64
-	#ifndef _PS2
-		#define _PS2
-	#endif
 
-	// Make sure a network stack was defined
-	#if !defined(SN_SYSTEMS) && !defined(EENET) && !defined(INSOCK)
-		#error "PlayStation2 network stack was not defined!"
-	#endif
-#endif
-
-// MacOS X detection
-#if defined(__APPLE__)
-	#include <TargetConditionals.h>
-
-	#if TARGET_OS_IPHONE
-		#define _IPHONE
-	#else
-		#define _MACOSX
-	#endif
-#endif
-
-#if defined(__linux__) || defined(__APPLE__)
-	#define _UNIX
-#endif
-
-#if defined(__linux__)
-	#ifndef _LINUX
-		#define _LINUX
-	#endif
-#endif
-
-#if defined(_XBOX) || defined (_X360)
-#if _XBOX_VER >= 200
-	#define _X360
-#endif
-#endif
-
-// WIN32, set by OS headers
-// _XBOX, set by OS headers
-// __MWERKS__, set by compiler
-// _NITRO, set by OS headers
-
+#include "rsCommon.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,234 +32,37 @@
 #include <stdio.h>
 #include <wchar.h>
 
-
-// XBOX/X360
-#if defined(_XBOX)
-	#include <Xtl.h>
-
-// WIN32
-#elif defined(_WIN32)
-	#ifndef WIN32_LEAN_AND_MEAN
-		#define WIN32_LEAN_AND_MEAN
-	#endif
-	#include <windows.h>
-	#include <limits.h>
-	#include <time.h>
-
-	#if defined(GSI_WINSOCK2)
-		#include <winsock2.h>
-	#else
-		#include <winsock.h>
-	#endif
-	
-	#if (_MSC_VER > 1300)
-		#define itoa(v, s, r) _itoa(v, s, r)
-	#endif
-
-	#ifndef WIN32
-		#define WIN32
-	#endif
-// PS2
-#elif defined(_PS2)
-	// EENet headers must be included before common PS2 headers
-	#ifdef EENET 
-		#include <libeenet.h>
-		#include <eenetctl.h>
-		#include <ifaddrs.h>
-		#include <sys/socket.h>
-		#include <sys/errno.h>
-		#include <netinet/in.h>
-		#include <arpa/inet.h>
-		#include <net/if.h>
-		#include <sys/select.h>
-		#include <malloc.h>
-		
-	#endif // EENET
-
-	// Common PS2 headers
-	#include <eekernel.h>
-	#include <stdio.h>
-	#include <malloc.h>
-	#include <sifdev.h>
-	#include <sifrpc.h>
-	#include <sifcmd.h>
-	#include <ilink.h>
-	#include <ilsock.h>
-	#include <ilsocksf.h>
-	#include <limits.h>
-	
-	#ifdef SN_SYSTEMS
-		// undefine socket defines from sys/types.h
-		// This is to workaround sony now automatically including sys/types.h
-		// and SNSystems having not produce a patch yet (they'll likely do the same since
-		// the SNSystems fd_set is a slightly different size than the sys/types.h.
-		#undef FD_CLR	
-		#undef FD_ZERO
-		#undef FD_SET	
-		#undef FD_ISSET
-		#undef FD_SETSIZE
-		#undef fd_set
-		#include "snskdefs.h"
-		#include "sntypes.h"
-		#include "snsocket.h"
-		#include "sneeutil.h"
-		#include "sntcutil.h"
-	#endif // SN_SYSTEMS
-
-	#ifdef INSOCK
-		#include "libinsck.h"
-		#include "libnet.h"
-		#include "sys/errno.h"
-		//#include "libmrpc.h"
-	#endif // INSOCK
-
-// LINUX and MACOSX
-#elif defined(_UNIX)
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <stdio.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <sys/ioctl.h>
-	#include <netinet/in.h>
-
-	// MACOSX Warning!! netdb.h has it's own NOFILE define.
-	// GameSpy uses NOFILE to determine if an HD is available
-	#ifndef NOFILE
-		// Since GameSpy NOFILE is not defined, include netdb.h then undef NOFILE
-		#include <netdb.h>
-		#undef NOFILE
-	#else
-		// Otherwise leave NOFILE defined
-		#include <netdb.h>
-	#endif
-
-	#include <arpa/inet.h>
-	#include <errno.h>
-	#include <sys/time.h>
-	#include <limits.h>
-	//#include <sys/syslimits.h>
-	#include <netinet/tcp.h>
-
-    // ICMP ping support is unsupported on Linux/MacOSX due to needing super-user access for raw sockets
-    #define SB_NO_ICMP_SUPPORT
-
-// Nintendo DS
-#elif defined(_NITRO)
-	#include <nitro.h>
-	#define NINET_NWBASE_MD5_H_  // resolves md5 conflicts
-	#include <nitroWiFi.h>
-	#include <extras.h>  // mwerks
-    #include <limits.h>
-	#include <time.h> //NAB - check if this causes any issues. It does not exist in the Nitro branch
-	// Raw sockets are undefined on Nitro
-	#define SB_NO_ICMP_SUPPORT
-
-// Sony PSP
-#elif defined(_PSP)
-	#include <kernel.h>
-	#include <pspnet.h>
-	#include <pspnet_error.h>
-	#include <pspnet_inet.h>
-	#include <pspnet/sys/select.h>
-	#include <pspnet_resolver.h>
-	#include <pspnet_apctl.h>
-	#include <pspnet_ap_dialog_dummy.h>
-	#include <rtcsvc.h>
-	#include <errno.h>
-	#include <wlan.h>
-
-	#include <pspnet/sys/socket.h>
-	#include <pspnet/netinet/in.h>
-	#include <utility\utility_common.h>
-	#include <utility\utility_netconf.h>
-	#include <utility\utility_module.h>
-	#include <utility\utility_sysparam.h>
-
-// PS3
-#elif defined(_PS3)
-	#include <netex/errno.h>
-	#include <sys/process.h>
-	#include <sys/time.h>
-	#include <sys/types.h>	
-	#include <sys/select.h>
-	#include <sys/socket.h>
-	#include <sys/sys_time.h>
-	#include <sys/timer.h>
-	#include <errno.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <netex/net.h>
-	#include <netex/ifctl.h>
-//	#include <netex/netset.h>
-	#include <limits.h>
-	#include <time.h>
-
-	#include <sysutil/sysutil_common.h>
-	#include <sysutil/sysutil_sysparam.h>
-
-// Nintendo Wii
-#elif defined(_REVOLUTION)
-	#include <revolution.h>
-	#include <revolution/soex.h>
-	#include <revolution/ncd.h>	
-    #include <limits.h>
-    #include <time.h>
-
-    #define GSI_DOMAIN_NAME "gs.nintendowifi.net"
-	// Raw sockets are undefined on Revolution
-	#define SB_NO_ICMP_SUPPORT
-
-// Unsupported platform or no platform defined!
-#else
-	#error "The GameSpy SDKs do not support this operating system"
-
-#endif //(platform switch)
-
-
-
 //---------- __cdecl fix for __fastcall conventions ----------
-#if defined(_WIN32)
-	#define GS_STATIC_CALLBACK __cdecl
-#else
+#ifndef GS_STATIC_CALLBACK
 	#define GS_STATIC_CALLBACK
 #endif
 
-
 //---------- Handle Endianess ----------------------
-#if defined(_PS3) || defined(_REVOLUTION) || defined(_X360) //defined(_MACOSX) || defined (_IPHONE)
-	#define GSI_BIG_ENDIAN
-#endif
 #ifndef GSI_BIG_ENDIAN
-	#define GSI_LITTLE_ENDIAN
+	#define GSI_LITTLE_ENDIAN 1
 #endif
-
-
 
 #include <ctype.h>
-
-#if defined(_MACOSX) || defined (_IPHONE)
-	#undef _T
-#endif
-
 #include <assert.h>
 
-#if defined(GS_NO_FILE) || defined(_PS2) || defined(_PS3) || defined(_PSP) || defined(_NITRO) || defined(_REVOLUTION) || defined(_XBOX)
-	#define NOFILE
+//---------- Handle 64-bit data ---------- 
+#ifdef GSI_64BIT
+	#define PTR_ALIGNMENT 32
+#else
+	#define PTR_ALIGNMENT 16
 #endif
 
-#if defined(_PSP) || defined(_NITRO) || defined(_IPHONE)
-	#define GS_WIRELESS_DEVICE
+#ifdef _DEBUG
+	#define GSI_COMMON_DEBUG 1
 #endif
 
-#if !defined(GSI_DOMAIN_NAME)
-	#define GSI_DOMAIN_NAME "gamespy.com"
+#if !defined(_DEBUG_) && defined(GSI_COMMON_DEBUG)
+	#define _DEBUG_ 1
 #endif
+
 
 #if !defined(GSI_OPEN_DOMAIN_NAME)
-	#define GSI_OPEN_DOMAIN_NAME_UNI _T("%s.api." GSI_DOMAIN_NAME) // unicode supported string blehhh
+	#define GSI_OPEN_DOMAIN_NAME_UNI _T("%s.api." GSI_DOMAIN_NAME) // unicode supported string
 	#define GSI_OPEN_DOMAIN_NAME "%s.api." GSI_DOMAIN_NAME
 #endif
 
@@ -319,11 +70,6 @@
 	#define RS_HTTP_PROTOCOL_URL "http://"
 #else
 	#define RS_HTTP_PROTOCOL_URL "https://"
-#endif
-
-//---------- Mac autorelease pool for working with CoreFoundation types ----------------------
-#if defined(_MACOSX) || defined(_IPHONE)
-#include "macosx/macAutoreleasePool.h"
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -356,38 +102,18 @@ typedef int               gsi_bool;
 	#define GSI_MAX_INTEGRAL_BITS   32
 #endif
 
-// Platform dependent types
-#ifdef _PS2
-	typedef signed long           gsi_i64;
-	typedef unsigned long         gsi_u64;
-#elif defined(_WIN32)
-	#if (!defined(_M_IX86) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64))
-	typedef __int64               gsi_i64;
-	typedef unsigned __int64      gsi_u64;
-	#endif
-#elif defined(_NITRO)
-	typedef s64                   gsi_i64;
-	typedef u64                   gsi_u64;
-#elif defined (_PSP)
-	typedef long long             gsi_i64;
-	typedef unsigned long long    gsi_u64;
-#elif defined (_PS3)
-	typedef int64_t               gsi_i64;
-	typedef uint64_t              gsi_u64;
-#elif defined (_REVOLUTION)
-	typedef signed long long      gsi_i64;
-	typedef unsigned long long    gsi_u64;
-#else /* _UNIX */
-	typedef long long             gsi_i64;
-	typedef unsigned long long    gsi_u64;
-#endif // 64 bit types
-
 #if defined(__GNUC__)
 #define GSI_FMT64	"ll"
 #elif defined(_MSC_VER)
 #define GSI_FMT64	"I64"
 #else
 #define GSI_FMT64	""
+#endif
+
+#if GSI_64BIT
+	typedef gsi_u64 gsi_mptr;
+#else
+	typedef gsi_u32 gsi_mptr;
 #endif
 
 
@@ -398,10 +124,8 @@ typedef int               gsi_bool;
 	// is Unicode
 	#define GSI_WCHAR (wchar_t *)
 	
-	#ifdef _UNIX		
-		#define gsi_char  gsi_u32	// for unix/linux, unicode is 4 bytes
-	#else
-		#define gsi_char  gsi_u16	// all other are 2 bytes
+	#ifndef gsi_char
+		#define gsi_char  gsi_u16
 	#endif
 #endif
 
@@ -446,6 +170,7 @@ extern "C" {
 #undef _tsnprintf
 #undef _tremove
 #undef _trename
+
 #ifdef GSI_UNICODE
 	#define _vftprintf  vfwprintf
 	#define _ftprintf   fwprintf
@@ -464,20 +189,17 @@ extern "C" {
 	#define _STR_CST(a)		(gsi_u16 *)##a
 	#define _WRD_CST(a)		(wchar_t *)##a
 
-	#if defined(_WIN32) || defined(_PS2) || defined(_PSP)
-		#define _tsnprintf _snwprintf
-	#else
+	#ifndef _tsnprintf
 		#define _tsnprintf swprintf
 	#endif
 
-	#ifndef _PSP
-		#define _stprintf   swprintf
-		#define _vswprintf  vswprintf
-	#else
+	#ifndef _stprintf
 		#define _stprintf   snwprintf
+	#endif
+	
+	#ifndef _vswprintf
 		#define _vswprintf  vsnwprintf
 	#endif
-
 #else
 	#define _vftprintf  vfprintf
 	#define _ftprintf   fprintf
@@ -487,13 +209,17 @@ extern "C" {
 	#define _tcsncpy	strncpy
 	#define _tcscat     strcat
 	#define _tcslen     strlen
+	
 #if defined (_MSC_VER)
+
 #if (_MSC_VER < 1400)
 	#define _tcschr	    strchr
 #endif
+
 #else
 	#define _tcschr	    strchr
 #endif
+
 	#define _tcsrchr	strrchr
 	#define _tcscmp     strcmp
 	#define _tfopen     fopen
@@ -505,23 +231,12 @@ extern "C" {
 	#define _STR_CST(a)		a
 	#define _WRD_CST(a)		a
 
-	#if defined(_WIN32)
-		#define _tsnprintf _snprintf
-	#else
+	#ifndef _tsnprintf
 		#define _tsnprintf snprintf
 	#endif
 #endif // GSI_UNICODE
 
-#if defined(_WIN32)
-	#define snprintf _snprintf
-#endif // _WIN32
-
-#if defined(_WIN32)
-	#define strcasecmp _stricmp
-	#define strncasecmp _strnicmp
-#endif
-
-#if !defined(_WIN32)
+#ifndef GSI_NO_STR_EXT
 	char *_strlwr(char *string);
 	char *_strupr(char *string);
 #endif
@@ -542,19 +257,13 @@ PRE_ALIGN(16);
 static char _mempool[MEMPOOL_SIZE]	POST_ALIGN(16);
 
 */
-#if defined _WIN32
-	#define PRE_ALIGN(x)	__declspec(align(x))	// ignore Win32 directive
-	#define POST_ALIGN(x)	// ignore
-#elif defined  (_PS2) || defined (_PSP) || defined (_PS3) 
-	#define PRE_ALIGN(x)	// ignored this on psp/ps2
-	#define POST_ALIGN(x)	__attribute__((aligned (x)))		// 
-#elif defined (_REVOLUTION)
-	#define PRE_ALIGN(x)  // not needed
-	#define POST_ALIGN(x) __attribute__((aligned(32)))
-#else
-	// #warning "Platform not supported"
-	#define PRE_ALIGN(x)	// ignore
-	#define POST_ALIGN(x)	// ignore
+
+#ifndef PRE_ALIGN
+	#define PRE_ALIGN(x)
+#endif
+
+#ifndef POST_ALIGN
+	#define POST_ALIGN(x)
 #endif
 
 #define DIM( x )				( sizeof( x ) / sizeof((x)[ 0 ]))
@@ -572,17 +281,15 @@ extern gsi_u64 gsiByteOrderSwap64(gsi_u64);
 //   GS_USTR - for gsi_char string that flips between unicode and ascii depending on GSI_UNICODE define
 //   GS_STR  - for char string that remains as ascii
 //
+
+#if !defined(GS_STR) && !defined(GS_USTR)
 #if defined(GSI_UNICODE)
-    #if defined(_PS3)
-        #define GS_STR  _T("%s")
-        #define GS_USTR _T("%ls")
-    #else
-        #define GS_STR  _T("%S")
-        #define GS_USTR _T("%s")
-    #endif
+	#define GS_STR  _T("%S")
+	#define GS_USTR _T("%s")
 #else
     #define GS_STR  _T("%s")
     #define GS_USTR _T("%s")
+#endif
 #endif
 
 #ifdef __cplusplus

@@ -1,4 +1,11 @@
-#if defined(_PSP)
+///////////////////////////////////////////////////////////////////////////////
+// File:	PSPcommon.c
+// SDK:		GameSpy Common PSP code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "../gsCommon.h"
@@ -410,7 +417,14 @@ int main(int argc, char** argp)
 	return SCE_KERNEL_EXIT_SUCCESS;
 }
 
-
+// ToDo:
+// ErrorMessage: Displays message and goes into an infinite loop
+// continues rendering
+void  _gsDebugAssert(const char *string)
+{
+	printf("%s\n", string);
+	while (1) {}
+}
+	
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#endif // _PSP only

@@ -1,7 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
+// File:	gsSocketRevolution.c
+// SDK:		GameSpy Common Revolution code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 ///////////////////////////////////////////////////////////////////////////////
-#if defined(_REVOLUTION)
-
+///////////////////////////////////////////////////////////////////////////////
 // include the revolution socket header
 #include "../gsPlatform.h"
 
@@ -191,7 +197,64 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
 	return rcode;
 }
 
+gsi_u32 gsiGetBroadcastIP(void)
+{
+	/*
+	int length;
+	gsi_u32 ip;
+	
+	length = (gsi_u32)sizeof(ip);
+
+	// IP_GetBroadcastAddr replaced by SOGetInterfaceOpt
+	// IP_GetBroadcastAddr(NULL, (u8*)&ip);
+	SOGetInterfaceOpt(NULL, SO_SOL_IP, SO_INADDR_BROADCAST, (u8*)&ip, &length);
+	*/
+	 IPAddrEntry* addrtbl; 
+    int addrnum;
+    int ret;
+	int length;
+	gsi_u32 ip;
+    length = (int)sizeof( addrnum );
+
+    ret = SOGetInterfaceOpt(NULL,
+                            SO_SOL_CONFIG,
+                            SO_CONFIG_IP_ADDR_NUMBER,
+                            (u8*)&addrnum, &length);
+
+    if( ret >= 0 )
+        return 0xFFFFFFFF;
+
+
+    length = (int)(sizeof( IPAddrEntry ) * addrnum);
+
+    addrtbl = (IPAddrEntry*)gsimalloc( (u32)length );
+
+    if( addrtbl == NULL )
+        return 0xFFFFFFFF;
+
+    ret = SOGetInterfaceOpt(NULL,
+                            SO_SOL_CONFIG, 
+                            SO_CONFIG_IP_ADDR_TABLE, 
+                            (u8*)addrtbl, 
+                            &length);
+
+    if( ret < 0 )
+    {
+        gsifree( addrtbl );
+        return 0xFFFFFFFF;
+    }
+
+    ip = (u32)(addrtbl->bcastAddr[3]
+            | (addrtbl->bcastAddr[2] << 8)
+            | (addrtbl->bcastAddr[1] << 16)
+            | (addrtbl->bcastAddr[0] << 24));
+
+    gsifree( addrtbl );
+    
+
+    return ip;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#endif // _REVOLUTION

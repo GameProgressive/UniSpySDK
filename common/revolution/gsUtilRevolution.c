@@ -1,4 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
+// File:	gsUtilRevolution.c
+// SDK:		GameSpy Common Revolution code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "../gsCommon.h"
 #include "../gsPlatformUtil.h"
@@ -10,6 +18,22 @@ static OSAlarm gAlarm;
 static OSThreadQueue gQueue;
 static BOOL          gQueueInitialized;
 
+
+// no built in system memalign
+void* _gsi_memalign(size_t boundary, size_t size)
+{
+	void *ptr = calloc((size)/(boundary), (boundary));
+	// check alignment
+	GS_ASSERT((((gsi_u32)ptr)% boundary)==0);
+	return ptr;
+}
+	
+void gsiDebugPrint(const char* format, va_list params) 
+{
+	static char string[256];
+	vsprintf(string, format, params);
+	OSReport(string);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -10,31 +10,6 @@
 #include "gsCommon.h"
 #include "gsPlatformUtil.h"
 
-// Include platform separated functions
-#if defined(_X360)
-	#include "x360/gsUtilX360.c"
-#elif defined(_XBOX)
-	//#include "xbox/gsUtilXBox.c"
-#elif defined(_WIN32)
-	#include "win32/gsUtilWin32.c"
-#elif defined(_LINUX)
-	#include "linux/gsUtilLinux.c"
-#elif defined(_MACOSX) || defined (_IPHONE)
-	#include "macosx/gsUtilMacOSX.c"
-#elif defined(_NITRO)
-	#include "nitro/gsUtilNitro.c"
-#elif defined(_PS2)
-	#include "ps2/gsUtilPs2.c"
-#elif defined(_PS3)
-	#include "ps3/gsUtilPs3.c"
-#elif defined(_PSP)
-	#include "psp/gsUtilPSP.c"
-#elif defined(_REVOLUTION)
-	#include "revolution/gsUtilRevolution.c"
-#else
-	#error "Missing or unsupported platform"
-#endif
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -63,12 +38,12 @@ typedef struct GSIResolveHostnameInfo
 } GSIResolveHostnameInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
-// for asynch DNS, must have:
+// for async DNS, must have:
 // * platform that supports threaded lookup AND
 // * threading enabled
 // * and async lookup enabled
 ////////////////////////////////////////////////////////////////////////////////
-#if	(defined(_WIN32) || /*defined(_PS2) ||*/ defined(_UNIX) || defined (_REVOLUTION) || defined(_PS3)) && !defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS)
+#if	!defined(GSI_NO_THREADS) && !defined(GSI_NO_ASYNC_DNS)
 
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32) /*|| defined(_PS2)*/
@@ -322,9 +297,11 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 }
 
 
-#else	// if * not a supported platform OR * no threads allowed OR * no async lookup allowed
-		///////////////////////////////////////////////////////////////////////////////////
-		// if !(_WIN32 ||_PS2 || _LINUX || _MACOSX || _IPHONE || _REVOLUTION) || GSI_NO_THREADS || GSI_NO_ASYNC_DNS
+#else
+
+// if * not a supported platform OR * no threads allowed OR * no async lookup allowed
+///////////////////////////////////////////////////////////////////////////////////
+// GSI_NO_THREADS || GSI_NO_ASYNC_DNS
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,8 +309,6 @@ unsigned int gsiGetResolvedIP(GSIResolveHostnameHandle handle)
 // ********** NON-ASYNC DNS ********** //
 // 
 // These are the non-threaded versions of the above functions.
-// The following platforms have synchronous DNS lookups:
-// _NITRO || _XBOX || _X360 || _PS3 || _PS2 || _PSP
 ///////////////////////////////////////////////////////////////////////////////
 
 int gsiStartResolvingHostname(const char * hostname, GSIResolveHostnameHandle * handle)
@@ -413,7 +388,7 @@ unsigned short * goawstrdup(const unsigned short *src)
 	return res;
 }
 
-#if !defined(_WIN32)
+#if !defined(GSI_NO_STR_EXT)
 
 char *_strlwr(char *string)
 {
@@ -478,101 +453,6 @@ void SocketShutDown()
 	#endif
 #endif
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-#ifdef _PS2
-extern int sceCdReadClock();
-
-#if !defined(__MWERKS__) && !defined(_PS2)
-typedef unsigned char u_char;
-#endif
-
-typedef struct {
-        u_char stat;            /* status */
-        u_char second;          /* second */
-        u_char minute;          /* minute */
-        u_char hour;            /* hour   */
-
-        u_char pad;             /* pad    */
-        u_char day;             /* day    */
-        u_char month;           /* month  */
-        u_char year;            /* year   */
-} sceCdCLOCK;
-
-static unsigned long GetTicks()
-{
-	unsigned long ticks;
-	asm volatile (" mfc0 %0, $9 " : "=r" (ticks));
-    return ticks;
-}
-
-#define DEC(x) (10*(x/16)+(x%16))
-#define _BASE_YEAR 			 70L
-#define _MAX_YEAR 			138L
-#define _LEAP_YEAR_ADJUST 	 17L
-int _days[] = {-1, 30, 58, 89, 119, 150, 180, 211, 242, 272, 303, 333, 364};
-
-static time_t _gmtotime_t (
-        int yr,     /* 0 based */
-        int mo,     /* 1 based */
-        int dy,     /* 1 based */
-        int hr,
-        int mn,
-        int sc
-        )
-{
-        int tmpdays;
-        long tmptim;
-        struct tm tb;
-
-        if ( ((long)(yr -= 1900) < _BASE_YEAR) || ((long)yr > _MAX_YEAR) )
-                return (time_t)(-1);
-
-        tmpdays = dy + _days[mo - 1];
-        if ( !(yr & 3) && (mo > 2) )
-                tmpdays++;
-
-        tmptim = (long)yr - _BASE_YEAR;
-
-        tmptim = ( ( ( ( tmptim ) * 365L
-                 + ((long)(yr - 1) >> 2) - (long)_LEAP_YEAR_ADJUST
-                 + (long)tmpdays )
-                 * 24L + (long)hr )
-                 * 60L + (long)mn )
-                 * 60L + (long)sc;
-
-        tb.tm_yday = tmpdays;
-        tb.tm_year = yr;
-        tb.tm_mon = mo - 1;
-        tb.tm_hour = hr;
-        
-        return (tmptim >= 0) ? (time_t)tmptim : (time_t)(-1);
-}
-
-time_t time(time_t *timer)
-{
-	time_t tim;
-	sceCdCLOCK clocktime; /* defined in libcdvd.h */
-
-	sceCdReadClock(&clocktime); /* libcdvd.a */
-
-	tim =   _gmtotime_t ( DEC(clocktime.year)+2000,
-							DEC(clocktime.month),
-							DEC(clocktime.day),
-							DEC(clocktime.hour),
-							DEC(clocktime.minute),
-							DEC(clocktime.second));
-
-	if(timer)
-		*timer = tim;
-		
-	return tim;
-}
-
-#endif /* _PS2 */
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -674,32 +554,6 @@ gsi_time current_time_hires()  // returns current time in microseconds
 	return (current_time() / 1000);
 #endif
 
-#ifdef _PS2
-	unsigned int ticks;
-	static unsigned int msec = 0;
-	static unsigned int lastticks = 0;
-	sceCdCLOCK lasttimecalled; /* defined in libcdvd.h */
-
-	if(!msec)
-	{
-		sceCdReadClock(&lasttimecalled); /* libcdvd.a */
-		msec =  (unsigned int)(DEC(lasttimecalled.day) * 86400000) +
-				(unsigned int)(DEC(lasttimecalled.hour) * 3600000) +
-				(unsigned int)(DEC(lasttimecalled.minute) * 60000) +
-				(unsigned int)(DEC(lasttimecalled.second) * 1000);
-		msec *= 1000;
-	}
-
-	ticks = (unsigned int)GetTicks();
-	if(lastticks > ticks)
-		msec += ((sizeof(unsigned int) - lastticks) + ticks) / 300;
-	else
-		msec += (unsigned int)(ticks-lastticks) / 300;
-	lastticks = ticks;
-
-	return msec;
-#endif
-
 #ifdef _PSP
 	struct SceRtcTick ticks;
 	int result = 0;
@@ -741,23 +595,6 @@ void msleep(gsi_time msec)
 {
 #if defined(_WIN32)
 	Sleep(msec);
-
-#elif defined(_PS2)
-	#ifdef SN_SYSTEMS
-		sn_delay((int)msec);
-	#endif
-	#ifdef EENET
-		if(msec >= 1000)
-		{
-			sleep(msec / 1000);
-			msec -= (msec / 1000);
-		}
-		if(msec)
-			usleep(msec * 1000);
-	#endif
-	#ifdef INSOCK
-		DelayThread(msec * 1000);
-	#endif
 
 #elif defined(_PSP)
 	sceKernelDelayThread(msec * 1000);
@@ -1944,7 +1781,7 @@ FILE * gsifopen(const char *filename, const char *mode)
 	f = (FILE*)fopen(filepath, mode);
 	gsifree(filepath);
 
-#elif !defined(NOFILE)
+#elif !defined(GS_NO_FILE)
 	f = (FILE*)fopen(filename, mode);
 #endif
 

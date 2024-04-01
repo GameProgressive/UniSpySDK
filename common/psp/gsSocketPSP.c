@@ -1,4 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
+// File:	gsSocketPSP.c
+// SDK:		GameSpy Common PSP code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include <psptypes.h>
 #include <wlan.h>
@@ -348,3 +356,7 @@ int _NetworkAdHocSocketRecv(int socket_id,
 }
 #endif
 
+gsi_u32 gsiGetBroadcastIP(void)
+{
+	return UINT_MAX;
+}

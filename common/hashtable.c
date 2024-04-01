@@ -17,12 +17,6 @@
 #include "hashtable.h"
 #include "gsAssert.h"
 
-#ifdef _MFC_MEM_DEBUG
-#define _CRTDBG_MAP_ALLOC 1
-#include <crtdbg.h>
-#endif
-
-
 #ifdef _NO_NOPORT_H_
 	#define gsimalloc malloc
 	#define gsifree free

@@ -3,6 +3,8 @@ Changelog for: MacOSX Common Code
 
 DATE        VERSION  BY   TYPE     DESCRIPTION
 ----------  -------  ---  -------  ---------------------------------------------------------
+02-09-2009  1.00.05  MWJ  OTHER    Update file header to new/standard format
+02-09-2009  1.00.04  MWJ  FEATURE  Added files for iPhone file system support
 06-03-2005  1.00.03  SN   RELEASE  Releasing to developer site.
 04-28-2005  1.00.03  SN   RELEASE  Releasing to developer site.
 04-04-2005  1.00.03  SN   RELEASE  Releasing to developer site.

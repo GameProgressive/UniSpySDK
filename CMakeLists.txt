@@ -27,29 +27,54 @@ if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
 
 	# WinSock1 is deprecated, it's better to use WinSock2
     option(RS_WINSOCK2 "Link against Windows Socket 2 instead of Windows Socket 1." ON)
+	
+	set(RS_ACTUAL_PLATFORM "win32")
+elseif(APPLE OR "${CMAKE_SYSTEM}" MATCHES "Darwin")
+	set(RS_ACTUAL_PLATFORM "macosx")
+elseif(UNIX AND NOT APPLE)
+	set(RS_ACTUAL_PLATFORM "linux")
+endif()
+
+if (NOT DEFINED RS_PLATFORM)
+	if (NOT DEFINED RS_ACTUAL_PLATFORM)
+		message(FATAL_ERROR "Please define a platform to build the code")
+	endif()
+	
+	set(RS_PLATFORM ${RS_ACTUAL_PLATFORM})
+	message(STATUS "Building platform ${RS_PLATFORM}")
+endif()
+
+if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+    set(RS_64BIT 1)
+endif()
+
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(RS_64BIT 1)
+endif()
+
+if(CMAKE_CL_64)
+   set(RS_64BIT 1)
 endif()
 
 # Do we optionally want to build the test executables?
 option(RS_BUILD_TESTS "Builds test executables." OFF)
 
 if(RS_SERVER_NAME)
-    add_definitions(-DGSI_DOMAIN_NAME="${RS_SERVER_NAME}")
     message(STATUS "UniSpy server name is set to ${RS_SERVER_NAME}")
+endif()
+
+if (NOT DEFINED RS_SERVER_NAME)
+	set(RS_SERVER_NAME "gamespy.com")
 endif()
 
 add_definitions(-DGS_PEER)
 
-if(RS_WINSOCK2)
-    add_definitions(-DGSI_WINSOCK2)
-endif()
-
-if(RS_SECURESECONNECT)
-	add_definitions(-DRS_HTTPS)
-endif()
-
 #if (RS_MEM_MANAGED)
 add_definitions(-DGSI_MEM_MANAGED)
 #endif()
+
+configure_file(common/rsCommon.h.in ${CMAKE_BINARY_DIR}/generated/rsCommon.h)
+include_directories(${CMAKE_BINARY_DIR}/generated)
 
 #add_subdirectory(brigades)
 add_subdirectory(common) # Most of the common stuff gets built into this.

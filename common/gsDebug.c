@@ -17,12 +17,6 @@
 // (Putting this above the header includes may cause compiler warnings.)
 #ifdef GSI_COMMON_DEBUG
 
-#if defined(_NITRO)
-#include "../../common/nitro/screen.h"
-#define printf Printf
-#define vprintf VPrintf
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Static debug data
@@ -60,51 +54,25 @@ static gsi_u32 gsiDebugLog2(gsi_u32 theInt)
 	return total;
 }
 
+extern void gsiDebugPrint(const char* format, va_list params);
 
 // default supplied debug function, will receive debug text
 // this is platform specific
 static void gsiDebugCallback(GSIDebugCategory category, GSIDebugType type,
 						GSIDebugLevel level, const char * format, va_list params)
 {
-	#if defined(_PSP)
-		// Output line prefix
-		vprintf(format, params);
-		//gsDebugTTyPrint(string);
-	#elif defined(_PS2)
-		// Output line prefix
-		vprintf(format, params);
-
-	#elif defined(_PS3)
-		// Output line prefix
-		vprintf(format, params);
-
-	#elif defined(_WIN32)
-		static char string[256];
-		vsprintf(string, format, params); 			
-		OutputDebugStringA(string);
-
-	#elif defined(_LINUX) || defined(_MACOSX) || defined (_IPHONE)
-		//static char    string[256];
-		//vsprintf(string, format, params); 			
-		vprintf(format, params);
-	#elif defined(_NITRO)
-		VPrintf(format, params);
-	#elif defined(_REVOLUTION)
-		static char string[256];
-		vsprintf(string, format, params);
-		OSReport(string);
-	#else
-		va_list argptr;
+	/*va_list argptr;
 		static char    string[256];
 		va_start(argptr, format);
 		vsprintf(string, format, argptr); 
 		va_end(argptr);
-		gsDebugTTyPrint(string);
-	#endif
-	
+		gsDebugTTyPrint(string);*/
+
 	GSI_UNUSED(category);
 	GSI_UNUSED(type);
 	GSI_UNUSED(level);
+
+	gsiDebugPrint(format, params);
 }
 
 
@@ -144,7 +112,7 @@ void gsDebugVaList(GSIDebugCategory theCat, GSIDebugType theType,
 	aCurLevel = gGSIDebugInstance.mGSIDebugLevel[theCat][theType];
 	if (aCurLevel & theLevel) // check the flag
 	{
-#if !defined(_NITRO)
+#ifndef GS_NO_FILE
 		// Output line prefix
 		if (gGSIDebugInstance.mGSIDebugFile)
 		{
@@ -273,8 +241,8 @@ void gsDebugBinary(GSIDebugCategory theCat, GSIDebugType theType,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void gsSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType, 
-					  GSIDebugLevel theLevel)
+static void gsiSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType, 
+					  GSIDebugLevel theLevel, gsi_bool notifyChange)
 {
 	// Verify Parameters
 	GS_ASSERT(theCat   <= GSIDebugCat_Count);
@@ -287,43 +255,63 @@ void gsSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType,
 		for (; i<GSIDebugCat_Count; i++)
 			gsSetDebugLevel((GSIDebugCategory)i, theType, theLevel);
 
-		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc,
-			GSIDebugLevel_Debug,
-			"Debug level set to %s for all categories (SDKs)\r\n",
-			gGSIDebugLevelDescriptionStrings[gsiDebugLog2(theLevel)]);
+		if (gsi_is_true(notifyChange))
+		{
+			gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc,
+				GSIDebugLevel_Debug,
+				"Debug level set to %s for all categories (SDKs)\r\n",
+				gGSIDebugLevelDescriptionStrings[gsiDebugLog2(theLevel)]);
+		}
 
+		for (; i<GSIDebugCat_Count; i++)
+			gsiSetDebugLevel((GSIDebugCategory)i, theType, theLevel, gsi_false);
+		
 		return;
 	}
 	
 	// Set for all types?
-	if (theType == GSIDebugType_Count)
+	else if (theType == GSIDebugType_Count)
 	{
 		int i=0;
-		for (; i<GSIDebugType_Count; i++)
-			gsSetDebugLevel(theCat, (GSIDebugType)i, theLevel);
 
-		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc,
-			GSIDebugLevel_Debug,
-			"Debug level set to %s for all types\r\n",
-			gGSIDebugLevelDescriptionStrings[gsiDebugLog2(theLevel)]);
+		if (gsi_is_true(notifyChange))
+		{
+
+			gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc,
+				GSIDebugLevel_Debug,
+				"Debug level set to %s for %s (all types)\r\n",
+				gGSIDebugLevelDescriptionStrings[gsiDebugLog2(theLevel)],
+				gGSIDebugCatStrings[theCat]);
+		}
+		
+		for (; i<GSIDebugType_Count; i++)
+			gsiSetDebugLevel(theCat, (GSIDebugType)i, theLevel, gsi_false);
+
 		return;
 	}
 
 	// Is the new level different from the old?
 	if (gGSIDebugInstance.mGSIDebugLevel[theCat][theType] != theLevel)
 	{
-		// Notify of the change
-		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, 
-			GSIDebugLevel_Comment,
-			"Changing debug level: [%s][%s][%02X]\r\n",
-			gGSIDebugCatStrings[theCat], 
-			gGSIDebugTypeStrings[theType], 
-			theLevel );
+		if (gsi_is_true(notifyChange))
+		{
+			// Notify of the change
+			gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, 
+				GSIDebugLevel_Comment,
+				"Changing debug level: [%s][%s][%02X]\r\n",
+				gGSIDebugCatStrings[theCat], 
+				gGSIDebugTypeStrings[theType], 
+				theLevel );
+		}
 		gGSIDebugInstance.mGSIDebugLevel[theCat][theType] = theLevel;
 	}
 }
+void gsSetDebugLevel(GSIDebugCategory theCat, GSIDebugType theType, GSIDebugLevel theLevel)
+{
+	gsiSetDebugLevel(theCat, theType, theLevel, gsi_true);
+}
 
-#if !defined(_NITRO)
+#ifndef GS_NO_FILE
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

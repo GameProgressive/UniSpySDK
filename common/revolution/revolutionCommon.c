@@ -1,7 +1,14 @@
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// (C) Gamespy Industries
-// 
+///////////////////////////////////////////////////////////////////////////////
+// File:	revolutionCommon.c
+// SDK:		GameSpy Common Revolution code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//
 // Commonly shared network startup code
 // WARNING: Please do not use this code as a basis for 
 // Game Network startup code.  This is only for testing
@@ -207,6 +214,11 @@ void StopNetwork()
     (void)SOCleanup();
 }
 
+void _gsDebugAssert(const char *string)
+{
+	OSHalt(string);
+}
+	
 extern int test_main(int argc, char **argv);
 void main(int argc, char **argv)
 {

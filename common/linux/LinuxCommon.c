@@ -1,7 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	LinuxCommon.c
+// SDK:		GameSpy Common Linux code
+//
 // Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
 // This software is made available only pursuant to certain license terms offered
 // by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
 // manner not expressly authorized by IGN or GameSpy is prohibited.
+
 
 #include "../gsCommon.h"
 #include "../gsMemory.h"
@@ -65,6 +70,12 @@ void gsiMemManagedClose(void * aMemoryPool)
 }
 */
 
+void  _gsDebugAssert(const char *string)
+{
+	printf("%s\n", string);
+	while (1) {}
+}
+	
 // sample common entry point
 extern int test_main(int argc, char ** argp); 
 

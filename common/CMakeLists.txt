@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 
+add_subdirectory(${RS_PLATFORM})
+
 add_library(rscommon
     darray.c
     gsAssert.c
@@ -11,7 +13,6 @@ add_library(rscommon
     gsMemory.c
     gsPlatform.c
     gsPlatformSocket.c
-    gsPlatformThread.c
     gsPlatformUtil.c
     gsRC4.c
     gsResultCodes.c
@@ -21,6 +22,31 @@ add_library(rscommon
     gsXML.c
     hashtable.c
     md5c.c
+    darray.h
+    gsAssert.h
+    gsAvailable.h
+    gsCommon.h
+    gsCore.h
+    gsCrypt.h
+    gsDebug.h
+    gsLargeInt.h
+    gsMemory.h
+    gsPlatform.h
+    gsPlatformSocket.h
+    gsPlatformThread.h
+    gsPlatformUtil.h
+    gsRC4.h
+    gsResultCodes.h
+    gsSHA1.h
+    gsSoap.h
+    gsSSL.h
+    gsStringUtil.h
+    gsUdpEngine.h
+    gsXML.h
+    hashtable.h
+    md5.h
+    nonport.h
+	${CMAKE_BINARY_DIR}/generated/rsCommon.h
 )
 
 # Handle linking threading library.
@@ -32,12 +58,14 @@ if (CMAKE_BUILD_TYPE EQUAL "Debug")
 endif()
 
 # Handle linking sockets library.
-if(WIN32 OR "${CMAKE_SYSTEM}" MATCHES "Windows")
+if(RS_PLATFORM MATCHES "win32")
     if(RS_WINSOCK2)
 	list(APPEND RS_PLATFORM_LIBS ws2_32)
     else()
 	list(APPEND RS_PLATFORM_LIBS wsock32)
     endif()
+	
+	list(APPEND RS_PLATFORM_LIBS advapi32)
 endif()
 
-target_link_libraries(rscommon ${RS_PLATFORM_LIBS})
+target_link_libraries(rscommon PUBLIC ${RS_PLATFORM_LIBS} rsplatform)

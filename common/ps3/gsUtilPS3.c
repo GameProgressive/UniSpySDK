@@ -1,9 +1,13 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsUtilPS3.c
+// SDK:		GameSpy Common CELL code
+//
 // Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
 // This software is made available only pursuant to certain license terms offered
 // by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
 // manner not expressly authorized by IGN or GameSpy is prohibited.
-
-#if defined(_PS3)
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 #include <sys/system_types.h>
 #include <sys/types.h>
@@ -14,6 +18,17 @@
 
 // This needs to be set during interface start
 extern int gNetInterfaceID;
+
+
+void gsiDebugPrint(const char* format, va_list params) // unics
+{
+	vprintf(format, params);
+}
+
+void* _gsi_memalign(size_t boundary, size_t size)
+{
+	return memalign(boundary, size);
+}
 
 #if defined(_PS3) && defined(UNIQUEID)
 	static const char * GetMAC(void)
@@ -78,4 +93,3 @@ void gsiInt64ToString(char theNumberStr[33], gsi_i64 theNumber)
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#endif // _PS3 only

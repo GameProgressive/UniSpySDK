@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// File:	gsPlatform.h
-// SDK:		GameSpy Common
+// File:	macAutoreleasePool.m
+// SDK:		GameSpy Common Mac OSX code
 //
 // Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
 // This software is made available only pursuant to certain license terms offered

@@ -1,7 +1,14 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	gsSocketX360.c
+// SDK:		GameSpy Common Xbox 360 code
+//
+// Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
+// This software is made available only pursuant to certain license terms offered
+// by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
+// manner not expressly authorized by IGN or GameSpy is prohibited.
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-#if defined(_X360)
 char * inet_ntoa(IN_ADDR in_addr)
 {
 	static char buffer[16];
@@ -49,4 +56,8 @@ struct hostent * gethostbyname(const char* name)
 
 	return rvalue;
 }
-#endif
+
+gsi_u32 gsiGetBroadcastIP(void)
+{
+	return UINT_MAX;
+}

@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////////////////////
+// File:	MacOSXCommon.c
+// SDK:		GameSpy Common Mac OSX code
+//
 // Copyright (c) IGN Entertainment, Inc.  All rights reserved.  
 // This software is made available only pursuant to certain license terms offered
 // by IGN or its subsidiary GameSpy Industries, Inc.  Unlicensed use or use in a 
@@ -26,6 +30,12 @@ static void DebugCallback(GSIDebugCategory theCat, GSIDebugType theType,
 }
 #endif
 
+void  _gsDebugAssert(const char *string)
+{
+	printf("%s\n", string);
+	while (1) {}
+}
+	
 // Common entry point
 int main(int argc, char** argp)
 {

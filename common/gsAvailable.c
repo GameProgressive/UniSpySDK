@@ -124,7 +124,7 @@ void GSIStartAvailableCheckW(const gsi_char * gamename)
 	char gamename_A[32];
 	GS_ASSERT(gamename != NULL);
 
-	UCS2ToAsciiString(gamename, gamename_A);
+	UCSToAsciiString(gamename, gamename_A);
 
 	GSIStartAvailableCheckA(gamename_A);
 }

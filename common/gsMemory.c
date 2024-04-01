@@ -13,56 +13,25 @@
 #include "gsAssert.h"
 #include "gsDebug.h"
 
-#ifdef _PSP
-	#include <malloc.h>
-#endif
-
-// toDo: move some of this to platform.h
-#ifdef _PS3
-	#if(0)
-		typedef gsi_u64			gsi_uint;
-		#define PTR_ALIGNMENT	32
-		#define GSI_64BIT		(1) 
-		#define GS_BIG_ENDIAN
-	#else
-		// changed as of SDK 0.8  Sony moved back to using 32 bit pointers
-		typedef gsi_u32			gsi_uint;
-		#define PTR_ALIGNMENT	16	
-		#define GSI_64BIT		(0) 
-		#define GS_BIG_ENDIAN
-	#endif
-#else
-	typedef gsi_u32			gsi_uint;
-	#define PTR_ALIGNMENT	16
-	#define GSI_64BIT		(0)
-#endif
-
-
+// Uni TODO: Change all GS_64BIT variables to use gsi_mptr
 
 // To Do:
 // Small block optimization using fixed size mempool.  
 // add multi-threaded support
 
-#define MEM_PROFILE	(1)	// if on additional memprofiling code will be enabled for such things as high water mark calcs
+#ifdef GSI_COMMON_DEBUG
+	#define MEM_PROFILE	(1)	// if on additional memprofiling code will be enabled for such things as high water mark calcs
+#else
+	#define MEM_PROFILE (0)
+#endif
+
 #if defined(MEM_PROFILE)
 	#define IF_MEM_PROFILE_ISON(a) a
 #else
 	#define IF_MEM_PROFILE_ISON(a)
 #endif
 
-// Disable compiler warnings for issues that are unavoidable.
-/////////////////////////////////////////////////////////////
-#if defined(_MSC_VER) // DevStudio
-	// Level4, "conditional expression is constant". 
-	// Occurs with use of the MS provided macro FD_SET
-	#pragma warning ( disable: 4127 )
-#endif // _MSC_VER
-
-#ifdef _WIN32
-	#define MEM_MANAGER_CALL _cdecl
-#else
-	#define MEM_MANAGER_CALL
-#endif
+#define MEM_MANAGER_CALL GS_STATIC_CALLBACK
 
 //#if !defined(_WIN32)
 //	#define MEM_MANAGER_DIRECT
@@ -91,45 +60,14 @@ static void* MEM_MANAGER_CALL _gsi_realloc(void* ptr, size_t size)
 	return realloc(ptr, size);
 }
 
-#if defined(_PS2) || defined(_PSP) || defined(_PS3)
-	static void* _gsi_memalign(size_t boundary, size_t size)
-	{
-		return memalign(boundary, size);
-	}
-#elif defined (_WIN32)
-	#if defined(_MSC_VER) && (_MSC_VER < 1300)
-		//extern added for vc6 compatability.
-		extern void* __cdecl _aligned_malloc(size_t size, int boundary);
-	#endif
-	static void* __cdecl _gsi_memalign(size_t boundary, size_t size)
-	{
-		return  _aligned_malloc(size, (int)boundary);
-	}
-#elif defined (_NITRO) || defined(_REVOLUTION)
+extern void* _gsi_memalign(size_t boundary, size_t size); // platform specific !!!
 
-	// no built in system memalign
-	static void* _gsi_memalign(size_t boundary, size_t size)
-	{
-		void *ptr = calloc((size)/(boundary), (boundary));
-		// check alignment
-		GS_ASSERT((((gsi_u32)ptr)% boundary)==0);
-		return ptr;
-	}
-#else
-
-	// no built in system memalign
-	static void* _gsi_memalign(size_t boundary, size_t size)
-	{
-		void *ptr = calloc((size)/(boundary), (boundary));
-		// check alignment
-		GS_ASSERT((((intptr_t)ptr)% boundary)==0);
-		return ptr;
-	}
+#ifndef memalign_direct
+#define memalign_direct _gsi_memalign
 #endif
 
 #ifdef GS_NO_STANDARD_ALLOC
 // If you define GS_NO_STANDARD_ALLOC, you must call gsiMemoryCallbacksSet() before using GameSpySDK.
-// used by NITRO && REVOLUTION DWC wrapper to reduce library size
 static MemManagerCallbacks memmanagercallbacks;
 #else
 static MemManagerCallbacks memmanagercallbacks =
@@ -138,11 +76,7 @@ static MemManagerCallbacks memmanagercallbacks =
         &malloc,
         &free,
         &realloc,
-        #if defined(_PS2) || defined(_PSP) || defined(_PS3)
-            &memalign,		// a version already exists on this platform
-        #else	
-            &_gsi_memalign,	//wrote our own
-        #endif
+        &memalign_direct, // some platforms have a custom direct memory manager
     #else
         &_gsi_malloc,
         &_gsi_free,
@@ -226,7 +160,7 @@ static	gsi_u32			MemTagStackIndex					= 0;
 
 
 #define MEM_IS_POWER_OF_2(x)	(((x) & ((x)-1)) == 0)	
-#define MEMALIGN_POWEROF2(x,a)	(((gsi_uint)(x)+(a-1)) &~ ( ((gsi_uint)(a)) -1))
+#define MEMALIGN_POWEROF2(x,a)	(((gsi_mptr)(x)+(a-1)) &~ ( ((gsi_mptr)(a)) -1))
 
 #if(1)	// enable assert, otherwise this runs faster
 	#define MP_ASSERT(x)	GS_ASSERT(x)
@@ -274,7 +208,7 @@ typedef struct  tMEM_CHUNK
 	// private
 		union
 		{
-			gsi_uint		MemUsed;		// size used by application.  ex// malloc(size)	
+			gsi_mptr		MemUsed;		// size used by application.  ex// malloc(size)	
 			#ifdef GS_BIG_ENDIAN
 				struct
 				{
@@ -335,7 +269,7 @@ gsi_u32		MEM_CHUNKTotalSizeGet(MEM_CHUNK *_this)
 	{ 
 		return PTR_ALIGNMENT + sizeof(MEM_CHUNK)/*Nub*/;	
 	}
-	return (gsi_uint) _this->next - (gsi_uint) _this;							
+	return (gsi_mptr) _this->next - (gsi_mptr) _this;							
 }	
 
 /***************************************/
@@ -344,7 +278,7 @@ gsi_u32		MEM_CHUNKChunkSizeGet(MEM_CHUNK *_this)
 {	
 	if (!_this->next) 
 		return PTR_ALIGNMENT;/*Nub*/;							
-	return (gsi_uint) _this->next - (gsi_uint) _this - sizeof(MEM_CHUNK);	
+	return (gsi_mptr) _this->next - (gsi_mptr) _this - sizeof(MEM_CHUNK);	
 }	
 
 gsi_u32		MEM_CHUNKMemUsedGet (MEM_CHUNK *_this)				
@@ -375,7 +309,7 @@ void	MEM_CHUNKMemTypeSet (MEM_CHUNK *_this,	char _MemType)
 
 void*	MEM_CHUNKMemPtrGet  (MEM_CHUNK *_this)				
 { 
-	return (void*)((gsi_uint) _this + sizeof(MEM_CHUNK));		
+	return (void*)((gsi_mptr) _this + sizeof(MEM_CHUNK));		
 }
 
 /*inline */MEM_CHUNK *Ptr_To_MEM_CHUNK(void *ptr)	
@@ -444,7 +378,7 @@ void		MEM_CHUNK_POOLFillMemoryTable				(MEM_CHUNK_POOL *_this,	char *Table, cons
 gsi_bool		MEM_CHUNK_POOLItemIsInPoolMemory			(MEM_CHUNK_POOL *_this,	void *ptr)	
 { 
 	GS_ASSERT(MEM_CHUNK_POOLIsValid(_this));	
-	return (((gsi_uint)ptr >=  (gsi_uint)MEM_CHUNKMemPtrGet(_this->HeaderStart)) &&((gsi_uint)ptr <=  (gsi_uint)MEM_CHUNKMemPtrGet(_this->HeaderEnd)));
+	return (((gsi_mptr)ptr >=  (gsi_mptr)MEM_CHUNKMemPtrGet(_this->HeaderStart)) &&((gsi_mptr)ptr <=  (gsi_mptr)MEM_CHUNKMemPtrGet(_this->HeaderEnd)));
 }
 			
 
@@ -519,11 +453,11 @@ void	MEM_CHUNK_POOLChunkMove	(MEM_CHUNK_POOL *_this, MEM_CHUNK *oldpos, MEM_CHUN
 	MP_ASSERT(oldpos->next);
 
 	// check if within movement limits
-	MP_ASSERT((gsi_uint) newpos <= (gsi_uint)oldpos->next - MEM_CHUNKMemUsedGet(oldpos)			- sizeof(MEM_CHUNK));
-	MP_ASSERT((gsi_uint) newpos >= (gsi_uint)oldpos->prev + MEM_CHUNKMemUsedGet(oldpos->prev)	+ sizeof(MEM_CHUNK));
+	MP_ASSERT((gsi_mptr) newpos <= (gsi_mptr)oldpos->next - MEM_CHUNKMemUsedGet(oldpos)			- sizeof(MEM_CHUNK));
+	MP_ASSERT((gsi_mptr) newpos >= (gsi_mptr)oldpos->prev + MEM_CHUNKMemUsedGet(oldpos->prev)	+ sizeof(MEM_CHUNK));
 
 	// check if alignment is valid
-	MP_ASSERT((((gsi_uint) newpos) % sizeof(MEM_CHUNK)) == 0);
+	MP_ASSERT((((gsi_mptr) newpos) % sizeof(MEM_CHUNK)) == 0);
 
 	*newpos = temp;
 
@@ -548,7 +482,7 @@ void	MEM_CHUNK_POOLChunkMove	(MEM_CHUNK_POOL *_this, MEM_CHUNK *oldpos, MEM_CHUN
 				_this->pFirstFree = newpos;
 			}
 
-			MP_ASSERT((newpos->NextFree==NULL) || ((gsi_uint)newpos->NextFree > (gsi_uint)newpos));
+			MP_ASSERT((newpos->NextFree==NULL) || ((gsi_mptr)newpos->NextFree > (gsi_mptr)newpos));
 		}
 	}
 
@@ -565,7 +499,7 @@ void MEM_CHUNK_POOLCreate(MEM_CHUNK_POOL *_this, const char * szNameIn, char *pt
 {
 	int len;
 	MEM_CHUNK *HeaderMid;
-	MP_ASSERT(((gsi_uint)ptr & 15 )==0); // ensure 16 byte alignment
+	MP_ASSERT(((gsi_mptr)ptr & 15 )==0); // ensure 16 byte alignment
 
 	//Copy limited length name
 	len = strlen(szNameIn)+1;
@@ -654,7 +588,7 @@ void MEM_CHUNK_POOLSplitChunk(MEM_CHUNK_POOL *_this, MEM_CHUNK *header, gsi_bool
 	NewHeader = (MEM_CHUNK *)MEMALIGN_POWEROF2(NewHeader,sizeof(MEM_CHUNK));
 	
 	//assert we have enough room for this new chunk
-	MP_ASSERT ((gsi_uint)NewHeader  + 2 * sizeof(MEM_CHUNK) <= (gsi_uint)header->next);
+	MP_ASSERT ((gsi_mptr)NewHeader  + 2 * sizeof(MEM_CHUNK) <= (gsi_mptr)header->next);
 	
 	// update some stats
 	#if (MEM_PROFILE)
@@ -816,7 +750,7 @@ MEM_CHUNK *MEM_CHUNK_POOLAllocChunk(MEM_CHUNK_POOL *_this,size_t Size, gsi_i32 A
 		if (MemRemain >= 0 )
 		{
 			// are we aligned properly?
-			Ptr			= (gsi_uint)MEM_CHUNKMemPtrGet(header);
+			Ptr			= (gsi_mptr)MEM_CHUNKMemPtrGet(header);
 			AlignedPtr	= MEMALIGN_POWEROF2(Ptr,Alignment);
 			delta		= AlignedPtr - Ptr;
 			if (delta)
@@ -830,7 +764,7 @@ MEM_CHUNK *MEM_CHUNK_POOLAllocChunk(MEM_CHUNK_POOL *_this,size_t Size, gsi_i32 A
 				}
 
 				// move the chunk over so that the pointer is aligned.
-				alignedheader = Ptr_To_MEM_CHUNK((void*)(gsi_uint)AlignedPtr);
+				alignedheader = Ptr_To_MEM_CHUNK((void*)(gsi_mptr)AlignedPtr);
 				MEM_CHUNK_POOLChunkMove	(_this,header,alignedheader);
 				header		= alignedheader;
 				MemRemain  -= delta;
@@ -1104,8 +1038,8 @@ gsi_u32 MEM_CHUNK_POOLWalkForType(MEM_CHUNK_POOL *_this,int type, gsi_bool _LogU
 
 	while (header) 
 	{
-		MP_ASSERT((header->next		== NULL) || ((gsi_uint)header		< (gsi_uint)header->next	));	// infinite loop or out of place
-		MP_ASSERT((header->prev		== NULL) || ((gsi_uint)header->prev	< (gsi_uint)header		));	// infinite loop or out of place
+		MP_ASSERT((header->next		== NULL) || ((gsi_mptr)header		< (gsi_mptr)header->next	));	// infinite loop or out of place
+		MP_ASSERT((header->prev		== NULL) || ((gsi_mptr)header->prev	< (gsi_mptr)header		));	// infinite loop or out of place
 		MP_ASSERT((header->prev		== NULL) || (header->prev->next == header));				// previous linked correctly to us
 		MP_ASSERT((header->next		== NULL) || (header->next->prev == header));				// next		linked correctly to us
 		MP_ASSERT( MEM_CHUNKMemUsedGet(header)  <= MEM_CHUNKChunkSizeGet(header)  );			// using too much mem
@@ -1153,8 +1087,8 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 	/***  Test validity of all chunks chain ***/
 	while (header) 
 	{
-		MP_ASSERT((header->next		== NULL) || ((gsi_uint)header		< (gsi_uint)header->next	));	// infinite loop or out of place
-		MP_ASSERT((header->prev		== NULL) || ((gsi_uint)header->prev	< (gsi_uint)header		));	// infinite loop or out of place
+		MP_ASSERT((header->next		== NULL) || ((gsi_mptr)header		< (gsi_mptr)header->next	));	// infinite loop or out of place
+		MP_ASSERT((header->prev		== NULL) || ((gsi_mptr)header->prev	< (gsi_mptr)header		));	// infinite loop or out of place
 		MP_ASSERT((header->prev		== NULL) || (header->prev->next == header));				// previous linked correctly to us
 		MP_ASSERT((header->next		== NULL) || (header->next->prev == header));				// next		linked correctly to us
 		MP_ASSERT( MEM_CHUNKMemUsedGet(header)  <= MEM_CHUNKChunkSizeGet(header)  );							// using too much mem
@@ -1179,7 +1113,7 @@ void MEM_CHUNK_POOLMemStatsGet(MEM_CHUNK_POOL *_this,MEM_STATS *pS)
 		else
 		{
 			// free chunk
-			MP_ASSERT((header->NextFree	== NULL) || ((gsi_uint)header	< (gsi_uint)header->NextFree	));	// infinite loop or out of place
+			MP_ASSERT((header->NextFree	== NULL) || ((gsi_mptr)header	< (gsi_mptr)header->NextFree	));	// infinite loop or out of place
 			
 			// make sure we aren't fragmented, as this ruins some algorithm assumptions
 			MP_ASSERT((header->next		== NULL) || (!MEM_CHUNKIsFree(header->next)));	// infinite loop or out of place
@@ -1266,8 +1200,8 @@ void MEM_CHUNK_POOLFillMemoryTable(MEM_CHUNK_POOL *_this,char *Table, const int 
 	{
 		if (!MEM_CHUNKIsFree(pChunk))
 		{
-			start_address	=  (gsi_uint)pChunk;
-			end_address		= ((gsi_uint)pChunk->next)-1;
+			start_address	=  (gsi_mptr)pChunk;
+			end_address		= ((gsi_mptr)pChunk->next)-1;
 
 			// translate address into table positions
 			s=  ((start_address - _HeapStart) * (TableSize>>4)) / (_HeapSize>>4);
@@ -1425,8 +1359,8 @@ gsMemMgrContext	gsMemMgrCreate		(gsMemMgrContext context, const char *PoolName,v
 
 	GS_ASSERT_STR(thePoolSize,"Cannnot create a pool of size 0");
 	GS_ASSERT_STR(thePoolSize,"thePoolBuffer	ptr is inivalid");
-	GS_ASSERT_STR(((((gsi_uint)thePoolSize)	&15) ==0)	,"PoolSize	must be aligned to 16 bytes");
-	GS_ASSERT_STR(((((gsi_uint)thePoolBuffer)&15) ==0)	,"thePoolBuffer must be aligned to 16 bytes");
+	GS_ASSERT_STR(((((gsi_mptr)thePoolSize)	&15) ==0)	,"PoolSize	must be aligned to 16 bytes");
+	GS_ASSERT_STR(((((gsi_mptr)thePoolBuffer)&15) ==0)	,"thePoolBuffer must be aligned to 16 bytes");
 	
 
 	while (MEM_CHUNK_POOLIsValid(&gChunkPool[context]))
@@ -1728,7 +1662,7 @@ void gsMemMgrSelfText()
 	int c= 0;
 	int i,j,k;
 
-	char *ptr	= (char *) ( ((gsi_uint)malloc(size-PTR_ALIGNMENT)+(PTR_ALIGNMENT-1))&~ (PTR_ALIGNMENT-1) )  ;
+	char *ptr	= (char *) ( ((gsi_mptr)malloc(size-PTR_ALIGNMENT)+(PTR_ALIGNMENT-1))&~ (PTR_ALIGNMENT-1) )  ;
 	MEM_CHUNK_POOLCreate(&gChunkPool,"",ptr,size);
 
 	while(1)

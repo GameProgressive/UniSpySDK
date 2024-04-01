@@ -40,9 +40,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 static int _ReadUCS2CharFromUTF8String(const UTF8String theUTF8String, int theMaxBytes, UCS2Char* theUnicodeCharOut)
 {
-#ifndef _PS2
 	GS_ASSERT(theUnicodeCharOut != NULL);
-#endif
 
 	if (theMaxBytes == 0)
 	{
@@ -136,10 +134,8 @@ static int _ReadUCS2CharFromUTF8String(const UTF8String theUTF8String, int theMa
 ///////////////////////////////////////////////////////////////////////////////
 static int _ReadUCS4CharFromUTF8String(const UTF8String theUTF8String, int theMaxBytes, UCS4Char* theUnicodeCharOut)
 {
-#ifndef _PS2
 	GS_ASSERT(theUnicodeCharOut != NULL);
-#endif
-	
+
 	if (theMaxBytes == 0)
 	{
 		// assert?
@@ -290,9 +286,7 @@ static int _ReadUCS4CharFromUTF8String(const UTF8String theUTF8String, int theMa
 ///////////////////////////////////////////////////////////////////////////////	
 int UCS2CharToUTF8String(UCS2Char theUCS2Char, UTF8String theUTF8String)
 {
-#ifndef _PS2
 	GS_ASSERT(theUTF8String != NULL);
-#endif
 
 	// Screen out simple ascii (includes NULL terminator)
 	if (theUCS2Char <= 0x7F)
@@ -338,10 +332,8 @@ int UCS2CharToUTF8String(UCS2Char theUCS2Char, UTF8String theUTF8String)
 ///////////////////////////////////////////////////////////////////////////////	
 int UCS4CharToUTF8String(UCS4Char theUCS4Char, UTF8String theUTF8String)
 {
-#ifndef _PS2
 	GS_ASSERT(theUTF8String != NULL);
-#endif
-	
+
 	// Screen out simple ascii (includes NULL terminator)
 	if (theUCS4Char < 0x80)
 	{
