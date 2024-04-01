@@ -107,6 +107,9 @@ typedef struct GHIConnection
 
 	SOCKET socket;					// The socket for this connection.
 	int socketError;				// If there was a socket error, the last error code is stored here.
+#ifdef _LINUX
+	int epollSocket;				// epoll socket
+#endif
 
 	GHIBuffer sendBuffer;			// The buffer for outgoing data. 
 	GHIBuffer encodeBuffer;			// The buffer for outgoing data (will be encrypted; only used with https).

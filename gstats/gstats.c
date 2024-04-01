@@ -135,6 +135,10 @@ static statsgame_t g_statsgame = NULL;
 static int connid = 0;
 static int sesskey = 0;
 static SOCKET sock = INVALID_SOCKET;
+#ifdef USE_POLLING
+static POLL poll = NULL;
+#endif
+
 /*	#define enc1 "GameSpy 3D"
 	#define enc2 "Industries"
 	#define enc3 "ProjectAphex"
@@ -287,6 +291,22 @@ int InitStatsAsync(int theGamePort, gsi_time theInitTimeout)
 	rcvmax = 64;
 	rcvlen = 0;
 
+#ifdef USE_POLLING
+	poll = GSISocketPollNew();
+	if (!poll)
+	{
+		free(rcvbuffer);
+		return GE_NOCONNECT;
+	}
+
+	if (GSISocketPollAdd(poll, sock, GS_POLLFLAG_READ | GS_POLLFLAG_WRITE | GS_POLLFLAG_ERROR) != GS_POLLERR_NONE)
+	{
+		free(rcvbuffer);
+		GSISocketPollFree(poll);
+		return GE_NOCONNECT;
+	}
+#endif
+
 	initstart = current_time();
 	stats_initstate = init_connecting;
 	return GE_CONNECTING;
@@ -303,6 +323,31 @@ int InitStatsThink()
 			// Check if socket is writeable yet
 			int aWriteFlag = 0;
 			int aExceptFlag = 0;
+
+#ifdef USE_POLLING
+			POLL_EVTS evts;
+			int aResult = GSISocketPoll(poll, &evts);
+			if (aResult < 0)
+			{
+				stats_initstate = init_failed;
+				CloseStatsConnection();
+				return GE_NOCONNECT;
+			}
+			else if (aResult == 0 || GSISocketPollCheck(&evts, sock, aResult, NULL, &aWriteFlag, &aExceptFlag) == GS_POLLERR_INVALID)
+			{
+				// Should we continue to wait?
+				if (current_time() - initstart > inittimeout)
+				{
+					stats_initstate = init_failed;
+					CloseStatsConnection();
+					return GE_TIMEDOUT;
+				}
+				else
+					return GE_CONNECTING;
+			}
+
+			assert(aResult > 0 && aWriteFlag == 1);
+#else
 			int aResult = GSISocketSelect(sock, NULL, &aWriteFlag, &aExceptFlag);
 			if ((gsiSocketIsError(aResult)) ||                   // socket error
 				(aResult == 1 && aExceptFlag == 1))  // exception
@@ -324,8 +369,10 @@ int InitStatsThink()
 					return GE_CONNECTING;
 			}
 
-			// Otherwise connected
 			assert(aResult == 1 && aWriteFlag == 1);
+#endif
+
+			// Otherwise connected
 			stats_initstate = init_awaitchallenge;
 			// fall through
 		}

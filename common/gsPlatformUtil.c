@@ -805,6 +805,8 @@ void msleep(gsi_time msec)
 #elif defined(_PSP2)
 	sceKernelDelayThread(msec * 1000);
 
+#elif defined(_LINUX)
+	sleep(msec);
 #elif defined(_UNIX)
 	usleep(msec * 1000);
 

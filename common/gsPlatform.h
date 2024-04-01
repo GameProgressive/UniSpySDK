@@ -113,6 +113,11 @@
 	#ifndef WIN32
 		#define WIN32
 	#endif
+
+	#ifdef _WIN32_WINNT >= 0x600
+		#define USE_POLLING 1
+	#endif
+
 // PS2
 #elif defined(_PS2)
 	// EENet headers must be included before common PS2 headers
@@ -198,6 +203,11 @@
 
     // ICMP ping support is unsupported on Linux/MacOSX due to needing super-user access for raw sockets
     #define SB_NO_ICMP_SUPPORT
+
+	#if defined(_LINUX)
+		#define USE_POLLING 1
+		#include <sys/epoll.h>
+	#endif
 
 // Nintendo DS
 #elif defined(_NITRO)

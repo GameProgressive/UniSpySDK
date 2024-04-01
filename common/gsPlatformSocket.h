@@ -27,6 +27,23 @@ extern "C" {
 	#define  gsiSocketIsNotError(theReturnValue)	((theReturnValue) != -1)
 #endif
 
+#ifdef USE_POLLING
+	typedef enum
+	{
+		GS_POLLERR_NONE = 0,
+		GS_POLLERR_MAX_FD = -1,
+		GS_POLLERR_INVALID = -2,
+		GS_POLLERR_WAIT = -3,
+	};
+
+	typedef enum
+	{
+		GS_POLLFLAG_NONE = 0,
+		GS_POLLFLAG_READ = 1 << 0,
+		GS_POLLFLAG_WRITE = 1 << 1,
+		GS_POLLFLAG_ERROR = 1 << 2,
+	};
+#endif
 
 #if (0) 
 typedef enum
@@ -582,6 +599,11 @@ int gsiShutdown(SOCKET s, int how);
 	#define closesocket        close //on unix
 #endif
 
+#if defined(_LINUX)
+	typedef struct epoll_event POLL_EVTS[MAX_EPOLL_EVENTS];
+	typedef int POLL;
+#endif
+
 #if !defined(_WIN32)
 	#define ioctlsocket ioctl
 #endif
@@ -589,6 +611,14 @@ int gsiShutdown(SOCKET s, int how);
 #if defined(_WIN32)
 	#define GOAGetLastError(s) WSAGetLastError()
 	typedef int socklen_t;
+	typedef struct gsw32poll
+	{
+		int flags;
+		SOCKET fd;
+	} GS_WIN32_POLL;
+
+	typedef GS_WIN32_POLL POLL_EVTS[FD_SETSIZE];
+	typedef void* POLL;
 #endif
 
 #if defined(_REVOLUTION)
@@ -786,7 +816,23 @@ int GetReceiveBufferSize(SOCKET sock);
 int GetSendBufferSize(SOCKET sock);
 int CanReceiveOnSocket(SOCKET sock);
 int CanSendOnSocket(SOCKET sock);
+
+#ifndef USE_POLLING
 int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* theExceptFlag);
+#else
+POLL GSISocketPollNew(void);
+void GSISocketPollFree(POLL thePoll);
+int GSISocketPollAdd(POLL thePoll, SOCKET theSocket, int flags);
+int GSISocketPollRemove(POLL thePoll, SOCKET theSocket);
+/*
+* If the function returns < 0, then there is an error to check
+* If the function returns > 0, then the number of sockets in POLL_EVTS filled up, pass this number to "socketNum" in the PollCheck
+* If the function returns == 0, then no socket has been made available
+*/
+int GSISocketPoll(POLL thePoll, POLL_EVTS* theEvents);
+int GSISocketPollCheck(POLL_EVTS* theEvents, SOCKET theSocket, int socketNum, int* theReadFlag, int* theWriteFlag, int* theExceptFlag);
+#endif
+
 void SocketStartUp();
 void SocketShutDown();
 

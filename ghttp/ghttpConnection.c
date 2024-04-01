@@ -137,6 +137,15 @@ GHIConnection * ghiNewConnection
 	connection->encryptor.mInterface = NULL;
 	connection->encryptor.mInitialized = GHTTPFalse;
 	connection->receiveFileIdleTime = 0;
+#ifdef _LINUX
+	connection->epollSocket = epoll_create1(0);
+	if (connection->epollSocket == -1)
+	{
+		ghiFreeConnection(connection);
+		ghiUnlock();
+		return NULL;
+	}
+#endif
 
 // This handle is used for asynch DNS lookups.
 #if !defined(GSI_NO_THREADS)
@@ -197,6 +206,14 @@ GHTTPBool ghiCloseConnection(GHIConnection * connection)
     }
 #endif
 
+#ifdef _LINUX
+	if (connection->epollSocket)
+	{
+		struct epoll_event epollEvt = { 0 };
+		epoll_ctl(connection->epollSocket, EPOLL_CTL_DEL, connection->socket, &epollEvt);
+	}
+#endif
+
 	if(connection->socket != INVALID_SOCKET)
 	{
 		shutdown(connection->socket, 2);
@@ -255,6 +272,11 @@ GHTTPBool ghiFreeConnectionData( GHIConnection * connection)
 #ifndef NOFILE
 	if(connection->saveFile)
 		fclose(connection->saveFile);
+#endif
+#ifdef _LINUX
+	if (connection->epollSocket)
+		close(connection->epollSocket);
+	connection->epollSocket = 0;
 #endif
 	
 	ghiFreeBuffer(&connection->sendBuffer);
@@ -382,6 +404,13 @@ void ghiRedirectConnection
     }
 #endif
 
+#ifdef _LINUX
+	if (connection->epollSocket)
+	{
+		struct epoll_event epollEvt = { 0 };
+		epoll_ctl(connection->epollSocket, EPOLL_CTL_DEL, connection->socket, &epollEvt);
+	}
+#endif
 
 
 	// Close the socket.

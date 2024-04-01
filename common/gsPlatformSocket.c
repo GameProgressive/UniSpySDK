@@ -20,7 +20,7 @@
 #elif defined(_WIN32)
 	#include "win32/gsSocketWin32.c"
 #elif defined(_LINUX)
-	//#include "linux/gsSocketLinux.c"
+	#include "linux/gsSocketLinux.c"
 #elif defined(_MACOSX)
 	//#include "macosx/gsSocketMacOSX.c"
 #elif defined(_NITRO)
@@ -214,7 +214,7 @@ int DisableNagle(SOCKET sock)
 #endif
 #endif
 
-#if !defined(_NITRO) && !defined(INSOCK) && !defined(_REVOLUTION)
+#if !defined(_NITRO) && !defined(INSOCK) && !defined(_REVOLUTION) && !defined(USE_POLLING)
 	int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* theExceptFlag)
 	{
 #if defined(_PSP2)
@@ -314,9 +314,14 @@ int DisableNagle(SOCKET sock)
 // Return 1 for immediate recv, otherwise 0
 int CanReceiveOnSocket(SOCKET sock)
 {
+#ifndef USE_POLLING
 	int aReadFlag = 0;
 	if (1 == GSISocketSelect(sock, &aReadFlag, NULL, NULL))
 		return aReadFlag;
+#else
+	int aReadFlag = 0;
+
+#endif
 
 	// SDKs expect 0 on SOCKET_ERROR
 	return 0;
