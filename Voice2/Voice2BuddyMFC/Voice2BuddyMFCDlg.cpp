@@ -313,7 +313,7 @@ LRESULT CVoice2BuddyMFCDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lPara
 			{
 				// Show the login dialog
 				CLoginDlg aDlg;
-				int result = aDlg.DoModal();
+				INT_PTR result = aDlg.DoModal();
 				if (result == IDCANCEL)
 					PostQuitMessage(0);
 				else
