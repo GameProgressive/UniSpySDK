@@ -124,7 +124,7 @@ int CChattyView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CChattyView::OnTimer(UINT nIDEvent) 
+void CChattyView::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == 100)
 	{

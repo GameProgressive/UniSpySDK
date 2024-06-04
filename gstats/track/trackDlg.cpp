@@ -270,7 +270,7 @@ void CTrackDlg::OnLogout()
 	ShowWindow(SW_SHOW);
 }
 
-void CTrackDlg::OnTimer(UINT nIDEvent) 
+void CTrackDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == TIMER_ONE_SECOND)
 	{

@@ -1552,7 +1552,7 @@ void CPeerTestDlg::OnButton21()
 	}
 }
 
-void CPeerTestDlg::OnTimer(UINT nIDEvent) 
+void CPeerTestDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == 100)
 	{

@@ -122,7 +122,7 @@ BOOL CLobbyWizard::OnInitDialog()
 
 // Think every 10ms.
 ////////////////////
-void CLobbyWizard::OnTimer(UINT nIDEvent) 
+void CLobbyWizard::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == THINK_TIMER)
 	{

@@ -54,7 +54,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CVoiceSessionDlg)
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

@@ -284,7 +284,7 @@ static void RemoveDelayedMessages(DArray delayedMessages, GT2Connection connecti
 	}
 }
 
-void CGt2testDlg::OnTimer(UINT nIDEvent) 
+void CGt2testDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	// Check for our timer.
 	if(nIDEvent == 100)

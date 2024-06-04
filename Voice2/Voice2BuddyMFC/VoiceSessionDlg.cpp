@@ -54,7 +54,7 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CVoiceSessionDlg message handlers
-void CVoiceSessionDlg::OnTimer(UINT nIDEvent) 
+void CVoiceSessionDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	// Win32 timers can be called concurrently by the OS.
 	//    (you can get a second timer callback before the first finishes!)

@@ -142,7 +142,7 @@ protected:
 	afx_msg void OnListen();
 	afx_msg void OnCloseAllConnections();
 	afx_msg void OnCloseAllConnectionsHard();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnSend();
 	afx_msg void OnPing();
 	afx_msg void OnCloseConnection();

@@ -714,7 +714,7 @@ void CMultiTrackDlg::UpdateStats()
 	UpdateRatingsDisplay();
 }
 
-void CMultiTrackDlg::OnTimer(UINT nIDEvent) 
+void CMultiTrackDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	char buffer[64];
 	int rcode;

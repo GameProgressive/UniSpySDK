@@ -149,7 +149,7 @@ BOOL CSbmfcsampleDlg::DestroyWindow()
 	return CDialog::DestroyWindow();
 }
 
-void CSbmfcsampleDlg::OnTimer(UINT nIDEvent) 
+void CSbmfcsampleDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	// think if our timer was called
 	if(nIDEvent == m_timerID)

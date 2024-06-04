@@ -1452,7 +1452,7 @@ void CGptestDlg::OnUpdate()
 }
 
 
-void CGptestDlg::OnTimer(UINT nIDEvent) 
+void CGptestDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(!m_connection)
 		return;

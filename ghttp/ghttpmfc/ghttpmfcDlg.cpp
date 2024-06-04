@@ -415,7 +415,7 @@ void CGhttpmfcDlg::OnCancel_()
 		ghttpCancelRequest(m_request);
 }
 
-void CGhttpmfcDlg::OnTimer(UINT nIDEvent) 
+void CGhttpmfcDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == 50)
 	{

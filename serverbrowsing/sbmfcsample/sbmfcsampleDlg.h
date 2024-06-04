@@ -68,7 +68,7 @@ protected:
 	afx_msg void OnRefresh();
 	afx_msg void OnClickServerlist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDblclkServerlist(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnColumnclickServerlist(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

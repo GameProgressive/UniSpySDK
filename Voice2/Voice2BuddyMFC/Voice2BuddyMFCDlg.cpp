@@ -551,7 +551,7 @@ void CVoice2BuddyMFCDlg::DoLogin(const CString& theEmail, const CString& theNick
 	gpSetStatus(&m_GP, GP_ONLINE, V2B_GP_STATUS_IDLE, V2B_GP_LOCATION);
 }
 
-void CVoice2BuddyMFCDlg::OnTimer(UINT nIDEvent) 
+void CVoice2BuddyMFCDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	// Win32 timers can be called concurrently by the OS.
 	//    (you can get a second timer callback before the first finishes!)

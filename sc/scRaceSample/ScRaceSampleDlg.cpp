@@ -897,7 +897,7 @@ void CScRaceSampleDlg::OnDestroy()
 	}
 }
 
-void CScRaceSampleDlg::OnTimer(UINT nIDEvent) 
+void CScRaceSampleDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	CString debugStr;
 	

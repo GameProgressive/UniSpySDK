@@ -176,7 +176,7 @@ void CSetupDlg::StartSelPlaybackDevice()
  
 static GVBool gMute = GVFalse;
 
-void CSetupDlg::OnTimer(UINT nIDEvent) 
+void CSetupDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	gvThink();
 

@@ -125,7 +125,7 @@ protected:
 	//{{AFX_MSG(CGptestDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnConnect();
 	afx_msg void OnDisconnect();
 	afx_msg void OnDestroy();

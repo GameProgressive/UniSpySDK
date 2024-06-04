@@ -65,7 +65,7 @@ protected:
 protected:
 	//{{AFX_MSG(CChattyView)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnHide();
 	afx_msg void OnSelchangeCallbacks();
 	afx_msg void OnDblclkUsers();

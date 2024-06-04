@@ -615,7 +615,7 @@ void CLadderTrackDlg::OnDestroy()
 	}
 }
 
-void CLadderTrackDlg::OnTimer(UINT nIDEvent) 
+void CLadderTrackDlg::OnTimer(UINT_PTR nIDEvent) 
 {
 	char buffer[64];
 	int rcode;
