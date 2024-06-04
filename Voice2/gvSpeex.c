@@ -24,18 +24,21 @@ GVBool gviSpeexInitialize(int quality, GVRate sampleRate)
 	int rate;
 	int bitsPerFrame;
 	int samplesPerSecond;
-	
+	const SpeexMode* speexMode;
+
 	// we shouldn't already be initialized
 	if(gviSpeexInitialized)
 		return GVFalse;
 
 	// create a new encoder state
 	if (sampleRate == GVRate_8KHz)
-		gviSpeexEncoderState = speex_encoder_init(&speex_nb_mode);
+		speexMode = speex_lib_get_mode(SPEEX_MODEID_NB);
 	else if (sampleRate == GVRate_16KHz)
-		gviSpeexEncoderState = speex_encoder_init(&speex_wb_mode);
+		speexMode = speex_lib_get_mode(SPEEX_MODEID_WB);
 	else
 		return GVFalse;
+
+	gviSpeexEncoderState = speex_encoder_init(speexMode);
 
 	if(!gviSpeexEncoderState)
 		return GVFalse;
@@ -107,14 +110,18 @@ GVBool gviSpeexNewDecoder(GVDecoderData * data)
 {
 	void * decoder;
 	int perceptualEnhancement = 1;
+	const SpeexMode* speexMode;
 	
 	// create a new decoder state
+
 	if (gviGetSampleRate() == GVRate_8KHz)
-		decoder = speex_decoder_init(&speex_nb_mode);
+		speexMode = speex_lib_get_mode(SPEEX_MODEID_NB);
 	else if (gviGetSampleRate() == GVRate_16KHz)
-		decoder = speex_decoder_init(&speex_wb_mode);
+		speexMode = speex_lib_get_mode(SPEEX_MODEID_WB);
 	else
 		return GVFalse;
+
+	decoder = speex_decoder_init(speexMode);
 
 	if(!decoder)
 		return GVFalse;
