@@ -163,6 +163,15 @@ static gsi_bool SampleStoreSavedGame()
 	// send off the CreateRecord request and then wait for a response via the callback
 	// we pass 'newRecordId' for the userData so that we can set this in the callback  
 	printf("  Creating Sake record...\n");
+	SAKE sake;
+		// startup sake
+	printf("Starting up Sake\n");
+	SAKEStartupResult startupResult = sakeStartup(&sake);
+	if(startupResult != SAKEStartupResult_SUCCESS)
+	{
+		printf("Startup failed: %d\n", startupResult);
+		return 0;
+	}
 	request = sakeCreateRecord(sake, &recordData, SampleStoreSavedGameCallback, &newRecordId);
 	
 	if(!request) // local issue prior to the request actually going out
@@ -206,6 +215,14 @@ static gsi_bool SampleRetrieveSavedGame()
 	myRecordToRetrieve.mNumFields = 5; 
 
 	printf("  Getting our Sake record...\n");
+	printf("Starting up Sake\n");
+	SAKE sake;
+	SAKEStartupResult startupResult = sakeStartup(&sake);
+	if(startupResult != SAKEStartupResult_SUCCESS)
+	{
+		printf("Startup failed: %d\n", startupResult);
+		return 0;
+	}
 	// send off the GetMyRecords request and then wait for a response via the callback
 	request = sakeGetMyRecords(sake, &myRecordToRetrieve, SampleRetrieveSavedGameCallback, &savedGameDataRetrieved);
 	
