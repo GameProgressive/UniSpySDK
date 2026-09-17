@@ -107,11 +107,22 @@ gsi_u32 gsiHasThreadShutdown(GSIThreadID id)
 
 void gsiInitializeCriticalSection(GSICriticalSection *theCrit)
 {
-	if (pthread_mutex_init(theCrit, NULL) != PTHREAD_NO_ERROR)
+	pthread_mutexattr_t attributes;
+	int result = pthread_mutexattr_init(&attributes);
+	int attributesInitialized = (result == PTHREAD_NO_ERROR);
+
+	if (result == PTHREAD_NO_ERROR)
+		result = pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE);
+	if (result == PTHREAD_NO_ERROR)
+		result = pthread_mutex_init(theCrit, &attributes);
+	if (result != PTHREAD_NO_ERROR)
 	{
 		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Misc, GSIDebugLevel_WarmError,
 			"Failed to initialize critical section\r\n");
 	}
+
+	if (attributesInitialized)
+		pthread_mutexattr_destroy(&attributes);
 }
 
 void gsiEnterCriticalSection(GSICriticalSection *theCrit)
